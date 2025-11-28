@@ -1,11 +1,21 @@
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
 from openai import OpenAI
 from .models import Product
+from .rule_engine import build_profile, recommend_products
 
 client = OpenAI(api_key="환경변수에서_불러오기")  # 코드에 하드코딩 X
+
+
+def index_view(request):
+    """
+    루트 페이지: 온보딩 설문 + 추천 결과를 보여주는 기본 화면.
+    """
+    return render(request, "index.html")
+
 
 @csrf_exempt
 def recommend(request):
@@ -33,6 +43,27 @@ def recommend(request):
     result = json.loads(response.output[0].content[0].text)
 
     return JsonResponse(result)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def recommend_view(request):
+    """POST /api/recommend/ - 룰베이스 추천 API"""
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"detail": "Invalid JSON"}, status=400)
+
+    # UserProfile 생성
+    profile = build_profile(payload)
+
+    # 제품 추천
+    recommendations = recommend_products(profile)
+
+    return JsonResponse({
+        "user_profile": payload,
+        "recommendations": recommendations
+    }, json_dumps_params={'ensure_ascii': False})
 
 
 @require_http_methods(["GET"])
