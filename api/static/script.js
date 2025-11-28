@@ -71,16 +71,20 @@ async function submitRecommendForm(event) {
 
         const data = await res.json();
 
-        if (!data.recommendations || data.recommendations.length === 0) {
+        // 새로운 API 응답 형식 지원 (success, count, recommendations)
+        const recommendations = data.recommendations || [];
+        
+        if (!data.success || !recommendations || recommendations.length === 0) {
             if (resultDiv) {
-                resultDiv.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">추천 결과가 없습니다.</p>';
+                const errorMsg = data.error || data.message || '추천 결과가 없습니다.';
+                resultDiv.innerHTML = `<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">${errorMsg}</p>`;
             }
             return;
         }
 
         // Render recommendations
         if (resultDiv) {
-            data.recommendations.forEach(item => {
+            recommendations.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
@@ -88,13 +92,14 @@ async function submitRecommendForm(event) {
                 const originalPrice = item.discount_price && item.price ? item.price : null;
                 
                 card.innerHTML = `
-                    <h3>${escapeHtml(item.name || '')}</h3>
+                    <h3>${escapeHtml(item.name || item.model || '')}</h3>
                     ${item.model_number ? `<p class="model">${escapeHtml(item.model_number)}</p>` : ''}
                     <p class="price">
                         ${price.toLocaleString()}원
                         ${originalPrice ? `<span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through; margin-left: 0.5rem;">${originalPrice.toLocaleString()}원</span>` : ''}
                     </p>
                     ${item.reason ? `<p class="reason">${escapeHtml(item.reason)}</p>` : ''}
+                    ${item.score ? `<p class="score" style="font-size: 0.85em; color: var(--lg-primary); margin-top: 0.5rem;">추천 점수: ${(item.score * 100).toFixed(0)}%</p>` : ''}
                 `;
                 
                 resultDiv.appendChild(card);
