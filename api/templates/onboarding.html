@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG 가전 포트폴리오 - 온보딩</title>
+    <link rel="stylesheet" href="{% static 'css/onboarding.css' %}">
+</head>
+<body>
+    <div class="onboarding-container">
+        <!-- 진행률 바 -->
+        <div class="progress-section">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p class="progress-text">
+                <span id="currentStep">1</span> / 5 단계
+            </p>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="onboarding-content">
+            
+            <!-- ========== Step 1: Vibe Check ========== -->
+            <div class="step-container" id="step1" data-step="1">
+                <div class="step-header">
+                    <h2>당신의 집 스타일은?</h2>
+                    <p>인테리어 무드를 선택해주세요</p>
+                </div>
+                
+                <div class="step-options">
+                    <label class="option-card">
+                        <input type="radio" name="vibe" value="modern" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">🎨</div>
+                            <div class="option-label">모던/심플</div>
+                            <div class="option-desc">미니멀하고 깔끔한 스타일</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="vibe" value="cozy" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">🏠</div>
+                            <div class="option-label">따뜻한 톤</div>
+                            <div class="option-desc">편안하고 아늑한 느낌</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="vibe" value="pop" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">✨</div>
+                            <div class="option-label">팝/생기있는</div>
+                            <div class="option-desc">활기차고 밝은 분위기</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="vibe" value="luxury" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">👑</div>
+                            <div class="option-label">럭셔리/고급</div>
+                            <div class="option-desc">고급스럽고 세련된 느낌</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ========== Step 2: Household DNA ========== -->
+            <div class="step-container hidden" id="step2" data-step="2">
+                <div class="step-header">
+                    <h2>가구 인원은 몇 명인가요?</h2>
+                    <p>생활 방식에 맞는 용량을 추천해드립니다</p>
+                </div>
+                
+                <div class="step-options">
+                    <label class="option-card">
+                        <input type="radio" name="household_size" value="1" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">1명</div>
+                            <div class="option-desc">싱글/자취</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="household_size" value="2" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">2명</div>
+                            <div class="option-desc">부부/커플</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="household_size" value="4" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">4명</div>
+                            <div class="option-desc">가족</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="household_size" value="5" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">5명 이상</div>
+                            <div class="option-desc">대가족</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ========== Step 3: Reality Check ========== -->
+            <div class="step-container hidden" id="step3" data-step="3">
+                <div class="step-header">
+                    <h2>주거 정보를 알려주세요</h2>
+                    <p>공간에 맞는 제품을 추천합니다</p>
+                </div>
+                
+                <div class="step-form">
+                    <div class="form-group">
+                        <label>주거 형태</label>
+                        <div class="form-options">
+                            <label class="radio-card">
+                                <input type="radio" name="housing_type" value="apartment">
+                                <span>🏢 아파트</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="housing_type" value="detached">
+                                <span>🏡 단독주택</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="housing_type" value="villa">
+                                <span>🏘️ 빌라/연립</span>
+                            </label>
+                            <label class="radio-card">
+                                <input type="radio" name="housing_type" value="officetel">
+                                <span>🏬 오피스텔</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pyung">평수</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="number" 
+                                id="pyung" 
+                                name="pyung" 
+                                min="10" 
+                                max="200" 
+                                placeholder="예: 30"
+                                class="number-input"
+                            >
+                            <span class="unit">평</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== Step 4: Lifestyle Info ========== -->
+            <div class="step-container hidden" id="step4" data-step="4">
+                <div class="step-header">
+                    <h2>가장 중요한 것은?</h2>
+                    <p>우선순위에 맞는 제품을 추천합니다</p>
+                </div>
+                
+                <div class="step-options">
+                    <label class="option-card">
+                        <input type="radio" name="priority" value="design" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">🎨</div>
+                            <div class="option-label">디자인/무드</div>
+                            <div class="option-desc">인테리어와 조화</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="priority" value="tech" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">⚙️</div>
+                            <div class="option-label">기술/성능</div>
+                            <div class="option-desc">최신 기능과 사양</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="priority" value="eco" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">🌱</div>
+                            <div class="option-label">에너지효율</div>
+                            <div class="option-desc">전기료 절감</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="priority" value="value" class="option-input">
+                        <div class="option-content">
+                            <div class="option-icon">💰</div>
+                            <div class="option-label">가성비</div>
+                            <div class="option-desc">합리적인 가격</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ========== Step 5: Budget ========== -->
+            <div class="step-container hidden" id="step5" data-step="5">
+                <div class="step-header">
+                    <h2>예산은 어느 정도인가요?</h2>
+                    <p>맞는 가격대의 제품을 추천합니다</p>
+                </div>
+                
+                <div class="step-options">
+                    <label class="option-card">
+                        <input type="radio" name="budget_level" value="low" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">500만원 이하</div>
+                            <div class="option-desc">합리적인 가격</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="budget_level" value="medium" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">500~2000만원</div>
+                            <div class="option-desc">중가</div>
+                        </div>
+                    </label>
+                    
+                    <label class="option-card">
+                        <input type="radio" name="budget_level" value="high" class="option-input">
+                        <div class="option-content">
+                            <div class="option-label">2000만원 이상</div>
+                            <div class="option-desc">프리미엄</div>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="category-selection">
+                    <label class="category-header">구매 예정 제품 (중복 선택 가능)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="selected_categories" value="TV">
+                            <span>📺 TV</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="selected_categories" value="KITCHEN">
+                            <span>🍳 주방가전</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="selected_categories" value="LIVING">
+                            <span>🔊 오디오</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="selected_categories" value="AIR">
+                            <span>❄️ 에어컨</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 로딩 화면 ========== -->
+            <div class="step-container hidden" id="loading" data-step="loading">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <h2>당신을 위한 제품을 찾고 있습니다...</h2>
+                    <p>AI가 최적의 조합을 분석중입니다</p>
+                </div>
+            </div>
+
+            <!-- ========== 결과 화면 ========== -->
+            <div class="step-container hidden" id="results" data-step="results">
+                <div class="results-header">
+                    <h2>당신을 위한 추천 제품</h2>
+                </div>
+                
+                <div class="recommendations" id="recommendationsContainer">
+                    <!-- 동적으로 추천 제품 삽입 -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="button-section">
+            <button id="prevBtn" class="btn btn-secondary hidden">이전</button>
+            <button id="nextBtn" class="btn btn-primary">다음</button>
+            <button id="skipBtn" class="btn btn-outline hidden">건너뛰기</button>
+            <button id="restartBtn" class="btn btn-primary hidden">다시 시작</button>
+        </div>
+
+    </div>
+
+    <script src="{% static 'js/onboarding-flow.js' %}"></script>
+</body>
+</html>
+

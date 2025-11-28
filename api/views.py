@@ -4,12 +4,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
-from openai import OpenAI
+# from openai import OpenAI  # OpenAI 사용 안 함
 from .models import Product, OnboardingSession
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 
-client = OpenAI(api_key="환경변수에서_불러오기")  # 코드에 하드코딩 X
+# client = OpenAI(api_key="환경변수에서_불러오기")  # OpenAI 사용 안 함
 
 
 def index_view(request):
@@ -19,32 +19,46 @@ def index_view(request):
     return render(request, "index.html")
 
 
+def onboarding_page(request):
+    """온보딩 페이지 렌더링"""
+    return render(request, "onboarding.html")
+
+
 @csrf_exempt
 def recommend(request):
-    if request.method != "POST":
-        return JsonResponse({"detail": "POST only"}, status=405)
-
-    try:
-        data = json.loads(request.body.decode("utf-8"))
-    except json.JSONDecodeError:
-        return JsonResponse({"detail": "Invalid JSON"}, status=400)
-
-    household = data.get("household", 2)
-    budget = data.get("budget", 300)
-
-    # 여기서 OpenAI 호출 (예: Responses API) :contentReference[oaicite:1]{index=1}
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=(
-            f"{household}인 가구, 예산 {budget}만원, "
-            f"이사 가전 포트폴리오 추천 JSON 만들어줘 ..."
-        ),
-        response_format={"type": "json_object"},
-    )
-
-    result = json.loads(response.output[0].content[0].text)
-
-    return JsonResponse(result)
+    """
+    OpenAI 기반 추천 API (현재 사용 안 함)
+    recommend_view를 사용하세요.
+    """
+    # OpenAI 사용 안 함 - recommend_view를 사용하세요
+    return JsonResponse({
+        "detail": "This endpoint is deprecated. Use /api/recommend/ instead."
+    }, status=410)
+    
+    # if request.method != "POST":
+    #     return JsonResponse({"detail": "POST only"}, status=405)
+    #
+    # try:
+    #     data = json.loads(request.body.decode("utf-8"))
+    # except json.JSONDecodeError:
+    #     return JsonResponse({"detail": "Invalid JSON"}, status=400)
+    #
+    # household = data.get("household", 2)
+    # budget = data.get("budget", 300)
+    #
+    # # 여기서 OpenAI 호출 (예: Responses API)
+    # # response = client.responses.create(
+    # #     model="gpt-4.1-mini",
+    # #     input=(
+    # #         f"{household}인 가구, 예산 {budget}만원, "
+    # #         f"이사 가전 포트폴리오 추천 JSON 만들어줘 ..."
+    # #     ),
+    # #     response_format={"type": "json_object"},
+    # # )
+    # #
+    # # result = json.loads(response.output[0].content[0].text)
+    # #
+    # # return JsonResponse(result)
 
 
 @csrf_exempt
