@@ -1,0 +1,434 @@
+"""
+Product scoring utilities based on ProductSpec JSON and UserProfile
+"""
+import json
+from typing import Dict, Optional
+from dataclasses import dataclass
+from ..models import Product
+from ..rule_engine import UserProfile
+
+
+# ============================================================================
+# 스코어링 가중치 설정 (Constants)
+# ============================================================================
+
+# 카테고리별 가중치
+CATEGORY_WEIGHTS = {
+    "TV": {
+        "resolution": 0.25,      # 해상도 (4K > FHD > HD)
+        "brightness": 0.15,      # 밝기 (nit)
+        "refresh_rate": 0.15,   # 주사율 (Hz)
+        "panel_type": 0.10,      # 패널 타입 (OLED > QLED > IPS)
+        "power_consumption": 0.10,  # 전력소비 (낮을수록 좋음)
+        "size": 0.10,           # 크기 (사용자 공간에 맞는지)
+        "price_match": 0.15,    # 예산 대비 가격 적합도
+    },
+    "LIVING": {
+        "audio_quality": 0.25,  # 오디오 품질
+        "connectivity": 0.15,   # 연결성
+        "power_consumption": 0.10,
+        "size": 0.10,
+        "price_match": 0.20,
+        "features": 0.20,       # 추가 기능
+    },
+    "KITCHEN": {
+        "capacity": 0.25,       # 용량
+        "energy_efficiency": 0.20,  # 에너지 효율
+        "features": 0.15,
+        "size": 0.10,
+        "price_match": 0.20,
+        "design": 0.10,
+    },
+    "default": {
+        "price_match": 0.30,
+        "features": 0.25,
+        "energy_efficiency": 0.20,
+        "size": 0.15,
+        "design": 0.10,
+    }
+}
+
+# Priority별 가중치 조정
+PRIORITY_MULTIPLIERS = {
+    "design": {
+        "design": 1.5,
+        "panel_type": 1.3,
+        "features": 1.2,
+    },
+    "tech": {
+        "resolution": 1.5,
+        "refresh_rate": 1.4,
+        "brightness": 1.3,
+        "features": 1.2,
+    },
+    "eco": {
+        "power_consumption": 1.5,
+        "energy_efficiency": 1.5,
+        "power_consumption": 1.3,
+    },
+    "value": {
+        "price_match": 1.5,
+        "features": 1.2,
+    },
+}
+
+# Vibe별 디자인 점수
+VIBE_SCORES = {
+    "modern": {
+        "OBJET": 1.0,
+        "SIGNATURE": 0.9,
+        "default": 0.7,
+    },
+    "cozy": {
+        "OBJET": 0.9,
+        "default": 0.8,
+    },
+    "pop": {
+        "OBJET": 1.0,
+        "default": 0.8,
+    },
+    "luxury": {
+        "SIGNATURE": 1.0,
+        "OBJET": 0.8,
+        "default": 0.6,
+    },
+}
+
+
+# ============================================================================
+# 스펙 파싱 헬퍼 함수
+# ============================================================================
+
+def parse_spec_json(product: Product) -> Optional[Dict]:
+    """ProductSpec의 spec_json을 파싱하여 dict 반환"""
+    try:
+        if hasattr(product, 'spec') and product.spec:
+            return json.loads(product.spec.spec_json)
+    except (json.JSONDecodeError, AttributeError):
+        pass
+    return None
+
+
+def get_spec_value(spec: Dict, key: str, default=None):
+    """스펙에서 값을 안전하게 가져오기"""
+    return spec.get(key, default) if spec else default
+
+
+def parse_number(value, default=0):
+    """문자열에서 숫자 추출 (예: "1,920 × 1,080" → 1920)"""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    
+    import re
+    # 숫자만 추출 (첫 번째 숫자)
+    numbers = re.findall(r'\d+', str(value).replace(',', ''))
+    return float(numbers[0]) if numbers else default
+
+
+def parse_resolution(resolution_str: str) -> tuple:
+    """해상도 문자열 파싱 (예: "1,920 × 1,080" → (1920, 1080))"""
+    if not resolution_str:
+        return (0, 0)
+    
+    import re
+    numbers = re.findall(r'\d+', str(resolution_str).replace(',', ''))
+    if len(numbers) >= 2:
+        return (int(numbers[0]), int(numbers[1]))
+    elif len(numbers) == 1:
+        return (int(numbers[0]), 0)
+    return (0, 0)
+
+
+# ============================================================================
+# 개별 스펙 점수 계산 함수
+# ============================================================================
+
+def score_resolution(spec: Dict, profile: UserProfile) -> float:
+    """해상도 점수 (0.0 ~ 1.0)"""
+    resolution_str = get_spec_value(spec, "해상도", "")
+    if not resolution_str:
+        return 0.5  # 기본값
+    
+    width, height = parse_resolution(resolution_str)
+    total_pixels = width * height
+    
+    # 해상도 등급별 점수
+    if total_pixels >= 3840 * 2160:  # 4K
+        return 1.0
+    elif total_pixels >= 2560 * 1440:  # QHD
+        return 0.8
+    elif total_pixels >= 1920 * 1080:  # FHD
+        return 0.6
+    elif total_pixels >= 1280 * 720:  # HD
+        return 0.4
+    else:
+        return 0.2
+
+
+def score_brightness(spec: Dict, profile: UserProfile) -> float:
+    """밝기 점수 (0.0 ~ 1.0)"""
+    brightness_str = get_spec_value(spec, "밝기 (Typ.)", "")
+    if not brightness_str:
+        return 0.5
+    
+    brightness = parse_number(brightness_str)
+    
+    # 밝기 등급별 점수 (nit 기준)
+    if brightness >= 1000:
+        return 1.0
+    elif brightness >= 700:
+        return 0.8
+    elif brightness >= 500:
+        return 0.6
+    elif brightness >= 300:
+        return 0.4
+    else:
+        return 0.2
+
+
+def score_refresh_rate(spec: Dict, profile: UserProfile) -> float:
+    """주사율 점수 (0.0 ~ 1.0)"""
+    refresh_str = get_spec_value(spec, "주사율", "")
+    if not refresh_str:
+        return 0.5
+    
+    refresh_rate = parse_number(refresh_str)
+    
+    # 주사율 등급별 점수
+    if refresh_rate >= 120:
+        return 1.0
+    elif refresh_rate >= 100:
+        return 0.9
+    elif refresh_rate >= 60:
+        return 0.7
+    else:
+        return 0.4
+
+
+def score_panel_type(spec: Dict, profile: UserProfile) -> float:
+    """패널 타입 점수 (0.0 ~ 1.0)"""
+    panel_type = get_spec_value(spec, "패널 타입", "").upper()
+    
+    # 패널 타입별 점수
+    if "OLED" in panel_type:
+        return 1.0
+    elif "QLED" in panel_type or "QD-OLED" in panel_type:
+        return 0.9
+    elif "IPS" in panel_type:
+        return 0.7
+    elif "VA" in panel_type:
+        return 0.6
+    else:
+        return 0.5
+
+
+def score_power_consumption(spec: Dict, profile: UserProfile) -> float:
+    """전력소비 점수 (낮을수록 좋음, 0.0 ~ 1.0)"""
+    power_str = get_spec_value(spec, "전력소비", "")
+    if not power_str:
+        return 0.5
+    
+    # 전력소비 값 추출 (W 단위)
+    import re
+    power_match = re.search(r'(\d+(?:\.\d+)?)\s*W', str(power_str), re.IGNORECASE)
+    if power_match:
+        power = float(power_match.group(1))
+    else:
+        power = parse_number(power_str)
+    
+    # 전력소비가 낮을수록 높은 점수 (역변환)
+    # 0W ~ 50W: 1.0, 50W ~ 100W: 0.8, 100W ~ 200W: 0.6, 200W+: 0.4
+    if power <= 50:
+        return 1.0
+    elif power <= 100:
+        return 0.8
+    elif power <= 200:
+        return 0.6
+    elif power <= 300:
+        return 0.4
+    else:
+        return 0.2
+
+
+def score_size(spec: Dict, profile: UserProfile) -> float:
+    """크기 적합도 점수 (0.0 ~ 1.0)"""
+    size_str = get_spec_value(spec, "패널 크기", "") or get_spec_value(spec, "크기", "")
+    if not size_str:
+        return 0.5
+    
+    # 크기 추출 (cm 또는 inch)
+    import re
+    size_match = re.search(r'(\d+(?:\.\d+)?)', str(size_str))
+    if size_match:
+        size_cm = float(size_match.group(1))
+        # inch인 경우 cm로 변환 (대략 1 inch = 2.54 cm)
+        if "인치" in str(size_str) or '"' in str(size_str) or "inch" in str(size_str).lower():
+            size_cm = size_cm * 2.54
+    else:
+        return 0.5
+    
+    # 공간 크기에 따른 적합도 (space_size 기반)
+    space_size = profile.space_size.lower() if profile.space_size else ""
+    household_size = parse_number(profile.household_size, 2)
+    
+    # 가구 인원과 공간 크기 기반 적정 크기 계산
+    if space_size in ["small", "소형"]:
+        ideal_size = 100  # 40인치 정도
+    elif space_size in ["medium", "중형"]:
+        ideal_size = 120  # 48인치 정도
+    else:  # large
+        ideal_size = 150  # 60인치 정도
+    
+    # 가구 인원이 많을수록 큰 화면 선호
+    ideal_size += (household_size - 2) * 10
+    
+    # 차이가 적을수록 높은 점수
+    diff = abs(size_cm - ideal_size)
+    if diff <= 10:
+        return 1.0
+    elif diff <= 20:
+        return 0.8
+    elif diff <= 30:
+        return 0.6
+    elif diff <= 50:
+        return 0.4
+    else:
+        return 0.2
+
+
+def score_price_match(product: Product, profile: UserProfile) -> float:
+    """예산 대비 가격 적합도 점수 (0.0 ~ 1.0)"""
+    price = float(product.price) if product.price else 0
+    discount_price = float(product.discount_price) if product.discount_price else price
+    
+    # 예산 범위 설정
+    budget_ranges = {
+        "budget": (0, 500000),
+        "standard": (500000, 2000000),
+        "premium": (2000000, 5000000),
+        "luxury": (5000000, float('inf')),
+    }
+    
+    budget_level = profile.budget_level.lower() if profile.budget_level else "standard"
+    min_budget, max_budget = budget_ranges.get(budget_level, (0, float('inf')))
+    
+    # 예산 범위 내에 있으면 높은 점수
+    if min_budget <= discount_price <= max_budget:
+        # 예산 중간값에 가까울수록 높은 점수
+        budget_center = (min_budget + max_budget) / 2
+        diff = abs(discount_price - budget_center) / (max_budget - min_budget) if max_budget != float('inf') else 0.1
+        return max(0.7, 1.0 - diff)
+    elif discount_price < min_budget:
+        # 예산보다 낮으면 약간 감점
+        return 0.6
+    else:
+        # 예산보다 높으면 감점
+        over_ratio = (discount_price - max_budget) / max_budget if max_budget != float('inf') else 0.1
+        return max(0.1, 0.5 - over_ratio * 0.5)
+
+
+def score_design(product: Product, profile: UserProfile) -> float:
+    """디자인 점수 (vibe 기반, 0.0 ~ 1.0)"""
+    vibe = profile.vibe.lower() if profile.vibe else ""
+    category = product.category
+    
+    # 카테고리별 디자인 라인업 매칭
+    if category in ["OBJET", "SIGNATURE"]:
+        design_line = category
+    elif "OBJET" in product.name.upper() or "오브제" in product.name:
+        design_line = "OBJET"
+    elif "SIGNATURE" in product.name.upper() or "시그니처" in product.name:
+        design_line = "SIGNATURE"
+    else:
+        design_line = "default"
+    
+    # Vibe별 점수
+    vibe_scores = VIBE_SCORES.get(vibe, VIBE_SCORES.get("modern", {}))
+    return vibe_scores.get(design_line, vibe_scores.get("default", 0.5))
+
+
+# ============================================================================
+# 메인 스코어링 함수
+# ============================================================================
+
+def calculate_product_score(product: Product, profile: UserProfile) -> float:
+    """
+    제품의 종합 점수를 계산 (0.0 ~ 1.0)
+    
+    Args:
+        product: Product 인스턴스
+        profile: UserProfile 인스턴스
+    
+    Returns:
+        float: 종합 점수 (0.0 ~ 1.0)
+    """
+    spec = parse_spec_json(product)
+    if not spec:
+        # 스펙이 없으면 기본 점수 (가격 적합도만)
+        return score_price_match(product, profile) * 0.5
+    
+    category = product.category
+    priority = profile.priority.lower() if profile.priority else ""
+    
+    # 카테고리별 가중치 가져오기
+    weights = CATEGORY_WEIGHTS.get(category, CATEGORY_WEIGHTS["default"])
+    
+    # Priority별 가중치 조정
+    multipliers = PRIORITY_MULTIPLIERS.get(priority, {})
+    
+    # 각 스펙 점수 계산
+    scores = {}
+    
+    # TV 카테고리
+    if category == "TV":
+        scores["resolution"] = score_resolution(spec, profile)
+        scores["brightness"] = score_brightness(spec, profile)
+        scores["refresh_rate"] = score_refresh_rate(spec, profile)
+        scores["panel_type"] = score_panel_type(spec, profile)
+        scores["power_consumption"] = score_power_consumption(spec, profile)
+        scores["size"] = score_size(spec, profile)
+        scores["price_match"] = score_price_match(product, profile)
+        scores["design"] = score_design(product, profile)
+    
+    # LIVING 카테고리 (오디오 등)
+    elif category == "LIVING":
+        # 오디오 관련 스펙 점수 (간단한 구현)
+        scores["audio_quality"] = 0.7  # 기본값 (향후 확장 가능)
+        scores["connectivity"] = 0.7
+        scores["power_consumption"] = score_power_consumption(spec, profile)
+        scores["size"] = score_size(spec, profile)
+        scores["price_match"] = score_price_match(product, profile)
+        scores["features"] = 0.7
+        scores["design"] = score_design(product, profile)
+    
+    # 기타 카테고리
+    else:
+        scores["price_match"] = score_price_match(product, profile)
+        scores["features"] = 0.7
+        scores["energy_efficiency"] = score_power_consumption(spec, profile)
+        scores["size"] = score_size(spec, profile)
+        scores["design"] = score_design(product, profile)
+    
+    # 가중치 적용하여 종합 점수 계산
+    total_score = 0.0
+    total_weight = 0.0
+    
+    for key, weight in weights.items():
+        if key in scores:
+            # Priority별 가중치 조정
+            multiplier = multipliers.get(key, 1.0)
+            adjusted_weight = weight * multiplier
+            total_score += scores[key] * adjusted_weight
+            total_weight += adjusted_weight
+    
+    # 정규화 (0.0 ~ 1.0)
+    if total_weight > 0:
+        final_score = total_score / total_weight
+    else:
+        final_score = 0.5  # 기본값
+    
+    # 최종 점수 클리핑
+    return max(0.0, min(1.0, final_score))
+

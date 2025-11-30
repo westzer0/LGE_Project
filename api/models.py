@@ -1,0 +1,483 @@
+from django.db import models
+from django.utils import timezone
+import uuid
+
+
+class Product(models.Model):
+    """LG 가전 제품 모델"""
+    
+    CATEGORY_CHOICES = [
+        ('TV', 'TV/오디오'),
+        ('KITCHEN', '주방가전'),
+        ('LIVING', '생활가전'),
+        ('AIR', '에어컨/에어케어'),
+        ('AI', 'AI Home'),
+        ('OBJET', 'LG Objet'),
+        ('SIGNATURE', 'LG SIGNATURE'),
+    ]
+    
+    name = models.CharField(max_length=200, verbose_name='제품명')
+    model_number = models.CharField(max_length=100, verbose_name='모델명', blank=True)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name='카테고리')
+    description = models.TextField(verbose_name='설명', blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='가격')
+    discount_price = models.DecimalField(
+        max_digits=12, 
+        decimal_places=0, 
+        null=True, 
+        blank=True, 
+        verbose_name='할인가'
+    )
+    image_url = models.URLField(verbose_name='이미지 URL', blank=True)
+    is_active = models.BooleanField(default=True, verbose_name='판매중')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
+    
+    class Meta:
+        verbose_name = '제품'
+        verbose_name_plural = '제품'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} ({self.model_number})"
+
+
+class ProductSpec(models.Model):
+    """제품 스펙 (JSON) - 1:1"""
+    product = models.OneToOneField(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="spec",
+    )
+    source = models.CharField(max_length=200, blank=True, default="")  # 예: TV_제품스펙.csv
+    spec_json = models.TextField(blank=True, default="{}")  # CSV row 전체를 JSON 문자열로 저장
+    ingested_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = '제품 스펙'
+        verbose_name_plural = '제품 스펙'
+
+    def __str__(self):
+        return f"Spec<{self.product_id}>"
+
+
+class ProductDemographics(models.Model):
+    """제품 인구통계 (1:1) - 어떤 사람들이 구매했는지"""
+    product = models.OneToOneField(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="demographics",
+    )
+    # 가족 구성 (예: ['신혼', '부모님', '1인가구'])
+    family_types = models.JSONField(default=list, blank=True)
+    # 집 크기 (예: ['20평', '30평대'])
+    house_sizes = models.JSONField(default=list, blank=True)
+    # 주거 형태 (예: ['아파트', '원룸'])
+    house_types = models.JSONField(default=list, blank=True)
+    
+    source = models.CharField(max_length=200, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = '제품 인구통계'
+        verbose_name_plural = '제품 인구통계'
+
+    def __str__(self):
+        return f"Demographics<{self.product_id}>"
+
+
+class ProductReview(models.Model):
+    """제품 리뷰 (1:N) - 실제 고객 리뷰"""
+    product = models.ForeignKey(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
+    star = models.CharField(max_length=20, blank=True, default="")  # 별점/평가
+    review_text = models.TextField(blank=True, default="")  # 리뷰 내용
+    
+    source = models.CharField(max_length=200, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = '제품 리뷰'
+        verbose_name_plural = '제품 리뷰'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Review<{self.product_id}>: {self.review_text[:30]}..."
+
+
+class ProductRecommendReason(models.Model):
+    """제품 추천이유 (1:1) - LLM 생성 또는 리뷰 요약 기반"""
+    product = models.OneToOneField(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="recommend_reason",
+    )
+    reason_text = models.TextField(blank=True, default="")  # 추천 이유 텍스트
+    
+    source = models.CharField(max_length=200, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = '제품 추천이유'
+        verbose_name_plural = '제품 추천이유'
+
+    def __str__(self):
+        return f"RecommendReason<{self.product_id}>"
+
+
+class UserSample(models.Model):
+    user_id = models.CharField(max_length=50, unique=True)
+    household_size = models.CharField(max_length=20, blank=True)
+    space_type = models.CharField(max_length=20, blank=True)
+    space_purpose = models.CharField(max_length=50, blank=True)
+    space_sqm = models.FloatField(null=True, blank=True)
+    space_size_cat = models.CharField(max_length=20, blank=True)
+    style_pref = models.CharField(max_length=50, blank=True)
+    cooking_freq = models.CharField(max_length=20, blank=True)
+    laundry_pattern = models.CharField(max_length=50, blank=True)
+    media_pref = models.CharField(max_length=50, blank=True)
+    pet = models.CharField(max_length=10, blank=True)
+    budget_range = models.CharField(max_length=50, blank=True)
+    payment_pref = models.CharField(max_length=20, blank=True)
+
+    recommended_fridge_l = models.IntegerField(null=True, blank=True)
+    recommended_washer_kg = models.IntegerField(null=True, blank=True)
+    recommended_tv_inch = models.IntegerField(null=True, blank=True)
+    recommended_vacuum = models.CharField(max_length=50, blank=True)
+    recommended_oven = models.CharField(max_length=50, blank=True)
+    purchased_items = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = '사용자 샘플'
+        verbose_name_plural = '사용자 샘플'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"UserSample({self.user_id})"
+
+
+class OnboardingSession(models.Model):
+    """
+    사용자 온보딩 세션
+    = 사용자의 설문 응답을 저장하는 모델
+    """
+    
+    # 세션 정보
+    session_id = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="고유 세션 ID"
+    )
+    
+    # 온보딩 답변 (Step 1~5)
+    vibe = models.CharField(
+        max_length=20,
+        choices=[
+            ('modern', '모던/심플'),
+            ('cozy', '따뜻한 톤'),
+            ('pop', '팝/생기있는'),
+            ('luxury', '럭셔리/고급'),
+        ],
+        null=True,
+        blank=True,
+        help_text="Step 1: 인테리어 무드"
+    )
+    
+    household_size = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Step 2: 가구 인원수"
+    )
+    
+    housing_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('apartment', '아파트'),
+            ('detached', '단독주택'),
+            ('villa', '빌라/연립'),
+            ('officetel', '오피스텔'),
+            ('studio', '원룸'),
+        ],
+        null=True,
+        blank=True,
+        help_text="Step 3: 주거 형태"
+    )
+    
+    pyung = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Step 3: 주거 평수"
+    )
+    
+    priority = models.CharField(
+        max_length=20,
+        choices=[
+            ('design', '디자인/무드'),
+            ('tech', '기술/성능'),
+            ('eco', '에너지효율'),
+            ('value', '가성비'),
+        ],
+        default='value',
+        help_text="Step 4: 구매 우선순위"
+    )
+    
+    budget_level = models.CharField(
+        max_length=20,
+        choices=[
+            ('low', '500만원 이하'),
+            ('medium', '500~2000만원'),
+            ('high', '2000만원 이상'),
+            # 기존 매핑과의 호환성
+            ('budget', '500만원 이하'),
+            ('standard', '500~2000만원'),
+            ('premium', '2000만원 이상'),
+            ('luxury', '2000만원 이상'),
+        ],
+        default='medium',
+        help_text="Step 5: 예산 범위"
+    )
+    
+    # 선택한 카테고리
+    selected_categories = models.JSONField(
+        default=list,
+        help_text="선택한 제품 카테고리 (예: ['TV', 'KITCHEN'])"
+    )
+    
+    # 추천 결과 저장
+    recommended_products = models.JSONField(
+        default=list,
+        help_text="추천 제품 ID 목록"
+    )
+    
+    recommendation_result = models.JSONField(
+        default=dict,
+        help_text="최종 추천 결과 (JSON)"
+    )
+    
+    # 상태 관리
+    current_step = models.IntegerField(
+        default=1,
+        choices=[(i, f'Step {i}') for i in range(1, 7)],
+        help_text="현재 진행 중인 스텝"
+    )
+    
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('in_progress', '진행중'),
+            ('completed', '완료'),
+            ('abandoned', '중단됨'),
+        ],
+        default='in_progress',
+        help_text="온보딩 상태"
+    )
+    
+    # 타임스탬프
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="세션 생성 시간"
+    )
+    
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="마지막 업데이트 시간"
+    )
+    
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="온보딩 완료 시간"
+    )
+    
+    class Meta:
+        verbose_name = '온보딩 세션'
+        verbose_name_plural = '온보딩 세션'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['session_id']),
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.session_id} - {self.get_status_display()} (Step {self.current_step})"
+    
+    def to_user_profile(self) -> dict:
+        """
+        OnboardingSession을 RecommendationEngine용 user_profile로 변환
+        """
+        return {
+            'vibe': self.vibe or 'modern',
+            'household_size': self.household_size or 2,
+            'housing_type': self.housing_type or 'apartment',
+            'pyung': self.pyung or 25,
+            'priority': self.priority or 'value',
+            'budget_level': self.budget_level or 'medium',
+            'categories': self.selected_categories or [],
+            'main_space': 'living',
+            'space_size': 'medium',
+        }
+    
+    def save(self, *args, **kwargs):
+        """세션 ID 자동 생성"""
+        if not self.session_id:
+            self.session_id = str(uuid.uuid4())[:8]
+        super().save(*args, **kwargs)
+    
+    def mark_completed(self):
+        """온보딩 완료 표시"""
+        self.status = 'completed'
+        self.current_step = 5
+        self.completed_at = timezone.now()
+        self.save()
+
+
+class Portfolio(models.Model):
+    """
+    사용자 포트폴리오 - 추천 결과 저장 (1:N)
+    PRD: ID와 포트폴리오는 1대 N 관계
+    """
+    
+    # 고유 식별자
+    portfolio_id = models.CharField(
+        max_length=20,
+        unique=True,
+        help_text="포트폴리오 내부 키 (예: PF-001, PF-002)"
+    )
+    
+    # 사용자 식별 (추후 카카오 로그인 연동 시 활용)
+    user_id = models.CharField(
+        max_length=100,
+        db_index=True,
+        help_text="사용자 ID (카카오 ID 또는 세션 ID)"
+    )
+    
+    # 온보딩 세션 연결 (선택적)
+    onboarding_session = models.ForeignKey(
+        'OnboardingSession',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='portfolios',
+        help_text="연결된 온보딩 세션"
+    )
+    
+    # 스타일 정보
+    style_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('modern', '모던 & 미니멀'),
+            ('cozy', '따뜻한 코지'),
+            ('natural', '내추럴 & 네이처'),
+            ('luxury', '럭셔리 & 프리미엄'),
+        ],
+        default='modern',
+        help_text="스타일 유형"
+    )
+    style_title = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="스타일 타이틀 (예: 모던 & 미니멀 라이프를 위한 오브제 스타일)"
+    )
+    style_subtitle = models.TextField(
+        blank=True,
+        help_text="스타일 설명 (ChatGPT 생성 가능)"
+    )
+    
+    # 온보딩 결과 데이터
+    onboarding_data = models.JSONField(
+        default=dict,
+        help_text="온보딩 설문 응답 데이터"
+    )
+    
+    # 추천 제품 목록
+    products = models.JSONField(
+        default=list,
+        help_text="추천 제품 목록 [{id, name, price, ...}, ...]"
+    )
+    
+    # 가격 정보
+    total_original_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        default=0,
+        help_text="정가 합계"
+    )
+    total_discount_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        default=0,
+        help_text="할인가 합계"
+    )
+    
+    # 매칭 점수
+    match_score = models.IntegerField(
+        default=0,
+        help_text="전체 매칭 점수 (0-100)"
+    )
+    
+    # 상태
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('draft', '임시저장'),
+            ('saved', '저장됨'),
+            ('shared', '공유됨'),
+            ('purchased', '구매완료'),
+        ],
+        default='draft',
+        help_text="포트폴리오 상태"
+    )
+    
+    # 공유 정보
+    share_url = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="공유 URL"
+    )
+    share_count = models.IntegerField(
+        default=0,
+        help_text="공유 횟수"
+    )
+    
+    # 타임스탬프
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = '포트폴리오'
+        verbose_name_plural = '포트폴리오'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user_id']),
+            models.Index(fields=['portfolio_id']),
+            models.Index(fields=['status']),
+        ]
+    
+    def __str__(self):
+        return f"{self.portfolio_id} - {self.style_type}"
+    
+    def save(self, *args, **kwargs):
+        """포트폴리오 ID 자동 생성"""
+        if not self.portfolio_id:
+            # PF-XXXXXX 형식
+            import random
+            import string
+            random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            self.portfolio_id = f"PF-{random_str}"
+        super().save(*args, **kwargs)
+    
+    def calculate_totals(self):
+        """가격 합계 계산"""
+        original = sum(p.get('price', 0) for p in self.products)
+        discount = sum(p.get('discountPrice', p.get('price', 0)) for p in self.products)
+        self.total_original_price = original
+        self.total_discount_price = discount
+        self.save()

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LG전자 | 홈</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div class="utility-bar">
+        <div class="container">
+            <div class="utility-links">
+                <a href="#">회사소개</a>
+                <a href="#">사업자몰</a>
+                <a href="#">마이페이지</a>
+            </div>
+            <button class="utility-btn">검색</button>
+        </div>
+    </div>
+
+    <header class="global-header">
+        <div class="container">
+            <a class="logo" href="#">LG<span>전자</span></a>
+            <nav class="gnb">
+                <button class="gnb__item">TV/오디오</button>
+                <button class="gnb__item">주방가전</button>
+                <button class="gnb__item">생활가전</button>
+                <button class="gnb__item">에어컨/에어케어</button>
+                <button class="gnb__item">AI Home</button>
+                <button class="gnb__item">LG Objet</button>
+                <button class="gnb__item">LG SIGNATURE</button>
+            </nav>
+            <div class="actions">
+                <button class="ghost">장바구니</button>
+                <button class="primary">로그인</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" aria-label="LG 메인 프로모션">
+            <div class="container">
+                <div class="slider">
+                    <button class="slider__control prev" aria-label="이전">&#10094;</button>
+                    <button class="slider__control next" aria-label="다음">&#10095;</button>
+                    <div class="dots" aria-label="슬라이드 이동"></div>
+                    <div class="slide active"
+                        style="--bg:url('https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=2000&q=80')">
+                        <div class="slide__content">
+                            <p class="eyebrow">LG Home Week</p>
+                            <h1>우리 집을 완성하는 베스트 추천 가전</h1>
+                            <p>워시타워, 디오스 식기세척기, 코드제로 등 인기 제품을 한정 혜택가로 만나보세요.</p>
+                            <div class="cta-group">
+                                <button class="primary">혜택 보러가기</button>
+                                <button class="ghost">카테고리별 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide"
+                        style="--bg:url('https://images.unsplash.com/photo-1484100356142-db6ab6244067?auto=format&fit=crop&w=2000&q=80')">
+                        <div class="slide__content">
+                            <p class="eyebrow">타임딜</p>
+                            <h1>LG 올레드 evo 특별전</h1>
+                            <p>48형부터 86형까지 단계별 혜택, 수량 소진 시 조기 종료됩니다.</p>
+                            <div class="cta-group">
+                                <button class="primary">OLED 라인업 보기</button>
+                                <button class="ghost">장바구니 담기</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slide"
+                        style="--bg:url('https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=2000&q=80')">
+                        <div class="slide__content">
+                            <p class="eyebrow">MD's Choice</p>
+                            <h1>프리미엄 키친 스타일링</h1>
+                            <p>시그니처 키친 스위트와 오브제컬렉션으로 완성하는 맞춤형 주방.</p>
+                            <div class="cta-group">
+                                <button class="primary">기획전 보기</button>
+                                <button class="ghost">상담 신청</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="time-deal">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">타임딜 · D-3</p>
+                        <h2>지금 담아야 할 LG 인기 제품</h2>
+                    </div>
+                    <a class="link" href="#">전체보기</a>
+                </div>
+                <div class="time-deal-grid" id="timeDealCards"></div>
+            </div>
+        </section>
+
+        <section class="section section--highlight" id="home-week">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">LG Home Week</p>
+                        <h2>우리 집을 완성하는 베스트 추천 가전</h2>
+                    </div>
+                    <a class="link" href="#">혜택 더 보기</a>
+                </div>
+                <div class="feature-row">
+                    <article class="feature-card">
+                        <h3>워시타워 오브제컬렉션</h3>
+                        <p>WL21WDU · 25/21kg · 에너지 1등급</p>
+                        <strong>최대혜택가 2,669,100원</strong>
+                    </article>
+                    <article class="feature-card">
+                        <h3>디오스 식기세척기</h3>
+                        <p>DUE4BGE · 스팀 · 1등급</p>
+                        <strong>최대혜택가 780,300원</strong>
+                    </article>
+                    <article class="feature-card">
+                        <h3>코드제로 A9S</h3>
+                        <p>AX920BWE · 흡입 전용</p>
+                        <strong>최대혜택가 688,200원</strong>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="md-choice">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">MD's Choice</p>
+                        <h2>놓치기 아쉬운 특별한 가격</h2>
+                    </div>
+                    <a class="link" href="#">더보기</a>
+                </div>
+                <div class="product-grid" id="mdChoiceGrid"></div>
+            </div>
+        </section>
+
+        <section class="section categories">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">바로가기</p>
+                        <h2>라이프스타일별 추천</h2>
+                    </div>
+                </div>
+                <div class="category-grid">
+                    <article>
+                        <h3>#홈엔터테인먼트</h3>
+                        <p>OLED · QNED · 사운드바</p>
+                    </article>
+                    <article>
+                        <h3>#결혼</h3>
+                        <p>신혼 패키지 · 혼수 혜택</p>
+                    </article>
+                    <article>
+                        <h3>#홈쿡</h3>
+                        <p>디오스 오븐 · 인덕션 · 큐커</p>
+                    </article>
+                    <article>
+                        <h3>#캠핑영화관</h3>
+                        <p>스탠바이미 · 시네빔 · 무드메이트</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer__grid">
+            <div>
+                <h4>LG전자 고객센터</h4>
+                <p>궁금하신 점은 1588-7777 또는 챗봇으로 빠르게 해결하세요.</p>
+            </div>
+            <div>
+                <h4>자주 찾는 링크</h4>
+                <ul>
+                    <li><a href="#">배송 안내</a></li>
+                    <li><a href="#">교환/환불 정책</a></li>
+                    <li><a href="#">매장 상담 예약</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>팔로우</h4>
+                <ul>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">YouTube</a></li>
+                    <li><a href="#">Facebook</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer__bottom">
+            © 2025 LG Electronics. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+
+</html>
