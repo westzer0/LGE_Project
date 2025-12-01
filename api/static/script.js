@@ -1,127 +1,161 @@
-// Smooth scroll for anchor links
-document.addEventListener('DOMContentLoaded', () => {
-    // GNB smooth scroll
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                const headerOffset = 64;
-                const elementPosition = target.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+const slider = document.querySelector('.slider');
+const slides = Array.from(document.querySelectorAll('.slide'));
+const dotsContainer = document.querySelector('.dots');
+const prevBtn = document.querySelector('.slider__control.prev');
+const nextBtn = document.querySelector('.slider__control.next');
 
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
+const timeDealCards = document.querySelector('#timeDealCards');
+const mdChoiceGrid = document.querySelector('#mdChoiceGrid');
+
+const timeDeals = [
+    {
+        badge: '타임딜',
+        title: 'LG 올레드 evo C4 (48형)',
+        desc: '모델명 OLED48C4ENA · 스탠드형',
+        price: '최대혜택가 1,181,100원',
+        stock: 'D-3 · 14개 남음',
+    },
+    {
+        badge: '타임딜',
+        title: 'LG 올레드 evo C4 (42형)',
+        desc: '모델명 OLED42C4ENA · 스탠드형',
+        price: '최대혜택가 1,060,200원',
+        stock: 'D-3 · 20개 남음',
+    },
+    {
+        badge: '타임딜',
+        title: 'LG 울트라 HD TV (75형)',
+        desc: '모델명 75UT9300BNA · 벽걸이형',
+        price: '최대혜택가 1,218,300원',
+        stock: 'D-3 · 116개 남음 · 닷컴 ONLY',
+    },
+    {
+        badge: '타임딜',
+        title: 'LG 나노셀 AI (65형)',
+        desc: '모델명 65NANO80AEA · 스탠드형',
+        price: '최대혜택가 1,004,400원',
+        stock: 'D-3 · 52개 남음 · 닷컴 ONLY',
+    },
+];
+
+const mdChoice = [
+    {
+        badge: 'MD Pick',
+        title: 'LG 퓨리케어 오브제컬렉션 하이드로에센셜',
+        desc: 'HY505RWLAHM · 무빙휠 세트',
+        price: '947,700원',
+    },
+    {
+        badge: 'MD Pick',
+        title: 'LG 트롬 워시타워 23/20kg',
+        desc: 'W20WAN · 에너지 1등급',
+        price: '1,990,200원',
+    },
+    {
+        badge: 'MD Pick',
+        title: 'LG 퓨리케어 360˚ 공기청정기',
+        desc: 'AS183HWWA · 62㎡ 커버리지',
+        price: '369,000원',
+    },
+    {
+        badge: 'MD Pick',
+        title: 'LG 울트라기어 올레드 게이밍모니터',
+        desc: '27GX704A · 67.3cm',
+        price: '715,200원',
+    },
+    {
+        badge: 'MD Pick',
+        title: 'LG 디오스 오브제컬렉션 식기세척기',
+        desc: 'DUE4BGE · 스팀 · 1등급',
+        price: '780,300원',
+    },
+    {
+        badge: 'MD Pick',
+        title: 'LG 스탠바이미 2',
+        desc: '27LX6TPGA · 이동형 스크린',
+        price: '1,134,600원',
+    },
+];
+
+let current = 0;
+let timer;
+
+const createDots = () => {
+    slides.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.setAttribute('aria-label', `${index + 1}번 슬라이드로 이동`);
+        dot.addEventListener('click', () => goToSlide(index));
+        dotsContainer.appendChild(dot);
     });
+};
 
-    // Form submit handler
-    const form = document.getElementById('recommend-form');
-    if (form) {
-        form.addEventListener('submit', submitRecommendForm);
-    }
-});
+const updateActive = () => {
+    slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === current);
+    });
+    Array.from(dotsContainer.children).forEach((dot, index) => {
+        dot.classList.toggle('active', index === current);
+    });
+};
 
-async function submitRecommendForm(event) {
-    event.preventDefault();
+const goToSlide = (index) => {
+    current = (index + slides.length) % slides.length;
+    updateActive();
+    resetTimer();
+};
 
-    const form = document.getElementById('recommend-form');
-    if (!form) return;
+const nextSlide = () => goToSlide(current + 1);
+const prevSlide = () => goToSlide(current - 1);
 
-    const payload = {
-        vibe: form.querySelector('select[name="vibe"]').value,
-        household_size: Number(form.querySelector('input[name="household_size"]').value),
-        housing_type: form.querySelector('select[name="housing_type"]').value,
-        main_space: "living",
-        space_size: "medium",
-        cook_freq: null,
-        laundry_pattern: null,
-        media_usage: null,
-        priority: form.querySelector('select[name="priority"]').value,
-        budget_level: form.querySelector('select[name="budget_level"]').value,
-        target_categories: ["TV"]
-    };
+const startAutoplay = () => {
+    timer = setInterval(nextSlide, 6000);
+};
 
-    const loading = document.getElementById('loading');
-    const resultDiv = document.getElementById('recommend-result');
+const resetTimer = () => {
+    clearInterval(timer);
+    startAutoplay();
+};
 
-    // Show loading
-    if (loading) {
-        loading.style.display = 'block';
-    }
-    if (resultDiv) {
-        resultDiv.innerHTML = '';
-    }
+const renderDeals = () => {
+    timeDeals.forEach((deal) => {
+        const card = document.createElement('article');
+        card.className = 'deal-card';
+        card.innerHTML = `
+      <span class="badge">${deal.badge}</span>
+      <h3>${deal.title}</h3>
+      <p>${deal.desc}</p>
+      <strong>${deal.price}</strong>
+      <small class="muted">${deal.stock}</small>
+    `;
+        timeDealCards.appendChild(card);
+    });
+};
 
-    try {
-        const res = await fetch('/api/recommend/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        });
+const renderMdChoice = () => {
+    mdChoice.forEach((item) => {
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.innerHTML = `
+      <span class="badge">${item.badge}</span>
+      <h3>${item.title}</h3>
+      <p>${item.desc}</p>
+      <strong>${item.price}</strong>
+      <button class="ghost" type="button">자세히 보기</button>
+    `;
+        mdChoiceGrid.appendChild(card);
+    });
+};
 
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
+createDots();
+updateActive();
+startAutoplay();
+renderDeals();
+renderMdChoice();
 
-        const data = await res.json();
+nextBtn.addEventListener('click', nextSlide);
+prevBtn.addEventListener('click', prevSlide);
 
-        // 새로운 API 응답 형식 지원 (success, count, recommendations)
-        const recommendations = data.recommendations || [];
-        
-        if (!data.success || !recommendations || recommendations.length === 0) {
-            if (resultDiv) {
-                const errorMsg = data.error || data.message || '추천 결과가 없습니다.';
-                resultDiv.innerHTML = `<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">${errorMsg}</p>`;
-            }
-            return;
-        }
+slider.addEventListener('mouseenter', () => clearInterval(timer));
+slider.addEventListener('mouseleave', startAutoplay);
 
-        // Render recommendations
-        if (resultDiv) {
-            recommendations.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                
-                const price = item.discount_price || item.price || 0;
-                const originalPrice = item.discount_price && item.price ? item.price : null;
-                
-                card.innerHTML = `
-                    <h3>${escapeHtml(item.name || item.model || '')}</h3>
-                    ${item.model_number ? `<p class="model">${escapeHtml(item.model_number)}</p>` : ''}
-                    <p class="price">
-                        ${price.toLocaleString()}원
-                        ${originalPrice ? `<span style="font-size: 0.8em; color: var(--text-secondary); text-decoration: line-through; margin-left: 0.5rem;">${originalPrice.toLocaleString()}원</span>` : ''}
-                    </p>
-                    ${item.reason ? `<p class="reason">${escapeHtml(item.reason)}</p>` : ''}
-                    ${item.score ? `<p class="score" style="font-size: 0.85em; color: var(--lg-primary); margin-top: 0.5rem;">추천 점수: ${(item.score * 100).toFixed(0)}%</p>` : ''}
-                `;
-                
-                resultDiv.appendChild(card);
-            });
-        }
-
-    } catch (err) {
-        console.error('Error fetching recommendations:', err);
-        if (resultDiv) {
-            resultDiv.innerHTML = '<p style="text-align: center; color: #d32f2f; padding: 2rem;">추천 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>';
-        }
-    } finally {
-        // Hide loading
-        if (loading) {
-            loading.style.display = 'none';
-        }
-    }
-}
-
-// XSS 방지를 위한 HTML 이스케이프 함수
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}

@@ -1,969 +1,89 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LG전자</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #fff;
-            color: #1a1a1a;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Header - 2단 구조 */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
-            z-index: 1000;
-        }
-
-        .header-wrapper {
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 0 60px;
-        }
-
-        /* 상단 줄 (Top Row) - 첫 번째 줄 */
-        .header-top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-        }
-
-        .header-top-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo {
-            display: block;
-            height: 28px;
-        }
-
-        .logo img {
-            height: 100%;
-            width: auto;
-        }
-
-        .header-top-right {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .header-top-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header-top-icon {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            color: #1a1a1a;
-            transition: color 0.2s;
-            flex-shrink: 0;
-        }
-
-        .header-top-icon:hover {
-            color: #A50034;
-        }
-
-        .header-top-link {
-            font-size: 13px;
-            color: #666;
-            text-decoration: none;
-            padding: 0 12px;
-            position: relative;
-            white-space: nowrap;
-        }
-
-        .header-top-link:hover {
-            color: #A50034;
-        }
-
-        .header-top-link:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1px;
-            height: 12px;
-            background: #e5e5e5;
-        }
-
-        /* 하단 줄 (Bottom Row) - 두 번째 줄 */
-        .header-bottom-row {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 16px 0;
-        }
-
-        .gnb {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            flex-shrink: 0;
-        }
-
-        .gnb-item {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1a1a1a;
-            text-decoration: none;
-            padding: 8px 0;
-            transition: color 0.2s;
-            white-space: nowrap;
-            position: relative;
-        }
-
-        .gnb-item:hover {
-            color: #A50034;
-        }
-
-        /* LG AI와 홈스타일 사이의 세로 구분선 */
-        .gnb-separator {
-            width: 1px;
-            height: 14px;
-            background: #e5e5e5;
-            margin: 0 12px;
-        }
-
-        /* 홈스타일 뱃지 스타일 - 집 모양 아이콘 */
-        .gnb-item.home-style {
-            background: #FD312E;
-            color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-weight: 700;
-            font-size: 13px;
-            transition: background 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            line-height: 1.2;
-        }
-
-        .home-style-icon {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0;
-        }
-
-        .home-style-icon svg {
-            width: 100%;
-            height: 100%;
-            fill: currentColor;
-        }
-
-        .gnb-item.home-style:hover {
-            background: #B80D3D;
-            color: #fff;
-        }
-
-        .gnb-brand {
-            display: flex;
-            align-items: center;
-            gap: 28px;
-            flex-shrink: 0;
-            background: #F4F6F8;
-            border-radius: 9999px;
-            padding: 6px 20px;
-            margin-left: 0;
-        }
-
-        .gnb-brand-item {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1a1a1a;
-            text-decoration: none;
-            padding: 0;
-            transition: color 0.2s;
-            white-space: nowrap;
-        }
-
-        .gnb-brand-item:hover {
-            color: #A50034;
-        }
-
-        /* 브랜드 이름 내부 강조 */
-        .gnb-brand-item strong {
-            font-weight: 700;
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-top: 120px;
-        }
-
-        /* Hero Banner */
-        .hero-banner {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            background: #F5F1EA;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 50px 0 80px;
-        }
-
-        .hero-banner::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            background: linear-gradient(to bottom, transparent, rgba(139, 108, 66, 0.08));
-            background-image: repeating-linear-gradient(90deg,
-                    transparent,
-                    transparent 3px,
-                    rgba(139, 108, 66, 0.06) 3px,
-                    rgba(139, 108, 66, 0.06) 6px);
-        }
-
-        .hero-content {
-            max-width: 1920px;
-            width: 100%;
-            padding: 0 60px;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            height: 100%;
-        }
-
-        .hero-text {
-            color: #1a1a1a;
-            max-width: 700px;
-            padding-left: 100px;
-            padding-right: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            background: #FD312E;
-            color: #fff;
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            width: fit-content;
-        }
-
-        .hero-title {
-            font-size: 44px;
-            font-weight: 700;
-            line-height: 1.35;
-            margin-bottom: 16px;
-            color: #1a1a1a;
-            letter-spacing: -0.5px;
-            white-space: nowrap;
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: #4a4a4a;
-            margin-bottom: 0;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        .banner-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 52px;
-            height: 52px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            z-index: 3;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .banner-nav:hover {
-            background: #fff;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .banner-nav svg {
-            color: #1a1a1a;
-            width: 24px;
-            height: 24px;
-        }
-
-        .banner-nav.prev {
-            left: 20px;
-        }
-
-        .banner-nav.next {
-            right: 20px;
-        }
-
-        .banner-pagination {
-            position: absolute;
-            bottom: 30px;
-            right: 60px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.65);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            padding: 10px 14px;
-            border-radius: 6px;
-            z-index: 3;
-        }
-
-        .banner-pagination span {
-            font-weight: 500;
-        }
-
-        .banner-pagination span[style*="cursor"] {
-            cursor: pointer;
-        }
-
-        /* Icon Navigation */
-        .icon-nav {
-            background: #fff;
-            padding: 40px 0;
-        }
-
-        /* Mid Banner */
-        .mid-banner {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            background: #fff;
-            overflow: hidden;
-        }
-
-        .mid-banner img {
-            width: 100%;
-            height: auto;
-            display: block;
-            object-fit: cover;
-        }
-
-        .icon-nav-container {
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 0 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            flex-wrap: wrap;
-        }
-
-        .icon-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: #1a1a1a;
-            transition: transform 0.2s;
-            cursor: pointer;
-            min-width: 90px;
-        }
-
-        .icon-nav-item:hover {
-            transform: translateY(-3px);
-        }
-
-        .icon-circle {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            border: 1px solid #e5e5e5;
-            overflow: hidden;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.2s;
-        }
-
-        .icon-circle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .icon-circle img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* 패키지 추천 아이콘 전용 스타일 */
-        .icon-circle img[alt="패키지 추천"] {
-            object-fit: contain;
-            padding: 14px;
-        }
-
-        .icon-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #A50034;
-            color: #fff;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 3px 7px;
-            border-radius: 12px;
-            z-index: 1;
-            white-space: nowrap;
-        }
-
-        .icon-label {
-            font-size: 13px;
-            font-weight: 500;
-            text-align: center;
-            color: #1a1a1a;
-            white-space: nowrap;
-        }
-
-        /* Product Sections */
-        .product-section {
-            padding: 80px 0;
-            background: #fff;
-        }
-
-        .product-section:nth-child(even) {
-            background: #fafafa;
-        }
-
-        .section-container {
-            max-width: 1920px;
-            margin: 0 auto;
-            padding: 0 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            width: 100%;
-        }
-
-        .section-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a1a1a;
-            letter-spacing: -0.5px;
-        }
-
-        .section-more {
-            font-size: 15px;
-            color: #666;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .section-more:hover {
-            color: #A50034;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-        }
-
-        .product-card {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .product-image {
-            width: 100%;
-            aspect-ratio: 4 / 3;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 56px;
-            overflow: hidden;
-            padding: 15px;
-        }
-
-        .product-image img {
-            width: 80%;
-            height: auto;
-            object-fit: contain;
-        }
-
-        .product-info {
-            padding: 24px;
-        }
-
-        .product-name {
-            font-size: 17px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .product-model {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 16px;
-        }
-
-        .product-price {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .price-label {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .price-value {
-            font-size: 22px;
-            font-weight: 700;
-            color: #FD312E;
-        }
-
-        .price-unit {
-            font-size: 15px;
-            color: #666;
-        }
-
-        .discount-badge {
-            display: inline-block;
-            background: #FD312E;
-            color: #fff;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 4px;
-            margin-left: 8px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1600px) {
-
-            .header-wrapper,
-            .hero-content,
-            .icon-nav-container,
-            .section-container {
-                padding: 0 40px;
-            }
-
-            .gnb {
-                gap: 32px;
-            }
-
-            .gnb-brand {
-                gap: 28px;
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .hero-content {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .hero-text {
-                max-width: 100%;
-                padding-left: 60px;
-                padding-right: 20px;
-            }
-
-            .hero-banner {
-                height: 450px;
-            }
-
-            .hero-title {
-                font-size: 36px;
-                white-space: nowrap;
-            }
-
-            .icon-nav-container {
-                gap: 30px;
-            }
-
-            .product-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 24px;
-            }
-        }
-
-        @media (max-width: 768px) {
-
-            .header-wrapper,
-            .hero-content,
-            .icon-nav-container,
-            .section-container {
-                padding: 0 20px;
-            }
-
-            .gnb {
-                display: none;
-            }
-
-            .hero-banner {
-                height: 400px;
-                padding: 30px 0 50px;
-            }
-
-            .hero-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-
-            .hero-text {
-                padding-left: 40px;
-                padding-right: 20px;
-                max-width: 100%;
-            }
-
-            .hero-title {
-                font-size: 24px;
-                line-height: 1.3;
-                white-space: normal;
-                word-break: keep-all;
-            }
-
-            .hero-subtitle {
-                font-size: 16px;
-            }
-
-            .hero-title {
-                font-size: 36px;
-            }
-
-            .icon-nav-container {
-                gap: 20px;
-            }
-
-            .icon-circle {
-                width: 60px;
-                height: 60px;
-            }
-
-            .product-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 16px;
-            }
-        }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LG전자 | 홈</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}" />
 </head>
 
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-wrapper">
-            <!-- 상단 줄 (Top Row) - 첫 번째 줄 -->
-            <div class="header-top-row">
-                <div class="header-top-left">
-                    <a href="/" class="logo">
-                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
-                    </a>
-                </div>
-                <div class="header-top-right">
-                    <div class="header-top-icons">
-                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                            </path>
-                        </svg>
-                    </div>
-                    <a href="#" class="header-top-link">회사소개</a>
-                    <a href="#" class="header-top-link">사업자몰</a>
-                </div>
+    <div class="utility-bar">
+        <div class="container">
+            <div class="utility-links">
+                <a href="#">회사소개</a>
+                <a href="#">사업자몰</a>
+                <a href="#">마이페이지</a>
             </div>
-            <!-- 하단 줄 (Bottom Row) - 두 번째 줄 -->
-            <div class="header-bottom-row">
-                <nav class="gnb">
-                    <a href="#" class="gnb-item">제품/소모품</a>
-                    <a href="#" class="gnb-item">고객지원</a>
-                    <a href="#" class="gnb-item">가전 구독</a>
-                    <a href="#" class="gnb-item">혜택/이벤트</a>
-                    <a href="#" class="gnb-item">스토리</a>
-                    <a href="#" class="gnb-item">베스트샵</a>
-                    <a href="#" class="gnb-item">LG AI</a>
-                    <span class="gnb-separator"></span>
-                    <a href="#" class="gnb-item home-style">
-                        <span class="home-style-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                            </svg>
-                        </span>
-                        홈스타일
-                    </a>
-                    <div class="gnb-brand">
-                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
-                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
-                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
-                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
-                    </div>
-                </nav>
+            <button class="utility-btn">검색</button>
+        </div>
+    </div>
+
+    <header class="global-header">
+        <div class="container">
+            <a class="logo" href="#">LG<span>전자</span></a>
+            <nav class="gnb">
+                <button class="gnb__item">TV/오디오</button>
+                <button class="gnb__item">주방가전</button>
+                <button class="gnb__item">생활가전</button>
+                <button class="gnb__item">에어컨/에어케어</button>
+                <button class="gnb__item">AI Home</button>
+                <button class="gnb__item">LG Objet</button>
+                <button class="gnb__item">LG SIGNATURE</button>
+            </nav>
+            <div class="actions">
+                <button class="ghost">장바구니</button>
+                <button class="primary">로그인</button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Hero Banner -->
-        <section class="hero-banner" data-banner-image="{% static 'images/banner.jpg' %}">
-            <div class="banner-nav prev">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </div>
-            <div class="hero-content">
-                <div class="hero-text">
-                    <span class="hero-badge">기획전</span>
-                    <h1 class="hero-title">2025 LG 올레드 굿바이 세일</h1>
-                    <p class="hero-subtitle">올해 마지막을 장식하는 선명한 혜택</p>
-                </div>
-            </div>
-            <div class="banner-nav next">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </div>
-            <div class="banner-pagination">
-                <span style="cursor: pointer;">||</span>
-                <span>5</span>
-                <span>|</span>
-                <span>13</span>
-                <span style="cursor: pointer;">+</span>
-            </div>
-        </section>
-
-        <!-- Icon Navigation -->
-        <section class="icon-nav">
-            <div class="icon-nav-container">
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/PC_20251121_184456.gif"
-                            alt="LG홈위크">
-                    </div>
-                    <span class="icon-label">LG홈위크</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%ED%98%9C%ED%83%9D%EC%9D%B4%EB%B2%A4%ED%8A%B8_20251120_133323.png"
-                            alt="혜택/이벤트">
-                    </div>
-                    <span class="icon-label">혜택/이벤트</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%EB%8B%A4%ED%92%88%EB%AA%A9%ED%95%A0%EC%9D%B8_20251120_133343.png"
-                            alt="다품목 할인">
-                    </div>
-                    <span class="icon-label">다품목 할인</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%EB%9D%BC%EC%9D%B4%EB%B8%8C_20251120_133405.png"
-                            alt="라이브">
-                    </div>
-                    <span class="icon-label">라이브</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%EC%B9%B4%EB%93%9C%ED%98%9C%ED%83%9D_20251120_133423.png"
-                            alt="LGE카드">
-                    </div>
-                    <span class="icon-label">LGE카드</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%EA%B0%80%EC%A0%84%EA%B5%AC%EB%8F%85_20250826_165534.png"
-                            alt="가전 구독">
-                    </div>
-                    <span class="icon-label">가전구독</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%EC%86%8C%EB%AA%A8%ED%92%88_20250826_165621.png"
-                            alt="소모품">
-                    </div>
-                    <span class="icon-label">소모품</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%ED%99%88%EC%8A%A4%ED%83%80%EC%9D%BC_20251119_160746.png"
-                            alt="홈스타일">
-                    </div>
-                    <span class="icon-label">홈스타일</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/%EA%B3%A0%EA%B0%9D%EC%A7%80%EC%9B%90_20250826_165716.png"
-                            alt="고객지원">
-                    </div>
-                    <span class="icon-label">고객지원</span>
-                </a>
-                <a href="#" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="https://www.lge.co.kr/kr/upload/admin/display/displayObject/BusinessMall_20250826_170056.png"
-                            alt="사업자몰">
-                    </div>
-                    <span class="icon-label">사업자몰</span>
-                </a>
-                <a href="{% url 'main' %}" class="icon-nav-item">
-                    <div class="icon-circle">
-                        <img src="{% static 'images/icon.png' %}" alt="패키지 추천">
-                    </div>
-                    <span class="icon-label">패키지 추천</span>
-                </a>
-            </div>
-        </section>
-
-        <!-- Mid Banner -->
-        <section class="mid-banner">
-            <img src="{% static 'images/banner2.png' %}" alt="홈스타일 그랜드 오픈">
-        </section>
-
-        <!-- Product Sections -->
-        <section class="product-section">
-            <div class="section-container">
-                <div class="section-header">
-                    <h2 class="section-title">베스트 추천</h2>
-                    <a href="#" class="section-more">더보기</a>
-                </div>
-                <div class="product-grid">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/tvs/md10319840/gallery/medium01.jpg"
-                                alt="LG 올레드 evo">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 올레드 evo (스탠드형)</div>
-                            <div class="product-model">모델명: OLED48C4ENA</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">1,181,100</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">닷컴 ONLY</span>
+    <main>
+        <section class="hero" aria-label="LG 메인 프로모션">
+            <div class="container">
+                <div class="slider">
+                    <button class="slider__control prev" aria-label="이전">&#10094;</button>
+                    <button class="slider__control next" aria-label="다음">&#10095;</button>
+                    <div class="dots" aria-label="슬라이드 이동"></div>
+                    <div class="slide active"
+                        style="--bg:url('https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=2000&q=80')">
+                        <div class="slide__content">
+                            <p class="eyebrow">LG Home Week</p>
+                            <h1>우리 집을 완성하는 베스트 추천 가전</h1>
+                            <p>워시타워, 디오스 식기세척기, 코드제로 등 인기 제품을 한정 혜택가로 만나보세요.</p>
+                            <div class="cta-group">
+                                <a href="{% url 'onboarding' %}" class="primary" style="text-decoration: none; display: inline-block; padding: 0.6rem 1.4rem; border-radius: 999px; background: var(--primary); color: #fff; font-weight: 600;">가전 패키지 추천 시작</a>
+                                <button class="ghost">카테고리별 보기</button>
                             </div>
                         </div>
                     </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/notebook/md10493826/md10493826-350x350.jpg"
-                                alt="LG 그램 Pro AI 40.6cm">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 그램 Pro AI 40.6cm</div>
-                            <div class="product-model">모델명: 16Z90TP-KA5WK</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">1,943,700</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">닷컴 ONLY</span>
+                    <div class="slide"
+                        style="--bg:url('https://images.unsplash.com/photo-1484100356142-db6ab6244067?auto=format&fit=crop&w=2000&q=80')">
+                        <div class="slide__content">
+                            <p class="eyebrow">타임딜</p>
+                            <h1>LG 올레드 evo 특별전</h1>
+                            <p>48형부터 86형까지 단계별 혜택, 수량 소진 시 조기 종료됩니다.</p>
+                            <div class="cta-group">
+                                <button class="primary">OLED 라인업 보기</button>
+                                <button class="ghost">장바구니 담기</button>
                             </div>
                         </div>
                     </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/stan-by-me/md10519833/md10519833-350x350.jpg"
-                                alt="LG 스탠바이미 2">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 스탠바이미 2</div>
-                            <div class="product-model">모델명: 27LX6TPGA</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">1,134,600</span>
-                                <span class="price-unit">원</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/wash-combo/md10491829/md10491829-350x350.jpg"
-                                alt="LG 트롬 오브제컬렉션 워시콤보">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 트롬 오브제컬렉션 워시콤보</div>
-                            <div class="product-model">모델명: FH25KAX</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">2,982,900</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">닷컴 ONLY</span>
+                    <div class="slide"
+                        style="--bg:url('https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=2000&q=80')">
+                        <div class="slide__content">
+                            <p class="eyebrow">MD's Choice</p>
+                            <h1>프리미엄 키친 스타일링</h1>
+                            <p>시그니처 키친 스위트와 오브제컬렉션으로 완성하는 맞춤형 주방.</p>
+                            <div class="cta-group">
+                                <button class="primary">기획전 보기</button>
+                                <button class="ghost">상담 신청</button>
                             </div>
                         </div>
                     </div>
@@ -971,179 +91,121 @@
             </div>
         </section>
 
-        <section class="product-section">
-            <div class="section-container">
-                <div class="section-header">
-                    <h2 class="section-title">LGE.COM 타임딜</h2>
-                    <a href="#" class="section-more">더보기</a>
+        <section class="section" id="time-deal">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">타임딜 · D-3</p>
+                        <h2>지금 담아야 할 LG 인기 제품</h2>
+                    </div>
+                    <a class="link" href="#">전체보기</a>
                 </div>
-                <div class="product-grid">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/tvs/md10319913/md10319913-350x350.jpg"
-                                alt="LG 올레드 evo">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 올레드 evo (스탠드형)</div>
-                            <div class="product-model">모델명: OLED48C4ENA</div>
-                            <div class="product-price">
-                                <span class="price-label">타임딜 할인가</span>
-                                <span class="price-value">1,181,100</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">D-6</span>
-                            </div>
-                        </div>
+                <div class="time-deal-grid" id="timeDealCards"></div>
+            </div>
+        </section>
+
+        <section class="section section--highlight" id="home-week">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">LG Home Week</p>
+                        <h2>우리 집을 완성하는 베스트 추천 가전</h2>
                     </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/air-purifier/md10495853/md10495853-350x350.jpg"
-                                alt="LG 퓨리케어 오브제컬렉션 에어로부스터">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 퓨리케어 오브제컬렉션 에어로부스터</div>
-                            <div class="product-model">모델명: AS155GWDL</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">622,200</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">D-6</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/electric-ranges/md10524829/md10524829-350x350.jpg"
-                                alt="LG 디오스 오브제컬렉션 인덕션">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 디오스 오브제컬렉션 인덕션</div>
-                            <div class="product-model">모델명: BEF3ANHLOE</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">1,082,600</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">D-7</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/electric-ranges/md10372843/md10372843-350x350.jpg"
-                                alt="LG 디오스 인덕션">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 디오스 인덕션</div>
-                            <div class="product-model">모델명: BEI3AMBLOE</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">1,102,100</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">닷컴 ONLY</span>
-                            </div>
-                        </div>
-                    </div>
+                    <a class="link" href="#">혜택 더 보기</a>
+                </div>
+                <div class="feature-row">
+                    <article class="feature-card">
+                        <h3>워시타워 오브제컬렉션</h3>
+                        <p>WL21WDU · 25/21kg · 에너지 1등급</p>
+                        <strong>최대혜택가 2,669,100원</strong>
+                    </article>
+                    <article class="feature-card">
+                        <h3>디오스 식기세척기</h3>
+                        <p>DUE4BGE · 스팀 · 1등급</p>
+                        <strong>최대혜택가 780,300원</strong>
+                    </article>
+                    <article class="feature-card">
+                        <h3>코드제로 A9S</h3>
+                        <p>AX920BWE · 흡입 전용</p>
+                        <strong>최대혜택가 688,200원</strong>
+                    </article>
                 </div>
             </div>
         </section>
 
-        <section class="product-section">
-            <div class="section-container">
-                <div class="section-header">
-                    <h2 class="section-title">LG Home Week 한정특가</h2>
-                    <a href="#" class="section-more">더보기</a>
+        <section class="section" id="md-choice">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">MD's Choice</p>
+                        <h2>놓치기 아쉬운 특별한 가격</h2>
+                    </div>
+                    <a class="link" href="#">더보기</a>
                 </div>
-                <div class="product-grid">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/refrigerators/md10635830/md10635830-350x350.jpg"
-                                alt="LG 디오스 AI 오브제컬렉션 냉장고">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 디오스 AI 오브제컬렉션 냉장고</div>
-                            <div class="product-model">모델명: S834MEE111</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">1,525,200</span>
-                                <span class="price-unit">원</span>
-                                <span class="discount-badge">닷컴 ONLY</span>
-                            </div>
-                        </div>
+                <div class="product-grid" id="mdChoiceGrid"></div>
+            </div>
+        </section>
+
+        <section class="section categories">
+            <div class="container">
+                <div class="section__head">
+                    <div>
+                        <p class="eyebrow">바로가기</p>
+                        <h2>라이프스타일별 추천</h2>
                     </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/tvs/md10319863/md10319863-350x350.jpg"
-                                alt="LG QNED TV">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG QNED TV (벽걸이형)</div>
-                            <div class="product-model">모델명: 86QNED70TEA</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">2,390,100</span>
-                                <span class="price-unit">원</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://www.lge.co.kr/kr/images/wash-tower/md09900826/md09900826-350x350.jpg"
-                                alt="LG 트롬 오브제컬렉션 워시타워">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">LG 트롬 오브제컬렉션 워시타워</div>
-                            <div class="product-model">모델명: W20WHN</div>
-                            <div class="product-price">
-                                <span class="price-label">최대혜택가</span>
-                                <span class="price-value">2,399,400</span>
-                                <span class="price-unit">원</span>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                <div class="category-grid">
+                    <article>
+                        <h3>#홈엔터테인먼트</h3>
+                        <p>OLED · QNED · 사운드바</p>
+                    </article>
+                    <article>
+                        <h3>#결혼</h3>
+                        <p>신혼 패키지 · 혼수 혜택</p>
+                    </article>
+                    <article>
+                        <h3>#홈쿡</h3>
+                        <p>디오스 오븐 · 인덕션 · 큐커</p>
+                    </article>
+                    <article>
+                        <h3>#캠핑영화관</h3>
+                        <p>스탠바이미 · 시네빔 · 무드메이트</p>
+                    </article>
                 </div>
             </div>
         </section>
     </main>
 
-    <script>
-        // Banner background image
-        document.addEventListener('DOMContentLoaded', function () {
-            const banner = document.querySelector('.hero-banner');
-            if (banner && banner.dataset.bannerImage) {
-                banner.style.backgroundImage = `url(${banner.dataset.bannerImage})`;
-            }
-        });
+    <footer>
+        <div class="container footer__grid">
+            <div>
+                <h4>LG전자 고객센터</h4>
+                <p>궁금하신 점은 1588-7777 또는 챗봇으로 빠르게 해결하세요.</p>
+            </div>
+            <div>
+                <h4>자주 찾는 링크</h4>
+                <ul>
+                    <li><a href="#">배송 안내</a></li>
+                    <li><a href="#">교환/환불 정책</a></li>
+                    <li><a href="#">매장 상담 예약</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>팔로우</h4>
+                <ul>
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">YouTube</a></li>
+                    <li><a href="#">Facebook</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container footer__bottom">
+            © 2025 LG Electronics. All Rights Reserved.
+        </div>
+    </footer>
 
-        // Banner navigation
-        let currentSlide = 5;
-        const totalSlides = 13;
-
-        document.querySelector('.banner-nav.prev').addEventListener('click', () => {
-            currentSlide = currentSlide > 1 ? currentSlide - 1 : totalSlides;
-            updatePagination();
-        });
-
-        document.querySelector('.banner-nav.next').addEventListener('click', () => {
-            currentSlide = currentSlide < totalSlides ? currentSlide + 1 : 1;
-            updatePagination();
-        });
-
-        function updatePagination() {
-            const pagination = document.querySelector('.banner-pagination');
-            pagination.innerHTML = `
-                <span style="cursor: pointer;">||</span>
-                <span>${currentSlide}</span>
-                <span>|</span>
-                <span>${totalSlides}</span>
-                <span style="cursor: pointer;">+</span>
-            `;
-        }
-
-        // Auto slide
-        setInterval(() => {
-            currentSlide = currentSlide < totalSlides ? currentSlide + 1 : 1;
-            updatePagination();
-        }, 5000);
-    </script>
+    <script src="{% static 'script.js' %}"></script>
 </body>
 
 </html>
+
