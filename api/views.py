@@ -25,6 +25,11 @@ def main_page(request):
     })
 
 
+def fake_lg_main(request):
+    """LG전자 메인 홈페이지 스타일의 진입용 랜딩 페이지"""
+    return render(request, "fake_lg_main.html")
+
+
 def onboarding_page(request):
     """온보딩 페이지 렌더링"""
     return render(request, "onboarding.html")

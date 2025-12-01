@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (
     index_view, recommend, products, recommend_view,
-    onboarding_page, main_page, onboarding_new_page, result_page,
+    onboarding_page, main_page, onboarding_new_page, result_page, fake_lg_main,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
@@ -22,6 +22,7 @@ urlpatterns = [
     # 메인 페이지
     path('', main_page, name='main'),
     path('home/', main_page, name='home'),
+    path('lg-main/', fake_lg_main, name='fake_lg_main'),  # LG전자 스타일 진입 페이지
     path('old/', index_view, name='index'),  # 기존 페이지 (백업)
     
     # 온보딩 페이지

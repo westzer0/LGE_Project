@@ -253,7 +253,7 @@ def score_power_consumption(spec: Dict, profile: UserProfile) -> float:
 
 
 def score_size(spec: Dict, profile: UserProfile) -> float:
-    """크기 적합도 점수 (0.0 ~ 1.0)"""
+    """크기 적합도 점수 (0.0 ~ 1.0) - TV 등 물리적 크기"""
     size_str = get_spec_value(spec, "패널 크기", "") or get_spec_value(spec, "크기", "")
     if not size_str:
         return 0.5
@@ -284,8 +284,22 @@ def score_size(spec: Dict, profile: UserProfile) -> float:
     # 가구 인원이 많을수록 큰 화면 선호
     ideal_size += (household_size - 2) * 10
     
+    # 1인 가구는 작은 크기 선호 (기본 크기 축소)
+    if household_size == 1:
+        ideal_size = max(ideal_size - 20, 80)  # 최소 80cm (약 32인치)
+    
     # 차이가 적을수록 높은 점수
     diff = abs(size_cm - ideal_size)
+    
+    # 1인 가구에게 대형 제품에 대한 강한 감점 적용
+    if household_size == 1 and size_cm > ideal_size + 20:
+        # 이상적인 크기보다 20cm 이상 크면 급격히 감점
+        over_ratio = (size_cm - ideal_size - 20) / ideal_size
+        penalty = min(0.3, over_ratio * 0.5)  # 최대 0.3 감점
+        base_score = max(0.2, 1.0 - diff / 100) if diff <= 50 else 0.2
+        return max(0.0, base_score - penalty)
+    
+    # 일반적인 점수 계산
     if diff <= 10:
         return 1.0
     elif diff <= 20:
@@ -327,6 +341,174 @@ def score_price_match(product: Product, profile: UserProfile) -> float:
         # 예산보다 높으면 감점
         over_ratio = (discount_price - max_budget) / max_budget if max_budget != float('inf') else 0.1
         return max(0.1, 0.5 - over_ratio * 0.5)
+
+
+def score_capacity(spec: Dict, profile: UserProfile, product: Product) -> float:
+    """
+    용량 적합도 점수 (0.0 ~ 1.0) - 냉장고, 세탁기 등 용량 기반 제품
+    
+    Args:
+        spec: 제품 스펙 딕셔너리
+        profile: 사용자 프로필
+        product: 제품 인스턴스 (카테고리 확인용)
+    
+    Returns:
+        float: 용량 적합도 점수 (0.0 ~ 1.0)
+    """
+    # 용량 정보 추출 (다양한 키 시도)
+    capacity_str = (
+        get_spec_value(spec, "용량", "") or
+        get_spec_value(spec, "총 용량", "") or
+        get_spec_value(spec, "세탁 용량", "") or
+        get_spec_value(spec, "냉장실 용량", "") or
+        get_spec_value(spec, "냉동실 용량", "")
+    )
+    
+    if not capacity_str:
+        return 0.5  # 용량 정보가 없으면 기본값
+    
+    # 용량 숫자 추출 (L, 리터 단위)
+    import re
+    capacity_match = re.search(r'(\d+(?:\.\d+)?)', str(capacity_str).replace(',', ''))
+    if not capacity_match:
+        return 0.5
+    
+    capacity_liters = float(capacity_match.group(1))
+    
+    # 가구 인원수 파싱
+    household_size = parse_number(profile.household_size, 2)
+    
+    # 카테고리별 적정 용량 계산
+    category = product.category if hasattr(product, 'category') else ""
+    
+    if category == "KITCHEN" or "냉장고" in product.name or "냉동고" in product.name:
+        # 냉장고: 1인당 50-70L 적정
+        ideal_capacity = household_size * 60
+        max_reasonable = household_size * 100  # 최대 적정 용량
+        min_reasonable = household_size * 40   # 최소 적정 용량
+        capacity_value = capacity_liters
+        
+    elif category == "LIVING" or "세탁기" in product.name or "건조기" in product.name:
+        # 세탁기: 1인당 2-3kg 적정, 2인 가구는 4-5kg
+        # 용량이 kg 단위일 수 있음
+        if capacity_liters > 50:  # L 단위가 아니라 kg 단위일 가능성
+            capacity_kg = capacity_liters
+        else:
+            capacity_kg = capacity_liters  # 실제로는 kg일 수도
+        
+        ideal_capacity = max(4, household_size * 2.5)
+        max_reasonable = household_size * 4
+        min_reasonable = max(3, household_size * 1.5)
+        
+        # 세탁기용량은 보통 kg이므로 liters로 변환하지 않음
+        capacity_value = capacity_kg
+        
+    else:
+        # 기타 제품은 기본 계산
+        ideal_capacity = household_size * 50
+        max_reasonable = household_size * 100
+        min_reasonable = household_size * 30
+        capacity_value = capacity_liters
+    
+    # 1인 가구에게 대형 용량에 대한 강한 감점 (하드 필터링 수준)
+    if household_size == 1:
+        if category == "KITCHEN" or "냉장고" in product.name:
+            # 1인 가구: 200L 이상은 과도하게 큼 (매우 강한 감점)
+            if capacity_value >= 200:
+                over_ratio = (capacity_value - 200) / 200
+                return max(0.0, 0.1 - over_ratio * 0.05)  # 0.1 ~ 0.05
+            elif capacity_value >= 150:
+                # 150-200L: 강한 감점
+                return 0.15
+            elif capacity_value >= 100:
+                # 100-150L: 중간 감점
+                return 0.3
+            # 100L 이하는 아래 일반 계산으로 진행 (1인 가구에게 적합한 용량)
+        
+        elif "세탁기" in product.name:
+            # 1인 가구: 7kg 이상은 과도하게 큼
+            if capacity_value >= 7:
+                return 0.05  # 매우 강한 감점
+            elif capacity_value >= 5:
+                return 0.2
+            # 5kg 이하는 아래 일반 계산으로 진행
+    
+    # 일반적인 용량 적합도 계산 (1인 가구의 적정 용량 포함)
+    if min_reasonable <= capacity_value <= max_reasonable:
+        # 적정 범위 내: 이상적인 용량에 가까울수록 높은 점수
+        diff = abs(capacity_value - ideal_capacity)
+        ideal_range = (max_reasonable - min_reasonable) / 2
+        
+        if diff <= ideal_range * 0.2:
+            return 1.0
+        elif diff <= ideal_range * 0.4:
+            return 0.8
+        elif diff <= ideal_range * 0.6:
+            return 0.6
+        else:
+            return 0.5
+    
+    elif capacity_value < min_reasonable:
+        # 용량 부족: 약간 감점
+        under_ratio = (min_reasonable - capacity_value) / min_reasonable
+        return max(0.3, 0.7 - under_ratio * 0.4)
+    
+    else:
+        # 용량 과다: 감점 (1인 가구는 이미 위에서 처리됨)
+        if household_size > 1:
+            over_ratio = (capacity_value - max_reasonable) / max_reasonable
+            return max(0.2, 0.7 - over_ratio * 0.5)
+        else:
+            # 1인 가구는 이미 위에서 강하게 감점되었으므로 여기 도달하지 않음
+            return 0.2
+
+
+def score_features(spec: Dict, product: Product, profile: UserProfile) -> float:
+    """
+    기능 점수 (0.0 ~ 1.0) - 펫 기능, 기타 기능 평가
+    
+    Args:
+        spec: 제품 스펙 딕셔너리
+        product: 제품 인스턴스
+        profile: 사용자 프로필
+    
+    Returns:
+        float: 기능 점수 (0.0 ~ 1.0)
+    """
+    score = 0.7  # 기본 점수
+    
+    # 제품명과 설명에서 펫 관련 키워드 검색
+    product_name = product.name.upper() if hasattr(product, 'name') else ""
+    product_desc = (product.description.upper() if hasattr(product, 'description') and product.description else "")
+    
+    # 스펙 전체를 문자열로 변환하여 검색
+    spec_text = ""
+    if spec:
+        spec_text = json.dumps(spec, ensure_ascii=False).upper()
+    
+    # 펫 관련 키워드
+    pet_keywords = [
+        "펫", "PET", "반려동물", "애완동물", "동물케어", 
+        "펫케어", "PET CARE", "동물", "애완"
+    ]
+    
+    has_pet_feature = any(keyword in product_name or keyword in product_desc or keyword in spec_text 
+                          for keyword in pet_keywords)
+    
+    # 사용자가 반려동물을 키우지 않는 경우
+    if not profile.has_pet:
+        if has_pet_feature:
+            # 펫 기능이 있는 제품: 강한 감점 (0.3 감점)
+            score = max(0.1, score - 0.4)
+            print(f"[Features Penalty] {product.name}: 펫 기능 감지, 반려동물 없음 사용자에게 감점")
+    
+    # 사용자가 반려동물을 키우는 경우
+    elif profile.has_pet:
+        if has_pet_feature:
+            # 펫 기능이 있으면 가산점
+            score = min(1.0, score + 0.2)
+    
+    return max(0.0, min(1.0, score))
 
 
 def score_design(product: Product, profile: UserProfile) -> float:
@@ -392,7 +574,7 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
         scores["price_match"] = score_price_match(product, profile)
         scores["design"] = score_design(product, profile)
     
-    # LIVING 카테고리 (오디오 등)
+    # LIVING 카테고리 (오디오, 세탁기 등)
     elif category == "LIVING":
         # 오디오 관련 스펙 점수 (간단한 구현)
         scores["audio_quality"] = 0.7  # 기본값 (향후 확장 가능)
@@ -400,16 +582,33 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
         scores["power_consumption"] = score_power_consumption(spec, profile)
         scores["size"] = score_size(spec, profile)
         scores["price_match"] = score_price_match(product, profile)
-        scores["features"] = 0.7
+        scores["features"] = score_features(spec, product, profile)
+        scores["design"] = score_design(product, profile)
+        
+        # 세탁기/건조기인 경우 용량 점수 추가
+        if "세탁기" in product.name or "건조기" in product.name or "워시" in product.name.upper():
+            scores["capacity"] = score_capacity(spec, profile, product)
+    
+    # KITCHEN 카테고리 (냉장고 등)
+    elif category == "KITCHEN":
+        scores["capacity"] = score_capacity(spec, profile, product)
+        scores["energy_efficiency"] = score_power_consumption(spec, profile)
+        scores["features"] = score_features(spec, product, profile)
+        scores["size"] = score_size(spec, profile)
+        scores["price_match"] = score_price_match(product, profile)
         scores["design"] = score_design(product, profile)
     
     # 기타 카테고리
     else:
         scores["price_match"] = score_price_match(product, profile)
-        scores["features"] = 0.7
+        scores["features"] = score_features(spec, product, profile)
         scores["energy_efficiency"] = score_power_consumption(spec, profile)
         scores["size"] = score_size(spec, profile)
         scores["design"] = score_design(product, profile)
+        
+        # 냉장고가 다른 카테고리에 있을 경우 용량 점수 추가
+        if "냉장고" in product.name or "냉동고" in product.name:
+            scores["capacity"] = score_capacity(spec, profile, product)
     
     # 가중치 적용하여 종합 점수 계산
     total_score = 0.0
