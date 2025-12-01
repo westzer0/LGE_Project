@@ -598,8 +598,15 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
         scores["price_match"] = score_price_match(product, profile)
         scores["design"] = score_design(product, profile)
     
-    # 기타 카테고리
+    # 기타 카테고리 (AI, OBJET, SIGNATURE, AIR 등)
     else:
+        # 사용자가 선택한 카테고리와 제품 카테고리가 불일치하면 강한 감점
+        target_categories = getattr(profile, 'target_categories', [])
+        if target_categories and category not in target_categories:
+            # 카테고리 불일치: 기본 점수의 30%만 적용
+            base_score = score_price_match(product, profile) * 0.3
+            return min(0.3, base_score)
+        
         scores["price_match"] = score_price_match(product, profile)
         scores["features"] = score_features(spec, product, profile)
         scores["energy_efficiency"] = score_power_consumption(spec, profile)
@@ -628,6 +635,41 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
     else:
         final_score = 0.5  # 기본값
     
+    # Priority별 추가 보정 (개인화 강화)
+    # 같은 제품이라도 priority에 따라 최종 점수가 달라지도록
+    if priority == "tech":
+        # 기술 우선: 기술 관련 점수가 높으면 추가 보너스
+        tech_score = (scores.get("resolution", 0) + scores.get("refresh_rate", 0) + 
+                     scores.get("brightness", 0) + scores.get("features", 0)) / 4
+        if tech_score > 0.7:
+            final_score += 0.05
+    elif priority == "design":
+        # 디자인 우선: 디자인 점수가 높으면 추가 보너스
+        if scores.get("design", 0) > 0.7:
+            final_score += 0.05
+    elif priority == "eco":
+        # 에너지 효율 우선: 에너지 점수가 높으면 추가 보너스
+        eco_score = (scores.get("power_consumption", 0) + 
+                    scores.get("energy_efficiency", 0)) / 2
+        if eco_score > 0.7:
+            final_score += 0.05
+    elif priority == "value":
+        # 가성비 우선: 가격 적합도가 높으면 추가 보너스
+        if scores.get("price_match", 0) > 0.7:
+            final_score += 0.05
+    
+    # Vibe별 추가 보정 (개인화 강화)
+    vibe = profile.vibe.lower() if profile.vibe else ""
+    design_score = scores.get("design", 0)
+    if vibe == "modern" and design_score > 0.8:
+        final_score += 0.03
+    elif vibe == "cozy" and design_score > 0.75:
+        final_score += 0.03
+    elif vibe == "luxury" and design_score > 0.85:
+        final_score += 0.05
+    elif vibe == "pop" and design_score > 0.75:
+        final_score += 0.03
+    
     # 가족 인원과 반려동물 정보 기반 추가 점수 조정
     household_size = getattr(profile, '_household_size_int', 2)
     has_pet = getattr(profile, 'has_pet', False) or getattr(profile, '_has_pet', False)
@@ -640,6 +682,7 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
     large_capacity_keywords = ['대용량', '4인', '5인', '6인', '870L', '900L', '1000L', 'LARGE', 'XL', '대형']
     small_capacity_keywords = ['소형', '1인', '300L', '400L', '500L', 'SMALL', 'S', '소형']
     
+    # 가족 구성원 수에 따른 용량 적합도 보정 (더 세밀하게)
     if household_size == 1:
         # 1인 가구: 작은 용량 제품에 가산점
         if any(keyword in product_name_upper or keyword in spec_str for keyword in small_capacity_keywords):
@@ -647,6 +690,16 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
         # 큰 용량 제품에 감점
         elif any(keyword in product_name_upper or keyword in spec_str for keyword in large_capacity_keywords):
             final_score -= 0.2
+    elif household_size == 2:
+        # 2인 가구: 중간 용량 선호, 큰 용량은 약간 감점
+        if any(keyword in product_name_upper or keyword in spec_str for keyword in large_capacity_keywords):
+            final_score -= 0.05  # 약간 감점
+    elif household_size == 3:
+        # 3인 가구: 중대형 용량 선호
+        if any(keyword in product_name_upper or keyword in spec_str for keyword in large_capacity_keywords):
+            final_score += 0.08
+        elif any(keyword in product_name_upper or keyword in spec_str for keyword in small_capacity_keywords):
+            final_score -= 0.1
     elif household_size >= 4:
         # 4인 이상 가족: 큰 용량 제품에 가산점
         if any(keyword in product_name_upper or keyword in spec_str for keyword in large_capacity_keywords):

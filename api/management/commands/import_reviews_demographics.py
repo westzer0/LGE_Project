@@ -27,7 +27,7 @@ class Command(BaseCommand):
         base_dir = Path(__file__).parent.parent.parent.parent / 'data'
         
         self.stdout.write(self.style.SUCCESS("=" * 60))
-        self.stdout.write(self.style.SUCCESS("📊 리뷰/인구통계/추천이유 Import 시작"))
+        self.stdout.write(self.style.SUCCESS("리뷰/인구통계/추천이유 Import 시작"))
         self.stdout.write(self.style.SUCCESS("=" * 60))
         
         # 1. 인구통계 Import
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         total_skipped = 0
         
         for csv_file in demo_dir.glob('*인구통계*.csv'):
-            self.stdout.write(f"  📄 {csv_file.name}")
+            self.stdout.write(f"  [FILE] {csv_file.name}")
             
             try:
                 with open(csv_file, 'r', encoding='utf-8-sig', newline='') as f:
@@ -107,7 +107,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"    Error: {e}"))
         
         self.stdout.write(self.style.SUCCESS(
-            f"  ✅ 인구통계: 생성 {total_created}, 업데이트 {total_updated}, 스킵 {total_skipped}"
+            f"  [OK] 인구통계: 생성 {total_created}, 업데이트 {total_updated}, 스킵 {total_skipped}"
         ))
 
     def import_recommend_reasons(self, base_dir):
@@ -124,7 +124,7 @@ class Command(BaseCommand):
         total_skipped = 0
         
         for csv_file in demo_dir.glob('*추천이유*.csv'):
-            self.stdout.write(f"  📄 {csv_file.name}")
+            self.stdout.write(f"  [FILE] {csv_file.name}")
             
             try:
                 with open(csv_file, 'r', encoding='utf-8-sig', newline='') as f:
@@ -170,7 +170,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR(f"    Error: {e}"))
         
         self.stdout.write(self.style.SUCCESS(
-            f"  ✅ 추천이유: 생성 {total_created}, 업데이트 {total_updated}, 스킵 {total_skipped}"
+            f"  [OK] 추천이유: 생성 {total_created}, 업데이트 {total_updated}, 스킵 {total_skipped}"
         ))
 
     def import_reviews(self, base_dir):
@@ -186,7 +186,7 @@ class Command(BaseCommand):
         total_skipped = 0
         
         for csv_file in review_dir.glob('*.csv'):
-            self.stdout.write(f"  📄 {csv_file.name}")
+            self.stdout.write(f"  [FILE] {csv_file.name}")
             file_count = 0
             
             try:
@@ -235,7 +235,7 @@ class Command(BaseCommand):
             self.stdout.write(f"    → {file_count}개 처리")
         
         self.stdout.write(self.style.SUCCESS(
-            f"  ✅ 리뷰: 생성 {total_created}, 스킵 {total_skipped}"
+            f"  [OK] 리뷰: 생성 {total_created}, 스킵 {total_skipped}"
         ))
 
     def _parse_list(self, value):
@@ -253,7 +253,7 @@ class Command(BaseCommand):
     def print_final_stats(self):
         """최종 통계 출력"""
         self.stdout.write("\n" + "=" * 60)
-        self.stdout.write(self.style.SUCCESS("📊 최종 통계"))
+        self.stdout.write(self.style.SUCCESS("최종 통계"))
         self.stdout.write("=" * 60)
         
         if self.dry_run:
@@ -265,10 +265,10 @@ class Command(BaseCommand):
             review_count = ProductReview.objects.count()
             reason_count = ProductRecommendReason.objects.count()
             
-            self.stdout.write(f"  👥 인구통계: {demo_count}개")
-            self.stdout.write(f"  📝 리뷰: {review_count}개")
-            self.stdout.write(f"  💬 추천이유: {reason_count}개")
+            self.stdout.write(f"  인구통계: {demo_count}개")
+            self.stdout.write(f"  리뷰: {review_count}개")
+            self.stdout.write(f"  추천이유: {reason_count}개")
         
         self.stdout.write("=" * 60)
-        self.stdout.write(self.style.SUCCESS("✅ Import 완료!"))
+        self.stdout.write(self.style.SUCCESS("[OK] Import 완료!"))
 

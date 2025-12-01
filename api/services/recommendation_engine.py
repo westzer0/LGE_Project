@@ -8,10 +8,11 @@ Recommendation Engine Service Layer
 4. 최종 추천 반환
 """
 from typing import Dict, List
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Count
 from api.models import Product
 from api.rule_engine import UserProfile, build_profile
 from api.utils.scoring import calculate_product_score
+from api.utils.taste_scoring import calculate_product_score_with_taste_logic
 
 
 class RecommendationEngine:
@@ -48,7 +49,8 @@ class RecommendationEngine:
     def get_recommendations(
         self,
         user_profile: dict,
-        limit: int = 3
+        limit: int = 3,
+        taste_id: int = None
     ) -> dict:
         """
         최종 추천 반환 (View에서만 호출)
@@ -100,7 +102,8 @@ class RecommendationEngine:
             # 3. Soft Scoring (가중치 기반 점수)
             scored_products = self._score_products(
                 filtered_products,
-                user_profile
+                user_profile,
+                taste_id=taste_id
             )
             
             # 4. 정렬 및 상위 K개 선택
@@ -183,44 +186,30 @@ class RecommendationEngine:
         has_pet = user_profile.get('has_pet', False)
         
         # Django ORM 쿼리
+        # 카테고리 필터링: 정확히 일치하는 카테고리만
         products = (
             Product.objects
             .filter(
                 is_active=True,
-                category__in=categories,
+                category__in=categories,  # 정확히 선택한 카테고리만
                 price__gte=min_price,
                 price__lte=max_price,
                 price__gt=0,  # 가격 0 제외
             )
         )
         
+        # 디버깅: 필터링된 제품 카테고리 확인
+        category_counts = products.values('category').annotate(count=Count('id'))
+        if category_counts:
+            print(f"[Filter Debug] 카테고리별 제품 수:")
+            for item in category_counts:
+                print(f"  {item['category']}: {item['count']}개")
+        
         # 스펙이 있는 제품만 (ProductSpec이 연결된 제품)
         products = products.filter(spec__isnull=False)
         
-<<<<<<< Updated upstream
-        # 가족 인원 기반 필터링 (ProductDemographics 활용)
-        if household_size == 1:
-            # 1인 가구: 작은 용량의 제품 우선
-            # ProductDemographics의 family_types에 '1인가구'가 포함된 제품 우선
-            pass  # 하드 필터링보다는 스코어링에서 처리
-        elif household_size >= 4:
-            # 4인 이상 가족: 대용량 제품 필터링
-            # 큰 용량을 나타내는 키워드가 있는 제품만
-            pass  # 하드 필터링보다는 스코어링에서 처리
-        
-        # 반려동물 기반 필터링
-        if has_pet:
-            # 반려동물이 있는 경우: 반려동물 관련 기능이 있는 제품만 필터링
-            # 실제로는 스코어링에서 처리하되, 제품 이름/스펙에 '펫', 'pet', '반려동물' 등이 포함된 것만
-            pass  # 하드 필터링보다는 스코어링에서 처리
-        else:
-            # 반려동물이 없는 경우: 반려동물 전용 기능이 있는 제품은 제외하지 않음
-            # 다만 스코어링에서 점수 감점 가능
-            pass
-        
-        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 가족: {household_size}명, 반려동물: {has_pet}, 결과: {products.count()}개")
-=======
         # 펫 관련 필터링: 반려동물이 없으면 펫 전용 제품 제외
+        # has_pet 값을 다양한 형태로 받을 수 있도록 처리
         has_pet = user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True']
         if not has_pet:
             # 펫 관련 키워드가 있는 제품 제외
@@ -236,12 +225,11 @@ class RecommendationEngine:
                 products = products.exclude(pet_filter)
                 print(f"[Filter] 펫 관련 제품 제외 (반려동물 없음)")
         
-        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 펫필터: {not has_pet}, 결과: {products.count()}개")
->>>>>>> Stashed changes
+        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 가족: {household_size}명, 반려동물: {has_pet}, 결과: {products.count()}개")
         
         return products
     
-    def _score_products(self, products: QuerySet, user_profile: dict) -> List[dict]:
+    def _score_products(self, products: QuerySet, user_profile: dict, taste_id: int = None) -> List[dict]:
         """
         Step 2: Soft Scoring
         - 각 제품 점수 계산 (스코어링 함수 호출)
@@ -249,14 +237,12 @@ class RecommendationEngine:
         scored = []
         
         # UserProfile 객체 생성 (scoring 함수 호환성)
+        # has_pet 값을 다양한 형태로 받을 수 있도록 처리
+        has_pet_value = user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True']
         profile = UserProfile(
             vibe=user_profile.get('vibe', ''),
             household_size=str(user_profile.get('household_size', 2)),
-<<<<<<< Updated upstream
-            has_pet=user_profile.get('has_pet', False),  # 반려동물 정보 추가
-=======
-            has_pet=user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True'],
->>>>>>> Stashed changes
+            has_pet=has_pet_value,  # 반려동물 정보 추가
             housing_type=user_profile.get('housing_type', ''),
             main_space=user_profile.get('main_space', 'living'),
             space_size=user_profile.get('space_size', 'medium'),
@@ -267,17 +253,24 @@ class RecommendationEngine:
         
         # 추가 사용자 정보를 profile 객체에 저장 (스코어링에서 사용)
         profile._household_size_int = user_profile.get('household_size', 2)
-        profile._has_pet = user_profile.get('has_pet', False)
+        profile._has_pet = has_pet_value
         profile._cooking = user_profile.get('cooking', 'sometimes')
         profile._laundry = user_profile.get('laundry', 'weekly')
         
         for idx, product in enumerate(products[:50], 1):  # 최대 50개까지만 처리
             try:
-                # 스코어링 함수 호출
-                score = calculate_product_score(
-                    product=product,
-                    profile=profile
-                )
+                # 스코어링 함수 호출 (taste_id가 있으면 취향별 logic 사용)
+                if taste_id is not None:
+                    score = calculate_product_score_with_taste_logic(
+                        product=product,
+                        profile=profile,
+                        taste_id=taste_id
+                    )
+                else:
+                    score = calculate_product_score(
+                        product=product,
+                        profile=profile
+                    )
                 
                 scored.append({
                     'product': product,
