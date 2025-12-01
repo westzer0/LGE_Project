@@ -8,6 +8,7 @@ JSON 결과 파일을 읽어서 다양한 차트로 시각화합니다.
 """
 import json
 import os
+import csv
 from collections import defaultdict, Counter
 from django.core.management.base import BaseCommand
 import numpy as np
@@ -69,6 +70,10 @@ class Command(BaseCommand):
         self.stdout.write(f'[3] 시각화 생성 중...')
         os.makedirs(output_dir, exist_ok=True)
         self._create_visualizations(analysis, output_dir)
+        
+        # CSV 표 생성
+        self.stdout.write(f'[4] CSV 표 생성 중...')
+        self._create_csv_tables(results, analysis, output_dir)
         
         self.stdout.write(self.style.SUCCESS(f'\n[완료] 시각화 완료!'))
         self.stdout.write(f'[FILE] 결과 저장 위치: {output_dir}')
@@ -408,4 +413,134 @@ class Command(BaseCommand):
         plt.savefig(os.path.join(output_dir, '06_logic_category_heatmap.png'), dpi=300, bbox_inches='tight')
         plt.close()
         self.stdout.write('  - Logic별 카테고리 히트맵 저장: 06_logic_category_heatmap.png')
+
+    def _create_csv_tables(self, results, analysis, output_dir):
+        """CSV 표 생성"""
+        # 1. 카테고리별 통계 표
+        category_stats_path = os.path.join(output_dir, '01_category_statistics.csv')
+        with open(category_stats_path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['카테고리', '추천 횟수', '평균 점수', '최소 점수', '최대 점수', '표준편차'])
+            
+            category_scores = analysis['category_scores']
+            for category, scores in sorted(category_scores.items()):
+                writer.writerow([
+                    category,
+                    len(scores),
+                    f'{np.mean(scores):.3f}',
+                    f'{np.min(scores):.3f}',
+                    f'{np.max(scores):.3f}',
+                    f'{np.std(scores):.3f}'
+                ])
+        self.stdout.write('  - 카테고리별 통계 표 저장: 01_category_statistics.csv')
+        
+        # 2. Logic별 사용 통계 표
+        logic_stats_path = os.path.join(output_dir, '02_logic_statistics.csv')
+        with open(logic_stats_path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Logic ID', '사용 횟수', 'KITCHEN 추천', 'TV 추천', 'LIVING 추천'])
+            
+            logic_usage = analysis['logic_usage']
+            for logic_id in sorted(logic_usage.keys(), key=lambda x: int(x) if str(x).isdigit() else 999):
+                data = logic_usage[logic_id]
+                categories = data['categories']
+                writer.writerow([
+                    logic_id,
+                    data['count'],
+                    categories.get('KITCHEN', 0),
+                    categories.get('TV', 0),
+                    categories.get('LIVING', 0)
+                ])
+        self.stdout.write('  - Logic별 통계 표 저장: 02_logic_statistics.csv')
+        
+        # 3. Taste ID별 추천 요약 표
+        taste_summary_path = os.path.join(output_dir, '03_taste_summary.csv')
+        with open(taste_summary_path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                'Taste ID', '인테리어 스타일', '메이트 구성', '우선순위', '예산',
+                'Logic ID', '추천 개수', 'KITCHEN 추천', 'TV 추천', 'LIVING 추천',
+                '평균 점수', '최고 점수'
+            ])
+            
+            for result in results:
+                if not result.get('success'):
+                    continue
+                
+                recommendations = result.get('recommendations', [])
+                category_counts = Counter(rec.get('category', 'UNKNOWN') for rec in recommendations)
+                scores = [rec.get('score', 0) for rec in recommendations]
+                
+                writer.writerow([
+                    result.get('taste_id', ''),
+                    result.get('interior_style', ''),
+                    result.get('mate', ''),
+                    result.get('priority', ''),
+                    result.get('budget', ''),
+                    result.get('logic_id', ''),
+                    len(recommendations),
+                    category_counts.get('KITCHEN', 0),
+                    category_counts.get('TV', 0),
+                    category_counts.get('LIVING', 0),
+                    f'{np.mean(scores):.3f}' if scores else '0.000',
+                    f'{np.max(scores):.3f}' if scores else '0.000'
+                ])
+        self.stdout.write('  - Taste ID별 요약 표 저장: 03_taste_summary.csv')
+        
+        # 4. 상위 추천 제품 표 (점수 높은 순)
+        top_products_path = os.path.join(output_dir, '04_top_recommendations.csv')
+        all_recommendations = []
+        for result in results:
+            if not result.get('success'):
+                continue
+            for rec in result.get('recommendations', []):
+                all_recommendations.append({
+                    'taste_id': result.get('taste_id', ''),
+                    'product_id': rec.get('product_id', ''),
+                    'model': rec.get('model', ''),
+                    'category': rec.get('category', ''),
+                    'score': rec.get('score', 0),
+                    'price': rec.get('price', 0)
+                })
+        
+        # 점수 높은 순으로 정렬
+        all_recommendations.sort(key=lambda x: x['score'], reverse=True)
+        
+        with open(top_products_path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['순위', 'Taste ID', '제품 ID', '모델명', '카테고리', '점수', '가격'])
+            
+            for idx, rec in enumerate(all_recommendations[:1000], 1):  # 상위 1000개
+                writer.writerow([
+                    idx,
+                    rec['taste_id'],
+                    rec['product_id'],
+                    rec['model'],
+                    rec['category'],
+                    f'{rec["score"]:.3f}',
+                    int(rec['price']) if rec['price'] else 0
+                ])
+        self.stdout.write('  - 상위 추천 제품 표 저장: 04_top_recommendations.csv (상위 1000개)')
+        
+        # 5. 점수 분포 통계 표
+        score_dist_path = os.path.join(output_dir, '05_score_distribution.csv')
+        with open(score_dist_path, 'w', encoding='utf-8-sig', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['점수 구간', '추천 횟수', '비율 (%)'])
+            
+            score_distribution = analysis['score_distribution']
+            total = sum(score_distribution.values())
+            
+            dist_map = {
+                'high': '높음 (≥0.8)',
+                'mid_high': '중상 (0.6~0.8)',
+                'mid': '중간 (0.5~0.6)',
+                'low': '낮음 (<0.5)'
+            }
+            
+            for key, label in dist_map.items():
+                count = score_distribution.get(key, 0)
+                ratio = (count / total * 100) if total > 0 else 0
+                writer.writerow([label, count, f'{ratio:.2f}'])
+        self.stdout.write('  - 점수 분포 통계 표 저장: 05_score_distribution.csv')
 

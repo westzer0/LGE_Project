@@ -48,8 +48,8 @@ class Command(BaseCommand):
             '--categories',
             type=str,
             nargs='+',
-            default=['TV', 'KITCHEN', 'LIVING'],
-            help='테스트할 카테고리 목록',
+            default=None,  # None이면 DB에 있는 모든 카테고리 사용
+            help='테스트할 카테고리 목록 (지정하지 않으면 DB에 있는 모든 카테고리 사용)',
         )
 
     def handle(self, *args, **options):
@@ -72,6 +72,14 @@ class Command(BaseCommand):
         if limit:
             data = data[:limit]
             self.stdout.write(f'  - 제한 적용: {limit}개만 처리\n')
+        
+        # 카테고리 설정 (지정하지 않으면 DB에 있는 모든 카테고리 사용)
+        if categories is None:
+            from api.models import Product
+            categories = sorted(list(Product.objects.values_list('category', flat=True).distinct()))
+            self.stdout.write(f'[1-1] 카테고리 자동 감지: {categories}')
+        else:
+            self.stdout.write(f'[1-1] 지정된 카테고리: {categories}')
         
         # 추천 엔진 초기화
         self.stdout.write('[2] 추천 엔진 초기화...')

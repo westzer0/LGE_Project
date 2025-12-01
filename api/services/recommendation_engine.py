@@ -7,6 +7,8 @@ Recommendation Engine Service Layer
 3. Soft Score (스코어링)
 4. 최종 추천 반환
 """
+import logging
+import traceback
 from typing import Dict, List
 from django.db.models import QuerySet, Count
 from api.models import Product
@@ -14,6 +16,8 @@ from api.rule_engine import UserProfile, build_profile
 from api.utils.scoring import calculate_product_score
 from api.utils.taste_scoring import calculate_product_score_with_taste_logic
 from .recommendation_reason_generator import reason_generator
+
+logger = logging.getLogger(__name__)
 
 
 class RecommendationEngine:
@@ -128,13 +132,14 @@ class RecommendationEngine:
             }
         
         except ValueError as e:
+            logger.warning(f"Recommendation validation error: {str(e)}", exc_info=True)
             return {
                 'success': False,
                 'error': str(e),
                 'recommendations': []
             }
         except Exception as e:
-            import traceback
+            logger.error(f"Recommendation engine error: {str(e)}", exc_info=True)
             print(f"Recommendation Error: {traceback.format_exc()}")
             return {
                 'success': False,
@@ -274,6 +279,12 @@ class RecommendationEngine:
                         profile=profile
                     )
                 
+                # 점수 범위 검증 (0.0 ~ 1.0)
+                if score < 0.0:
+                    score = 0.0
+                elif score > 1.0:
+                    score = 1.0
+                
                 scored.append({
                     'product': product,
                     'score': score,
@@ -283,6 +294,7 @@ class RecommendationEngine:
                     print(f"[Score] {idx}. {product.name}: {score:.2f}")
             
             except Exception as e:
+                logger.warning(f"Score calculation failed for product {product.id}: {str(e)}", exc_info=True)
                 print(f"[Score Error] {product.name}: {e}")
                 # 스코어 계산 실패 시 기본값 0.5
                 scored.append({
@@ -328,44 +340,8 @@ class RecommendationEngine:
             'reason': reason,
         }
     
-    def _build_recommendation_reason(
-        self,
-        product: Product,
-        user_profile: dict,
-        score: float
-    ) -> str:
-        """
-        추천 이유 생성
-        """
-        reasons = []
-        
-        # 점수 기반 이유
-        if score >= 0.8:
-            priority = user_profile.get('priority', 'value')
-            priority_labels = {
-                'design': '디자인',
-                'tech': '기술 사양',
-                'eco': '에너지 효율',
-                'value': '가성비',
-            }
-            reasons.append(
-                f"당신의 선호도({priority_labels.get(priority, '개인맞춤')})에 "
-                f"가장 잘 맞는 제품입니다."
-            )
-        elif score >= 0.6:
-            reasons.append("우수한 성능과 가성비를 갖춘 제품입니다.")
-        else:
-            reasons.append("조건에 맞는 추천 제품입니다.")
-        
-        # 할인 정보
-        if product.discount_price and product.price and product.price > 0:
-            discount_pct = (
-                (float(product.price) - float(product.discount_price)) / float(product.price) * 100
-            )
-            if discount_pct > 10:
-                reasons.append(f"{int(discount_pct)}% 할인 중입니다.")
-        
-        return " ".join(reasons)
+    # _build_recommendation_reason 메서드는 제거됨
+    # 추천 이유 생성은 recommendation_reason_generator.py의 RecommendationReasonGenerator를 사용
 
 
 # ============================================================

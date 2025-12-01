@@ -11,6 +11,7 @@ from api.views import (
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
     ai_chat_view, ai_status_view,
 )
+from api.views_drf import convert_figma_to_code
 
 # DRF ViewSet 라우터
 from api.views_drf import RecommendAPIView, PortfolioViewSet, OnboardingSessionViewSet
@@ -67,4 +68,7 @@ urlpatterns = [
     path('api/ai/style-message/', ai_style_message_view, name='ai_style_message'),
     path('api/ai/review-summary/', ai_review_summary_view, name='ai_review_summary'),
     path('api/ai/chat/', ai_chat_view, name='ai_chat'),
+    
+    # Figma 이미지 → 코드 변환 API
+    path('api/figma-to-code/', convert_figma_to_code, name='figma_to_code'),
 ]
