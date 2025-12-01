@@ -197,6 +197,7 @@ class RecommendationEngine:
         # 스펙이 있는 제품만 (ProductSpec이 연결된 제품)
         products = products.filter(spec__isnull=False)
         
+<<<<<<< Updated upstream
         # 가족 인원 기반 필터링 (ProductDemographics 활용)
         if household_size == 1:
             # 1인 가구: 작은 용량의 제품 우선
@@ -218,6 +219,25 @@ class RecommendationEngine:
             pass
         
         print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 가족: {household_size}명, 반려동물: {has_pet}, 결과: {products.count()}개")
+=======
+        # 펫 관련 필터링: 반려동물이 없으면 펫 전용 제품 제외
+        has_pet = user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True']
+        if not has_pet:
+            # 펫 관련 키워드가 있는 제품 제외
+            from django.db.models import Q
+            pet_keywords = ['펫', 'PET', '반려동물', '애완동물', '동물케어', '펫케어', 'PET CARE']
+            
+            # 제품명이나 설명에 펫 키워드가 포함된 제품 제외
+            pet_filter = Q()
+            for keyword in pet_keywords:
+                pet_filter |= Q(name__icontains=keyword) | Q(description__icontains=keyword)
+            
+            if pet_filter:
+                products = products.exclude(pet_filter)
+                print(f"[Filter] 펫 관련 제품 제외 (반려동물 없음)")
+        
+        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 펫필터: {not has_pet}, 결과: {products.count()}개")
+>>>>>>> Stashed changes
         
         return products
     
@@ -232,7 +252,11 @@ class RecommendationEngine:
         profile = UserProfile(
             vibe=user_profile.get('vibe', ''),
             household_size=str(user_profile.get('household_size', 2)),
+<<<<<<< Updated upstream
             has_pet=user_profile.get('has_pet', False),  # 반려동물 정보 추가
+=======
+            has_pet=user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True'],
+>>>>>>> Stashed changes
             housing_type=user_profile.get('housing_type', ''),
             main_space=user_profile.get('main_space', 'living'),
             space_size=user_profile.get('space_size', 'medium'),
