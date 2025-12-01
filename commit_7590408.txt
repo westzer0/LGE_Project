@@ -1,0 +1,7 @@
+feat: Add taste-based scoring logic and recommendation phrase generation
+
+- Add taste-based scoring logic system
+- Add recommendation phrase generation based on taste combinations
+- Add analysis commands for taste recommendations
+- Add scoring logic explanation and JSON data
+- Update recommendation engine with taste scoring

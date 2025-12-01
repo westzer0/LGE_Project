@@ -1,0 +1,5 @@
+merge: Main page integration and banner image application (previous commit recovery)
+
+- Add banner images (banner2.png)
+- Update main.html template
+- Add backup files from previous commit

@@ -1,0 +1,9 @@
+feat: Add main page integration, AI chatbot, API key configuration
+
+- Add main page template (main.html)
+- Add AI chatbot functionality (ai-chatbot.js)
+- Add API key configuration using python-dotenv (.env file)
+- Improve Kakao SDK integration (error handling, loading logic)
+- Improve recommendation logic (result formatting, error handling)
+- Add documentation (DRF guide, server start guide, view products guide)
+- Add environment setup files (env.example)
