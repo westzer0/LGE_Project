@@ -1,8 +1,0 @@
-merge: Main page integration and image assets addition
-
-- Add import excel command
-- Add product specs migration
-- Add banner and icon images
-- Add backup files from previous commits
-- Update views and URLs
-
