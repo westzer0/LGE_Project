@@ -531,6 +531,74 @@ def score_design(product: Product, profile: UserProfile) -> float:
     return vibe_scores.get(design_line, vibe_scores.get("default", 0.5))
 
 
+def score_energy_efficiency(spec: Dict, profile: UserProfile) -> float:
+    """에너지 효율 점수 (0.0 ~ 1.0)"""
+    # 에너지 효율 등급 확인
+    energy_grade = get_spec_value(spec, "에너지등급", "")
+    if not energy_grade:
+        energy_grade = get_spec_value(spec, "에너지 효율 등급", "")
+    
+    # 등급별 점수 (1등급이 최고)
+    grade_scores = {
+        "1등급": 1.0,
+        "1": 1.0,
+        "2등급": 0.85,
+        "2": 0.85,
+        "3등급": 0.7,
+        "3": 0.7,
+        "4등급": 0.55,
+        "4": 0.55,
+        "5등급": 0.4,
+        "5": 0.4,
+    }
+    
+    if energy_grade:
+        for grade, score in grade_scores.items():
+            if grade in str(energy_grade):
+                return score
+    
+    # 전력소비량 기반 점수 (낮을수록 좋음)
+    power_consumption = score_power_consumption(spec, profile)
+    return power_consumption
+
+
+def score_audio_quality(spec: Dict, profile: UserProfile) -> float:
+    """오디오 품질 점수 (0.0 ~ 1.0)"""
+    # 오디오 관련 스펙 확인
+    audio_specs = [
+        get_spec_value(spec, "채널", ""),
+        get_spec_value(spec, "출력", ""),
+        get_spec_value(spec, "와트", ""),
+        get_spec_value(spec, "사운드", ""),
+    ]
+    
+    # 오디오 관련 스펙이 있으면 기본 점수
+    if any(audio_specs):
+        return 0.7
+    
+    # 기본값
+    return 0.5
+
+
+def score_connectivity(spec: Dict, profile: UserProfile) -> float:
+    """연결성 점수 (0.0 ~ 1.0)"""
+    # 연결 관련 스펙 확인
+    connectivity_specs = [
+        get_spec_value(spec, "블루투스", ""),
+        get_spec_value(spec, "와이파이", ""),
+        get_spec_value(spec, "WiFi", ""),
+        get_spec_value(spec, "연결", ""),
+        get_spec_value(spec, "포트", ""),
+    ]
+    
+    # 연결 관련 스펙이 있으면 기본 점수
+    if any(connectivity_specs):
+        return 0.7
+    
+    # 기본값
+    return 0.5
+
+
 # ============================================================================
 # 메인 스코어링 함수
 # ============================================================================

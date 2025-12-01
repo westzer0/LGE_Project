@@ -91,10 +91,8 @@ def calculate_product_score_with_taste_logic(
 def _apply_scoring_logic(product: Product, profile: UserProfile, logic: Dict) -> float:
     """Scoring Logic 적용"""
     # 제품 스펙 파싱
-    try:
-        spec = json.loads(product.spec) if isinstance(product.spec, str) else product.spec
-    except:
-        spec = {}
+    from .scoring import parse_spec_json
+    spec = parse_spec_json(product)
     
     # 카테고리 결정
     category = product.category or "default"
@@ -128,22 +126,22 @@ def _apply_scoring_logic(product: Product, profile: UserProfile, logic: Dict) ->
         if 'price_match' in weights:
             scores['price_match'] = score_price_match(product, profile)
         if 'features' in weights:
-            scores['features'] = score_features(spec, profile)
+            scores['features'] = score_features(spec, product, profile)
     
     # KITCHEN 카테고리
     elif category == "KITCHEN":
         if 'capacity' in weights:
-            scores['capacity'] = score_capacity(spec, profile)
+            scores['capacity'] = score_capacity(spec, profile, product)
         if 'energy_efficiency' in weights:
             scores['energy_efficiency'] = score_energy_efficiency(spec, profile)
         if 'features' in weights:
-            scores['features'] = score_features(spec, profile)
+            scores['features'] = score_features(spec, product, profile)
         if 'size' in weights:
             scores['size'] = score_size(spec, profile)
         if 'price_match' in weights:
             scores['price_match'] = score_price_match(product, profile)
         if 'design' in weights:
-            scores['design'] = score_design(spec, profile)
+            scores['design'] = score_design(product, profile)
         if 'resolution' in weights:  # 일부 Logic에 포함될 수 있음
             scores['resolution'] = score_resolution(spec, profile)
         if 'refresh_rate' in weights:
@@ -162,7 +160,7 @@ def _apply_scoring_logic(product: Product, profile: UserProfile, logic: Dict) ->
         if 'price_match' in weights:
             scores['price_match'] = score_price_match(product, profile)
         if 'features' in weights:
-            scores['features'] = score_features(spec, profile)
+            scores['features'] = score_features(spec, product, profile)
         if 'resolution' in weights:
             scores['resolution'] = score_resolution(spec, profile)
         if 'refresh_rate' in weights:
@@ -173,13 +171,13 @@ def _apply_scoring_logic(product: Product, profile: UserProfile, logic: Dict) ->
         if 'price_match' in weights:
             scores['price_match'] = score_price_match(product, profile)
         if 'features' in weights:
-            scores['features'] = score_features(spec, profile)
+            scores['features'] = score_features(spec, product, profile)
         if 'energy_efficiency' in weights:
             scores['energy_efficiency'] = score_energy_efficiency(spec, profile)
         if 'size' in weights:
             scores['size'] = score_size(spec, profile)
         if 'design' in weights:
-            scores['design'] = score_design(spec, profile)
+            scores['design'] = score_design(product, profile)
     
     # 가중 평균 계산
     weighted_score = 0.0

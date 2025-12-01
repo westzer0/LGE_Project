@@ -13,6 +13,7 @@ from api.models import Product
 from api.rule_engine import UserProfile, build_profile
 from api.utils.scoring import calculate_product_score
 from api.utils.taste_scoring import calculate_product_score_with_taste_logic
+from .recommendation_reason_generator import reason_generator
 
 
 class RecommendationEngine:
@@ -50,7 +51,8 @@ class RecommendationEngine:
         self,
         user_profile: dict,
         limit: int = 3,
-        taste_id: int = None
+        taste_id: int = None,
+        taste_info: dict = None
     ) -> dict:
         """
         최종 추천 반환 (View에서만 호출)
@@ -115,7 +117,7 @@ class RecommendationEngine:
             
             # 5. 최종 포맷팅
             recommendations = [
-                self._format_recommendation(item, user_profile)
+                self._format_recommendation(item, user_profile, taste_id=taste_id, taste_info=taste_info)
                 for item in top_products
             ]
             
@@ -290,7 +292,13 @@ class RecommendationEngine:
         
         return scored
     
-    def _format_recommendation(self, item: dict, user_profile: dict) -> dict:
+    def _format_recommendation(
+        self, 
+        item: dict, 
+        user_profile: dict,
+        taste_id: int = None,
+        taste_info: dict = None
+    ) -> dict:
         """
         Step 3: 최종 포맷팅
         - API 응답 형식으로 변환
@@ -298,8 +306,13 @@ class RecommendationEngine:
         product = item['product']
         score = item['score']
         
-        # 추천 이유 생성
-        reason = self._build_recommendation_reason(product, user_profile, score)
+        # 추천 이유 생성 (새로운 로직 사용)
+        reason = reason_generator.generate_reason(
+            product=product,
+            user_profile=user_profile,
+            taste_info=taste_info,
+            score=score
+        )
         
         return {
             'product_id': product.id,
