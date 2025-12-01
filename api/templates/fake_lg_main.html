@@ -590,7 +590,7 @@
 
         @media (max-width: 1200px) {
             .hero-content {
-                grid-template-columns: 1fr;
+                flex-direction: column;
                 gap: 40px;
             }
 
@@ -638,7 +638,7 @@
             }
 
             .hero-content {
-                grid-template-columns: 1fr;
+                flex-direction: column;
                 gap: 30px;
             }
 
@@ -657,10 +657,6 @@
 
             .hero-subtitle {
                 font-size: 16px;
-            }
-
-            .hero-title {
-                font-size: 36px;
             }
 
             .icon-nav-container {
@@ -744,7 +740,7 @@
     <!-- Main Content -->
     <main class="main-content">
         <!-- Hero Banner -->
-        <section class="hero-banner" style="background-image: url({% static 'images/banner.jpg' %});">
+        <section class="hero-banner" data-banner-image="{% static 'images/banner.jpg' %}">
             <div class="banner-nav prev">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -1029,6 +1025,14 @@
     </main>
 
     <script>
+        // Banner background image
+        document.addEventListener('DOMContentLoaded', function () {
+            const banner = document.querySelector('.hero-banner');
+            if (banner && banner.dataset.bannerImage) {
+                banner.style.backgroundImage = `url(${banner.dataset.bannerImage})`;
+            }
+        });
+
         // Banner navigation
         let currentSlide = 5;
         const totalSlides = 13;
