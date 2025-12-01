@@ -429,6 +429,45 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
     else:
         final_score = 0.5  # 기본값
     
+    # 가족 인원과 반려동물 정보 기반 추가 점수 조정
+    household_size = getattr(profile, '_household_size_int', 2)
+    has_pet = getattr(profile, 'has_pet', False) or getattr(profile, '_has_pet', False)
+    
+    # 가족 인원 기반 점수 조정
+    product_name_upper = product.name.upper()
+    spec_str = json.dumps(spec, ensure_ascii=False).upper() if spec else ""
+    
+    # 용량 관련 키워드
+    large_capacity_keywords = ['대용량', '4인', '5인', '6인', '870L', '900L', '1000L', 'LARGE', 'XL', '대형']
+    small_capacity_keywords = ['소형', '1인', '300L', '400L', '500L', 'SMALL', 'S', '소형']
+    
+    if household_size == 1:
+        # 1인 가구: 작은 용량 제품에 가산점
+        if any(keyword in product_name_upper or keyword in spec_str for keyword in small_capacity_keywords):
+            final_score += 0.15
+        # 큰 용량 제품에 감점
+        elif any(keyword in product_name_upper or keyword in spec_str for keyword in large_capacity_keywords):
+            final_score -= 0.2
+    elif household_size >= 4:
+        # 4인 이상 가족: 큰 용량 제품에 가산점
+        if any(keyword in product_name_upper or keyword in spec_str for keyword in large_capacity_keywords):
+            final_score += 0.15
+        # 작은 용량 제품에 감점
+        elif any(keyword in product_name_upper or keyword in spec_str for keyword in small_capacity_keywords):
+            final_score -= 0.2
+    
+    # 반려동물 기반 점수 조정
+    pet_keywords = ['펫', 'PET', '반려동물', '애완동물', '동물', '털', '냄새']
+    if has_pet:
+        # 반려동물이 있는 경우: 반려동물 관련 기능이 있는 제품에 가산점
+        if any(keyword in product_name_upper or keyword in spec_str for keyword in pet_keywords):
+            final_score += 0.2
+    else:
+        # 반려동물이 없는 경우: 반려동물 전용 기능이 있는 제품에 약간 감점
+        # (완전히 제외하지는 않고 약간만 감점)
+        if any(keyword in product_name_upper or keyword in spec_str for keyword in pet_keywords):
+            final_score -= 0.1
+    
     # 최종 점수 클리핑
     return max(0.0, min(1.0, final_score))
 

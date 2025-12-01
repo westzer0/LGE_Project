@@ -12,7 +12,7 @@ try:
     client = OpenAI(api_key=settings.OPENAI_API_KEY)
     OPENAI_AVAILABLE = True
 except Exception as e:
-    print(f"⚠️ OpenAI 초기화 실패: {e}")
+    print(f"[WARNING] OpenAI 초기화 실패: {e}")
     client = None
     OPENAI_AVAILABLE = False
 

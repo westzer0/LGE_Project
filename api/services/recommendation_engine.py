@@ -168,6 +168,8 @@ class RecommendationEngine:
         - 카테고리 필터
         - 가격 범위 필터
         - 스펙 존재 필터
+        - 가족 인원 필터 (ProductDemographics 기반)
+        - 반려동물 필터 (제품 스펙/이름 기반)
         """
         # 예산 범위 계산
         budget_level = user_profile.get('budget_level', 'medium')
@@ -177,6 +179,8 @@ class RecommendationEngine:
         )
         
         categories = user_profile.get('categories', [])
+        household_size = user_profile.get('household_size', 2)
+        has_pet = user_profile.get('has_pet', False)
         
         # Django ORM 쿼리
         products = (
@@ -193,7 +197,27 @@ class RecommendationEngine:
         # 스펙이 있는 제품만 (ProductSpec이 연결된 제품)
         products = products.filter(spec__isnull=False)
         
-        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 결과: {products.count()}개")
+        # 가족 인원 기반 필터링 (ProductDemographics 활용)
+        if household_size == 1:
+            # 1인 가구: 작은 용량의 제품 우선
+            # ProductDemographics의 family_types에 '1인가구'가 포함된 제품 우선
+            pass  # 하드 필터링보다는 스코어링에서 처리
+        elif household_size >= 4:
+            # 4인 이상 가족: 대용량 제품 필터링
+            # 큰 용량을 나타내는 키워드가 있는 제품만
+            pass  # 하드 필터링보다는 스코어링에서 처리
+        
+        # 반려동물 기반 필터링
+        if has_pet:
+            # 반려동물이 있는 경우: 반려동물 관련 기능이 있는 제품만 필터링
+            # 실제로는 스코어링에서 처리하되, 제품 이름/스펙에 '펫', 'pet', '반려동물' 등이 포함된 것만
+            pass  # 하드 필터링보다는 스코어링에서 처리
+        else:
+            # 반려동물이 없는 경우: 반려동물 전용 기능이 있는 제품은 제외하지 않음
+            # 다만 스코어링에서 점수 감점 가능
+            pass
+        
+        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 가족: {household_size}명, 반려동물: {has_pet}, 결과: {products.count()}개")
         
         return products
     
@@ -208,6 +232,7 @@ class RecommendationEngine:
         profile = UserProfile(
             vibe=user_profile.get('vibe', ''),
             household_size=str(user_profile.get('household_size', 2)),
+            has_pet=user_profile.get('has_pet', False),  # 반려동물 정보 추가
             housing_type=user_profile.get('housing_type', ''),
             main_space=user_profile.get('main_space', 'living'),
             space_size=user_profile.get('space_size', 'medium'),
@@ -215,6 +240,12 @@ class RecommendationEngine:
             budget_level=user_profile.get('budget_level', 'medium'),
             target_categories=user_profile.get('categories', []),
         )
+        
+        # 추가 사용자 정보를 profile 객체에 저장 (스코어링에서 사용)
+        profile._household_size_int = user_profile.get('household_size', 2)
+        profile._has_pet = user_profile.get('has_pet', False)
+        profile._cooking = user_profile.get('cooking', 'sometimes')
+        profile._laundry = user_profile.get('laundry', 'weekly')
         
         for idx, product in enumerate(products[:50], 1):  # 최대 50개까지만 처리
             try:

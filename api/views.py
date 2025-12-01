@@ -19,7 +19,10 @@ def index_view(request):
 
 def main_page(request):
     """메인 랜딩 페이지 - LG 홈스타일링"""
-    return render(request, "main.html")
+    from django.conf import settings
+    return render(request, "main.html", {
+        'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', '')
+    })
 
 
 def onboarding_page(request):
@@ -118,6 +121,10 @@ def recommend_view(request):
             'categories': data.get('categories', data.get('target_categories', [])),
             'main_space': data.get('main_space', 'living'),
             'space_size': data.get('space_size', 'medium'),
+            'has_pet': data.get('has_pet', False),  # 반려동물 정보 추가
+            'cooking': data.get('cooking', 'sometimes'),
+            'laundry': data.get('laundry', 'weekly'),
+            'media': data.get('media', 'balanced'),
         }
         
         print(f"\n[API] 추천 요청: {user_profile}")
@@ -315,8 +322,31 @@ def onboarding_complete_view(request):
             }
         )
         
-        # 2. user_profile 생성
-        user_profile = session.to_user_profile()
+        # 2. user_profile 생성 (온보딩 데이터 포함)
+        # 온보딩 데이터에서 추가 정보 추출
+        onboarding_data = {
+            'pet': data.get('pet'),
+            'cooking': data.get('cooking'),
+            'laundry': data.get('laundry'),
+            'media': data.get('media'),
+            'family_size': data.get('family_size', data.get('household_size')),
+        }
+        
+        user_profile = {
+            'vibe': session.vibe or 'modern',
+            'household_size': session.household_size or 2,
+            'housing_type': session.housing_type or 'apartment',
+            'pyung': session.pyung or 25,
+            'priority': session.priority or 'value',
+            'budget_level': session.budget_level or 'medium',
+            'categories': session.selected_categories or [],
+            'main_space': 'living',
+            'space_size': 'medium',
+            'has_pet': onboarding_data.get('pet') == 'yes',
+            'cooking': onboarding_data.get('cooking', 'sometimes'),
+            'laundry': onboarding_data.get('laundry', 'weekly'),
+            'media': onboarding_data.get('media', 'balanced'),
+        }
         
         print(f"\n[Onboarding Complete] Session: {session_id}")
         print(f"[Profile] {user_profile}")
@@ -324,12 +354,15 @@ def onboarding_complete_view(request):
         # 3. 추천 엔진 호출
         result = recommendation_engine.get_recommendations(user_profile, limit=3)
         
-        # 4. 추천 결과 저장
+        # 4. 추천 결과 저장 (온보딩 데이터 포함)
         if result['success']:
             session.recommended_products = [
                 r['product_id'] for r in result['recommendations']
             ]
-            session.recommendation_result = result
+            # 추천 결과에 온보딩 데이터도 함께 저장
+            result_with_data = result.copy()
+            result_with_data['onboarding_data'] = onboarding_data
+            session.recommendation_result = result_with_data
             session.save()
             
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")

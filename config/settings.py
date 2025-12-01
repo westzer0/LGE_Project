@@ -31,6 +31,19 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # 외부 API 키 설정
 # ============================================================
 import os
+from pathlib import Path
+
+# .env 파일 로드 (python-dotenv 사용)
+try:
+    from dotenv import load_dotenv
+    # 프로젝트 루트 디렉토리의 .env 파일 로드
+    env_path = Path(__file__).resolve().parent.parent / '.env'
+    load_dotenv(dotenv_path=env_path)
+    print(f"[ENV] .env 파일 로드 완료: {env_path}")
+except ImportError:
+    print("[WARNING] python-dotenv가 설치되지 않았습니다. pip install python-dotenv 실행하세요.")
+except Exception as e:
+    print(f"[WARNING] .env 파일 로드 실패: {e}")
 
 # 카카오 API (https://developers.kakao.com)
 KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY', '')
@@ -38,6 +51,12 @@ KAKAO_JS_KEY = os.environ.get('KAKAO_JS_KEY', '')
 
 # OpenAI API (https://platform.openai.com) - ChatGPT 연동용
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+
+# API 키 설정 확인 (디버그 모드에서만)
+if DEBUG:
+    print(f"[API Keys Status]")
+    print(f"  KAKAO_JS_KEY: {'[OK] 설정됨' if KAKAO_JS_KEY else '[X] 미설정'}")
+    print(f"  OPENAI_API_KEY: {'[OK] 설정됨' if OPENAI_API_KEY else '[X] 미설정'}")
 
 
 # Application definition

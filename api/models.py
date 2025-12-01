@@ -313,6 +313,11 @@ class OnboardingSession(models.Model):
         """
         OnboardingSession을 RecommendationEngine용 user_profile로 변환
         """
+        # recommendation_result에서 추가 정보 추출 (온보딩 데이터가 저장된 경우)
+        extra_data = {}
+        if isinstance(self.recommendation_result, dict):
+            extra_data = self.recommendation_result.get('onboarding_data', {})
+        
         return {
             'vibe': self.vibe or 'modern',
             'household_size': self.household_size or 2,
@@ -323,6 +328,10 @@ class OnboardingSession(models.Model):
             'categories': self.selected_categories or [],
             'main_space': 'living',
             'space_size': 'medium',
+            'has_pet': extra_data.get('pet') == 'yes' if isinstance(extra_data, dict) else False,
+            'cooking': extra_data.get('cooking', 'sometimes') if isinstance(extra_data, dict) else 'sometimes',
+            'laundry': extra_data.get('laundry', 'weekly') if isinstance(extra_data, dict) else 'weekly',
+            'media': extra_data.get('media', 'balanced') if isinstance(extra_data, dict) else 'balanced',
         }
     
     def save(self, *args, **kwargs):

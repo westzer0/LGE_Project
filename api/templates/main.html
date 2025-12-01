@@ -517,6 +517,311 @@
             color: var(--lg-white);
         }
 
+        /* 카카오톡 공유 플로팅 버튼 */
+        .share-floating-btn {
+            position: fixed;
+            bottom: 120px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #FEE500;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            z-index: 999;
+            transition: all 0.3s;
+            color: #000;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .share-floating-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .share-floating-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* AI 챗봇 컨테이너 */
+        .ai-chatbot-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+        }
+
+        /* AI 챗봇 토글 버튼 */
+        .ai-chatbot-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--lg-gradient);
+            border: none;
+            box-shadow: 0 4px 20px rgba(165, 0, 52, 0.3);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .ai-chatbot-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(165, 0, 52, 0.4);
+        }
+
+        .ai-chatbot-btn.active {
+            background: var(--lg-red);
+        }
+
+        .ai-chatbot-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* AI 챗봇 윈도우 */
+        .ai-chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 60px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .ai-chatbot-window.open {
+            display: flex;
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        /* 챗봇 헤더 */
+        .chatbot-header {
+            background: var(--lg-gradient);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .chatbot-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chatbot-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .chatbot-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .chatbot-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .chatbot-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chatbot-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 챗봇 메시지 영역 */
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chatbot-message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chatbot-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .chatbot-message.bot .message-avatar {
+            background: var(--lg-gray-100);
+        }
+
+        .chatbot-message.user .message-avatar {
+            background: var(--lg-red);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: white;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--lg-black);
+            word-wrap: break-word;
+        }
+
+        .chatbot-message.user .message-content {
+            background: var(--lg-red);
+            color: white;
+        }
+
+        .message-content.loading {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .loading-dots span {
+            animation: dotPulse 1.4s infinite;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotPulse {
+            0%, 60%, 100% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
+
+        /* 챗봇 입력 영역 */
+        .chatbot-input-area {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid var(--lg-gray-200);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--lg-gray-300);
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chatbot-input:focus {
+            border-color: var(--lg-red);
+        }
+
+        .chatbot-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--lg-gradient);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chatbot-send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .hero-content {
@@ -572,6 +877,19 @@
 
             .cta-title {
                 font-size: 32px;
+            }
+
+            .ai-chatbot-window {
+                width: calc(100vw - 48px);
+                height: calc(100vh - 120px);
+                max-height: 600px;
+                bottom: 80px;
+                right: 24px;
+                left: 24px;
+            }
+
+            .share-floating-btn {
+                bottom: 100px;
             }
         }
     </style>
@@ -746,6 +1064,175 @@
             </div>
         </div>
     </footer>
+
+    <!-- 카카오톡 공유 플로팅 버튼 -->
+    <button class="share-floating-btn" onclick="shareKakaoMain()" title="카카오톡 공유">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3z"/>
+        </svg>
+        <span>공유하기</span>
+    </button>
+
+    <!-- AI 챗봇 플로팅 버튼 -->
+    <div class="ai-chatbot-container" id="aiChatbotContainer">
+        <button class="ai-chatbot-btn" onclick="toggleChatbot()" id="chatbotToggleBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+            </svg>
+            <span>AI 챗봇</span>
+        </button>
+        <div class="ai-chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-header-info">
+                    <div class="chatbot-avatar">🤖</div>
+                    <div>
+                        <div class="chatbot-title">LG 홈스타일링 AI</div>
+                        <div class="chatbot-subtitle">필요한 정보를 찾기 어려우신가요?</div>
+                    </div>
+                </div>
+                <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="chatbot-message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        안녕하세요! LG 홈스타일링 AI입니다. 👋<br>
+                        가전 제품 추천이나 궁금한 점이 있으시면 언제든 물어보세요!
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" id="chatbotInput" class="chatbot-input" placeholder="메시지를 입력하세요..." onkeypress="handleChatbotKeyPress(event)">
+                <button class="chatbot-send-btn" onclick="sendChatbotMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 카카오톡 공유 기능
+        const KAKAO_JS_KEY = '{{ kakao_js_key|default:"" }}';
+        let kakaoInitialized = false;
+        let kakaoSDKLoading = false;
+        let kakaoSDKLoaded = false;
+
+        function initKakao() {
+            if (typeof Kakao !== 'undefined' && !kakaoInitialized && KAKAO_JS_KEY) {
+                try {
+                    if (!Kakao.isInitialized()) {
+                        Kakao.init(KAKAO_JS_KEY);
+                        console.log('[Kakao] SDK 초기화 완료');
+                    }
+                    kakaoInitialized = true;
+                    kakaoSDKLoaded = true;
+                } catch (error) {
+                    console.error('[Kakao] 초기화 실패:', error);
+                }
+            }
+        }
+
+        // 카카오 SDK 로드
+        (function loadKakaoSDK() {
+            if (!KAKAO_JS_KEY) {
+                console.warn('[Kakao] JavaScript 키가 설정되지 않았습니다.');
+                return;
+            }
+            
+            if (kakaoSDKLoading) return;
+            kakaoSDKLoading = true;
+            
+            const script = document.createElement('script');
+            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.6.0/kakao.min.js';
+            script.integrity = 'sha384-6MFdIr0zOira1CHQkedUqJVql0YtcZA1P0nbPrQYJXVJZUkTk/oX4U9GhLYdmfPcR';
+            script.crossOrigin = 'anonymous';
+            script.onload = function() {
+                console.log('[Kakao] SDK 스크립트 로드 완료');
+                initKakao();
+            };
+            script.onerror = function() {
+                console.error('[Kakao] SDK 스크립트 로드 실패');
+                kakaoSDKLoading = false;
+            };
+            document.head.appendChild(script);
+        })();
+
+        // SDK 로드 대기 함수
+        function waitForKakaoSDK(callback, maxWaitTime = 5000) {
+            const startTime = Date.now();
+            
+            function check() {
+                if (typeof Kakao !== 'undefined' && kakaoSDKLoaded) {
+                    callback();
+                } else if (Date.now() - startTime < maxWaitTime) {
+                    setTimeout(check, 100);
+                } else {
+                    alert('카카오 SDK 로딩에 시간이 걸리고 있습니다. 잠시 후 다시 시도해주세요.');
+                }
+            }
+            
+            check();
+        }
+
+        function shareKakaoMain() {
+            if (!KAKAO_JS_KEY) {
+                alert('카카오톡 공유 기능을 사용할 수 없습니다. 관리자에게 문의해주세요.');
+                return;
+            }
+            
+            // SDK가 아직 로드되지 않았으면 대기
+            if (typeof Kakao === 'undefined' || !kakaoSDKLoaded) {
+                waitForKakaoSDK(function() {
+                    executeKakaoShare();
+                });
+                return;
+            }
+            
+            executeKakaoShare();
+        }
+        
+        function executeKakaoShare() {
+            try {
+                initKakao();
+                
+                if (!Kakao.isInitialized()) {
+                    alert('카카오 SDK 초기화에 실패했습니다. 페이지를 새로고침해주세요.');
+                    return;
+                }
+                
+                Kakao.Share.sendDefault({
+                    objectType: 'feed',
+                    content: {
+                        title: 'LG 홈스타일링 | 나에게 딱 맞는 가전 패키지 추천',
+                        description: '라이프스타일에 맞춘 최적의 LG 가전 조합을 추천받아보세요. 간단한 설문만으로 나만의 홈스타일링을 완성하세요.',
+                        imageUrl: 'https://www.lge.co.kr/kr/images/brand/objet-collection/2024/visual/kv_visual_bg_w.webp',
+                        link: {
+                            mobileWebUrl: window.location.origin,
+                            webUrl: window.location.origin,
+                        },
+                    },
+                    buttons: [
+                        {
+                            title: '추천 받기',
+                            link: {
+                                mobileWebUrl: window.location.origin + '/onboarding/',
+                                webUrl: window.location.origin + '/onboarding/',
+                            },
+                        },
+                    ],
+                });
+            } catch (error) {
+                console.error('[Kakao] 공유 실패:', error);
+                alert('카카오톡 공유 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
+        }
+
+    </script>
+    
+    <!-- AI 챗봇 공통 스크립트 -->
+    <script src="{% static 'js/ai-chatbot.js' %}"></script>
 </body>
 </html>
 

@@ -1,13 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>온보딩 | LG 홈스타일링</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -165,6 +167,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -517,6 +520,7 @@
 
         /* Responsive */
         @media (max-width: 640px) {
+
             .options-grid.grid-2,
             .options-grid.grid-3,
             .options-grid.grid-4 {
@@ -526,9 +530,290 @@
             .question-title {
                 font-size: 24px;
             }
+
+            .ai-chatbot-window {
+                width: calc(100vw - 48px);
+                height: calc(100vh - 200px);
+                max-height: 500px;
+                bottom: 80px;
+                right: 24px;
+                left: 24px;
+            }
+        }
+
+        /* AI 챗봇 스타일 - 메인 페이지와 동일 */
+        .ai-chatbot-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+        }
+
+        .ai-chatbot-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--lg-gradient);
+            border: none;
+            box-shadow: 0 4px 20px rgba(165, 0, 52, 0.3);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .ai-chatbot-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(165, 0, 52, 0.4);
+        }
+
+        .ai-chatbot-btn.active {
+            background: var(--lg-red);
+        }
+
+        .ai-chatbot-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .ai-chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 60px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px) scale(0.95);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .ai-chatbot-window.open {
+            display: flex;
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .chatbot-header {
+            background: var(--lg-gradient);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .chatbot-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chatbot-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .chatbot-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .chatbot-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .chatbot-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chatbot-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chatbot-message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chatbot-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .chatbot-message.bot .message-avatar {
+            background: var(--lg-gray-100);
+        }
+
+        .chatbot-message.user .message-avatar {
+            background: var(--lg-red);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: white;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--lg-black);
+            word-wrap: break-word;
+        }
+
+        .chatbot-message.user .message-content {
+            background: var(--lg-red);
+            color: white;
+        }
+
+        .message-content.loading {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .loading-dots span {
+            animation: dotPulse 1.4s infinite;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotPulse {
+
+            0%,
+            60%,
+            100% {
+                opacity: 0.3;
+            }
+
+            30% {
+                opacity: 1;
+            }
+        }
+
+        .chatbot-input-area {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid var(--lg-gray-200);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--lg-gray-300);
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chatbot-input:focus {
+            border-color: var(--lg-red);
+        }
+
+        .chatbot-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--lg-gradient);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chatbot-send-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <header class="onboarding-header">
@@ -557,7 +842,7 @@
             <span class="step-label">STEP 1 · 기본 정보</span>
             <h2 class="question-title">어떤 공간에서<br>생활하고 계신가요?</h2>
             <p class="question-description">주거 형태에 따라 적합한 가전을 추천해 드릴게요.</p>
-            
+
             <div class="options-grid grid-3" data-name="housing_type">
                 <div class="option-card" data-value="apartment">
                     <span class="option-icon">🏢</span>
@@ -588,7 +873,7 @@
             <div style="margin-top: 40px;">
                 <span class="step-label" style="background: var(--lg-gray-200); color: var(--lg-gray-700);">가구 인원</span>
                 <h3 style="font-size: 20px; font-weight: 600; margin: 16px 0 24px;">함께 사는 가족은 몇 명인가요?</h3>
-                
+
                 <div class="range-container">
                     <div class="range-value" id="familyValue">2</div>
                     <div class="range-unit">명</div>
@@ -606,11 +891,11 @@
             <span class="step-label">STEP 2 · 공간 정보</span>
             <h2 class="question-title">집의 크기는<br>어느 정도인가요?</h2>
             <p class="question-description">공간 크기에 맞는 최적의 가전 사이즈를 추천해 드릴게요.</p>
-            
+
             <div class="range-container">
                 <div class="range-value" id="sizeValue">25</div>
                 <div class="range-unit">평</div>
-                <input type="range" class="range-slider" id="sizeSlider" min="10" max="60" value="25" step="5">
+                <input type="range" class="range-slider" id="sizeSlider" min="10" max="60" value="25" step="1">
                 <div class="range-labels">
                     <span>10평</span>
                     <span>60평+</span>
@@ -619,7 +904,7 @@
 
             <div style="margin-top: 40px;">
                 <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">선호하는 인테리어 스타일은?</h3>
-                
+
                 <div class="options-grid grid-2" data-name="style">
                     <div class="option-card" data-value="modern">
                         <span class="option-icon">⬜</span>
@@ -650,9 +935,10 @@
             <span class="step-label">STEP 3 · 라이프스타일</span>
             <h2 class="question-title">생활 패턴을<br>알려주세요</h2>
             <p class="question-description">라이프스타일에 맞는 기능을 갖춘 가전을 추천해 드릴게요.</p>
-            
+
             <div style="margin-bottom: 32px;">
-                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">🍳 요리 빈도</h4>
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">🍳 요리 빈도
+                </h4>
                 <div class="options-grid grid-3" data-name="cooking">
                     <div class="option-card" data-value="rarely">
                         <span class="option-icon">🥡</span>
@@ -670,7 +956,8 @@
             </div>
 
             <div style="margin-bottom: 32px;">
-                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">👕 세탁 패턴</h4>
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">👕 세탁 패턴
+                </h4>
                 <div class="options-grid grid-3" data-name="laundry">
                     <div class="option-card" data-value="weekly">
                         <span class="option-icon">📅</span>
@@ -688,7 +975,8 @@
             </div>
 
             <div style="margin-bottom: 32px;">
-                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">📺 미디어 소비</h4>
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">📺 미디어 소비
+                </h4>
                 <div class="options-grid grid-3" data-name="media">
                     <div class="option-card" data-value="mobile">
                         <span class="option-icon">📱</span>
@@ -706,7 +994,8 @@
             </div>
 
             <div>
-                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">🐾 반려동물</h4>
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--lg-gray-700);">🐾 반려동물
+                </h4>
                 <div class="options-grid grid-2" data-name="pet">
                     <div class="option-card" data-value="yes">
                         <span class="option-icon">🐕</span>
@@ -725,7 +1014,7 @@
             <span class="step-label">STEP 4 · 예산 정보</span>
             <h2 class="question-title">가전 구매 예산은<br>어느 정도인가요?</h2>
             <p class="question-description">예산에 맞춰 최적의 패키지를 구성해 드릴게요.</p>
-            
+
             <div class="budget-cards" data-name="budget">
                 <div class="budget-card" data-value="budget">
                     <div class="budget-icon">💵</div>
@@ -763,7 +1052,7 @@
 
             <div style="margin-top: 40px;">
                 <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 24px;">구매 시 가장 중요한 기준은?</h3>
-                
+
                 <div class="options-grid grid-2" data-name="priority">
                     <div class="option-card" data-value="design">
                         <span class="option-icon">🎨</span>
@@ -912,7 +1201,7 @@
             // Update buttons
             prevBtn.style.display = currentStep > 1 ? 'flex' : 'none';
             backBtn.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
-            
+
             if (currentStep === totalSteps) {
                 nextBtn.innerHTML = '추천 받기 <span>→</span>';
             } else {
@@ -930,8 +1219,8 @@
                 case 2:
                     return formData.style !== null;
                 case 3:
-                    return formData.cooking !== null && formData.laundry !== null && 
-                           formData.media !== null && formData.pet !== null;
+                    return formData.cooking !== null && formData.laundry !== null &&
+                        formData.media !== null && formData.pet !== null;
                 case 4:
                     return formData.budget !== null && formData.priority !== null;
                 default:
@@ -967,18 +1256,62 @@
         }
 
         // Submit onboarding data
-        function submitOnboarding() {
+        async function submitOnboarding() {
             console.log('Submitting:', formData);
-            
+
             // Show loading
             nextBtn.disabled = true;
             nextBtn.innerHTML = '분석 중... ⏳';
 
-            // Simulate API call
-            setTimeout(() => {
-                // Redirect to results page
-                window.location.href = '/result/?data=' + encodeURIComponent(JSON.stringify(formData));
-            }, 1500);
+            try {
+                // Map formData to API format
+                const apiData = {
+                    vibe: formData.style || 'modern',
+                    household_size: formData.family_size || 2,
+                    housing_type: formData.housing_type || 'apartment',
+                    pyung: formData.space_size || 25,
+                    priority: formData.priority || 'value',
+                    budget_level: formData.budget || 'standard',
+                    categories: formData.selected_categories || ['TV', 'KITCHEN', 'LIVING'], // Default categories if not selected
+                    has_pet: formData.pet === 'yes',
+                    cooking: formData.cooking || 'sometimes',
+                    laundry: formData.laundry || 'weekly',
+                    media: formData.media || 'balanced',
+                };
+
+                console.log('API Request:', apiData);
+
+                // Call recommendation API
+                const response = await fetch('/api/recommend/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(apiData)
+                });
+
+                const result = await response.json();
+                console.log('API Response:', result);
+
+                if (result.success && result.recommendations && result.recommendations.length > 0) {
+                    // Store recommendations in sessionStorage for result page
+                    sessionStorage.setItem('onboardingData', JSON.stringify(formData));
+                    sessionStorage.setItem('recommendations', JSON.stringify(result.recommendations));
+
+                    // Redirect to results page
+                    window.location.href = '/result/?data=' + encodeURIComponent(JSON.stringify({
+                        ...formData,
+                        recommendations: result.recommendations
+                    }));
+                } else {
+                    throw new Error(result.error || '추천 결과가 없습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('추천을 가져오는 중 오류가 발생했습니다: ' + error.message);
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = '추천 받기 <span>→</span>';
+            }
         }
 
         // Exit modal functions
@@ -1002,6 +1335,47 @@
             }
         });
     </script>
-</body>
-</html>
 
+    <!-- AI 챗봇 -->
+    <div class="ai-chatbot-container" id="aiChatbotContainer">
+        <button class="ai-chatbot-btn" id="chatbotToggleBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+            </svg>
+            <span>AI 챗봇</span>
+        </button>
+        <div class="ai-chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-header-info">
+                    <div class="chatbot-avatar">🤖</div>
+                    <div>
+                        <div class="chatbot-title">LG 홈스타일링 AI</div>
+                        <div class="chatbot-subtitle">필요한 정보를 찾기 어려우신가요?</div>
+                    </div>
+                </div>
+                <button class="chatbot-close">✕</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="chatbot-message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        안녕하세요! LG 홈스타일링 AI입니다. 👋<br>
+                        온보딩 설문 중 궁금한 점이 있으시면 언제든 물어보세요!
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" id="chatbotInput" class="chatbot-input" placeholder="메시지를 입력하세요...">
+                <button class="chatbot-send-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/ai-chatbot.js' %}"></script>
+</body>
+
+</html>
