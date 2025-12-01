@@ -1,5 +1,7 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from api.views import (
     index_view, recommend, products, recommend_view,
     onboarding_page, main_page, onboarding_new_page, result_page,
@@ -8,6 +10,13 @@ from api.views import (
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
     ai_chat_view, ai_status_view,
 )
+
+# DRF ViewSet 라우터
+from api.views_drf import RecommendAPIView, PortfolioViewSet, OnboardingSessionViewSet
+
+router = DefaultRouter()
+router.register(r'portfolios', PortfolioViewSet, basename='portfolio')
+router.register(r'onboarding-sessions', OnboardingSessionViewSet, basename='onboarding-session')
 
 urlpatterns = [
     # 메인 페이지
@@ -26,18 +35,22 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     
-    # API 엔드포인트
+    # API 엔드포인트 (기존 - 하위 호환성 유지)
     path('api/recommend/', recommend_view, name='recommend'),
     path('api/products/', products, name='products'),
     path('api/onboarding/step/', onboarding_step_view, name='onboarding_step'),
     path('api/onboarding/complete/', onboarding_complete_view, name='onboarding_complete'),
     path('api/onboarding/session/<str:session_id>/', onboarding_session_view, name='onboarding_session'),
     
-    # 포트폴리오 API
+    # 포트폴리오 API (기존 - 하위 호환성 유지)
     path('api/portfolio/save/', portfolio_save_view, name='portfolio_save'),
     path('api/portfolio/list/', portfolio_list_view, name='portfolio_list'),
     path('api/portfolio/<str:portfolio_id>/', portfolio_detail_view, name='portfolio_detail'),
     path('api/portfolio/<str:portfolio_id>/share/', portfolio_share_view, name='portfolio_share'),
+    
+    # DRF API 엔드포인트 (새로운 방식)
+    path('api/drf/recommend/', RecommendAPIView.as_view(), name='drf_recommend'),
+    path('api/drf/', include(router.urls)),  # /api/drf/portfolios/, /api/drf/onboarding-sessions/
     
     # AI (ChatGPT) API
     path('api/ai/status/', ai_status_view, name='ai_status'),

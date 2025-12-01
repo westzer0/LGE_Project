@@ -1140,43 +1140,85 @@
         // ============================================================
         // 🟡 카카오톡 공유 기능
         // ============================================================
-        // 카카오 JS 키는 서버에서 전달받거나, 환경에 맞게 설정
         const KAKAO_JS_KEY = '{{ kakao_js_key|default:"" }}';
         let kakaoInitialized = false;
+        let kakaoSDKLoading = false;
+        let kakaoSDKLoaded = false;
 
-        // 카카오 SDK 초기화
         function initKakao() {
-            if (typeof Kakao !== 'undefined' && !kakaoInitialized) {
-                if (!Kakao.isInitialized()) {
-                    Kakao.init(KAKAO_JS_KEY);
-                    console.log('✅ 카카오 SDK 초기화 완료');
+            if (typeof Kakao !== 'undefined' && !kakaoInitialized && KAKAO_JS_KEY) {
+                try {
+                    if (!Kakao.isInitialized()) {
+                        Kakao.init(KAKAO_JS_KEY);
+                        console.log('[Kakao] SDK 초기화 완료');
+                    }
+                    kakaoInitialized = true;
+                    kakaoSDKLoaded = true;
+                } catch (error) {
+                    console.error('[Kakao] 초기화 실패:', error);
                 }
-                kakaoInitialized = true;
             }
         }
 
-        // 페이지 로드 시 카카오 SDK 로드
+        // 카카오 SDK 로드
         (function loadKakaoSDK() {
+            if (!KAKAO_JS_KEY) {
+                console.warn('[Kakao] JavaScript 키가 설정되지 않았습니다.');
+                return;
+            }
+            
+            if (kakaoSDKLoading) return;
+            kakaoSDKLoading = true;
+            
             const script = document.createElement('script');
             script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.6.0/kakao.min.js';
             script.integrity = 'sha384-6MFdIr0zOira1CHQkedUqJVql0YtcZA1P0nbPrQYJXVJZUkTk/oX4U9GhLYdmfPcR';
             script.crossOrigin = 'anonymous';
-            script.onload = initKakao;
+            script.onload = function() {
+                console.log('[Kakao] SDK 스크립트 로드 완료');
+                initKakao();
+            };
+            script.onerror = function() {
+                console.error('[Kakao] SDK 스크립트 로드 실패');
+                kakaoSDKLoading = false;
+            };
             document.head.appendChild(script);
         })();
 
-        function shareKakao() {
-            // 카카오 SDK 확인
-            if (typeof Kakao === 'undefined') {
-                showToast('⏳ 카카오 SDK 로딩 중... 잠시 후 다시 시도해주세요.');
-                return;
+        // SDK 로드 대기 함수
+        function waitForKakaoSDK(callback, maxWaitTime = 5000) {
+            const startTime = Date.now();
+            
+            function check() {
+                if (typeof Kakao !== 'undefined' && kakaoSDKLoaded) {
+                    callback();
+                } else if (Date.now() - startTime < maxWaitTime) {
+                    setTimeout(check, 100);
+                } else {
+                    showToast('카카오 SDK 로딩에 시간이 걸리고 있습니다. 잠시 후 다시 시도해주세요.');
+                }
             }
             
-            initKakao();
+            check();
+        }
+
+        function shareKakao() {
+            if (!KAKAO_JS_KEY) {
+                showToast('카카오톡 공유 기능을 사용할 수 없습니다. 관리자에게 문의해주세요.');
+                return;
+            }
             
             // 포트폴리오 저장 여부 확인
             if (!savedPortfolioId) {
                 showShareOptionsModal();
+                return;
+            }
+            
+            // SDK가 아직 로드되지 않았으면 대기
+            if (typeof Kakao === 'undefined' || !kakaoSDKLoaded) {
+                waitForKakaoSDK(function() {
+                    executeKakaoShare();
+                });
                 return;
             }
             
@@ -1362,14 +1404,47 @@
         }
 
         // ============================================================
-        // 페이지 로드 시 URL에서 portfolio_id 확인
+        // 페이지 로드 시 URL에서 portfolio_id 확인 및 데이터 로드
         // ============================================================
-        (function checkExistingPortfolio() {
+        (async function checkExistingPortfolio() {
             const pathMatch = window.location.pathname.match(/\/portfolio\/([^/]+)/);
             if (pathMatch) {
                 savedPortfolioId = pathMatch[1];
-                // TODO: 서버에서 포트폴리오 데이터 불러오기
-                console.log('기존 포트폴리오:', savedPortfolioId);
+                console.log('[Portfolio] 기존 포트폴리오 감지:', savedPortfolioId);
+                
+                try {
+                    // 서버에서 포트폴리오 데이터 불러오기
+                    const response = await fetch(`/api/portfolio/${savedPortfolioId}/`);
+                    const result = await response.json();
+                    
+                    if (result.success && result.portfolio) {
+                        const portfolio = result.portfolio;
+                        console.log('[Portfolio] 포트폴리오 데이터 로드 완료:', portfolio);
+                        
+                        // 포트폴리오 데이터로 페이지 재구성
+                        if (portfolio.onboarding_data) {
+                            onboardingData = portfolio.onboarding_data;
+                        }
+                        
+                        if (portfolio.products && portfolio.products.length > 0) {
+                            recommendedProducts = portfolio.products;
+                            // 추천 결과 표시
+                            displayRecommendations();
+                        }
+                        
+                        if (portfolio.style_type) {
+                            updateStyleDisplay(portfolio.style_type);
+                        }
+                        
+                        showToast('✅ 저장된 포트폴리오를 불러왔습니다.');
+                    } else {
+                        console.error('[Portfolio] 포트폴리오 로드 실패:', result.error);
+                        showToast('⚠️ 포트폴리오를 불러올 수 없습니다.');
+                    }
+                } catch (error) {
+                    console.error('[Portfolio] 포트폴리오 로드 에러:', error);
+                    showToast('⚠️ 포트폴리오를 불러오는 중 오류가 발생했습니다.');
+                }
             }
         })();
     </script>

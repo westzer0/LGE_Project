@@ -404,20 +404,6 @@
             position: relative;
         }
 
-        .process-step::after {
-            content: '';
-            position: absolute;
-            top: 40px;
-            right: -12px;
-            width: calc(100% - 80px);
-            height: 2px;
-            background: linear-gradient(90deg, var(--lg-red) 0%, transparent 100%);
-        }
-
-        .process-step:last-child::after {
-            display: none;
-        }
-
         .step-number {
             width: 80px;
             height: 80px;
@@ -849,9 +835,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .process-step::after {
-                display: none;
-            }
         }
 
         @media (max-width: 768px) {
