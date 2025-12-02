@@ -31,8 +31,13 @@ def fake_lg_main_page(request):
 
 
 def onboarding_page(request):
-    """온보딩 페이지 렌더링"""
+    """온보딩 페이지 렌더링 (1단계)"""
     return render(request, "onboarding.html")
+
+
+def onboarding_step2_page(request):
+    """온보딩 페이지 렌더링 (2단계)"""
+    return render(request, "onboarding_step2.html")
 
 
 def onboarding_new_page(request):
@@ -212,10 +217,26 @@ def onboarding_step_view(request):
     }
     """
     try:
-        if hasattr(request, 'data'):
-            data = request.data
-        else:
-            data = json.loads(request.body.decode("utf-8"))
+        # 요청 데이터 파싱
+        try:
+            if hasattr(request, 'data'):
+                data = request.data
+            else:
+                body_str = request.body.decode("utf-8")
+                if body_str:
+                    data = json.loads(body_str)
+                else:
+                    data = {}
+        except json.JSONDecodeError as e:
+            return JsonResponse({
+                'success': False,
+                'error': f'JSON 파싱 오류: {str(e)}'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': f'요청 데이터 처리 오류: {str(e)}'
+            }, status=400)
         
         session_id = data.get('session_id')
         step = int(data.get('step', 1))
@@ -237,9 +258,29 @@ def onboarding_step_view(request):
         if step == 1:
             session.vibe = step_data.get('vibe')
         elif step == 2:
+            # household_size 또는 mate 값 처리
             household_size = step_data.get('household_size')
+            mate = step_data.get('mate')  # 2단계에서 전달되는 mate 값
+            pet = step_data.get('pet')  # 반려동물 정보
+            
             if household_size:
                 session.household_size = int(household_size)
+            elif mate:
+                # mate 값을 household_size로 변환
+                mate_to_size = {
+                    'alone': 1,
+                    'couple': 2,
+                    'family_3_4': 4,  # 3~4인 가족은 평균 4로 설정
+                    'family_5plus': 5  # 5인 이상은 5로 설정
+                }
+                session.household_size = mate_to_size.get(mate, 2)
+            
+            # 반려동물 정보를 recommendation_result에 저장 (임시)
+            if pet:
+                if not session.recommendation_result:
+                    session.recommendation_result = {}
+                session.recommendation_result['has_pet'] = (pet == 'yes')
+                session.recommendation_result['pet'] = pet
         elif step == 3:
             session.housing_type = step_data.get('housing_type')
             pyung = step_data.get('pyung')
@@ -256,11 +297,19 @@ def onboarding_step_view(request):
         session.updated_at = timezone.now()
         session.save()
         
+        print(f"\n[온보딩 저장 성공]")
+        print(f"  세션 ID: {session_id}")
+        print(f"  단계: {step}")
+        print(f"  저장된 데이터: {step_data}")
+        print(f"  현재 단계: {session.current_step}")
+        print(f"  상태: {session.status}")
+        
         return JsonResponse({
             'success': True,
             'session_id': session_id,
             'current_step': step,
             'next_step': min(step + 1, 6),
+            'saved_data': step_data,  # 저장된 데이터 확인용
         }, json_dumps_params={'ensure_ascii': False})
     
     except Exception as e:

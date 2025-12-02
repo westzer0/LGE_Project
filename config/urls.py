@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (
     index_view, recommend, products, recommend_view,
-    onboarding_page, main_page, onboarding_new_page, result_page,
+    onboarding_page, onboarding_step2_page, main_page, onboarding_new_page, result_page,
     fake_lg_main_page,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
@@ -27,7 +27,8 @@ urlpatterns = [
     path('old/', index_view, name='index'),  # 기존 페이지 (백업)
     
     # 온보딩 페이지
-    path('onboarding/', onboarding_new_page, name='onboarding'),
+    path('onboarding/', onboarding_page, name='onboarding'),
+    path('onboarding/step2/', onboarding_step2_page, name='onboarding_step2'),
     path('onboarding/old/', onboarding_page, name='onboarding_old'),
     
     # 결과 페이지
