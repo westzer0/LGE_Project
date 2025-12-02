@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
-    index_view, recommend, products, recommend_view,
+    index_view, recommend, products, recommend_view, product_spec_view, product_image_by_name_view,
     onboarding_page, onboarding_step2_page, onboarding_step3_page, onboarding_step4_page, onboarding_step5_page, onboarding_step6_page, main_page, onboarding_new_page, result_page,
     fake_lg_main_page,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
@@ -45,6 +45,8 @@ urlpatterns = [
     # API 엔드포인트 (기존 - 하위 호환성 유지)
     path('api/recommend/', recommend_view, name='recommend'),
     path('api/products/', products, name='products'),
+    path('api/products/<int:product_id>/spec/', product_spec_view, name='product_spec'),
+    path('api/products/image-by-name/', product_image_by_name_view, name='product_image_by_name'),
     path('api/onboarding/step/', onboarding_step_view, name='onboarding_step'),
     path('api/onboarding/complete/', onboarding_complete_view, name='onboarding_complete'),
     path('api/onboarding/session/<str:session_id>/', onboarding_session_view, name='onboarding_session'),

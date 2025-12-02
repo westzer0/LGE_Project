@@ -1,13 +1,16 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>추천 결과 | LG 홈스타일링</title>
+    <title>LG전자 | 가전 패키지 추천 결과</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,1439 +18,1783 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --lg-red: #A50034;
-            --lg-red-light: #C4314B;
-            --lg-black: #1A1A1A;
-            --lg-gray-900: #2D2D2D;
-            --lg-gray-700: #4A4A4A;
-            --lg-gray-500: #6B6B6B;
-            --lg-gray-300: #9E9E9E;
-            --lg-gray-200: #E5E5E5;
-            --lg-gray-100: #F5F5F5;
-            --lg-white: #FFFFFF;
-            --lg-beige: #F7F4EF;
-            --lg-gradient: linear-gradient(135deg, #A50034 0%, #C4314B 100%);
-        }
-
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--lg-white);
-            color: var(--lg-black);
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #fff;
+            color: #1a1a1a;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Floating Header */
-        .floating-header {
+        /* ============================================
+           Header - onboarding.html과 동일한 스타일
+           ============================================ */
+        .header {
             position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 100px;
-            padding: 12px 24px;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left {
             display: flex;
             align-items: center;
-            gap: 16px;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
-        .floating-btn {
+        .logo {
+            display: block;
+            height: 28px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-top-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-top-icon {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: #1a1a1a;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-top-icon:hover {
+            color: #A50034;
+        }
+
+        .header-top-link {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            padding: 0 12px;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .header-top-link:hover {
+            color: #A50034;
+        }
+
+        .header-top-link:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 12px;
+            background: #e5e5e5;
+        }
+
+        .header-bottom-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .gnb {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .gnb-item {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .gnb-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-separator {
+            width: 1px;
+            height: 14px;
+            background: #e5e5e5;
+            margin: 0 12px;
+        }
+
+        .gnb-item.home-style {
+            background: #FD312E;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.2;
+        }
+
+        .home-style-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .home-style-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .gnb-item.home-style:hover {
+            background: #B80D3D;
+            color: #fff;
+        }
+
+        .gnb-brand {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-shrink: 0;
+            background: #F4F6F8;
+            border-radius: 9999px;
+            padding: 6px 20px;
+            margin-left: 0;
+        }
+
+        .gnb-brand-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .gnb-brand-item:hover {
+            color: #A50034;
+        }
+
+        /* ============================================
+           Breadcrumb - onboarding.html과 동일한 구조
+           ============================================ */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: none;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 16px;
-            border-radius: 100px;
             font-size: 14px;
-            font-weight: 500;
+            color: #666;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
             text-decoration: none;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            background: transparent;
-            color: var(--lg-gray-700);
+            transition: color 0.2s;
         }
 
-        .floating-btn:hover {
-            background: var(--lg-gray-100);
+        .breadcrumb-nav a:hover {
+            color: #A50034;
         }
 
-        .floating-btn.primary {
-            background: var(--lg-gradient);
-            color: white;
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
         }
 
-        .floating-btn.primary:hover {
-            opacity: 0.9;
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
         }
 
-        .floating-divider {
-            width: 1px;
-            height: 24px;
-            background: var(--lg-gray-200);
+        /* ============================================
+           Main Content
+           ============================================ */
+        .main-content {
+            margin-top: 160px;
+            min-height: calc(100vh - 160px);
+            padding: 0;
         }
 
-        /* Hero Section */
-        .hero-section {
-            min-height: 100vh;
-            background: linear-gradient(180deg, var(--lg-beige) 0%, var(--lg-white) 100%);
-            padding: 120px 40px 80px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
+        /* ============================================
+           Banner Section (이미지 배너)
+           ============================================ */
+        .banner-section {
             position: relative;
+            width: 100%;
+            height: 600px;
             overflow: hidden;
+            margin-bottom: 0;
         }
 
-        .hero-section::before {
-            content: '';
+        .banner-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .banner-overlay {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23A50034' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .style-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            border: 1px solid rgba(165, 0, 52, 0.2);
-            border-radius: 100px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--lg-red);
-            margin-bottom: 32px;
-        }
-
-        .style-title {
-            font-size: 48px;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 20px;
-            background: var(--lg-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .style-subtitle {
-            font-size: 20px;
-            color: var(--lg-gray-500);
-            max-width: 600px;
-            margin: 0 auto 48px;
-            line-height: 1.7;
-        }
-
-        /* Package Summary */
-        .package-summary {
+            background: transparent;
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            gap: 48px;
-            flex-wrap: wrap;
-        }
-
-        .summary-item {
+            align-items: center;
+            padding: 60px 40px;
             text-align: center;
         }
 
-        .summary-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: var(--lg-black);
+        .banner-overlay.has-overlay {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 229, 232, 0.3) 50%, rgba(255, 200, 210, 0.4) 100%);
         }
 
-        .summary-value .unit {
-            font-size: 18px;
-            color: var(--lg-gray-500);
-        }
-
-        .summary-label {
+        .style-analysis-label {
             font-size: 14px;
-            color: var(--lg-gray-500);
-            margin-top: 4px;
+            font-weight: 600;
+            color: #FD312E;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: transparent;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
-        /* Scroll Indicator */
-        .scroll-indicator {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
+        .banner-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .banner-title.white {
+            color: #fff;
+        }
+
+        .banner-description {
+            font-size: 18px;
+            color: #1a1a1a;
+            line-height: 1.8;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .banner-description.white {
+            color: #fff;
+        }
+
+        .appliance-icons-container {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            margin-top: 40px;
+            display: inline-block;
+            width: 900px;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+
+        .appliance-icons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .appliance-icon {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            animation: bounce 2s infinite;
+            gap: 12px;
+            flex: 1;
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
-        }
-
-        .scroll-indicator span {
-            font-size: 12px;
-            color: var(--lg-gray-500);
-        }
-
-        .scroll-arrow {
-            font-size: 24px;
-            color: var(--lg-gray-300);
-        }
-
-        /* Product Section */
-        .product-section {
-            padding: 120px 0;
-        }
-
-        .product-section:nth-child(even) {
-            background: var(--lg-gray-100);
-        }
-
-        .product-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 40px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
+        .appliance-icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
             align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .product-section:nth-child(odd) .product-container {
-            direction: rtl;
+        .appliance-icon-circle:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .product-section:nth-child(odd) .product-container > * {
-            direction: ltr;
+        .appliance-icon-circle img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
         }
 
-        /* Product Image */
+        .appliance-icon-label {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           Top Action Bar (플로팅)
+           ============================================ */
+        .top-action-bar {
+            position: fixed;
+            top: 189px;
+            right: 40px;
+            z-index: 998;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-icon-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .action-icon-button:hover {
+            background: #f5f5f5;
+            border-color: #e5e5e5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-icon-button svg {
+            width: 24px;
+            height: 24px;
+            color: #1a1a1a;
+        }
+
+        .action-icon-button:hover svg {
+            color: #1a1a1a;
+        }
+
+        /* 저장 아이콘 (체크마크) */
+        .action-icon-button.save svg {
+            stroke-width: 2.5;
+        }
+
+        /* 카카오톡 공유 아이콘 (말풍선) */
+        .action-icon-button.kakao svg {
+            stroke-width: 2;
+        }
+
+        /* 링크 복사 아이콘 */
+        .action-icon-button.link svg {
+            stroke-width: 2;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            right: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .action-icon-button:hover .tooltip {
+            opacity: 1;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-left-color: #1a1a1a;
+        }
+
+        /* ============================================
+           Retry Button Section
+           ============================================ */
+        .retry-section {
+            position: absolute;
+            top: 189px;
+            left: 40px;
+            z-index: 998;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .retry-button-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .retry-button-icon:hover {
+            background: #333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .retry-button-icon svg {
+            width: 16px;
+            height: 16px;
+            color: #fff;
+        }
+
+        .retry-button-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+
+        /* ============================================
+           Product List Section
+           ============================================ */
+        .product-list-section {
+            padding: 0;
+            background: #fff;
+        }
+
+        .product-list-container {
+            max-width: 100%;
+            margin: 0;
+            width: 100%;
+        }
+
+        .product-item {
+            background: #fff;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 0;
+            position: relative;
+            scroll-margin-top: 200px;
+            display: grid;
+            grid-template-columns: 3fr 2.5fr;
+            gap: 0;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+
+        .product-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .match-badge {
+            position: relative;
+            display: inline-block;
+            background: transparent;
+            color: #FD312E;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            z-index: 10;
+        }
+
+        .match-badge.gray {
+            background: transparent;
+            color: #999;
+        }
+
+        .product-content {
+            display: contents;
+        }
+
         .product-image-wrapper {
             position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            background: #f5f5f5;
         }
 
         .product-image {
             width: 100%;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            min-height: 100vh;
+            object-fit: cover;
+            background: #f5f5f5;
         }
 
-        .match-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--lg-gradient);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 100px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        /* Product Info */
         .product-info {
-            padding: 20px 0;
+            background: #fff;
+            padding: 40px 40px 40px 40px;
+            padding-right: 180px; /* 저장, 카카오톡 공유, URL 복사 버튼 공간 확보 */
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            height: 100%;
+            min-height: 100vh;
+            overflow-y: auto;
         }
 
-        .product-category {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--lg-red);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
-        }
-
-        .product-name {
-            font-size: 32px;
+        .product-title {
+            font-size: 20px;
             font-weight: 700;
-            color: var(--lg-black);
-            margin-bottom: 8px;
-            line-height: 1.3;
+            color: #1a1a1a;
+            margin-bottom: 0;
+            line-height: 1.5;
         }
 
-        .product-model {
-            font-size: 14px;
-            color: var(--lg-gray-500);
-            margin-bottom: 24px;
-        }
-
-        .product-description {
-            font-size: 16px;
-            color: var(--lg-gray-700);
-            line-height: 1.8;
-            margin-bottom: 32px;
-        }
-
-        /* Recommendation Reason */
-        .recommend-reason {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            border-left: 4px solid var(--lg-red);
+        .recommend-reason-box {
+            background: transparent;
+            padding: 0;
+            border: none;
         }
 
         .recommend-reason-title {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            color: var(--lg-red);
+            color: #1a1a1a;
             margin-bottom: 8px;
         }
 
         .recommend-reason-text {
             font-size: 15px;
-            color: var(--lg-gray-700);
+            color: #1a1a1a;
             line-height: 1.6;
         }
 
-        /* Price Section */
+        .review-analysis-box {
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        .review-analysis-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .review-analysis-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .review-analysis-text:before {
+            content: "• ";
+            color: #666;
+            margin-right: 4px;
+        }
+
+        .review-analysis-text:last-child {
+            margin-bottom: 0;
+        }
+
         .price-section {
             display: flex;
-            align-items: baseline;
-            gap: 12px;
-            margin-bottom: 24px;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .price-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .price-row .price-label {
+            margin-right: auto;
+        }
+
+        .price-label {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 500;
+            text-align: left;
+            flex-shrink: 0;
         }
 
         .price-original {
             font-size: 16px;
-            color: var(--lg-gray-300);
+            color: #999;
             text-decoration: line-through;
+            text-align: right;
         }
 
         .price-discount {
-            font-size: 32px;
+            font-size: 16px;
+            color: #999;
+            text-decoration: line-through;
+            text-align: right;
+        }
+
+        .price-final {
+            font-size: 24px;
             font-weight: 700;
-            color: var(--lg-black);
+            color: #FD312E;
+            margin-top: 4px;
+            text-align: right;
         }
 
-        .price-discount .won {
-            font-size: 18px;
-        }
-
-        .price-badge {
-            background: #FF3B30;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
+        .price-disclaimer {
             font-size: 12px;
-            font-weight: 700;
+            color: #999;
+            margin-top: 8px;
+            line-height: 1.5;
         }
 
-        /* Product Actions */
-        .product-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn {
+        .spec-button {
+            margin-top: 0;
             padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
             cursor: pointer;
             transition: all 0.2s;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: var(--lg-gradient);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background: var(--lg-gray-100);
-            color: var(--lg-gray-700);
-        }
-
-        .btn-secondary:hover {
-            background: var(--lg-gray-200);
-        }
-
-        /* Total Summary */
-        .total-section {
-            padding: 80px 40px;
-            background: var(--lg-black);
-            color: white;
-        }
-
-        .total-container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .total-header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .total-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .total-subtitle {
-            font-size: 16px;
-            color: var(--lg-gray-300);
-        }
-
-        .total-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-bottom: 48px;
-        }
-
-        .total-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 32px;
-            text-align: center;
-        }
-
-        .total-card-label {
-            font-size: 14px;
-            color: var(--lg-gray-300);
-            margin-bottom: 8px;
-        }
-
-        .total-card-value {
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .total-card-value.highlight {
-            color: #FF3B30;
-        }
-
-        .total-actions {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .total-actions .btn {
-            padding: 18px 32px;
-            font-size: 16px;
-        }
-
-        .btn-white {
-            background: white;
-            color: var(--lg-black);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        .btn-outline:hover {
-            background: white;
-            color: var(--lg-black);
-        }
-
-        /* Alternative Products */
-        .alternatives-section {
-            padding: 80px 40px;
-            background: var(--lg-beige);
-        }
-
-        .alternatives-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .alternatives-header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        .alternatives-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .alternatives-subtitle {
-            font-size: 16px;
-            color: var(--lg-gray-500);
-        }
-
-        /* Category Tabs */
-        .category-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .category-tab {
-            padding: 12px 24px;
-            border-radius: 100px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            background: white;
-            color: var(--lg-gray-500);
-            transition: all 0.2s;
-        }
-
-        .category-tab.active {
-            background: var(--lg-gradient);
-            color: white;
-        }
-
-        .category-tab:hover:not(.active) {
-            background: var(--lg-gray-100);
-        }
-
-        /* Product Cards Grid */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-card-image {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            text-align: center;
         }
 
-        .product-card-content {
-            padding: 24px;
+        .spec-button:hover {
+            background: #f5f5f5;
+            border-color: #A50034;
+            color: #A50034;
         }
 
-        .product-card-category {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--lg-red);
-            margin-bottom: 8px;
-        }
-
-        .product-card-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--lg-black);
-            margin-bottom: 8px;
-        }
-
-        .product-card-price {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--lg-black);
-        }
-
-        .product-card-reason {
-            font-size: 13px;
-            color: var(--lg-gray-500);
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--lg-gray-200);
-        }
-
-        /* Footer */
-        .footer {
-            padding: 60px 40px;
-            background: var(--lg-gray-900);
-            color: var(--lg-gray-300);
-        }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .scroll-to-top-button {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e5e5e5;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .footer-logo {
-            font-size: 20px;
-            font-weight: 700;
-            color: white;
+        .scroll-to-top-button:hover {
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .footer-links {
-            display: flex;
-            gap: 24px;
+        .scroll-to-top-button svg {
+            width: 24px;
+            height: 24px;
+            color: #666;
         }
 
-        .footer-links a {
-            color: var(--lg-gray-300);
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        /* Loading State */
-        .loading-overlay {
+        /* ============================================
+           스펙 요약 정보 모달
+           ============================================ */
+        .spec-modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: white;
-            display: flex;
-            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
         }
 
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid var(--lg-gray-200);
-            border-top-color: var(--lg-red);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .spec-modal.active {
+            display: flex;
+        }
+
+        .spec-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .spec-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #1a1a1a;
+            padding: 0;
+        }
+
+        .spec-modal-close:hover {
+            color: #666;
+        }
+
+        .spec-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
             margin-bottom: 24px;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .spec-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .loading-text {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--lg-gray-700);
-            margin-bottom: 8px;
-        }
-
-        .loading-subtext {
+        .spec-item {
             font-size: 14px;
-            color: var(--lg-gray-500);
+            color: #1a1a1a;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            padding-left: 0;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .product-container {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .product-section:nth-child(odd) .product-container {
-                direction: ltr;
-            }
-
-            .total-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .spec-item:last-child {
+            margin-bottom: 0;
         }
 
+        .spec-item:before {
+            content: "• ";
+            color: #1a1a1a;
+            margin-right: 8px;
+        }
+
+        /* ============================================
+           Bottom Action Buttons
+           ============================================ */
+        .bottom-actions {
+            background: #fff;
+            padding: 40px;
+            border-top: none;
+        }
+
+        .bottom-actions-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .bottom-actions-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .bottom-actions-row-single {
+            display: flex;
+            justify-content: center;
+        }
+
+        .action-button {
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            color: #fff;
+            background: #1a1a1a;
+        }
+
+        .action-button:hover {
+            background: #333;
+        }
+
+        .action-button svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        .action-button-large {
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            color: #fff;
+            background: #FF456D;
+            text-align: center;
+        }
+
+        .action-button-large:hover {
+            background: #ff5c7d;
+        }
+
+        /* ============================================
+           Toast Notification
+           ============================================ */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* ============================================
+           Responsive
+           ============================================ */
         @media (max-width: 768px) {
-            .floating-header {
-                padding: 8px 16px;
-                gap: 8px;
+            .header-wrapper {
+                padding: 0 20px;
             }
 
-            .floating-btn span {
-                display: none;
+            .breadcrumb-wrapper {
+                padding: 0 20px;
             }
 
-            .style-title {
-                font-size: 32px;
+            .banner-section {
+                height: 500px;
             }
 
-            .package-summary {
-                gap: 24px;
-            }
-
-            .product-name {
+            .banner-title {
                 font-size: 24px;
             }
 
-            .products-grid {
-                grid-template-columns: 1fr;
+            .banner-description {
+                font-size: 16px;
             }
 
-            .footer-container {
-                flex-direction: column;
+            .top-action-bar {
+                right: 20px;
+                top: 140px;
+            }
+
+            .retry-section {
+                left: 20px;
+                top: 140px;
+            }
+
+            .product-content {
+                grid-template-columns: 1fr;
                 gap: 24px;
-                text-align: center;
+            }
+
+            .product-item {
+                padding: 24px;
             }
         }
     </style>
 </head>
-<body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">맞춤 가전을 찾고 있어요</div>
-        <div class="loading-subtext">잠시만 기다려 주세요...</div>
-    </div>
 
-    <!-- Floating Header -->
-    <header class="floating-header">
-        <a href="/onboarding/" class="floating-btn">
-            🔄 <span>다시하기</span>
-        </a>
-        <div class="floating-divider"></div>
-        <button class="floating-btn" onclick="saveResult()">
-            💾 <span>저장</span>
-        </button>
-        <button class="floating-btn" onclick="shareKakao()">
-            💬 <span>공유</span>
-        </button>
-        <div class="floating-divider"></div>
-        <button class="floating-btn primary" onclick="addAllToCart()">
-            🛒 <span>전체 담기</span>
-        </button>
+<body>
+    <!-- ============================================
+         Header - onboarding.html과 동일한 구조
+         ============================================ -->
+    <header class="header">
+        <div class="header-wrapper">
+            <!-- 상단 줄 (Top Row) -->
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/" class="logo">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+                <div class="header-top-right">
+                    <div class="header-top-icons">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <a href="#" class="header-top-link">회사소개</a>
+                    <a href="#" class="header-top-link">사업자몰</a>
+                </div>
+            </div>
+            <!-- 하단 줄 (Bottom Row) -->
+            <div class="header-bottom-row">
+                <nav class="gnb">
+                    <a href="#" class="gnb-item">제품/소모품</a>
+                    <a href="#" class="gnb-item">고객지원</a>
+                    <a href="#" class="gnb-item">가전 구독</a>
+                    <a href="#" class="gnb-item">혜택/이벤트</a>
+                    <a href="#" class="gnb-item">스토리</a>
+                    <a href="#" class="gnb-item">베스트샵</a>
+                    <a href="#" class="gnb-item">LG AI</a>
+                    <span class="gnb-separator"></span>
+                    <a href="/lge/#" class="gnb-item home-style">
+                        <span class="home-style-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
+                        </span>
+                        홈스타일
+                    </a>
+                    <div class="gnb-brand">
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
+                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <div class="style-badge">
-                <span>✨</span>
-                <span id="styleBadgeText">당신을 위한 맞춤 스타일</span>
-            </div>
-            <h1 class="style-title" id="styleTitle">모던 & 미니멀 라이프를 위한<br>오브제 스타일</h1>
-            <p class="style-subtitle" id="styleSubtitle">
-                당신의 공간 분위기와 라이프스타일을 반영해<br>
-                Essence White 컬러의 오브제컬렉션 중심으로 구성했어요.
-            </p>
-            <div class="package-summary">
-                <div class="summary-item">
-                    <div class="summary-value" id="totalProducts">0<span class="unit">개</span></div>
-                    <div class="summary-label">추천 가전</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="totalDiscount">0<span class="unit">%</span></div>
-                    <div class="summary-label">평균 할인율</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" id="matchScore">0<span class="unit">%</span></div>
-                    <div class="summary-label">매칭 점수</div>
-                </div>
+    <!-- ============================================
+         Breadcrumb - onboarding.html과 동일한 구조
+         ============================================ -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/lge/#">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">가전패키지추천</span>
             </div>
         </div>
-        <div class="scroll-indicator">
-            <span>스크롤해서 확인하기</span>
-            <div class="scroll-arrow">↓</div>
-        </div>
-    </section>
+    </nav>
 
-    <!-- Product Sections (Dynamic) -->
-    <div id="productSections"></div>
+    <!-- ============================================
+         Main Content - 결과 페이지 본문
+         ============================================ -->
+    <main class="main-content">
+        <!-- 취향분석 다시하기 버튼 (왼쪽 상단 플로팅) -->
+        <div class="retry-section">
+            <button class="retry-button-icon" onclick="retryOnboarding()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <span class="retry-button-text">취향분석 다시하기</span>
+        </div>
 
-    <!-- Total Summary -->
-    <section class="total-section">
-        <div class="total-container">
-            <div class="total-header">
-                <h2 class="total-title">패키지 견적 요약</h2>
-                <p class="total-subtitle">선택하신 가전 패키지의 총 금액입니다</p>
+        <!-- 상단 액션 바 (오른쪽 상단 플로팅) -->
+        <div class="top-action-bar">
+            <div class="action-icon-button save" onclick="saveResult()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="tooltip">결과 저장하기</span>
             </div>
-            <div class="total-grid">
-                <div class="total-card">
-                    <div class="total-card-label">정가 합계</div>
-                    <div class="total-card-value" id="originalTotal">0원</div>
-                </div>
-                <div class="total-card">
-                    <div class="total-card-label">총 할인</div>
-                    <div class="total-card-value highlight" id="totalDiscountAmount">-0원</div>
-                </div>
-                <div class="total-card">
-                    <div class="total-card-label">최종 결제 예정금액</div>
-                    <div class="total-card-value" id="finalTotal">0원</div>
-                </div>
+            <div class="action-icon-button kakao" onclick="shareKakao()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <span class="tooltip">카카오톡 공유하기</span>
             </div>
-            <div class="total-actions">
-                <a href="https://bestshop.lge.co.kr/counselReserve/main/MC11420001?inflow=lgekor" 
-                   target="_blank" class="btn btn-white">
-                    📅 베스트샵 상담 예약
-                </a>
-                <button class="btn btn-outline" onclick="addAllToCart()">
-                    🛒 장바구니 모두 담기
-                </button>
-                <button class="btn btn-outline" onclick="scrollToAlternatives()">
-                    🔍 다른 추천 후보
-                </button>
+            <div class="action-icon-button link" onclick="copyLink()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                <span class="tooltip">URL 복사하기</span>
             </div>
         </div>
-    </section>
 
-    <!-- Alternative Products -->
-    <section class="alternatives-section" id="alternativesSection">
-        <div class="alternatives-container">
-            <div class="alternatives-header">
-                <h2 class="alternatives-title">다른 추천 후보</h2>
-                <p class="alternatives-subtitle">조건에 맞는 다른 모델도 확인해 보세요</p>
+        <!-- 배너 섹션 (이미지 + 텍스트 오버레이) -->
+        <div class="banner-section">
+            <img id="bannerImage" src="" alt="스타일 배너" class="banner-image">
+            <div class="banner-overlay">
+                <div class="style-analysis-label">스타일 분석</div>
+                <h1 class="banner-title" id="bannerTitle">둘만의 신혼 무드를 완성하는 오브제 스타일</h1>
+                <p class="banner-description" id="bannerDescription">
+                    당신의 공간 분위기와 요리 중심의 라이프스타일을 반영해 Essence White 컬러의 오브제컬렉션 냉장고, 광파오븐, 식기세척기로 구성했어요. 완성도와 기능성을 모두 갖춘 표준 예산 범위 내의 추천이에요.
+                </p>
+                <div class="appliance-icons-container">
+                    <div class="appliance-icons">
+                        <div class="appliance-icon" data-appliance="refrigerator">
+                            <div class="appliance-icon-circle">
+                                <img src="{% static 'images/가전 카테고리/냉장고.png' %}" alt="냉장고">
+                            </div>
+                            <span class="appliance-icon-label">냉장고</span>
+                        </div>
+                        <div class="appliance-icon" data-appliance="microwave">
+                            <div class="appliance-icon-circle">
+                                <img src="{% static 'images/가전 카테고리/광파오븐.png' %}" alt="광파오븐">
+                            </div>
+                            <span class="appliance-icon-label">광파오븐</span>
+                        </div>
+                        <div class="appliance-icon" data-appliance="dishwasher">
+                            <div class="appliance-icon-circle">
+                                <img src="{% static 'images/가전 카테고리/식기세척기.png' %}" alt="식기세척기">
+                            </div>
+                            <span class="appliance-icon-label">식기세척기</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="category-tabs" id="categoryTabs">
-                <button class="category-tab active" data-category="all">전체</button>
-                <button class="category-tab" data-category="refrigerator">냉장고</button>
-                <button class="category-tab" data-category="washer">세탁기</button>
-                <button class="category-tab" data-category="tv">TV</button>
-                <button class="category-tab" data-category="air">에어컨</button>
-            </div>
-            <div class="products-grid" id="productsGrid"></div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-logo">LG 홈스타일링</div>
-            <div class="footer-links">
-                <a href="#">이용약관</a>
-                <a href="#">개인정보처리방침</a>
-                <a href="#">고객센터</a>
+
+        <!-- 제품 리스트 -->
+        <div class="product-list-section">
+            <div class="product-list-container">
+                <!-- 제품 1: 냉장고 -->
+                <div class="product-item" id="product-refrigerator">
+                    <div class="product-image-wrapper">
+                        <img id="product-image-refrigerator" src="" alt="LG Dios AI Objet Collection 냉장고" class="product-image" onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+AI+Objet+Collection+Refrigerator'">
+                    </div>
+                    <div class="product-info">
+                        <div class="match-badge">취향 89% 일치</div>
+                        <h2 class="product-title">LG 디오스 AI 오브제컬렉션 STEM 얼음정수 냉장고 (노크온 매직스페이스)</h2>
+                        <div class="recommend-reason-box">
+                            <div class="recommend-reason-title">추천 이유</div>
+                            <div class="recommend-reason-text">용량이 크고 아이들과 함께하는 4인 가구와 함께 지내도 넉넉한 냉장고</div>
+                        </div>
+                        <div class="review-analysis-box">
+                            <div class="review-analysis-title">구매 리뷰 분석</div>
+                            <div class="review-analysis-text">이쁜 건 물론이고 공간 활용부터 성능, 수납력까지 대만족</div>
+                            <div class="review-analysis-text">가구장과 간격이 빌트인처럼 딱 맞아요</div>
+                        </div>
+                        <div class="price-section">
+                            <div class="price-section-title">구매 가격</div>
+                            <div class="price-row">
+                                <span class="price-original">3,340,000원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">판매가</span>
+                                <span class="price-original">2,140,000원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">최대 혜택가</span>
+                                <span class="price-final">1,990,200원</span>
+                            </div>
+                            <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
+                        </div>
+                        <button class="spec-button" onclick="openSpecModal('refrigerator')">스펙 요약 정보</button>
+                    </div>
+                </div>
+
+                <!-- 제품 2: 광파오븐 -->
+                <div class="product-item" id="product-microwave">
+                    <div class="product-image-wrapper">
+                        <img id="product-image-microwave" src="" alt="LG Dios Objet Collection 광파오븐" class="product-image" onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+Objet+Collection+Microwave'">
+                    </div>
+                    <div class="product-info">
+                        <div class="match-badge gray">취향 69% 일치</div>
+                        <h2 class="product-title">LG 디오스 오브제컬렉션 광파오븐</h2>
+                        <div class="recommend-reason-box">
+                            <div class="recommend-reason-title">추천 이유</div>
+                            <div class="recommend-reason-text">용량이 크고 아이들과 함께하는 4인 가구와 함께 지내도 넉넉한 냉장고</div>
+                        </div>
+                        <div class="review-analysis-box">
+                            <div class="review-analysis-title">구매 리뷰 분석</div>
+                            <div class="review-analysis-text">고급스러운 디자인</div>
+                            <div class="review-analysis-text">하나로 모든기능을 사용할수 있어서 편하고 좋아요</div>
+                        </div>
+                        <div class="price-section">
+                            <div class="price-section-title">구매 가격</div>
+                            <div class="price-row">
+                                <span class="price-original">1,065,000원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">판매가</span>
+                                <span class="price-original">950,000원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">최대 혜택가</span>
+                                <span class="price-final">855,600원</span>
+                            </div>
+                            <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
+                        </div>
+                        <button class="spec-button" onclick="openSpecModal('microwave')">스펙 요약 정보</button>
+                    </div>
+                </div>
+
+                <!-- 제품 3: 식기세척기 -->
+                <div class="product-item" id="product-dishwasher">
+                    <div class="product-image-wrapper">
+                        <img id="product-image-dishwasher" src="" alt="LG Dios AI Objet Collection 식기세척기" class="product-image" onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+AI+Objet+Collection+Dishwasher'">
+                    </div>
+                    <div class="product-info">
+                        <div class="match-badge">취향 75% 일치</div>
+                        <h2 class="product-title">LG 디오스 AI 오브제컬렉션 식기세척기</h2>
+                        <div class="recommend-reason-box">
+                            <div class="recommend-reason-title">추천 이유</div>
+                            <div class="recommend-reason-text">용량이 크고 아이들과 함께하는 4인 가구와 함께 지내도 넉넉한 냉장고</div>
+                        </div>
+                        <div class="review-analysis-box">
+                            <div class="review-analysis-title">구매 리뷰 분석</div>
+                            <div class="review-analysis-text">TV는 역시 LG</div>
+                            <div class="review-analysis-text">집에서도 영화관 같은 분위기</div>
+                        </div>
+                        <div class="price-section">
+                            <div class="price-section-title">구매 가격</div>
+                            <div class="price-row">
+                                <span class="price-original">2,080,000원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">판매가</span>
+                                <span class="price-original">1,960,000원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">최대 혜택가</span>
+                                <span class="price-final">1,960,000원</span>
+                            </div>
+                            <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
+                        </div>
+                        <button class="spec-button" onclick="openSpecModal('dishwasher')">스펙 요약 정보</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </footer>
+
+        <!-- Bottom Action Buttons -->
+        <div class="bottom-actions">
+            <div class="bottom-actions-container">
+                <div class="bottom-actions-row">
+                    <button class="action-button" onclick="addAllToCart()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        장바구니 모두 담기
+                    </button>
+                    <button class="action-button" onclick="retryOnboarding()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        다시 추천받기
+                    </button>
+                    <button class="action-button" onclick="bookBestShop()">
+                        베스트샵 상담예약
+                    </button>
+                </div>
+                <div class="bottom-actions-row-single">
+                    <button class="action-button-large" onclick="checkOtherRecommendations()">
+                        다른 추천 후보 확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 페이지 오른쪽 하단 스크롤 버튼 -->
+    <button class="scroll-to-top-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
+    <!-- 스펙 요약 정보 모달 -->
+    <div class="spec-modal" id="specModal">
+        <div class="spec-modal-content">
+            <button class="spec-modal-close" onclick="closeSpecModal()">×</button>
+            <h2 class="spec-modal-title">스펙 요약 정보</h2>
+            <ul class="spec-list" id="specList">
+                <!-- 스펙 정보가 여기에 동적으로 추가됩니다 -->
+            </ul>
+        </div>
+    </div>
 
     <script>
-        // 온보딩 데이터 파싱
-        const urlParams = new URLSearchParams(window.location.search);
-        const onboardingData = urlParams.get('data') ? JSON.parse(decodeURIComponent(urlParams.get('data'))) : null;
+        // ============================================
+        // 제품 데이터 로드 및 이미지 설정
+        // ============================================
+        async function loadProductImages() {
+            try {
+                // 세션 ID 가져오기
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                if (!sessionId) {
+                    console.warn('세션 ID가 없습니다. 기본 이미지 사용');
+                    // 세션이 없어도 페이지는 정상 표시되도록 함
+                    return;
+                }
 
-        // 스타일 메시지 생성
-        const styleMessages = {
-            modern: {
-                badge: "모던 & 미니멀",
-                title: "모던 & 미니멀 라이프를 위한<br>오브제 스타일",
-                subtitle: "당신의 공간 분위기와 라이프스타일을 반영해<br>Essence White 컬러의 오브제컬렉션 중심으로 구성했어요."
-            },
-            cozy: {
-                badge: "따뜻한 코지",
-                title: "따뜻하고 자연스러운<br>코지 패밀리 스타일",
-                subtitle: "Nature Beige 톤과 패밀리 구성에 최적화된<br>대용량 가전과 에너지 효율 중심 조합이에요."
-            },
-            natural: {
-                badge: "내추럴 & 네이처",
-                title: "자연을 닮은 따뜻한 취향의<br>라이프스타일 패키지",
-                subtitle: "은은하고 차분한 Nature Beige & Clay Brown 무드로<br>전체 공간이 조화롭게 어울립니다."
-            },
-            luxury: {
-                badge: "럭셔리 & 프리미엄",
-                title: "프리미엄 감성과 성능을 모두 챙긴<br>고급형 라이프스타일",
-                subtitle: "고급형 예산을 반영해 프리미엄·시그니처 중심으로 구성했습니다."
+                // 온보딩 세션에서 추천 결과 가져오기
+                const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                
+                if (!response.ok) {
+                    console.warn('세션 조회 실패:', response.status);
+                    // API 실패해도 페이지는 정상 표시되도록 함
+                    return;
+                }
+                
+                const data = await response.json();
+
+                if (data.success && data.session && data.session.recommendation_result) {
+                    const recommendations = data.session.recommendation_result.recommendations || [];
+                    
+                    // 제품 순서대로 매핑 (첫 번째: 냉장고, 두 번째: 광파오븐, 세 번째: 식기세척기)
+                    const productIds = ['refrigerator', 'microwave', 'dishwasher'];
+                    
+                    recommendations.forEach((product, index) => {
+                        if (index < productIds.length) {
+                            const productId = productIds[index];
+                            
+                            // 제품명으로 이미지 URL 가져오기
+                            if (product.name) {
+                                loadProductImageByName(productId, product.name);
+                            } else if (product.image_url) {
+                                // 기존 image_url이 있으면 사용
+                                const imgElement = document.getElementById(`product-image-${productId}`);
+                                if (imgElement) {
+                                    imgElement.src = product.image_url;
+                                }
+                            }
+                            
+                            // 제품 정보 업데이트
+                            updateProductInfo(productId, product);
+                        }
+                    });
+                    
+                    // 제품 정보 업데이트 후 취향 일치도 색상 설정
+                    updateMatchBadgeColors();
+                } else {
+                    console.warn('추천 결과가 없습니다. 기본 이미지 사용');
+                }
+            } catch (error) {
+                console.error('제품 이미지 로드 오류:', error);
+                // 에러가 발생해도 페이지는 정상 표시되도록 함
             }
-        };
+        }
 
-        // 샘플 제품 데이터
-        const sampleProducts = [
-            {
-                id: 1,
-                category: 'refrigerator',
-                categoryDisplay: '냉장고',
-                name: 'LG 오브제컬렉션 냉장고',
-                model: 'M874GBB551',
-                description: '870L 대용량으로 4인 가족에게 최적화된 용량입니다. ThinQ 앱과 연동하여 스마트하게 관리하세요.',
-                reason: '가족 수에 맞는 대용량, 원하는 예산 범위 내',
-                price: 4290000,
-                discountPrice: 3490000,
-                matchScore: 96,
-                image: 'https://www.lge.co.kr/kr/images/refrigerators/md09023534/gallery/medium01.jpg'
-            },
-            {
-                id: 2,
-                category: 'washer',
-                categoryDisplay: '세탁기',
-                name: 'LG 트롬 오브제컬렉션 워시타워',
-                model: 'WL20HMZ',
-                description: '세탁기와 건조기가 하나로! 공간 효율성을 극대화하고 AI DD가 최적의 세탁 코스를 자동 선택합니다.',
-                reason: '세탁 빈도에 맞는 대용량, 공간 효율 극대화',
-                price: 3890000,
-                discountPrice: 2990000,
-                matchScore: 94,
-                image: 'https://www.lge.co.kr/kr/images/washers/md09023538/gallery/medium01.jpg'
-            },
-            {
-                id: 3,
-                category: 'tv',
-                categoryDisplay: 'TV',
-                name: 'LG OLED evo TV',
-                model: 'OLED77C4FNA',
-                description: '77인치 대화면으로 영화관 같은 몰입감을 선사합니다. α9 Gen7 AI 프로세서가 완벽한 화질을 구현합니다.',
-                reason: '미디어 소비 패턴에 맞춤, 거실 크기 최적화',
-                price: 5290000,
-                discountPrice: 3990000,
-                matchScore: 92,
-                image: 'https://www.lge.co.kr/kr/images/tv/md09023540/gallery/medium01.jpg'
-            },
-            {
-                id: 4,
-                category: 'air',
-                categoryDisplay: '에어컨',
-                name: 'LG 휘센 오브제컬렉션 타워',
-                model: 'FQ18HDWBA1',
-                description: '18평형 원형 타워 에어컨으로 360° 입체 냉방을 제공합니다. 반려동물 케어 기능으로 펫 가정에도 최적화.',
-                reason: '평수에 맞는 용량, 반려동물 케어 기능',
-                price: 2890000,
-                discountPrice: 2290000,
-                matchScore: 90,
-                image: 'https://www.lge.co.kr/kr/images/air-conditioners/md09023542/gallery/medium01.jpg'
+        // 제품명으로 이미지 URL 가져오기
+        async function loadProductImageByName(productId, productName) {
+            try {
+                const response = await fetch(`/api/products/image-by-name/?name=${encodeURIComponent(productName)}`);
+                const data = await response.json();
+                
+                if (data.success && data.image_url) {
+                    const imgElement = document.getElementById(`product-image-${productId}`);
+                    if (imgElement) {
+                        imgElement.src = data.image_url;
+                        console.log(`제품 이미지 로드: ${productId} -> ${data.image_url}`);
+                    }
+                } else {
+                    console.warn(`이미지 URL을 찾을 수 없습니다: ${productName}`);
+                }
+            } catch (error) {
+                console.error(`제품 이미지 로드 오류 (${productName}):`, error);
             }
-        ];
+        }
 
-        // 대체 제품 데이터
-        const alternativeProducts = [
-            { ...sampleProducts[0], id: 5, name: 'LG 디오스 얼음정수기냉장고', price: 3890000, discountPrice: 3190000, reason: '합리적 가격대' },
-            { ...sampleProducts[1], id: 6, name: 'LG 트롬 드럼세탁기', price: 1890000, discountPrice: 1490000, reason: '1인 가구 추천' },
-            { ...sampleProducts[2], id: 7, name: 'LG QNED TV 65인치', price: 2890000, discountPrice: 1990000, reason: '가성비 추천' },
-            { ...sampleProducts[3], id: 8, name: 'LG 휘센 벽걸이 에어컨', price: 1290000, discountPrice: 990000, reason: '소형 공간 추천' },
-            { ...sampleProducts[0], id: 9, name: 'LG 오브제컬렉션 김치냉장고', price: 2490000, discountPrice: 1990000, reason: '한식 요리 필수템' },
-            { ...sampleProducts[1], id: 10, name: 'LG 스타일러', price: 1890000, discountPrice: 1490000, reason: '의류 케어 추천' },
-        ];
-
-        // 페이지 초기화
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                initializePage();
-                document.getElementById('loadingOverlay').style.display = 'none';
-            }, 1500);
-        });
-
-        function initializePage() {
-            // 스타일 메시지 설정
-            const style = onboardingData?.style || 'modern';
-            const styleData = styleMessages[style];
+        // 제품 정보 업데이트 함수
+        function updateProductInfo(productId, product) {
+            // 제품명 업데이트
+            const titleElement = document.querySelector(`#product-${productId} .product-title`);
+            if (titleElement && product.name) {
+                titleElement.textContent = product.name;
+            }
             
-            document.getElementById('styleBadgeText').textContent = styleData.badge;
-            document.getElementById('styleTitle').innerHTML = styleData.title;
-            document.getElementById('styleSubtitle').innerHTML = styleData.subtitle;
-
-            // 요약 정보
-            document.getElementById('totalProducts').innerHTML = `${sampleProducts.length}<span class="unit">개</span>`;
-            document.getElementById('totalDiscount').innerHTML = `24<span class="unit">%</span>`;
-            document.getElementById('matchScore').innerHTML = `93<span class="unit">%</span>`;
-
-            // 제품 섹션 렌더링
-            renderProductSections();
-
-            // 가격 요약 업데이트
-            updatePriceSummary();
-
-            // 대체 제품 렌더링
-            renderAlternativeProducts('all');
-
-            // 카테고리 탭 이벤트
-            setupCategoryTabs();
-        }
-
-        function renderProductSections() {
-            const container = document.getElementById('productSections');
-            container.innerHTML = sampleProducts.map((product, index) => `
-                <section class="product-section">
-                    <div class="product-container">
-                        <div class="product-image-wrapper">
-                            <img src="${product.image}" alt="${product.name}" class="product-image" 
-                                 onerror="this.src='https://via.placeholder.com/600x400?text=LG+Product'">
-                            <div class="match-badge">${product.matchScore}% 매칭</div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">${product.categoryDisplay}</div>
-                            <h2 class="product-name">${product.name}</h2>
-                            <div class="product-model">${product.model}</div>
-                            <p class="product-description">${product.description}</p>
-                            <div class="recommend-reason">
-                                <div class="recommend-reason-title">✨ 추천 이유</div>
-                                <div class="recommend-reason-text">${product.reason}</div>
-                            </div>
-                            <div class="price-section">
-                                <span class="price-original">${formatPrice(product.price)}원</span>
-                                <span class="price-discount">${formatPrice(product.discountPrice)}<span class="won">원</span></span>
-                                <span class="price-badge">${Math.round((1 - product.discountPrice / product.price) * 100)}% OFF</span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn btn-primary" onclick="addToCart(${product.id})">
-                                    🛒 장바구니 담기
-                                </button>
-                                <a href="https://www.lge.co.kr/search?search=${product.model}" target="_blank" class="btn btn-secondary">
-                                    🔗 상세보기
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            `).join('');
-        }
-
-        function updatePriceSummary() {
-            const originalTotal = sampleProducts.reduce((sum, p) => sum + p.price, 0);
-            const discountTotal = sampleProducts.reduce((sum, p) => sum + p.discountPrice, 0);
-            const savings = originalTotal - discountTotal;
-
-            document.getElementById('originalTotal').textContent = formatPrice(originalTotal) + '원';
-            document.getElementById('totalDiscountAmount').textContent = '-' + formatPrice(savings) + '원';
-            document.getElementById('finalTotal').textContent = formatPrice(discountTotal) + '원';
-        }
-
-        function renderAlternativeProducts(category) {
-            const filtered = category === 'all' 
-                ? alternativeProducts 
-                : alternativeProducts.filter(p => p.category === category);
+            // 취향 일치도 업데이트 및 색상 설정
+            const matchBadge = document.querySelector(`#product-${productId} .match-badge`);
+            if (matchBadge && product.score !== undefined) {
+                const matchPercent = Math.round(product.score * 100);
+                matchBadge.textContent = `취향 ${matchPercent}% 일치`;
+                
+                // 70% 이상이면 빨간색, 미만이면 회색
+                if (matchPercent >= 70) {
+                    matchBadge.classList.remove('gray');
+                } else {
+                    matchBadge.classList.add('gray');
+                }
+            }
             
-            const grid = document.getElementById('productsGrid');
-            grid.innerHTML = filtered.map(product => `
-                <div class="product-card" onclick="viewProduct(${product.id})">
-                    <img src="${product.image}" alt="${product.name}" class="product-card-image"
-                         onerror="this.src='https://via.placeholder.com/400x200?text=LG+Product'">
-                    <div class="product-card-content">
-                        <div class="product-card-category">${product.categoryDisplay}</div>
-                        <div class="product-card-name">${product.name}</div>
-                        <div class="product-card-price">${formatPrice(product.discountPrice)}원</div>
-                        <div class="product-card-reason">💡 ${product.reason}</div>
-                    </div>
-                </div>
-            `).join('');
+            // 추천 이유 업데이트
+            const reasonText = document.querySelector(`#product-${productId} .recommend-reason-text`);
+            if (reasonText && product.reason) {
+                reasonText.textContent = product.reason;
+            }
+            
+            // 가격 업데이트
+            if (product.price !== undefined) {
+                const priceFinal = document.querySelector(`#product-${productId} .price-final`);
+                if (priceFinal) {
+                    priceFinal.textContent = `${formatPrice(product.discount_price || product.price)}원`;
+                }
+                
+                const priceOriginal = document.querySelectorAll(`#product-${productId} .price-original`);
+                if (priceOriginal.length > 0 && product.price) {
+                    priceOriginal[0].textContent = `${formatPrice(product.price)}원`;
+                }
+                if (priceOriginal.length > 1 && product.discount_price) {
+                    priceOriginal[1].textContent = `${formatPrice(product.discount_price)}원`;
+                }
+            }
         }
 
-        function setupCategoryTabs() {
-            document.querySelectorAll('.category-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    renderAlternativeProducts(tab.dataset.category);
+        // 가격 포맷팅 함수
+        function formatPrice(price) {
+            if (!price) return '0';
+            return Math.round(price).toLocaleString('ko-KR');
+        }
+
+        // 스펙 모달 열기
+        function openSpecModal(productId) {
+            const modal = document.getElementById('specModal');
+            const specList = document.getElementById('specList');
+            
+            // 제품 스펙 데이터 가져오기
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            if (!sessionId) {
+                alert('세션 정보를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 세션에서 제품 정보 가져오기
+            fetch(`/api/onboarding/session/${sessionId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.session && data.session.recommendation_result) {
+                        const recommendations = data.session.recommendation_result.recommendations || [];
+                        const productIds = ['refrigerator', 'microwave', 'dishwasher'];
+                        const index = productIds.indexOf(productId);
+                        
+                        if (index >= 0 && index < recommendations.length) {
+                            const product = recommendations[index];
+                            displaySpecModal(product);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('스펙 정보 로드 오류:', error);
+                    // 기본 스펙 정보 표시
+                    displaySpecModal(null, productId);
                 });
+            
+            modal.classList.add('active');
+        }
+
+        // 스펙 모달 닫기
+        function closeSpecModal() {
+            const modal = document.getElementById('specModal');
+            modal.classList.remove('active');
+        }
+
+        // 스펙 정보 표시
+        function displaySpecModal(product, productId = null) {
+            const specList = document.getElementById('specList');
+            specList.innerHTML = '';
+            
+            if (product && product.product_id) {
+                // API에서 제품 스펙 가져오기
+                fetch(`/api/products/${product.product_id}/spec/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.specs) {
+                            const specs = data.specs;
+                            
+                            // 스펙 키 매핑 (다양한 키 이름 지원)
+                            const specMappings = {
+                                '전체 용량 (L)': [
+                                    specs['전체 용량 (L)'], specs['전체 용량'], specs['용량'], specs['총 용량'],
+                                    specs['냉장실 용량'], specs['냉동실 용량'], specs['총용량']
+                                ],
+                                '색상': [
+                                    specs['색상'], specs['컬러'], specs['색상명'], specs['제품 색상']
+                                ],
+                                '도어스타일/재질': [
+                                    specs['도어스타일/재질'], specs['도어스타일'], specs['재질'], specs['도어 재질'],
+                                    specs['도어 스타일'], specs['도어 재료']
+                                ],
+                                '냉각방식': [
+                                    specs['냉각방식'], specs['냉각 방식'], specs['냉각 시스템'], specs['냉각기술']
+                                ],
+                                '에너지 소비효율등급': [
+                                    specs['에너지 소비효율등급'], specs['에너지 효율등급'], specs['에너지 효율'],
+                                    specs['효율등급'], specs['에너지등급'], specs['소비효율등급']
+                                ]
+                            };
+                            
+                            // 각 스펙 항목 생성
+                            Object.keys(specMappings).forEach(key => {
+                                const values = specMappings[key];
+                                const value = values.find(v => v !== undefined && v !== null && v !== '');
+                                
+                                if (value) {
+                                    const li = document.createElement('li');
+                                    li.className = 'spec-item';
+                                    li.textContent = `${key}: ${value}`;
+                                    specList.appendChild(li);
+                                }
+                            });
+                            
+                            // 스펙이 하나도 없으면 메시지 표시
+                            if (specList.children.length === 0) {
+                                specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
+                            }
+                        } else {
+                            // 기본 스펙 정보
+                            specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('스펙 정보 로드 오류:', error);
+                        specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
+                    });
+            } else {
+                // 기본 스펙 정보
+                specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
+            }
+        }
+
+        // 취향 일치도 배지 색상 업데이트
+        function updateMatchBadgeColors() {
+            document.querySelectorAll('.match-badge').forEach(badge => {
+                const text = badge.textContent;
+                const match = text.match(/(\d+)%/);
+                if (match) {
+                    const percent = parseInt(match[1]);
+                    if (percent >= 70) {
+                        badge.classList.remove('gray');
+                    } else {
+                        badge.classList.add('gray');
+                    }
+                }
             });
         }
 
-        function formatPrice(price) {
-            return price.toLocaleString('ko-KR');
-        }
+        // 모달 외부 클릭 시 닫기
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('specModal');
+            if (event.target === modal) {
+                closeSpecModal();
+            }
+        });
 
-        function addToCart(productId) {
-            alert(`제품 ${productId}이(가) 장바구니에 담겼습니다.`);
-        }
-
-        function addAllToCart() {
-            alert('모든 제품이 장바구니에 담겼습니다.');
-        }
-
-        // ============================================================
-        // 🔥 서버 저장 기능
-        // ============================================================
-        let savedPortfolioId = null;
-
-        async function saveResult() {
-            const saveBtn = document.querySelector('.floating-btn[onclick="saveResult()"]');
-            const originalText = saveBtn.innerHTML;
+        // ============================================
+        // vibe 값에 따라 배너 이미지 변경
+        // ============================================
+        let isInitialized = false;
+        
+        function initPage() {
+            // 제품 이미지 로드 (비동기이므로 await하지 않음)
+            loadProductImages().catch(err => {
+                console.error('제품 이미지 로드 실패:', err);
+            });
             
-            try {
-                // 로딩 표시
-                saveBtn.innerHTML = '💾 <span>저장 중...</span>';
-                saveBtn.disabled = true;
+            // sessionStorage에서 vibe 값 가져오기
+            const vibe = sessionStorage.getItem('step1_vibe');
+            
+            // vibe 값에 따른 이미지 매핑
+            const vibeImagePaths = {
+                'modern': '{% static "images/신혼 무드_모던_미니멀.png" %}',
+                'cozy': '{% static "images/코지_네이처.png" %}',
+                'pop': '{% static "images/신혼 무드_유니크_팝.png" %}',
+                'luxury': '{% static "images/하이엔드_럭셔리.png" %}'
+            };
 
-                // 스타일 정보
-                const style = onboardingData?.style || 'modern';
-                const styleData = styleMessages[style];
+            // vibe 값에 따른 제목 매핑
+            const vibeTitleMap = {
+                'modern': '둘만의 신혼 무드를 완성하는 오브제 스타일',
+                'cozy': '따뜻한 자연의 감성을 담은 오브제 스타일',
+                'pop': '유니크하고 컬러풀한 오브제 스타일',
+                'luxury': '럭셔리한 프리미엄 오브제 스타일'
+            };
 
-                // 서버에 저장 요청
-                const response = await fetch('/api/portfolio/save/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_id: getUserId(),
-                        style_type: style,
-                        style_title: styleData.title.replace(/<br>/g, ' '),
-                        style_subtitle: styleData.subtitle.replace(/<br>/g, ' '),
-                        onboarding_data: onboardingData || {},
-                        products: sampleProducts,
-                        match_score: 93
-                    })
-                });
+            // vibe 값에 따른 설명 매핑
+            const vibeDescriptionMap = {
+                'modern': '당신의 공간 분위기와 요리 중심의 라이프스타일을 반영해 Essence White 컬러의 오브제컬렉션 냉장고, 광파오븐, 식기세척기로 구성했어요.<br>완성도와 기능성을 모두 갖춘 표준 예산 범위 내의 추천이에요.',
+                'cozy': '자연스러운 우드 톤과 코지한 분위기를 반영해 Nature Beige 컬러의 오브제컬렉션으로 구성했어요.<br>따뜻하고 편안한 공간을 만들어줄 가전 패키지예요.',
+                'pop': '유니크하고 컬러풀한 감성을 담아 다양한 컬러의 오브제컬렉션으로 구성했어요.<br>개성 있는 공간을 완성할 수 있는 추천이에요.',
+                'luxury': '고급스러운 프리미엄 감성을 반영해 하이엔드 오브제컬렉션으로 구성했어요.<br>최고의 품질과 성능을 갖춘 럭셔리한 가전 패키지예요.'
+            };
 
-                const result = await response.json();
+            // 배너 이미지 설정
+            const bannerImage = document.getElementById('bannerImage');
+            if (vibe && vibeImagePaths[vibe]) {
+                bannerImage.src = vibeImagePaths[vibe];
+            } else {
+                // 기본값
+                bannerImage.src = vibeImagePaths['modern'];
+            }
 
-                if (result.success) {
-                    savedPortfolioId = result.portfolio_id;
-                    
-                    // 성공 알림
-                    showToast(`✅ 포트폴리오가 저장되었습니다! (ID: ${result.portfolio_id})`);
-                    
-                    // URL 업데이트 (뒤로가기 시에도 유지)
-                    history.replaceState(null, '', `/portfolio/${result.portfolio_id}/`);
-                    
-                    // 버튼 텍스트 변경
-                    saveBtn.innerHTML = '✅ <span>저장됨</span>';
-                } else {
-                    throw new Error(result.error || '저장 실패');
+            // 제목과 설명 업데이트
+            if (vibe && vibeTitleMap[vibe]) {
+                document.getElementById('bannerTitle').textContent = vibeTitleMap[vibe];
+            }
+            if (vibe && vibeDescriptionMap[vibe]) {
+                document.getElementById('bannerDescription').innerHTML = vibeDescriptionMap[vibe];
+            }
+            
+            // 하이엔드_럭셔리.png와 신혼 무드_유니크_팝.png 사용 시 모든 텍스트를 흰색으로 변경
+            const styleAnalysisLabel = document.querySelector('.style-analysis-label');
+            const bannerTitle = document.getElementById('bannerTitle');
+            const bannerDescription = document.getElementById('bannerDescription');
+            const bannerOverlay = document.querySelector('.banner-overlay');
+            
+            if (vibe === 'luxury' || vibe === 'pop') {
+                // 텍스트 색상을 흰색으로 변경
+                if (styleAnalysisLabel) {
+                    styleAnalysisLabel.style.color = '#fff';
                 }
+                if (bannerTitle) {
+                    bannerTitle.classList.add('white');
+                }
+                if (bannerDescription) {
+                    bannerDescription.classList.add('white');
+                }
+                // 오버레이 제거하여 이미지가 선명하게 보이도록
+                if (bannerOverlay) {
+                    bannerOverlay.classList.remove('has-overlay');
+                }
+            } else {
+                // 다른 vibe일 때는 오버레이 적용
+                if (bannerOverlay) {
+                    bannerOverlay.classList.add('has-overlay');
+                }
+            }
+        }
+        
+        // DOMContentLoaded 이벤트 리스너 등록 (한 번만 실행되도록 보장)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!isInitialized) {
+                    isInitialized = true;
+                    initPage();
+                }
+            }, { once: true }); // once 옵션으로 한 번만 실행
+        } else {
+            // 이미 로드되었으면 즉시 실행
+            if (!isInitialized) {
+                isInitialized = true;
+                initPage();
+            }
+        }
+
+
+        // ============================================
+        // 제품으로 자동 스크롤
+        // ============================================
+        function scrollToProduct(applianceId) {
+            const productElement = document.getElementById(`product-${applianceId}`);
+            if (productElement) {
+                productElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 배너의 가전 아이콘 클릭 시에도 스크롤
+        function initApplianceIcons() {
+            document.querySelectorAll('.appliance-icon').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const applianceId = this.dataset.appliance;
+                    scrollToProduct(applianceId);
+                });
+            });
+        }
+        
+        // DOMContentLoaded에서 한 번만 실행
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApplianceIcons);
+        } else {
+            initApplianceIcons();
+        }
+
+        // ============================================
+        // 취향분석 다시하기
+        // ============================================
+        function retryOnboarding() {
+            // 온보딩 1단계로 이동 (저장된 정보는 그대로 유지)
+            window.location.href = '/onboarding/';
+        }
+
+        // ============================================
+        // 장바구니 모두 담기
+        // ============================================
+        function addAllToCart() {
+            // TODO: 장바구니에 모든 추천 제품 추가
+            showToast('장바구니에 추가되었습니다.');
+        }
+
+        // ============================================
+        // 베스트샵 상담예약
+        // ============================================
+        function bookBestShop() {
+            // 베스트샵 예약 페이지로 이동
+            window.open('https://bestshop.lge.co.kr/counselReserve/main/MC11420001?inflow=lgekor', '_blank');
+        }
+
+        // ============================================
+        // 다른 추천 후보 확인
+        // ============================================
+        function checkOtherRecommendations() {
+            // TODO: 다른 추천 후보 확인 기능 구현
+            showToast('다른 추천 후보 확인 기능 준비 중입니다.');
+        }
+
+        // ============================================
+        // 결과 저장하기
+        // ============================================
+        async function saveResult() {
+            try {
+                // TODO: API 호출하여 결과 저장
+                showToast('결과가 저장되었습니다.');
             } catch (error) {
                 console.error('저장 오류:', error);
-                showToast(`❌ 저장 실패: ${error.message}`);
-                saveBtn.innerHTML = originalText;
-            } finally {
-                saveBtn.disabled = false;
+                showToast('저장 중 오류가 발생했습니다.');
             }
         }
 
-        // 사용자 ID 가져오기 (카카오 로그인 연동 전까지는 세션 기반)
-        function getUserId() {
-            let userId = localStorage.getItem('lg_homestyling_user_id');
-            if (!userId) {
-                userId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('lg_homestyling_user_id', userId);
-            }
-            return userId;
-        }
-
-        // ============================================================
-        // 🟡 카카오톡 공유 기능
-        // ============================================================
-        const KAKAO_JS_KEY = '{{ kakao_js_key|default:"" }}';
-        let kakaoInitialized = false;
-        let kakaoSDKLoading = false;
-        let kakaoSDKLoaded = false;
-
-        function initKakao() {
-            if (typeof Kakao !== 'undefined' && !kakaoInitialized && KAKAO_JS_KEY) {
-                try {
-                    if (!Kakao.isInitialized()) {
-                        Kakao.init(KAKAO_JS_KEY);
-                        console.log('[Kakao] SDK 초기화 완료');
-                    }
-                    kakaoInitialized = true;
-                    kakaoSDKLoaded = true;
-                } catch (error) {
-                    console.error('[Kakao] 초기화 실패:', error);
-                }
-            }
-        }
-
-        // 카카오 SDK 로드
-        (function loadKakaoSDK() {
-            if (!KAKAO_JS_KEY) {
-                console.warn('[Kakao] JavaScript 키가 설정되지 않았습니다.');
-                return;
-            }
-            
-            if (kakaoSDKLoading) return;
-            kakaoSDKLoading = true;
-            
-            const script = document.createElement('script');
-            script.src = 'https://t1.kakaocdn.net/kakao_js_sdk/2.6.0/kakao.min.js';
-            script.integrity = 'sha384-6MFdIr0zOira1CHQkedUqJVql0YtcZA1P0nbPrQYJXVJZUkTk/oX4U9GhLYdmfPcR';
-            script.crossOrigin = 'anonymous';
-            script.onload = function() {
-                console.log('[Kakao] SDK 스크립트 로드 완료');
-                initKakao();
-            };
-            script.onerror = function() {
-                console.error('[Kakao] SDK 스크립트 로드 실패');
-                kakaoSDKLoading = false;
-            };
-            document.head.appendChild(script);
-        })();
-
-        // SDK 로드 대기 함수
-        function waitForKakaoSDK(callback, maxWaitTime = 5000) {
-            const startTime = Date.now();
-            
-            function check() {
-                if (typeof Kakao !== 'undefined' && kakaoSDKLoaded) {
-                    callback();
-                } else if (Date.now() - startTime < maxWaitTime) {
-                    setTimeout(check, 100);
-                } else {
-                    showToast('카카오 SDK 로딩에 시간이 걸리고 있습니다. 잠시 후 다시 시도해주세요.');
-                }
-            }
-            
-            check();
-        }
-
-        function shareKakao() {
-            if (!KAKAO_JS_KEY) {
-                showToast('카카오톡 공유 기능을 사용할 수 없습니다. 관리자에게 문의해주세요.');
-                return;
-            }
-            
-            // 포트폴리오 저장 여부 확인
-            if (!savedPortfolioId) {
-                showShareOptionsModal();
-                return;
-            }
-            
-            // SDK가 아직 로드되지 않았으면 대기
-            if (typeof Kakao === 'undefined' || !kakaoSDKLoaded) {
-                waitForKakaoSDK(function() {
-                    executeKakaoShare();
-                });
-                return;
-            }
-            
-            executeKakaoShare();
-        }
-
-        function showShareOptionsModal() {
-            // 공유 옵션 모달
-            const modal = document.createElement('div');
-            modal.id = 'shareModal';
-            modal.innerHTML = `
-                <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;">
-                    <div style="background:white;border-radius:20px;padding:32px;max-width:360px;width:90%;text-align:center;">
-                        <div style="font-size:48px;margin-bottom:16px;">💬</div>
-                        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px;">공유하기</h3>
-                        <p style="font-size:14px;color:#6B6B6B;margin-bottom:24px;">저장하고 공유하면 링크가 생성돼요!</p>
-                        <div style="display:flex;flex-direction:column;gap:12px;">
-                            <button onclick="saveAndShare()" style="padding:14px;border-radius:12px;border:none;background:#FEE500;color:#191919;font-size:15px;font-weight:600;cursor:pointer;">
-                                💾 저장하고 카카오톡 공유
-                            </button>
-                            <button onclick="shareLinkOnly()" style="padding:14px;border-radius:12px;border:none;background:#F5F5F5;color:#4A4A4A;font-size:15px;font-weight:600;cursor:pointer;">
-                                📋 현재 링크 복사
-                            </button>
-                            <button onclick="closeShareModal()" style="padding:14px;border-radius:12px;border:none;background:transparent;color:#9E9E9E;font-size:14px;cursor:pointer;">
-                                취소
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        function closeShareModal() {
-            const modal = document.getElementById('shareModal');
-            if (modal) modal.remove();
-        }
-
-        async function saveAndShare() {
-            closeShareModal();
-            await saveResult();
-            if (savedPortfolioId) {
-                executeKakaoShare();
-            }
-        }
-
-        function shareLinkOnly() {
-            closeShareModal();
-            copyShareLink(window.location.href);
-        }
-
-        async function executeKakaoShare() {
-            try {
-                showToast('📤 카카오톡 공유 준비 중...');
-
-                // 서버에 공유 기록 (선택적)
-                let shareUrl = window.location.href;
-                
-                if (savedPortfolioId) {
-                    try {
-                        const response = await fetch(`/api/portfolio/${savedPortfolioId}/share/`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        const result = await response.json();
-                        if (result.success && result.share_url) {
-                            shareUrl = result.share_url;
-                        }
-                    } catch (e) {
-                        console.warn('공유 기록 실패:', e);
-                    }
-                }
-
-                // 스타일 정보
-                const style = onboardingData?.style || 'modern';
-                const styleData = styleMessages[style];
-
-                // 카카오톡 공유 실행
-                Kakao.Share.sendDefault({
-                    objectType: 'feed',
-                    content: {
-                        title: 'LG 홈스타일링 - ' + styleData.badge,
-                        description: styleData.subtitle.replace(/<br>/g, ' ').substring(0, 100),
-                        imageUrl: 'https://www.lge.co.kr/kr/images/brand/objet-collection/2024/visual/kv_visual_bg_w.webp',
-                        link: {
-                            mobileWebUrl: shareUrl,
-                            webUrl: shareUrl,
-                        },
-                    },
-                    social: {
-                        likeCount: Math.floor(Math.random() * 1000) + 500,
-                        sharedCount: Math.floor(Math.random() * 100) + 50,
-                    },
-                    buttons: [
-                        {
-                            title: '🏠 추천 결과 보기',
-                            link: {
-                                mobileWebUrl: shareUrl,
-                                webUrl: shareUrl,
-                            },
-                        },
-                        {
-                            title: '🎯 나도 추천받기',
-                            link: {
-                                mobileWebUrl: window.location.origin + '/onboarding/',
-                                webUrl: window.location.origin + '/onboarding/',
-                            },
-                        },
-                    ],
-                });
-
-                showToast('✅ 카카오톡 공유창이 열렸어요!');
-                
-            } catch (error) {
-                console.error('카카오 공유 오류:', error);
-                // 폴백: 링크 복사
-                copyShareLink(window.location.href);
-            }
-        }
-
-        function copyShareLink(url) {
-            navigator.clipboard.writeText(url || window.location.href).then(() => {
-                showToast('📋 링크가 복사되었습니다! 카카오톡에 붙여넣기 하세요.');
+        // ============================================
+        // 링크 복사하기
+        // ============================================
+        function copyLink() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('URL을 복사하였습니다');
             }).catch(() => {
                 showToast('링크 복사 실패');
             });
         }
 
-        // ============================================================
-        // Toast 알림
-        // ============================================================
+        // ============================================
+        // 카카오톡 공유하기
+        // ============================================
+        function shareKakao() {
+            // TODO: 카카오톡 공유 기능 구현
+            showToast('카카오톡 공유 기능 준비 중입니다.');
+        }
+
+        // ============================================
+        // Toast 알림 표시
+        // ============================================
         function showToast(message) {
-            // 기존 토스트 제거
-            const existingToast = document.querySelector('.toast-notification');
-            if (existingToast) existingToast.remove();
-
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.innerHTML = message;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(0, 0, 0, 0.9);
-                color: white;
-                padding: 16px 24px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                z-index: 10000;
-                animation: toastIn 0.3s ease;
-            `;
-            document.body.appendChild(toast);
-
-            // 3초 후 제거
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
             setTimeout(() => {
-                toast.style.animation = 'toastOut 0.3s ease forwards';
-                setTimeout(() => toast.remove(), 300);
+                toast.classList.remove('show');
             }, 3000);
         }
-
-        // Toast 애니메이션 CSS 추가
-        const toastStyle = document.createElement('style');
-        toastStyle.textContent = `
-            @keyframes toastIn {
-                from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-                to { opacity: 1; transform: translateX(-50%) translateY(0); }
-            }
-            @keyframes toastOut {
-                from { opacity: 1; transform: translateX(-50%) translateY(0); }
-                to { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            }
-        `;
-        document.head.appendChild(toastStyle);
-
-        function viewProduct(productId) {
-            console.log('View product:', productId);
-        }
-
-        function scrollToAlternatives() {
-            document.getElementById('alternativesSection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // ============================================================
-        // 페이지 로드 시 URL에서 portfolio_id 확인 및 데이터 로드
-        // ============================================================
-        (async function checkExistingPortfolio() {
-            const pathMatch = window.location.pathname.match(/\/portfolio\/([^/]+)/);
-            if (pathMatch) {
-                savedPortfolioId = pathMatch[1];
-                console.log('[Portfolio] 기존 포트폴리오 감지:', savedPortfolioId);
-                
-                try {
-                    // 서버에서 포트폴리오 데이터 불러오기
-                    const response = await fetch(`/api/portfolio/${savedPortfolioId}/`);
-                    const result = await response.json();
-                    
-                    if (result.success && result.portfolio) {
-                        const portfolio = result.portfolio;
-                        console.log('[Portfolio] 포트폴리오 데이터 로드 완료:', portfolio);
-                        
-                        // 포트폴리오 데이터로 페이지 재구성
-                        if (portfolio.onboarding_data) {
-                            onboardingData = portfolio.onboarding_data;
-                        }
-                        
-                        if (portfolio.products && portfolio.products.length > 0) {
-                            recommendedProducts = portfolio.products;
-                            // 추천 결과 표시
-                            displayRecommendations();
-                        }
-                        
-                        if (portfolio.style_type) {
-                            updateStyleDisplay(portfolio.style_type);
-                        }
-                        
-                        showToast('✅ 저장된 포트폴리오를 불러왔습니다.');
-                    } else {
-                        console.error('[Portfolio] 포트폴리오 로드 실패:', result.error);
-                        showToast('⚠️ 포트폴리오를 불러올 수 없습니다.');
-                    }
-                } catch (error) {
-                    console.error('[Portfolio] 포트폴리오 로드 에러:', error);
-                    showToast('⚠️ 포트폴리오를 불러오는 중 오류가 발생했습니다.');
-                }
-            }
-        })();
     </script>
 </body>
+
 </html>
+
 
