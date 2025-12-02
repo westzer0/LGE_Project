@@ -498,6 +498,87 @@
         }
 
         /* ============================================
+           Exit Modal (중도 이탈 경고 모달)
+           ============================================ */
+        .exit-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exit-modal-overlay.show {
+            display: flex;
+        }
+
+        .exit-modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .exit-modal-message {
+            font-size: 16px;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .exit-modal-question {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .exit-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .exit-modal-btn {
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 120px;
+        }
+
+        .exit-modal-btn-cancel {
+            background: #fff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+        }
+
+        .exit-modal-btn-cancel:hover {
+            background: #f5f5f5;
+        }
+
+        .exit-modal-btn-continue {
+            background: #FD312E;
+            color: #fff;
+        }
+
+        .exit-modal-btn-continue:hover {
+            background: #B80D3D;
+        }
+
+        /* ============================================
            Responsive (반응형 디자인)
            ============================================ */
         @media (max-width: 1024px) {
@@ -696,6 +777,18 @@
         </div>
     </main>
 
+    <!-- 중도 이탈 경고 모달 -->
+    <div class="exit-modal-overlay" id="exitModal">
+        <div class="exit-modal">
+            <p class="exit-modal-message">지금 나가시면 입력하신 정보가 사라질 수 있어요.</p>
+            <p class="exit-modal-question">취향 분석을 계속 진행하시겠어요?</p>
+            <div class="exit-modal-buttons">
+                <button class="exit-modal-btn exit-modal-btn-cancel" onclick="cancelOnboarding()">취소</button>
+                <button class="exit-modal-btn exit-modal-btn-continue" onclick="continueOnboarding()">계속 진행하기</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // 전역 변수
@@ -878,18 +971,21 @@
                         sessionStorage.setItem('step2_mate', selectedMate);
                         sessionStorage.setItem('step2_pet', selectedPet);
                         
-                        // 다음 단계로 이동 (3단계가 있으면 여기서 이동)
-                        // TODO: 3단계 URL로 변경
+                        // 다음 단계로 이동 (3단계로 이동)
                         console.log('2단계 데이터 저장 완료, 다음 단계로 이동합니다.');
-                        // window.location.href = '/onboarding/step3/';
+                        window.location.href = '/onboarding/step3/';
                     } else {
-                        console.error('❌ 저장 실패:', data.error);
-                        alert('데이터 저장에 실패했습니다: ' + (data.error || '알 수 없는 오류') + '\n\n다시 시도해주세요.');
+                        console.warn('⚠️ 서버 저장 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                        console.warn('오류 내용:', data.error);
+                        // sessionStorage에 저장되어 있으므로 이동
+                        window.location.href = '/onboarding/step3/';
                     }
                 })
                 .catch(error => {
                     console.error('❌ API Error:', error);
-                    alert('서버와의 통신 중 오류가 발생했습니다.\n\n' + error.message + '\n\n다시 시도해주세요.');
+                    console.warn('⚠️ API 호출 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                    // sessionStorage에 저장되어 있으므로 이동
+                    window.location.href = '/onboarding/step3/';
                 });
         }
 
@@ -912,6 +1008,73 @@
         }
 
         // ============================================
+        // 중도 이탈 경고 모달
+        // ============================================
+        let isNavigating = false; // 정상적인 네비게이션인지 확인
+
+        function showExitModal() {
+            const modal = document.getElementById('exitModal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function hideExitModal() {
+            const modal = document.getElementById('exitModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        function continueOnboarding() {
+            // 계속 진행하기: 모달만 닫고 현재 페이지에서 계속 진행
+            hideExitModal();
+        }
+
+        function cancelOnboarding() {
+            // 취소: main.html로 이동
+            isNavigating = true; // 정상 네비게이션으로 표시
+            window.location.href = '/main/';
+        }
+
+        // 페이지 이탈 시 경고
+        window.addEventListener('beforeunload', function (e) {
+            // 정상적인 네비게이션이면 경고하지 않음
+            if (isNavigating) {
+                return;
+            }
+
+            // 모달 표시 (일부 브라우저에서는 기본 확인창만 표시됨)
+            const message = '지금 나가시면 입력하신 정보가 사라질 수 있어요.';
+            e.returnValue = message;
+            return message;
+        });
+
+        // 정상적인 네비게이션 시 플래그 설정
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            isNavigating = true;
+        });
+
+        // 외부 링크 클릭 시 모달 표시
+        document.querySelectorAll('a[href^="/"], a[href^="http"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // 온보딩 관련 링크가 아니면 경고
+                const href = this.getAttribute('href');
+                if (href && !href.includes('/onboarding/') && !href.includes('/result/')) {
+                    e.preventDefault();
+                    showExitModal();
+                }
+            });
+        });
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('exitModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideExitModal();
+            }
+        });
+
+        // ============================================
         // 초기화: 페이지 로드 시
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
@@ -921,8 +1084,32 @@
             petQuestionSection.classList.remove('show');
             petOptionsGrid.classList.remove('show');
             
+            // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                nextBtn.textContent = '다음 단계로 이동';
+            }
+            
             // 버튼 비활성화 상태 유지
             updateButton();
+        });
+
+        // ============================================
+        // 뒤로가기 감지 시 현재 단계 데이터 저장
+        // ============================================
+        window.addEventListener('pageshow', function(event) {
+            // 뒤로가기로 돌아왔을 때 (bfcache에서 복원된 경우)
+            if (event.persisted) {
+                console.log('뒤로가기로 페이지 복원됨');
+                // 버튼 상태 초기화
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) {
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = '다음 단계로 이동';
+                    updateButton();
+                }
+            }
         });
     </script>
 </body>

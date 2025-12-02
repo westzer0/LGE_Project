@@ -40,6 +40,26 @@ def onboarding_step2_page(request):
     return render(request, "onboarding_step2.html")
 
 
+def onboarding_step3_page(request):
+    """온보딩 페이지 렌더링 (3단계)"""
+    return render(request, "onboarding_step3.html")
+
+
+def onboarding_step4_page(request):
+    """온보딩 페이지 렌더링 (4단계)"""
+    return render(request, "onboarding_step4.html")
+
+
+def onboarding_step5_page(request):
+    """온보딩 페이지 렌더링 (5단계)"""
+    return render(request, "onboarding_step5.html")
+
+
+def onboarding_step6_page(request):
+    """온보딩 페이지 렌더링 (6단계)"""
+    return render(request, "onboarding_step6.html")
+
+
 def onboarding_new_page(request):
     """새 온보딩 페이지 (4단계 설문)"""
     return render(request, "onboarding_new.html")
@@ -286,11 +306,51 @@ def onboarding_step_view(request):
             pyung = step_data.get('pyung')
             if pyung:
                 session.pyung = int(pyung)
+            
+            # 주요 공간 정보 저장 (recommendation_result에 저장)
+            main_space = step_data.get('main_space')
+            if main_space:
+                if not session.recommendation_result:
+                    session.recommendation_result = {}
+                session.recommendation_result['main_space'] = main_space
         elif step == 4:
             session.priority = step_data.get('priority', 'value')
         elif step == 5:
-            session.budget_level = step_data.get('budget_level', 'medium')
-            session.selected_categories = step_data.get('selected_categories', [])
+            # 우선순위 정보 저장
+            priority = step_data.get('priority', [])  # 우선순위 순서 배열
+            priority_map = step_data.get('priority_map', {})  # 우선순위 맵
+            
+            # recommendation_result에 저장
+            if not session.recommendation_result:
+                session.recommendation_result = {}
+            
+            session.recommendation_result['priority'] = priority
+            session.recommendation_result['priority_map'] = priority_map
+            
+            # priority 필드에 첫 번째 우선순위 저장 (기존 필드 호환성)
+            if priority and len(priority) > 0:
+                session.priority = priority[0]
+        elif step == 6:
+            # 예산 범위 정보 저장
+            budget = step_data.get('budget')
+            
+            # recommendation_result에 저장
+            if not session.recommendation_result:
+                session.recommendation_result = {}
+            
+            session.recommendation_result['budget'] = budget
+            
+            # budget_level 필드에 저장 (기존 필드 호환성)
+            budget_mapping = {
+                'budget': 'budget',
+                'standard': 'standard',
+                'premium': 'premium',
+                'high_end': 'high_end'
+            }
+            session.budget_level = budget_mapping.get(budget, 'standard')
+            
+            # 온보딩 완료 처리
+            session.is_completed = True
         
         # 진행 상태 업데이트
         session.current_step = step
