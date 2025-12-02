@@ -1,0 +1,989 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG전자 | 가전 패키지 추천</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #fff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================
+           Header - main.html과 동일한 스타일
+           ============================================ */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            display: block;
+            height: 28px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-top-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-top-icon {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: #1a1a1a;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-top-icon:hover {
+            color: #A50034;
+        }
+
+        .header-top-link {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            padding: 0 12px;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .header-top-link:hover {
+            color: #A50034;
+        }
+
+        .header-top-link:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 12px;
+            background: #e5e5e5;
+        }
+
+        .header-bottom-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .gnb {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .gnb-item {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .gnb-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-separator {
+            width: 1px;
+            height: 14px;
+            background: #e5e5e5;
+            margin: 0 12px;
+        }
+
+        .gnb-item.home-style {
+            background: #FD312E;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.2;
+        }
+
+        .home-style-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .home-style-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .gnb-item.home-style:hover {
+            background: #B80D3D;
+            color: #fff;
+        }
+
+        .gnb-brand {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-shrink: 0;
+            background: #F4F6F8;
+            border-radius: 9999px;
+            padding: 6px 20px;
+            margin-left: 0;
+        }
+
+        .gnb-brand-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .gnb-brand-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-brand-item strong {
+            font-weight: 700;
+        }
+
+        /* ============================================
+           Breadcrumb - main.html과 동일한 스타일
+           ============================================ */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: none;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           Main Content
+           ============================================ */
+        .main-content {
+            margin-top: 160px;
+            min-height: calc(100vh - 160px);
+            padding: 60px 0 150px;
+            /* 하단 버튼 공간 확보 */
+        }
+
+        .onboarding-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ============================================
+           Progress Bar (프로그레스 바)
+           ============================================ */
+        .progress-section {
+            margin-bottom: 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0;
+            width: 500px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #e5e5e5;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a1a1a;
+            transition: width 0.3s ease;
+            width: 16.67%;
+            /* 1단계 / 6단계 = 16.67% */
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* ============================================
+           Question Section (질문 영역)
+           ============================================ */
+        .question-section {
+            margin-top: 0;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .question-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.4;
+            margin-bottom: 13px;
+            text-align: center;
+        }
+
+        .question-title .bold {
+            font-weight: 700;
+            /* 핵심 단어는 이미 bold이지만 명시적으로 표시 */
+        }
+
+        .question-subtitle {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* ============================================
+           Option Cards (선택 옵션 카드)
+           ============================================ */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 60px;
+        }
+
+        .option-card {
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 선택된 카드: 빨간색 테두리 */
+        .option-card.selected {
+            border-color: #FD312E;
+            border-width: 3px;
+        }
+
+        .option-image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ============================================
+           Button (하단 버튼) - 하단 고정
+           ============================================ */
+        .button-section {
+            position: fixed;
+            bottom: 48px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .button-section .btn {
+            pointer-events: auto;
+        }
+
+        .btn {
+            padding: 14px 100px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 400px;
+            width: auto;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #333;
+        }
+
+        .btn-primary:disabled {
+            background: #e5e5e5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+           Exit Modal (중도 이탈 경고 모달)
+           ============================================ */
+        .exit-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exit-modal-overlay.show {
+            display: flex;
+        }
+
+        .exit-modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .exit-modal-message {
+            font-size: 16px;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .exit-modal-question {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .exit-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .exit-modal-btn {
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 120px;
+        }
+
+        .exit-modal-btn-cancel {
+            background: #fff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+        }
+
+        .exit-modal-btn-cancel:hover {
+            background: #f5f5f5;
+        }
+
+        .exit-modal-btn-continue {
+            background: #FD312E;
+            color: #fff;
+        }
+
+        .exit-modal-btn-continue:hover {
+            background: #B80D3D;
+        }
+
+        /* ============================================
+           Responsive (반응형 디자인)
+           ============================================ */
+        @media (max-width: 1024px) {
+
+            .header-wrapper,
+            .breadcrumb-wrapper {
+                padding: 0 40px;
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .header-wrapper,
+            .breadcrumb-wrapper {
+                padding: 0 20px;
+            }
+
+            .main-content {
+                margin-top: 140px;
+            }
+
+            .breadcrumb {
+                top: 100px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .question-title {
+                font-size: 24px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 500px;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ============================================
+         Header - main.html과 동일한 구조
+         ============================================ -->
+    <header class="header">
+        <div class="header-wrapper">
+            <!-- 상단 줄 (Top Row) -->
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/" class="logo">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+                <div class="header-top-right">
+                    <div class="header-top-icons">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <a href="#" class="header-top-link">회사소개</a>
+                    <a href="#" class="header-top-link">사업자몰</a>
+                </div>
+            </div>
+            <!-- 하단 줄 (Bottom Row) -->
+            <div class="header-bottom-row">
+                <nav class="gnb">
+                    <a href="#" class="gnb-item">제품/소모품</a>
+                    <a href="#" class="gnb-item">고객지원</a>
+                    <a href="#" class="gnb-item">가전 구독</a>
+                    <a href="#" class="gnb-item">혜택/이벤트</a>
+                    <a href="#" class="gnb-item">스토리</a>
+                    <a href="#" class="gnb-item">베스트샵</a>
+                    <a href="#" class="gnb-item">LG AI</a>
+                    <span class="gnb-separator"></span>
+                    <a href="/lge/#" class="gnb-item home-style">
+                        <span class="home-style-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
+                        </span>
+                        홈스타일
+                    </a>
+                    <div class="gnb-brand">
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
+                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================
+         Breadcrumb - main.html과 동일한 구조
+         ============================================ -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/lge/#">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">가전패키지추천</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================
+         Main Content - 온보딩 페이지 본문
+         ============================================ -->
+    <main class="main-content">
+        <div class="onboarding-container">
+            <!-- 프로그레스 바 -->
+            <div class="progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">1단계 / 6단계</span>
+                </div>
+            </div>
+
+            <!-- 질문 영역 -->
+            <div class="question-section">
+                <h2 class="question-title">
+                    새로운 가전과 함께할 <span class="bold">공간</span>, 어떤 <span class="bold">분위기</span>를 꿈꾸시나요?
+                </h2>
+                <p class="question-subtitle">1개 선택 가능해요.</p>
+            </div>
+
+            <!-- 선택 옵션 카드 -->
+            <div class="options-grid">
+                <!-- [A] 모던 & 미니멀 -->
+                <div class="option-card" data-value="modern" id="option-modern">
+                    <img src="{% static 'images/온보딩_모던미니멀.jpg' %}" alt="모던 & 미니멀" class="option-image">
+                </div>
+
+                <!-- [B] 코지 & 네이처 -->
+                <div class="option-card" data-value="cozy" id="option-cozy">
+                    <img src="{% static 'images/온보딩_우드 네이쳐.jpg' %}" alt="코지 & 네이처" class="option-image">
+                </div>
+
+                <!-- [C] 유니크 & 팝 -->
+                <div class="option-card" data-value="pop" id="option-pop">
+                    <img src="{% static 'images/온보딩_컬러풀 팝.jpg' %}" alt="유니크 & 팝" class="option-image">
+                </div>
+
+                <!-- [D] 럭셔리 & 아티스틱 -->
+                <div class="option-card" data-value="luxury" id="option-luxury">
+                    <img src="{% static 'images/온보딩_럭셔리.jpg' %}" alt="럭셔리 & 아티스틱" class="option-image">
+                </div>
+            </div>
+
+            <!-- 하단 버튼 -->
+            <div class="button-section">
+                <button id="nextBtn" class="btn btn-primary" disabled>다음 단계로 이동</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 중도 이탈 경고 모달 -->
+    <div class="exit-modal-overlay" id="exitModal">
+        <div class="exit-modal">
+            <p class="exit-modal-message">지금 나가시면 입력하신 정보가 사라질 수 있어요.</p>
+            <p class="exit-modal-question">취향 분석을 계속 진행하시겠어요?</p>
+            <div class="exit-modal-buttons">
+                <button class="exit-modal-btn exit-modal-btn-cancel" onclick="cancelOnboarding()">취소</button>
+                <button class="exit-modal-btn exit-modal-btn-continue" onclick="continueOnboarding()">계속 진행하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CSRF 토큰 가져오기 (Django 템플릿에서)
+        // ============================================
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // ============================================
+        // 전역 변수
+        // ============================================
+        let selectedVibe = null; // 선택된 분위기 값 저장
+
+        // ============================================
+        // 옵션 카드 클릭 이벤트 (단일 선택)
+        // ============================================
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('click', function () {
+                // 모든 카드의 선택 상태 제거
+                document.querySelectorAll('.option-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                // 클릭한 카드에 선택 상태 추가
+                this.classList.add('selected');
+                selectedVibe = this.dataset.value;
+
+                // 버튼 활성화
+                updateButton();
+            });
+        });
+
+        // ============================================
+        // 버튼 상태 업데이트 함수
+        // ============================================
+        function updateButton() {
+            const nextBtn = document.getElementById('nextBtn');
+            if (selectedVibe) {
+                // 선택되었으면 버튼 활성화 (블랙 색상)
+                nextBtn.disabled = false;
+                nextBtn.style.background = '#1a1a1a';
+                nextBtn.style.color = '#fff';
+            } else {
+                // 선택되지 않았으면 버튼 비활성화 (회색)
+                nextBtn.disabled = true;
+                nextBtn.style.background = '#e5e5e5';
+                nextBtn.style.color = '#999';
+            }
+        }
+
+        // ============================================
+        // 다음 단계로 이동 버튼 클릭 이벤트
+        // ============================================
+        document.getElementById('nextBtn').addEventListener('click', function () {
+            console.log('다음 버튼 클릭됨');
+            console.log('버튼 disabled 상태:', this.disabled);
+            console.log('selectedVibe:', selectedVibe);
+
+            if (this.disabled) {
+                console.log('버튼이 비활성화되어 있어서 동작하지 않습니다.');
+                return; // 비활성화 상태면 동작하지 않음
+            }
+
+            // 선택된 값 확인
+            if (selectedVibe) {
+                console.log('선택된 분위기:', selectedVibe);
+
+                // 세션에 저장하고 다음 단계로 이동
+                saveStepAndNavigate();
+            } else {
+                console.error('selectedVibe가 없습니다!');
+                alert('옵션을 선택해주세요.');
+            }
+        });
+
+        // ============================================
+        // 세션 저장 및 다음 단계로 이동
+        // ============================================
+        function saveStepAndNavigate() {
+            console.log('saveStepAndNavigate 함수 호출됨');
+
+            // 세션 ID 가져오기 또는 생성
+            let sessionId = sessionStorage.getItem('onboarding_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now();
+                sessionStorage.setItem('onboarding_session_id', sessionId);
+            }
+            console.log('Session ID:', sessionId);
+
+            // 1단계 선택 값 저장 (sessionStorage)
+            sessionStorage.setItem('step1_vibe', selectedVibe);
+            console.log('step1_vibe 저장됨:', selectedVibe);
+
+            // 1단계 데이터 준비
+            const step1Data = {
+                session_id: sessionId,
+                step: 1,
+                data: {
+                    vibe: selectedVibe
+                }
+            };
+
+            // CSRF 토큰 가져오기
+            const csrftoken = getCookie('csrftoken');
+            console.log('CSRF Token:', csrftoken ? '존재함' : '없음');
+
+            // 버튼 비활성화 (중복 클릭 방지)
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = true;
+            nextBtn.textContent = '저장 중...';
+
+            // API 호출하여 세션 저장
+            fetch('/api/onboarding/step/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken || ''
+                },
+                body: JSON.stringify(step1Data)
+            })
+                .then(response => {
+                    console.log('API Response status:', response.status);
+                    // 응답이 ok가 아니어도 JSON 파싱 시도
+                    return response.json().catch(() => {
+                        // JSON 파싱 실패 시 빈 객체 반환
+                        return { success: false, error: '응답 파싱 실패 (Status: ' + response.status + ')' };
+                    });
+                })
+                .then(data => {
+                    console.log('API Response data:', data);
+                    if (data.success) {
+                        console.log('✅ 1단계 데이터 저장 성공!');
+                        console.log('저장된 세션 ID:', data.session_id);
+                        console.log('현재 단계:', data.current_step);
+                        console.log('다음 단계:', data.next_step);
+
+                        // 저장 성공 시 2단계로 이동
+                        window.location.href = '/onboarding/step2/';
+                    } else {
+                        console.warn('⚠️ 서버 저장 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                        console.warn('오류 내용:', data.error);
+                        // sessionStorage에 저장되어 있으므로 이동
+                        window.location.href = '/onboarding/step2/';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ API Error:', error);
+                    console.warn('⚠️ API 호출 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                    // sessionStorage에 저장되어 있으므로 이동
+                    window.location.href = '/onboarding/step2/';
+                });
+        }
+
+        // ============================================
+        // 중도 이탈 경고 모달
+        // ============================================
+        let isNavigating = false; // 정상적인 네비게이션인지 확인
+
+        function showExitModal() {
+            const modal = document.getElementById('exitModal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function hideExitModal() {
+            const modal = document.getElementById('exitModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        function continueOnboarding() {
+            // 계속 진행하기: 모달만 닫고 현재 페이지에서 계속 진행
+            hideExitModal();
+        }
+
+        function cancelOnboarding() {
+            // 취소: main.html로 이동
+            window.location.href = '/main/';
+        }
+
+        // 페이지 이탈 시 경고 (beforeunload는 기본 확인창만 가능)
+        // 커스텀 모달을 표시하려면 다른 이벤트를 사용해야 함
+        window.addEventListener('beforeunload', function (e) {
+            // 정상적인 네비게이션이면 경고하지 않음
+            if (isNavigating) {
+                return;
+            }
+
+            // 기본 확인창 표시 (브라우저가 자체 스타일로 표시)
+            const message = '지금 나가시면 입력하신 정보가 사라질 수 있어요.';
+            e.returnValue = message;
+            return message;
+        });
+
+        // 브라우저 뒤로가기 버튼 감지 (커스텀 모달 표시 가능)
+        window.addEventListener('popstate', function (e) {
+            if (!isNavigating) {
+                e.preventDefault();
+                showExitModal();
+                // 히스토리에 현재 상태 추가하여 뒤로가기 취소
+                history.pushState(null, null, location.href);
+            }
+        });
+
+        // 페이지 로드 시 히스토리 상태 추가
+        history.pushState(null, null, location.href);
+
+        // 정상적인 네비게이션 시 플래그 설정
+        document.getElementById('nextBtn').addEventListener('click', function () {
+            isNavigating = true;
+        });
+
+        // 외부 링크 클릭 시 모달 표시
+        document.querySelectorAll('a[href^="/"], a[href^="http"]').forEach(link => {
+            link.addEventListener('click', function (e) {
+                // 온보딩 관련 링크가 아니면 경고
+                const href = this.getAttribute('href');
+                if (href && !href.includes('/onboarding/') && !href.includes('/result/')) {
+                    e.preventDefault();
+                    showExitModal();
+                }
+            });
+        });
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('exitModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                hideExitModal();
+            }
+        });
+
+        // ============================================
+        // 페이지 로드 시 버튼 상태 초기화
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function () {
+            // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                nextBtn.textContent = '다음 단계로 이동';
+                // 선택된 값에 따라 버튼 상태 업데이트
+                updateButton();
+            }
+        });
+
+        // ============================================
+        // 뒤로가기 감지 시 현재 단계 데이터 저장
+        // ============================================
+        window.addEventListener('pageshow', function (event) {
+            // 뒤로가기로 돌아왔을 때 (bfcache에서 복원된 경우)
+            if (event.persisted) {
+                console.log('뒤로가기로 페이지 복원됨');
+                // 버튼 상태 초기화
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) {
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = '다음 단계로 이동';
+                    updateButton();
+                }
+            }
+        });
+
+        // ============================================
+        // 초기화: 페이지 로드 시 버튼 비활성화 상태 유지
+        // ============================================
+        updateButton();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,4572 @@
+[
+  {
+    "logic_id": 1,
+    "logic_name": "Scoring_Logic_001",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 19
+    },
+    "applies_to_taste_ids": [
+      1,
+      14,
+      30,
+      105,
+      156,
+      214,
+      340,
+      353,
+      361,
+      387,
+      406,
+      542,
+      568,
+      619,
+      654,
+      668,
+      698,
+      708,
+      763
+    ],
+    "taste_count": 19,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 2,
+    "logic_name": "Scoring_Logic_002",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 19
+    },
+    "applies_to_taste_ids": [
+      2,
+      50,
+      134,
+      143,
+      184,
+      241,
+      304,
+      334,
+      456,
+      510,
+      533,
+      614,
+      616,
+      670,
+      695,
+      702,
+      709,
+      711,
+      762
+    ],
+    "taste_count": 19,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 3,
+    "logic_name": "Scoring_Logic_003",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 23
+    },
+    "applies_to_taste_ids": [
+      3,
+      21,
+      25,
+      201,
+      204,
+      207,
+      409,
+      422,
+      459,
+      469,
+      519,
+      537,
+      571,
+      574,
+      603,
+      640,
+      651,
+      662,
+      672,
+      692,
+      697,
+      703,
+      746
+    ],
+    "taste_count": 23,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 4,
+    "logic_name": "Scoring_Logic_004",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 13
+    },
+    "applies_to_taste_ids": [
+      4,
+      142,
+      312,
+      350,
+      405,
+      411,
+      426,
+      475,
+      479,
+      520,
+      543,
+      553,
+      650
+    ],
+    "taste_count": 13,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 5,
+    "logic_name": "Scoring_Logic_005",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      5,
+      37,
+      67,
+      70,
+      95,
+      284,
+      287,
+      355,
+      377,
+      383,
+      391,
+      488,
+      545,
+      638,
+      653,
+      680
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": []
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 6,
+    "logic_name": "Scoring_Logic_006",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 19
+    },
+    "applies_to_taste_ids": [
+      6,
+      8,
+      22,
+      125,
+      146,
+      148,
+      163,
+      171,
+      265,
+      289,
+      298,
+      299,
+      342,
+      352,
+      376,
+      577,
+      634,
+      647,
+      728
+    ],
+    "taste_count": 19,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 7,
+    "logic_name": "Scoring_Logic_007",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 13
+    },
+    "applies_to_taste_ids": [
+      7,
+      69,
+      233,
+      235,
+      239,
+      274,
+      285,
+      318,
+      385,
+      413,
+      480,
+      516,
+      716
+    ],
+    "taste_count": 13,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 8,
+    "logic_name": "Scoring_Logic_008",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 11
+    },
+    "applies_to_taste_ids": [
+      9,
+      75,
+      114,
+      120,
+      149,
+      288,
+      302,
+      336,
+      356,
+      417,
+      423
+    ],
+    "taste_count": 11,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 9,
+    "logic_name": "Scoring_Logic_009",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 21
+    },
+    "applies_to_taste_ids": [
+      10,
+      74,
+      185,
+      186,
+      237,
+      254,
+      281,
+      290,
+      307,
+      345,
+      364,
+      397,
+      404,
+      443,
+      541,
+      547,
+      551,
+      552,
+      582,
+      669,
+      740
+    ],
+    "taste_count": 21,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 10,
+    "logic_name": "Scoring_Logic_010",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      11,
+      12,
+      32,
+      62,
+      140,
+      178,
+      212,
+      278,
+      341,
+      439,
+      463,
+      468,
+      579,
+      696,
+      713,
+      768
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 11,
+    "logic_name": "Scoring_Logic_011",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 17
+    },
+    "applies_to_taste_ids": [
+      13,
+      100,
+      132,
+      147,
+      155,
+      175,
+      193,
+      199,
+      378,
+      381,
+      491,
+      564,
+      649,
+      675,
+      726,
+      731,
+      745
+    ],
+    "taste_count": 17,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 12,
+    "logic_name": "Scoring_Logic_012",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 20
+    },
+    "applies_to_taste_ids": [
+      15,
+      23,
+      24,
+      43,
+      51,
+      182,
+      194,
+      203,
+      271,
+      295,
+      305,
+      308,
+      367,
+      392,
+      427,
+      508,
+      565,
+      617,
+      676,
+      759
+    ],
+    "taste_count": 20,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 13,
+    "logic_name": "Scoring_Logic_013",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 17
+    },
+    "applies_to_taste_ids": [
+      16,
+      85,
+      126,
+      195,
+      213,
+      247,
+      291,
+      474,
+      539,
+      546,
+      555,
+      557,
+      604,
+      673,
+      719,
+      755,
+      767
+    ],
+    "taste_count": 17,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "AI 또는 스마트 기능",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 14,
+    "logic_name": "Scoring_Logic_014",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 22
+    },
+    "applies_to_taste_ids": [
+      17,
+      18,
+      92,
+      131,
+      167,
+      180,
+      309,
+      321,
+      328,
+      338,
+      390,
+      440,
+      444,
+      511,
+      521,
+      578,
+      585,
+      596,
+      612,
+      655,
+      661,
+      701
+    ],
+    "taste_count": 22,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 15,
+    "logic_name": "Scoring_Logic_015",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      19,
+      66,
+      123,
+      161,
+      421,
+      538,
+      608,
+      657,
+      671,
+      732
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 16,
+    "logic_name": "Scoring_Logic_016",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 19
+    },
+    "applies_to_taste_ids": [
+      20,
+      96,
+      109,
+      112,
+      168,
+      222,
+      240,
+      243,
+      256,
+      267,
+      446,
+      447,
+      496,
+      497,
+      548,
+      572,
+      587,
+      718,
+      765
+    ],
+    "taste_count": 19,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 17,
+    "logic_name": "Scoring_Logic_017",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      26,
+      118,
+      170,
+      205,
+      252,
+      261,
+      348,
+      428,
+      435,
+      458,
+      460,
+      465,
+      529,
+      635,
+      725,
+      747
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 18,
+    "logic_name": "Scoring_Logic_018",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 17
+    },
+    "applies_to_taste_ids": [
+      27,
+      48,
+      90,
+      121,
+      159,
+      200,
+      209,
+      258,
+      292,
+      293,
+      431,
+      540,
+      556,
+      620,
+      682,
+      743,
+      749
+    ],
+    "taste_count": 17,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 19,
+    "logic_name": "Scoring_Logic_019",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 14
+    },
+    "applies_to_taste_ids": [
+      28,
+      72,
+      150,
+      260,
+      331,
+      369,
+      375,
+      402,
+      518,
+      534,
+      580,
+      607,
+      642,
+      684
+    ],
+    "taste_count": 14,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 20,
+    "logic_name": "Scoring_Logic_020",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 15
+    },
+    "applies_to_taste_ids": [
+      29,
+      36,
+      68,
+      91,
+      144,
+      382,
+      454,
+      500,
+      507,
+      509,
+      554,
+      593,
+      652,
+      694,
+      737
+    ],
+    "taste_count": 15,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 21,
+    "logic_name": "Scoring_Logic_021",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 20
+    },
+    "applies_to_taste_ids": [
+      31,
+      34,
+      58,
+      102,
+      238,
+      249,
+      263,
+      268,
+      327,
+      416,
+      425,
+      450,
+      536,
+      549,
+      576,
+      588,
+      677,
+      681,
+      710,
+      730
+    ],
+    "taste_count": 20,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 22,
+    "logic_name": "Scoring_Logic_022",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 12
+    },
+    "applies_to_taste_ids": [
+      33,
+      54,
+      57,
+      226,
+      330,
+      379,
+      399,
+      401,
+      473,
+      494,
+      513,
+      722
+    ],
+    "taste_count": 12,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 23,
+    "logic_name": "Scoring_Logic_023",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      35,
+      38,
+      44,
+      52,
+      93,
+      97,
+      162,
+      224,
+      270,
+      504,
+      512,
+      590,
+      630,
+      646,
+      738,
+      744
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 24,
+    "logic_name": "Scoring_Logic_024",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 15
+    },
+    "applies_to_taste_ids": [
+      39,
+      47,
+      89,
+      166,
+      179,
+      217,
+      248,
+      266,
+      280,
+      344,
+      558,
+      583,
+      599,
+      659,
+      760
+    ],
+    "taste_count": 15,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 25,
+    "logic_name": "Scoring_Logic_025",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      40,
+      106,
+      139,
+      227,
+      255,
+      277,
+      591,
+      605,
+      639,
+      679
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 26,
+    "logic_name": "Scoring_Logic_026",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      41,
+      76,
+      119,
+      136,
+      244,
+      368,
+      445,
+      449,
+      461,
+      514,
+      522,
+      610,
+      686,
+      691,
+      693,
+      729
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업"
+      ],
+      "exclude": [
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 27,
+    "logic_name": "Scoring_Logic_027",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 11
+    },
+    "applies_to_taste_ids": [
+      42,
+      189,
+      198,
+      234,
+      282,
+      464,
+      499,
+      530,
+      595,
+      643,
+      666
+    ],
+    "taste_count": 11,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": []
+    },
+    "bonuses": [
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 28,
+    "logic_name": "Scoring_Logic_028",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 21
+    },
+    "applies_to_taste_ids": [
+      45,
+      124,
+      188,
+      218,
+      257,
+      269,
+      297,
+      316,
+      386,
+      410,
+      432,
+      489,
+      550,
+      561,
+      609,
+      688,
+      699,
+      714,
+      739,
+      753,
+      757
+    ],
+    "taste_count": 21,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": []
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 29,
+    "logic_name": "Scoring_Logic_029",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 20
+    },
+    "applies_to_taste_ids": [
+      46,
+      82,
+      99,
+      110,
+      116,
+      122,
+      174,
+      232,
+      313,
+      324,
+      333,
+      408,
+      414,
+      482,
+      498,
+      625,
+      742,
+      750,
+      756,
+      761
+    ],
+    "taste_count": 20,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 30,
+    "logic_name": "Scoring_Logic_030",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 9
+    },
+    "applies_to_taste_ids": [
+      49,
+      81,
+      196,
+      332,
+      492,
+      525,
+      586,
+      715,
+      758
+    ],
+    "taste_count": 9,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 31,
+    "logic_name": "Scoring_Logic_031",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 14
+    },
+    "applies_to_taste_ids": [
+      53,
+      80,
+      87,
+      101,
+      152,
+      160,
+      173,
+      219,
+      253,
+      300,
+      337,
+      346,
+      457,
+      589
+    ],
+    "taste_count": 14,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": []
+    },
+    "bonuses": [
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 32,
+    "logic_name": "Scoring_Logic_032",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 19
+    },
+    "applies_to_taste_ids": [
+      55,
+      59,
+      77,
+      135,
+      206,
+      215,
+      262,
+      301,
+      393,
+      395,
+      467,
+      501,
+      566,
+      569,
+      570,
+      615,
+      636,
+      656,
+      707
+    ],
+    "taste_count": 19,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 33,
+    "logic_name": "Scoring_Logic_033",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      56,
+      153,
+      360,
+      394,
+      418,
+      433,
+      451,
+      466,
+      523,
+      602
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 34,
+    "logic_name": "Scoring_Logic_034",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 11
+    },
+    "applies_to_taste_ids": [
+      60,
+      169,
+      228,
+      306,
+      380,
+      396,
+      515,
+      581,
+      613,
+      622,
+      712
+    ],
+    "taste_count": 11,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 35,
+    "logic_name": "Scoring_Logic_035",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 20
+    },
+    "applies_to_taste_ids": [
+      61,
+      117,
+      181,
+      190,
+      208,
+      319,
+      326,
+      339,
+      370,
+      372,
+      384,
+      388,
+      389,
+      420,
+      484,
+      606,
+      628,
+      658,
+      706,
+      752
+    ],
+    "taste_count": 20,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 36,
+    "logic_name": "Scoring_Logic_036",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 19
+    },
+    "applies_to_taste_ids": [
+      63,
+      65,
+      79,
+      115,
+      128,
+      176,
+      183,
+      191,
+      229,
+      250,
+      251,
+      276,
+      310,
+      476,
+      535,
+      573,
+      626,
+      641,
+      733
+    ],
+    "taste_count": 19,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": []
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 37,
+    "logic_name": "Scoring_Logic_037",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 12
+    },
+    "applies_to_taste_ids": [
+      64,
+      94,
+      129,
+      138,
+      303,
+      374,
+      407,
+      503,
+      562,
+      600,
+      665,
+      734
+    ],
+    "taste_count": 12,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 38,
+    "logic_name": "Scoring_Logic_038",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 21
+    },
+    "applies_to_taste_ids": [
+      71,
+      86,
+      165,
+      202,
+      210,
+      230,
+      231,
+      279,
+      373,
+      442,
+      471,
+      477,
+      481,
+      485,
+      493,
+      611,
+      667,
+      689,
+      700,
+      721,
+      754
+    ],
+    "taste_count": 21,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": []
+    },
+    "bonuses": [
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 39,
+    "logic_name": "Scoring_Logic_039",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 15
+    },
+    "applies_to_taste_ids": [
+      73,
+      83,
+      88,
+      113,
+      130,
+      286,
+      365,
+      400,
+      403,
+      505,
+      631,
+      633,
+      678,
+      720,
+      766
+    ],
+    "taste_count": 15,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": []
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 40,
+    "logic_name": "Scoring_Logic_040",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 18
+    },
+    "applies_to_taste_ids": [
+      78,
+      133,
+      221,
+      242,
+      275,
+      283,
+      294,
+      315,
+      329,
+      351,
+      354,
+      363,
+      528,
+      531,
+      584,
+      623,
+      690,
+      735
+    ],
+    "taste_count": 18,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 41,
+    "logic_name": "Scoring_Logic_041",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "나 혼자 산다 (1인 가구)",
+      "priority": "인테리어를 완성하는 디자인",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      84,
+      273,
+      323,
+      424,
+      441,
+      453,
+      527,
+      592,
+      598,
+      748
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.21186440677966104,
+        "brightness": 0.1271186440677966,
+        "refresh_rate": 0.1271186440677966,
+        "panel_type": 0.11016949152542374,
+        "power_consumption": 0.08474576271186442,
+        "size": 0.08474576271186442,
+        "price_match": 0.1271186440677966,
+        "design": 0.12711864406779663
+      },
+      "KITCHEN": {
+        "capacity": 0.21186440677966098,
+        "energy_efficiency": 0.1694915254237288,
+        "features": 0.12711864406779658,
+        "size": 0.0847457627118644,
+        "price_match": 0.1694915254237288,
+        "design": 0.1271186440677966,
+        "panel_type": 0.11016949152542371
+      },
+      "LIVING": {
+        "audio_quality": 0.1953125,
+        "connectivity": 0.1171875,
+        "power_consumption": 0.078125,
+        "size": 0.078125,
+        "price_match": 0.15625,
+        "features": 0.15625,
+        "design": 0.11718750000000001,
+        "panel_type": 0.1015625
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업"
+      ],
+      "exclude": [
+        "대용량 제품 (800L 이상 냉장고, 대형 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "OBJET 또는 SIGNATURE 라인업",
+        "bonus": 0.15,
+        "reason": "디자인 우선순위에 맞는 프리미엄 디자인 라인업"
+      },
+      {
+        "condition": "소형 또는 컴팩트 제품",
+        "bonus": 0.1,
+        "reason": "1인 가구에 적합한 크기"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "penalty": -0.2,
+        "reason": "1인 가구에 부적합한 크기"
+      },
+      {
+        "condition": "기본형 또는 실용형 디자인",
+        "penalty": -0.1,
+        "reason": "디자인 우선순위에 부합하지 않음"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 나 혼자 산다 (1인 가구)\n- 우선순위: 인테리어를 완성하는 디자인\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "1인 가구는 작은 용량의 제품이 적합하므로, 소형 제품에 보너스를 부여하고 대용량 제품에 페널티를 적용합니다.",
+      "priority_impact": "디자인 우선순위는 시각적 완성도를 중시하므로, 디자인 관련 속성(패널 타입, 디자인 라인업)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 42,
+    "logic_name": "Scoring_Logic_042",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 12
+    },
+    "applies_to_taste_ids": [
+      98,
+      107,
+      137,
+      192,
+      259,
+      362,
+      452,
+      455,
+      487,
+      621,
+      624,
+      632
+    ],
+    "taste_count": 12,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 43,
+    "logic_name": "Scoring_Logic_043",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 12
+    },
+    "applies_to_taste_ids": [
+      103,
+      314,
+      470,
+      490,
+      506,
+      517,
+      524,
+      560,
+      567,
+      723,
+      736,
+      764
+    ],
+    "taste_count": 12,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 44,
+    "logic_name": "Scoring_Logic_044",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      104,
+      157,
+      197,
+      211,
+      223,
+      236,
+      349,
+      434,
+      462,
+      478,
+      544,
+      563,
+      627,
+      663,
+      674,
+      685
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": []
+    },
+    "bonuses": [
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 45,
+    "logic_name": "Scoring_Logic_045",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "1,500만원 ~ 3,000만원 (고급형)",
+      "lineup": "3,000만원 이상 (하이엔드)",
+      "group_size": 12
+    },
+    "applies_to_taste_ids": [
+      108,
+      172,
+      187,
+      225,
+      272,
+      296,
+      335,
+      486,
+      502,
+      618,
+      645,
+      717
+    ],
+    "taste_count": 12,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": []
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 1,500만원 ~ 3,000만원 (고급형)\n- 선호 라인업: 3,000만원 이상 (하이엔드)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "고급형 예산은 품질을 중시하므로, 기능성과 디자인에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 46,
+    "logic_name": "Scoring_Logic_046",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "우리 둘이 알콩달콩 (2인/신혼)",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 16
+    },
+    "applies_to_taste_ids": [
+      111,
+      264,
+      317,
+      320,
+      343,
+      347,
+      358,
+      398,
+      429,
+      438,
+      483,
+      559,
+      629,
+      660,
+      664,
+      683
+    ],
+    "taste_count": 16,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": []
+    },
+    "bonuses": [],
+    "penalties": [],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 우리 둘이 알콩달콩 (2인/신혼)\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "2인 가구는 중간 용량의 제품이 적합하므로, 표준형 제품에 가중치를 부여합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 47,
+    "logic_name": "Scoring_Logic_047",
+    "representative_taste": {
+      "vibe": "모던 & 미니멀 (Modern & Minimal)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "3,000만원 이상 (하이엔드)",
+      "lineup": "500만원 ~ 1,500만원 (표준형)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      127,
+      145,
+      151,
+      158,
+      246,
+      359,
+      430,
+      526,
+      637,
+      644
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "프리미엄 라인업 또는 하이엔드 제품"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 모던 & 미니멀 (Modern & Minimal)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 3,000만원 이상 (하이엔드)\n- 선호 라인업: 500만원 ~ 1,500만원 (표준형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "모던 & 미니멀 스타일은 깔끔하고 세련된 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "하이엔드 예산은 최고 품질을 선호하므로, 프리미엄 라인업과 최고 사양에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 48,
+    "logic_name": "Scoring_Logic_048",
+    "representative_taste": {
+      "vibe": "코지 & 네이처 (Cozy & Nature)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "삶을 편하게 해주는 AI/스마트 기능",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      141,
+      216,
+      311,
+      322,
+      357,
+      366,
+      412,
+      472,
+      594,
+      601
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.27472527472527475,
+        "brightness": 0.10989010989010989,
+        "refresh_rate": 0.15384615384615385,
+        "panel_type": 0.07326007326007326,
+        "power_consumption": 0.07326007326007326,
+        "size": 0.07326007326007326,
+        "price_match": 0.10989010989010989,
+        "features": 0.13186813186813187
+      },
+      "KITCHEN": {
+        "capacity": 0.15479876160990713,
+        "energy_efficiency": 0.12383900928792571,
+        "features": 0.11145510835913312,
+        "size": 0.061919504643962855,
+        "price_match": 0.12383900928792571,
+        "design": 0.061919504643962855,
+        "resolution": 0.23219814241486067,
+        "refresh_rate": 0.13003095975232198
+      },
+      "LIVING": {
+        "audio_quality": 0.15384615384615385,
+        "connectivity": 0.0923076923076923,
+        "power_consumption": 0.06153846153846154,
+        "size": 0.06153846153846154,
+        "price_match": 0.12307692307692308,
+        "features": 0.14769230769230768,
+        "resolution": 0.23076923076923078,
+        "refresh_rate": 0.12923076923076923
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "AI 또는 스마트 기능"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      },
+      {
+        "condition": "AI 또는 스마트 기능 포함",
+        "bonus": 0.12,
+        "reason": "기술 우선순위에 부합"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 코지 & 네이처 (Cozy & Nature)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 삶을 편하게 해주는 AI/스마트 기능\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "코지 & 네이처 스타일은 따뜻하고 자연스러운 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "AI/스마트 기능 우선순위는 첨단 기술을 중시하므로, 기술 관련 속성(해상도, 주사율, AI 기능)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 49,
+    "logic_name": "Scoring_Logic_049",
+    "representative_taste": {
+      "vibe": "럭셔리 & 아티스틱 (Luxury & Artistic)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "가성비를 추구하는 가격",
+      "budget": "500만원 미만 (실속형)",
+      "lineup": "1,500만원 ~ 3,000만원 (고급형)",
+      "group_size": 14
+    },
+    "applies_to_taste_ids": [
+      154,
+      177,
+      325,
+      371,
+      415,
+      419,
+      436,
+      448,
+      495,
+      532,
+      597,
+      648,
+      704,
+      751
+    ],
+    "taste_count": 14,
+    "weights": {
+      "TV": {
+        "resolution": 0.23255813953488372,
+        "brightness": 0.13953488372093023,
+        "refresh_rate": 0.13953488372093023,
+        "panel_type": 0.0930232558139535,
+        "power_consumption": 0.0930232558139535,
+        "size": 0.0930232558139535,
+        "price_match": 0.20930232558139533
+      },
+      "KITCHEN": {
+        "capacity": 0.22727272727272727,
+        "energy_efficiency": 0.18181818181818182,
+        "features": 0.13636363636363635,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "design": 0.09090909090909091
+      },
+      "LIVING": {
+        "audio_quality": 0.22727272727272727,
+        "connectivity": 0.13636363636363635,
+        "power_consumption": 0.09090909090909091,
+        "size": 0.09090909090909091,
+        "price_match": 0.27272727272727276,
+        "features": 0.18181818181818182
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "SIGNATURE 또는 시그니처 라인업"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)",
+        "프리미엄 라인업 (시그니처 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 럭셔리 & 아티스틱 (Luxury & Artistic)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 가성비를 추구하는 가격\n- 예산 범위: 500만원 미만 (실속형)\n- 선호 라인업: 1,500만원 ~ 3,000만원 (고급형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "럭셔리 & 아티스틱 스타일은 고급스러운 디자인을 선호하므로, SIGNATURE 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "가성비 우선순위는 가격 대비 성능을 중시하므로, 가격 적합도에 높은 가중치를 부여합니다.",
+      "budget_impact": "실속형 예산은 가격이 낮은 제품을 선호하므로, 가격 필터링과 가격 적합도에 높은 가중치를 부여합니다."
+    }
+  },
+  {
+    "logic_id": 50,
+    "logic_name": "Scoring_Logic_050",
+    "representative_taste": {
+      "vibe": "유니크 & 팝 (Unique & Pop)",
+      "mate": "함께 사는 3~4인 가족",
+      "priority": "지구를 지키는 에너지 효율",
+      "budget": "500만원 ~ 1,500만원 (표준형)",
+      "lineup": "500만원 미만 (실속형)",
+      "group_size": 10
+    },
+    "applies_to_taste_ids": [
+      164,
+      220,
+      245,
+      437,
+      575,
+      687,
+      705,
+      724,
+      727,
+      741
+    ],
+    "taste_count": 10,
+    "weights": {
+      "TV": {
+        "resolution": 0.18518518518518517,
+        "brightness": 0.1111111111111111,
+        "refresh_rate": 0.1111111111111111,
+        "panel_type": 0.07407407407407407,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.1111111111111111,
+        "energy_efficiency": 0.22222222222222224
+      },
+      "KITCHEN": {
+        "capacity": 0.2,
+        "energy_efficiency": 0.24000000000000005,
+        "features": 0.12,
+        "size": 0.08,
+        "price_match": 0.16,
+        "design": 0.08,
+        "power_consumption": 0.12000000000000002
+      },
+      "LIVING": {
+        "audio_quality": 0.18518518518518517,
+        "connectivity": 0.1111111111111111,
+        "power_consumption": 0.11111111111111112,
+        "size": 0.07407407407407407,
+        "price_match": 0.14814814814814814,
+        "features": 0.14814814814814814,
+        "energy_efficiency": 0.22222222222222224
+      }
+    },
+    "filters": {
+      "must_have": [],
+      "should_have": [
+        "OBJET 또는 오브제 라인업",
+        "에너지 1등급 또는 인버터 기술"
+      ],
+      "exclude": [
+        "소형 제품 (300L 이하 냉장고, 미니 세탁기 등)"
+      ]
+    },
+    "bonuses": [
+      {
+        "condition": "대용량 제품 (800L 이상)",
+        "bonus": 0.1,
+        "reason": "가족 구성에 적합한 용량"
+      }
+    ],
+    "penalties": [
+      {
+        "condition": "소형 제품 (300L 이하)",
+        "penalty": -0.2,
+        "reason": "가족 구성에 부적합한 용량"
+      }
+    ],
+    "explanation": "\n이 Scoring Logic은 다음 취향 조합을 대표합니다:\n- 인테리어 스타일: 유니크 & 팝 (Unique & Pop)\n- 메이트 구성: 함께 사는 3~4인 가족\n- 우선순위: 지구를 지키는 에너지 효율\n- 예산 범위: 500만원 ~ 1,500만원 (표준형)\n- 선호 라인업: 500만원 미만 (실속형)\n\n이 취향 조합의 특성을 반영하여 제품 추천 점수를 계산합니다.\n",
+    "rationale": {
+      "vibe_impact": "유니크 & 팝 스타일은 개성 있는 디자인을 선호하므로, OBJET 라인업에 가중치를 부여합니다.",
+      "mate_impact": "가족 구성은 큰 용량의 제품이 적합하므로, 대용량 제품에 보너스를 부여하고 소형 제품에 페널티를 적용합니다.",
+      "priority_impact": "에너지 효율 우선순위는 환경 친화성을 중시하므로, 에너지 관련 속성(전력소비, 에너지 등급)에 높은 가중치를 부여합니다.",
+      "budget_impact": "표준형 예산은 균형 잡힌 선택을 선호하므로, 모든 속성에 균등한 가중치를 부여합니다."
+    }
+  }
+]
