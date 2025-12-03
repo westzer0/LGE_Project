@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8zb-1$0d6^f=&c@v8-l2-9b*9ydnp7k3m0-s_y8gljjkvtiyt8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']  # 테스트용: 모든 주소 허용
 
 # ============================================================
 # 외부 API 키 설정
@@ -174,3 +174,10 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
     ],
 }
+
+# ============================================================
+# CSRF 설정 (ngrok 등 외부 도메인 접근 허용)
+# ============================================================
+CSRF_TRUSTED_ORIGINS = [
+    'https://surer-tabatha-gullibly.ngrok-free.dev',
+]

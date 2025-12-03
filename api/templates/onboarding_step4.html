@@ -526,7 +526,7 @@
         .exit-modal-btn-cancel {
             background: #fff;
             color: #1a1a1a;
-            border: 2px solid #1a1a1a;
+            border: 1px solid #1a1a1a;
         }
 
         .exit-modal-btn-cancel:hover {
@@ -534,12 +534,12 @@
         }
 
         .exit-modal-btn-continue {
-            background: #FD312E;
+            background: #EA1917;
             color: #fff;
         }
 
         .exit-modal-btn-continue:hover {
-            background: #B80D3D;
+            background: #c01414;
         }
 
         /* ============================================
@@ -1187,23 +1187,13 @@
         }
 
         function cancelOnboarding() {
-            // 취소: main.html로 이동
+            // 취소: 메인 페이지로 이동
             isNavigating = true; // 정상 네비게이션으로 표시
-            window.location.href = '/main/';
+            window.location.href = 'http://127.0.0.1:8000/';
         }
 
-        // 페이지 이탈 시 경고
-        window.addEventListener('beforeunload', function (e) {
-            // 정상적인 네비게이션이면 경고하지 않음
-            if (isNavigating) {
-                return;
-            }
-
-            // 모달 표시 (일부 브라우저에서는 기본 확인창만 표시됨)
-            const message = '지금 나가시면 입력하신 정보가 사라질 수 있어요.';
-            e.returnValue = message;
-            return message;
-        });
+        // 페이지 이탈 시 경고 제거 (beforeunload 이벤트 제거)
+        // 브라우저 기본 팝업은 표시하지 않음
 
         // 정상적인 네비게이션 시 플래그 설정
         document.getElementById('nextBtn').addEventListener('click', function() {
