@@ -60,6 +60,11 @@ def onboarding_step6_page(request):
     return render(request, "onboarding_step6.html")
 
 
+def onboarding_step7_page(request):
+    """온보딩 페이지 렌더링 (7단계)"""
+    return render(request, "onboarding_step7.html")
+
+
 def onboarding_new_page(request):
     """새 온보딩 페이지 (4단계 설문)"""
     return render(request, "onboarding_new.html")

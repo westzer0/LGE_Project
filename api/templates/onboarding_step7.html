@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LG전자 | 가전 패키지 추천 - 2단계</title>
+    <title>LG전자 | 가전 패키지 추천 - 7단계</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -266,7 +266,7 @@
         .main-content {
             margin-top: 160px;
             min-height: calc(100vh - 160px);
-            padding: 60px 0 180px; /* 하단 버튼 공간 확보 */
+            padding: 60px 0 240px; /* 하단 버튼 공간 확보 */
         }
 
         .onboarding-container {
@@ -304,8 +304,8 @@
             height: 100%;
             background: #1a1a1a;
             transition: width 0.3s ease;
-            width: 33.33%;
-            /* 2단계 / 6단계 = 33.33% */
+            width: 100%;
+            /* 7단계 / 7단계 = 100% */
         }
 
         .progress-text {
@@ -353,7 +353,7 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 16px;
-            margin-bottom: 60px;
+            margin-bottom: 100px;
             max-width: 460px;
             margin-left: auto;
             margin-right: auto;
@@ -370,10 +370,12 @@
             padding: 18px 24px;
             text-align: left;
             width: 460px;
-            height: 80px;
+            min-height: 80px;
             display: flex;
-            align-items: center;
-            justify-content: flex-start;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 8px;
         }
 
         .option-card:hover {
@@ -396,56 +398,12 @@
             line-height: 1.5;
         }
 
-        /* ============================================
-           추가 질문 섹션 (반려동물) - 조건부 표시
-           ============================================ */
-        .additional-question-section {
-            margin-top: 80px;
-            margin-bottom: 40px;
-            text-align: center;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            display: none; /* 기본적으로 숨김 */
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .additional-question-section.show {
-            display: block;
-            opacity: 1;
-        }
-
-        .additional-question-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1a1a1a;
-            line-height: 1.4;
-            margin-bottom: 13px;
-            text-align: center;
-        }
-
-        .additional-question-subtitle {
+        .option-price {
             font-size: 16px;
-            color: #666;
-            text-align: center;
-        }
-
-        .additional-options-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-bottom: 60px;
-            max-width: 460px;
-            margin-left: auto;
-            margin-right: auto;
-            display: none; /* 기본적으로 숨김 */
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .additional-options-grid.show {
-            display: grid;
-            opacity: 1;
+            font-weight: 500;
+            color: #666666;
+            line-height: 1.5;
+            white-space: nowrap;
         }
 
         /* ============================================
@@ -500,6 +458,12 @@
             flex-shrink: 0;
         }
 
+        /* 마지막 단계의 가전 패키지 추천받기 버튼은 더 넓게 */
+        .btn-primary.final-step-btn {
+            width: 300px;
+            white-space: nowrap;
+        }
+
         .btn-primary {
             background: #1a1a1a;
             color: #fff;
@@ -513,6 +477,55 @@
             background: #e5e5e5;
             color: #999;
             cursor: not-allowed;
+        }
+
+        /* ============================================
+           Loading Overlay (로딩 화면)
+           ============================================ */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            color: #666;
         }
 
         /* ============================================
@@ -609,8 +622,7 @@
                 padding: 0 40px;
             }
 
-            .options-grid,
-            .additional-options-grid {
+            .options-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
@@ -736,68 +748,55 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
-                    <span class="progress-text" id="progressText">2단계 / 6단계</span>
+                    <span class="progress-text" id="progressText">7단계 / 7단계</span>
                 </div>
             </div>
 
-            <!-- 질문 영역 -->
+            <!-- 질문 섹션 -->
             <div class="question-section">
                 <h2 class="question-title">
-                    이 공간에서 함께 생활하는 <span class="bold">메이트</span>는 누구인가요?
+                    선호하는 <span class="bold">제품 라인업</span>은 어느 정도인가요?
                 </h2>
                 <p class="question-subtitle">1개 선택 가능해요.</p>
             </div>
 
-            <!-- 선택 옵션 카드 -->
+            <!-- 옵션 카드 -->
             <div class="options-grid">
-                <!-- [A] 나 혼자 산다 -->
-                <div class="option-card" data-value="alone" id="option-alone">
-                    <span class="option-text">나 혼자 산다</span>
+                <div class="option-card budget-option" data-value="budget" id="option-budget">
+                    <span class="option-text">가성비가 중요해요 "실속형"</span>
+                    <span class="option-price">500만원 미만</span>
                 </div>
 
-                <!-- [B] 우리 둘이 알콩달콩 -->
-                <div class="option-card" data-value="couple" id="option-couple">
-                    <span class="option-text">우리 둘이 알콩달콩</span>
+                <div class="option-card budget-option" data-value="standard" id="option-standard">
+                    <span class="option-text">적당한 가격에 좋은 기능을 원해요 "표준형"</span>
+                    <span class="option-price">500만원 ~ 1,500만원</span>
                 </div>
 
-                <!-- [C] 아이가 있는 3~4인 가족 -->
-                <div class="option-card" data-value="family_3_4" id="option-family-3-4">
-                    <span class="option-text">아이가 있는 3~4인 가족</span>
+                <div class="option-card budget-option" data-value="premium" id="option-premium">
+                    <span class="option-text">오래 쓸 거니까 투자를 아끼지 않을래요 "고급형"</span>
+                    <span class="option-price">1,500만원 ~ 3,000만원</span>
                 </div>
 
-                <!-- [D] 5인 이상 대가족 -->
-                <div class="option-card" data-value="family_5plus" id="option-family-5plus">
-                    <span class="option-text">5인 이상 대가족</span>
-                </div>
-            </div>
-
-            <!-- 추가 질문 영역 (반려동물) -->
-            <div class="additional-question-section">
-                <h2 class="additional-question-title">
-                    혹시 반려동물과 함께하시나요?
-                </h2>
-            </div>
-
-            <!-- 반려동물 선택 옵션 카드 -->
-            <div class="additional-options-grid" id="petOptionsGrid">
-                <!-- [A] 네, 사랑스러운 댕냥이가 있어요 -->
-                <div class="option-card pet-option" data-value="yes" id="option-pet-yes">
-                    <span class="option-text">네, 사랑스러운 댕냥이가 있어요</span>
-                </div>
-
-                <!-- [B] 아니요, 없어요 -->
-                <div class="option-card pet-option" data-value="no" id="option-pet-no">
-                    <span class="option-text">아니요, 없어요</span>
+                <div class="option-card budget-option" data-value="high_end" id="option-high-end">
+                    <span class="option-text">가격 상관없이 최고가 좋아요 "하이엔드"</span>
+                    <span class="option-price">3,000만원 이상</span>
                 </div>
             </div>
 
             <!-- 하단 버튼 -->
             <div class="button-section">
                 <button id="prevBtn" class="btn btn-secondary" onclick="goToPreviousStep()">이전</button>
-                <button id="nextBtn" class="btn btn-primary" disabled>다음 단계로 이동</button>
+                <button id="nextBtn" class="btn btn-primary final-step-btn" disabled>가전 패키지 추천받기</button>
             </div>
         </div>
     </main>
+
+    <!-- 로딩 화면 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">가전 패키지를 분석 중이에요</div>
+        <div class="loading-subtext">잠시만 기다려주세요</div>
+    </div>
 
     <!-- 중도 이탈 경고 모달 -->
     <div class="exit-modal-overlay" id="exitModal">
@@ -815,103 +814,69 @@
         // ============================================
         // 전역 변수
         // ============================================
-        let selectedMate = null; // 선택된 메이트 값 저장
-        let selectedPet = null; // 선택된 반려동물 값 저장
+        let selectedLineup = null; // 선택된 제품 라인업
 
         // ============================================
-        // 메이트 옵션 카드 클릭 이벤트 (단일 선택)
+        // 제품 라인업 옵션 카드 클릭 이벤트
         // ============================================
-        document.querySelectorAll('.options-grid .option-card').forEach(card => {
+        document.querySelectorAll('.budget-option').forEach(card => {
             card.addEventListener('click', function () {
                 // 이미 선택된 카드를 다시 클릭하면 선택 해제
                 if (this.classList.contains('selected')) {
                     this.classList.remove('selected');
-                    selectedMate = null;
-                    showPetQuestion(); // 반려동물 질문 숨김
-                    updateButton();
-                    return;
+                    selectedLineup = null;
+                } else {
+                    // 라인업 카드의 선택 상태 제거
+                    document.querySelectorAll('.budget-option').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+
+                    // 클릭한 카드에 선택 상태 추가
+                    this.classList.add('selected');
+                    selectedLineup = this.dataset.value;
                 }
 
-                // 메이트 카드의 선택 상태 제거
-                document.querySelectorAll('.options-grid .option-card').forEach(c => {
-                    c.classList.remove('selected');
-                });
-
-                // 클릭한 카드에 선택 상태 추가
-                this.classList.add('selected');
-                selectedMate = this.dataset.value;
-
-                // 메이트 선택 시 반려동물 질문 표시
-                showPetQuestion();
+                console.log('선택된 제품 라인업:', selectedLineup);
 
                 // 버튼 활성화 확인
                 updateButton();
             });
         });
-
-        // ============================================
-        // 반려동물 옵션 카드 클릭 이벤트 (단일 선택)
-        // ============================================
-        document.querySelectorAll('.pet-option').forEach(card => {
-            card.addEventListener('click', function () {
-                // 반려동물 카드의 선택 상태 제거
-                document.querySelectorAll('.pet-option').forEach(c => {
-                    c.classList.remove('selected');
-                });
-
-                // 클릭한 카드에 선택 상태 추가
-                this.classList.add('selected');
-                selectedPet = this.dataset.value;
-
-                // 버튼 활성화 확인
-                updateButton();
-            });
-        });
-
-        // ============================================
-        // 반려동물 질문 표시 함수
-        // ============================================
-        function showPetQuestion() {
-            const petQuestionSection = document.querySelector('.additional-question-section');
-            const petOptionsGrid = document.getElementById('petOptionsGrid');
-            
-            if (selectedMate) {
-                // 메이트 선택 시 반려동물 질문 표시
-                petQuestionSection.classList.add('show');
-                petOptionsGrid.classList.add('show');
-                
-                // 스크롤을 추가 질문 위치로 이동
-                setTimeout(() => {
-                    petQuestionSection.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start',
-                        inline: 'nearest'
-                    });
-                }, 100);
-            } else {
-                // 메이트 선택 해제 시 반려동물 질문 숨김
-                petQuestionSection.classList.remove('show');
-                petOptionsGrid.classList.remove('show');
-                selectedPet = null; // 반려동물 선택 초기화
-            }
-        }
 
         // ============================================
         // 버튼 상태 업데이트 함수
         // ============================================
         function updateButton() {
             const nextBtn = document.getElementById('nextBtn');
-            // 메이트 선택 시 반려동물도 선택해야 함
-            if (selectedMate && selectedPet) {
-                // 모두 선택되었으면 버튼 활성화 (블랙 색상)
+            
+            // 제품 라인업이 선택되었는지 확인
+            if (selectedLineup) {
+                // 버튼 활성화 (블랙 색상)
                 nextBtn.disabled = false;
                 nextBtn.style.background = '#1a1a1a';
                 nextBtn.style.color = '#fff';
             } else {
-                // 하나라도 선택되지 않았으면 버튼 비활성화 (회색)
+                // 버튼 비활성화 (회색)
                 nextBtn.disabled = true;
                 nextBtn.style.background = '#e5e5e5';
                 nextBtn.style.color = '#999';
+            }
+        }
+
+        // ============================================
+        // 로딩 화면 표시/숨김 함수
+        // ============================================
+        function showLoading() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('show');
+            }
+        }
+
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('show');
             }
         }
 
@@ -921,20 +886,18 @@
         document.getElementById('nextBtn').addEventListener('click', function () {
             if (this.disabled) return; // 비활성화 상태면 동작하지 않음
 
-            // 두 질문 모두 선택되었는지 확인
-            if (selectedMate && selectedPet) {
-                console.log('선택된 메이트:', selectedMate);
-                console.log('선택된 반려동물:', selectedPet);
+            // 제품 라인업 정보 확인
+            console.log('선택된 제품 라인업:', selectedLineup);
 
-                // 세션에 저장하고 다음 단계로 이동
-                saveStepAndNavigate();
-            } else {
-                alert('모든 질문에 답변해주세요.');
-            }
+            // 로딩 화면 표시
+            showLoading();
+
+            // 세션에 저장하고 결과 페이지로 이동
+            saveStepAndNavigate();
         });
 
         // ============================================
-        // 세션 저장 및 다음 단계로 이동
+        // 세션 저장 및 결과 페이지로 이동
         // ============================================
         function saveStepAndNavigate() {
             // 세션 ID 가져오기 또는 생성
@@ -944,19 +907,45 @@
                 sessionStorage.setItem('onboarding_session_id', sessionId);
             }
 
-            // 1단계에서 선택한 값 가져오기
+            // 이전 단계에서 선택한 값 가져오기
             const step1Vibe = sessionStorage.getItem('step1_vibe');
+            const step2Mate = sessionStorage.getItem('step2_mate');
+            const step2Pet = sessionStorage.getItem('step2_pet');
+            const step3HousingType = sessionStorage.getItem('step3_housing_type');
+            const step3Pyung = sessionStorage.getItem('step3_pyung');
+            const step3MainSpace = sessionStorage.getItem('step3_main_space');
+            const step4Cooking = sessionStorage.getItem('step4_cooking');
+            const step4Laundry = sessionStorage.getItem('step4_laundry');
+            const step4Media = sessionStorage.getItem('step4_media');
+            const step5Priority = sessionStorage.getItem('step5_priority');
+            const step5PriorityMap = sessionStorage.getItem('step5_priority_map');
+            const step6Budget = sessionStorage.getItem('step6_budget');
 
-            // 2단계 데이터 준비
-            const step2Data = {
+            // 7단계 데이터 준비
+            const step7Data = {
                 session_id: sessionId,
-                step: 2,
+                step: 7,
                 data: {
                     vibe: step1Vibe,
-                    mate: selectedMate,  // mate 값으로 전달
-                    pet: selectedPet     // 반려동물 값 추가
+                    mate: step2Mate,
+                    pet: step2Pet,
+                    housing_type: step3HousingType,
+                    main_space: step3MainSpace ? JSON.parse(step3MainSpace) : [],
+                    pyung: step3Pyung ? parseInt(step3Pyung) : null,
+                    cooking: step4Cooking,
+                    laundry: step4Laundry,
+                    media: step4Media,
+                    priority: step5Priority ? JSON.parse(step5Priority) : [],
+                    priority_map: step5PriorityMap ? JSON.parse(step5PriorityMap) : {},
+                    budget: step6Budget,
+                    lineup: selectedLineup
                 }
             };
+
+            // 버튼 비활성화 (중복 클릭 방지)
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = true;
+            nextBtn.textContent = '저장 중...';
 
             // API 호출하여 세션 저장
             fetch('/api/onboarding/step/', {
@@ -965,49 +954,45 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify(step2Data)
+                body: JSON.stringify(step7Data)
             })
                 .then(response => {
                     console.log('API Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error('서버 오류: ' + response.status);
-                    }
                     return response.json().catch(() => {
-                        return { success: false, error: '응답 파싱 실패' };
+                        return { success: false, error: '응답 파싱 실패 (Status: ' + response.status + ')' };
                     });
                 })
                 .then(data => {
                     console.log('API Response data:', data);
                     if (data.success) {
-                        console.log('✅ 2단계 데이터 저장 성공!');
+                        console.log('✅ 7단계 데이터 저장 성공!');
                         console.log('저장된 세션 ID:', data.session_id);
                         console.log('현재 단계:', data.current_step);
-                        console.log('다음 단계:', data.next_step);
-                        console.log('저장된 데이터:', {
-                            vibe: step1Vibe,
-                            mate: selectedMate,
-                            pet: selectedPet
-                        });
                         
-                        // 2단계 선택 값 저장 (sessionStorage)
-                        sessionStorage.setItem('step2_mate', selectedMate);
-                        sessionStorage.setItem('step2_pet', selectedPet);
+                        // 7단계 선택 값 저장
+                        sessionStorage.setItem('step7_lineup', selectedLineup);
                         
-                        // 다음 단계로 이동 (3단계로 이동)
-                        console.log('2단계 데이터 저장 완료, 다음 단계로 이동합니다.');
-                        window.location.href = '/onboarding/step3/';
+                        // 로딩 화면을 짧게 유지한 후 결과 페이지로 이동 (1.5초 딜레이)
+                        setTimeout(() => {
+                            console.log('온보딩 완료, 결과 페이지로 이동합니다.');
+                            window.location.href = '/result/';
+                        }, 1500);
                     } else {
                         console.warn('⚠️ 서버 저장 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
                         console.warn('오류 내용:', data.error);
-                        // sessionStorage에 저장되어 있으므로 이동
-                        window.location.href = '/onboarding/step3/';
+                        // 로딩 화면을 짧게 유지한 후 이동 (1.5초 딜레이)
+                        setTimeout(() => {
+                            window.location.href = '/result/';
+                        }, 1500);
                     }
                 })
                 .catch(error => {
                     console.error('❌ API Error:', error);
                     console.warn('⚠️ API 호출 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
-                    // sessionStorage에 저장되어 있으므로 이동
-                    window.location.href = '/onboarding/step3/';
+                    // 로딩 화면을 짧게 유지한 후 이동 (1.5초 딜레이)
+                    setTimeout(() => {
+                        window.location.href = '/result/';
+                    }, 1500);
                 });
         }
 
@@ -1115,39 +1100,20 @@
         // ============================================
         function goToPreviousStep() {
             isNavigating = true;
-            window.location.href = '/onboarding/';
+            window.location.href = '/onboarding/step6/';
         }
 
         // ============================================
-        // 초기화: 페이지 로드 시
+        // 페이지 로드 시 버튼 상태 초기화 및 이전 선택값 복원
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             // sessionStorage에서 이전에 선택한 값 복원
-            const savedMate = sessionStorage.getItem('step2_mate');
-            const savedPet = sessionStorage.getItem('step2_pet');
-            
-            if (savedMate) {
-                const mateCard = document.querySelector(`.option-card[data-value="${savedMate}"]`);
-                if (mateCard) {
-                    mateCard.classList.add('selected');
-                    selectedMate = savedMate;
-                }
-            }
-            
-            // 반려동물 질문 초기 상태: 숨김
-            const petQuestionSection = document.querySelector('.additional-question-section');
-            const petOptionsGrid = document.getElementById('petOptionsGrid');
-            petQuestionSection.classList.remove('show');
-            petOptionsGrid.classList.remove('show');
-            
-            if (savedPet) {
-                selectedPet = savedPet;
-                const petOption = document.querySelector(`input[type="radio"][value="${savedPet}"]`);
-                if (petOption) {
-                    petOption.checked = true;
-                    if (savedPet === 'yes') {
-                        showPetQuestion();
-                    }
+            const savedLineup = sessionStorage.getItem('step7_lineup');
+            if (savedLineup) {
+                selectedLineup = savedLineup;
+                const lineupCard = document.querySelector(`.option-card[data-value="${savedLineup}"]`);
+                if (lineupCard) {
+                    lineupCard.classList.add('selected');
                 }
             }
             
@@ -1155,11 +1121,9 @@
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
                 nextBtn.disabled = false;
-                nextBtn.textContent = '다음 단계로 이동';
+                nextBtn.textContent = '가전 패키지 추천받기';
+                updateButton();
             }
-            
-            // 버튼 비활성화 상태 유지
-            updateButton();
         });
 
         // ============================================
@@ -1173,7 +1137,7 @@
                 const nextBtn = document.getElementById('nextBtn');
                 if (nextBtn) {
                     nextBtn.disabled = false;
-                    nextBtn.textContent = '다음 단계로 이동';
+                    nextBtn.textContent = '가전 패키지 추천받기';
                     updateButton();
                 }
             }

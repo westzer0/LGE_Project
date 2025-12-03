@@ -9,8 +9,7 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -19,7 +18,7 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
             background-color: #fff;
             color: #1a1a1a;
             line-height: 1.6;
@@ -432,8 +431,27 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 20px;
             z-index: 100;
             pointer-events: none;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #BAAFB3;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 120px !important;
+            flex-shrink: 0;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
         }
 
         .button-section .btn {
@@ -441,15 +459,15 @@
         }
 
         .btn {
-            padding: 14px 100px;
-            font-size: 18px;
-            font-weight: 600;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 400;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 400px;
-            width: auto;
+            width: 300px;
+            flex-shrink: 0;
         }
 
         .btn-primary {
@@ -491,8 +509,9 @@
             background: #fff;
             border-radius: 12px;
             padding: 40px;
-            max-width: 400px;
-            width: 90%;
+            min-width: 450px;
+            max-width: 500px;
+            width: auto;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
@@ -501,12 +520,14 @@
             font-size: 16px;
             color: #1a1a1a;
             line-height: 1.6;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .exit-modal-question {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 400;
             color: #1a1a1a;
             line-height: 1.6;
             margin-bottom: 32px;
@@ -721,6 +742,7 @@
 
             <!-- 하단 버튼 -->
             <div class="button-section">
+                <button id="prevBtn" class="btn btn-secondary" onclick="goToPreviousStep()">이전</button>
                 <button id="nextBtn" class="btn btn-primary" disabled>다음 단계로 이동</button>
             </div>
         </div>
@@ -985,8 +1007,30 @@
             window.location.href = 'http://127.0.0.1:8000/';
         }
 
-        // 페이지 이탈 시 경고 제거 (beforeunload 이벤트 제거)
-        // 브라우저 기본 팝업은 표시하지 않음
+        // 페이지 이탈 시 경고 (beforeunload는 기본 확인창만 가능)
+        window.addEventListener('beforeunload', function (e) {
+            // 정상적인 네비게이션이면 경고하지 않음
+            if (isNavigating) {
+                return;
+            }
+
+            // 기본 확인창 표시 (브라우저가 자체 스타일로 표시)
+            const message = '지금 나가시면 입력하신 정보가 사라질 수 있어요.';
+            e.returnValue = message;
+            return message;
+        });
+
+        // 브라우저 뒤로가기 버튼 감지
+        window.addEventListener('popstate', function (e) {
+            if (!isNavigating) {
+                e.preventDefault();
+                showExitModal();
+                history.pushState(null, null, location.href);
+            }
+        });
+
+        // 페이지 로드 시 히스토리 상태 추가
+        history.pushState(null, null, location.href);
 
         // 정상적인 네비게이션 시 플래그 설정
         document.getElementById('nextBtn').addEventListener('click', function() {
@@ -994,15 +1038,17 @@
         });
 
         // 외부 링크 클릭 시 모달 표시
-        document.querySelectorAll('a[href^="/"], a[href^="http"]').forEach(link => {
-            link.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('a[href]');
+            if (link && !isNavigating) {
+                const href = link.getAttribute('href');
                 // 온보딩 관련 링크가 아니면 경고
-                const href = this.getAttribute('href');
-                if (href && !href.includes('/onboarding/') && !href.includes('/result/')) {
+                if (href && !href.includes('/onboarding/') && !href.includes('/result/') && !href.startsWith('#')) {
                     e.preventDefault();
                     showExitModal();
+                    window.exitModalLinkHref = href;
                 }
-            });
+            }
         });
 
         // 모달 외부 클릭 시 닫기
@@ -1013,9 +1059,39 @@
         });
 
         // ============================================
-        // 페이지 로드 시 버튼 상태 초기화
+        // 이전 단계로 이동
+        // ============================================
+        function goToPreviousStep() {
+            isNavigating = true;
+            window.location.href = '/onboarding/step4/';
+        }
+
+        // ============================================
+        // 페이지 로드 시 버튼 상태 초기화 및 이전 선택값 복원
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
+            // sessionStorage에서 이전에 선택한 값 복원
+            const savedPriority = sessionStorage.getItem('step5_priority');
+            if (savedPriority) {
+                try {
+                    priorityOrder = JSON.parse(savedPriority);
+                    // 우선순위 복원
+                    priorityOrder.forEach((value, index) => {
+                        priorityMap[value] = index + 1;
+                        const priorityCard = document.querySelector(`.option-card[data-value="${value}"]`);
+                        if (priorityCard) {
+                            priorityCard.classList.add('selected');
+                            const badge = priorityCard.querySelector('.priority-badge');
+                            if (badge) {
+                                badge.textContent = index + 1;
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error('우선순위 복원 실패:', e);
+                }
+            }
+            
             // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {

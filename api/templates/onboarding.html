@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
             background-color: #fff;
             color: #1a1a1a;
             line-height: 1.6;
@@ -457,8 +457,9 @@
             background: #fff;
             border-radius: 12px;
             padding: 40px;
-            max-width: 400px;
-            width: 90%;
+            min-width: 450px;
+            max-width: 500px;
+            width: auto;
             text-align: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
@@ -467,12 +468,14 @@
             font-size: 16px;
             color: #1a1a1a;
             line-height: 1.6;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .exit-modal-question {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 400;
             color: #1a1a1a;
             line-height: 1.6;
             margin-bottom: 32px;
@@ -687,6 +690,8 @@
 
             <!-- 하단 버튼 -->
             <div class="button-section">
+                <button id="prevBtn" class="btn btn-secondary" onclick="goToPreviousStep()"
+                    style="display: none;">이전</button>
                 <button id="nextBtn" class="btn btn-primary" disabled>다음 단계로 이동</button>
             </div>
         </div>
@@ -898,8 +903,19 @@
             window.location.href = 'http://127.0.0.1:8000/';
         }
 
-        // 페이지 이탈 시 경고 제거 (beforeunload 이벤트 제거)
-        // 브라우저 기본 팝업은 표시하지 않음
+        // 페이지 이탈 시 경고 (beforeunload는 기본 확인창만 가능)
+        // 커스텀 모달을 표시하려면 다른 이벤트를 사용해야 함
+        window.addEventListener('beforeunload', function (e) {
+            // 정상적인 네비게이션이면 경고하지 않음
+            if (isNavigating) {
+                return;
+            }
+
+            // 기본 확인창 표시 (브라우저가 자체 스타일로 표시)
+            const message = '지금 나가시면 입력하신 정보가 사라질 수 있어요.';
+            e.returnValue = message;
+            return message;
+        });
 
         // 브라우저 뒤로가기 버튼 감지 (커스텀 모달 표시 가능)
         window.addEventListener('popstate', function (e) {
@@ -920,21 +936,50 @@
         });
 
         // 외부 링크 클릭 시 모달 표시
-        document.querySelectorAll('a[href^="/"], a[href^="http"]').forEach(link => {
-            link.addEventListener('click', function (e) {
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('a[href]');
+            if (link && !isNavigating) {
+                const href = link.getAttribute('href');
                 // 온보딩 관련 링크가 아니면 경고
-                const href = this.getAttribute('href');
-                if (href && !href.includes('/onboarding/') && !href.includes('/result/')) {
+                if (href && !href.includes('/onboarding/') && !href.includes('/result/') && !href.startsWith('#')) {
                     e.preventDefault();
                     showExitModal();
+                    // 모달에서 취소를 선택하면 링크로 이동
+                    const originalHref = href;
+                    window.exitModalLinkHref = originalHref;
                 }
-            });
+            }
         });
 
         // 모달 외부 클릭 시 닫기
         document.getElementById('exitModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 hideExitModal();
+            }
+        });
+
+        // ============================================
+        // 이전 단계로 이동
+        // ============================================
+        function goToPreviousStep() {
+            isNavigating = true;
+            window.location.href = 'http://127.0.0.1:8000/';
+        }
+
+        // ============================================
+        // 페이지 로드 시 이전 선택값 복원
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function () {
+            // sessionStorage에서 이전에 선택한 값 복원
+            const savedVibe = sessionStorage.getItem('step1_vibe');
+            if (savedVibe) {
+                // 해당 옵션 카드 찾아서 선택 상태로 복원
+                const vibeCard = document.querySelector(`.option-card[data-value="${savedVibe}"]`);
+                if (vibeCard) {
+                    vibeCard.classList.add('selected');
+                    selectedVibe = savedVibe;
+                    updateButton();
+                }
             }
         });
 
