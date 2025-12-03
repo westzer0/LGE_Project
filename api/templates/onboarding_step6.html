@@ -446,6 +446,55 @@
         }
 
         /* ============================================
+           Loading Overlay (로딩 화면)
+           ============================================ */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* ============================================
            Exit Modal (중도 이탈 경고 모달)
            ============================================ */
         .exit-modal-overlay {
@@ -700,6 +749,13 @@
         </div>
     </main>
 
+    <!-- 로딩 화면 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">가전 패키지를 분석 중이에요</div>
+        <div class="loading-subtext">잠시만 기다려주세요</div>
+    </div>
+
     <!-- 중도 이탈 경고 모달 -->
     <div class="exit-modal-overlay" id="exitModal">
         <div class="exit-modal">
@@ -766,6 +822,23 @@
         }
 
         // ============================================
+        // 로딩 화면 표시/숨김 함수
+        // ============================================
+        function showLoading() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.add('show');
+            }
+        }
+
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('show');
+            }
+        }
+
+        // ============================================
         // 가전 패키지 추천받기 버튼 클릭 이벤트
         // ============================================
         document.getElementById('nextBtn').addEventListener('click', function () {
@@ -773,6 +846,9 @@
 
             // 예산 범위 정보 확인
             console.log('선택된 예산 범위:', selectedBudget);
+
+            // 로딩 화면 표시
+            showLoading();
 
             // 세션에 저장하고 결과 페이지로 이동
             saveStepAndNavigate();
@@ -852,21 +928,27 @@
                         // 6단계 선택 값 저장
                         sessionStorage.setItem('step6_budget', selectedBudget);
                         
-                        // 결과 페이지로 이동
-                        console.log('온보딩 완료, 결과 페이지로 이동합니다.');
-                        window.location.href = '/result/';
+                        // 로딩 화면을 짧게 유지한 후 결과 페이지로 이동 (1.5초 딜레이)
+                        setTimeout(() => {
+                            console.log('온보딩 완료, 결과 페이지로 이동합니다.');
+                            window.location.href = '/result/';
+                        }, 1500);
                     } else {
                         console.warn('⚠️ 서버 저장 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
                         console.warn('오류 내용:', data.error);
-                        // sessionStorage에 저장되어 있으므로 이동
-                        window.location.href = '/result/';
+                        // 로딩 화면을 짧게 유지한 후 이동 (1.5초 딜레이)
+                        setTimeout(() => {
+                            window.location.href = '/result/';
+                        }, 1500);
                     }
                 })
                 .catch(error => {
                     console.error('❌ API Error:', error);
                     console.warn('⚠️ API 호출 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
-                    // sessionStorage에 저장되어 있으므로 이동
-                    window.location.href = '/result/';
+                    // 로딩 화면을 짧게 유지한 후 이동 (1.5초 딜레이)
+                    setTimeout(() => {
+                        window.location.href = '/result/';
+                    }, 1500);
                 });
         }
 
