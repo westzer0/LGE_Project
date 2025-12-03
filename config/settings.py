@@ -105,24 +105,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Oracle 데이터베이스 설정
-# 커스텀 백엔드를 사용하여 Oracle 11g 지원 (버전 체크 우회)
-
-# 환경 변수에서 Oracle 설정 로드
-db_host = os.environ.get('ORACLE_HOST') or os.environ.get('DB_HOST', 'project-db-campus.smhrd.com')
-db_port = os.environ.get('ORACLE_PORT') or os.environ.get('DB_PORT', '1524')
-db_sid = os.environ.get('ORACLE_SID', 'xe')  # SQL Developer에서 확인한 SID
-db_user = os.environ.get('ORACLE_USER') or os.environ.get('DB_USER', '')
-db_password = os.environ.get('ORACLE_PASSWORD') or os.environ.get('DB_PASSWORD', '')
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'api.db.oracle_backend',  # 커스텀 백엔드 (Oracle 11g 버전 체크 우회)
-        'HOST': db_host,
-        'PORT': db_port,
-        'NAME': db_sid,  # SID: xe
-        'USER': db_user,
-        'PASSWORD': db_password,
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 

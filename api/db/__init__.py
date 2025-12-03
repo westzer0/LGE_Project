@@ -6,15 +6,13 @@ from .oracle_client import (
     get_connection,
     fetch_all,
     fetch_one,
-    execute,
-    execute_many,
+    fetch_all_dict,
 )
 
 __all__ = [
     'get_connection',
     'fetch_all',
     'fetch_one',
-    'execute',
-    'execute_many',
+    'fetch_all_dict',
 ]
 

@@ -174,13 +174,18 @@ class RecommendationEngine:
     
     def _filter_products(self, user_profile: dict) -> QuerySet:
         """
-        Step 1: Hard Filtering
+        Step 1: Hard Filtering (엄격한 필터링)
         - 카테고리 필터
         - 가격 범위 필터
         - 스펙 존재 필터
-        - 가족 인원 필터 (ProductDemographics 기반)
-        - 반려동물 필터 (제품 스펙/이름 기반)
+        - 반려동물 필터
+        - 가족 구성 기반 용량 필터 (NEW)
+        - 주거 형태/평수 기반 크기 필터 (NEW)
+        - 생활 패턴 기반 필터 (NEW)
+        - 우선순위 기반 필터 (NEW)
         """
+        from api.utils.product_filters import apply_all_filters
+        
         # 예산 범위 계산
         budget_level = user_profile.get('budget_level', 'medium')
         min_price, max_price = self.budget_mapping.get(
@@ -192,7 +197,7 @@ class RecommendationEngine:
         household_size = user_profile.get('household_size', 2)
         has_pet = user_profile.get('has_pet', False)
         
-        # Django ORM 쿼리
+        # Step 1: 기본 필터 (Django ORM 쿼리)
         # 카테고리 필터링: 정확히 일치하는 카테고리만
         products = (
             Product.objects
@@ -232,7 +237,24 @@ class RecommendationEngine:
                 products = products.exclude(pet_filter)
                 print(f"[Filter] 펫 관련 제품 제외 (반려동물 없음)")
         
-        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 가족: {household_size}명, 반려동물: {has_pet}, 결과: {products.count()}개")
+        print(f"[Filter Step 1] 기본 필터: 카테고리={categories}, 가격={min_price}~{max_price}원, 가족={household_size}명, 반려동물={has_pet}, 결과={products.count()}개")
+        
+        # Step 2: 추가 필터링 (Python 레벨에서 처리)
+        # QuerySet을 리스트로 변환하여 상세 필터링 적용
+        products_list = list(products)
+        
+        # 엄격한 필터링 적용
+        filtered_products = apply_all_filters(products_list, user_profile)
+        
+        # 필터링된 제품 ID 리스트로 QuerySet 재생성
+        if filtered_products:
+            product_ids = [p.id for p in filtered_products]
+            products = Product.objects.filter(id__in=product_ids)
+        else:
+            # 필터링 결과가 없으면 빈 QuerySet 반환
+            products = Product.objects.none()
+        
+        print(f"[Filter Step 2] 추가 필터링 후: {products.count()}개")
         
         return products
     
