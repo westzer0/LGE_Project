@@ -71,3 +71,5 @@ git commit -m "feat: Add Kakao share, AI chatbot, API key management"
 
 만약 반드시 수정하고 싶다면, **옵션 2(빈 커밋 추가)**를 사용하는 것이 가장 안전합니다.
 
+
+

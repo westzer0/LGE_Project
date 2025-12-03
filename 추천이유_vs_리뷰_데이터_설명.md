@@ -212,3 +212,5 @@ def _build_recommendation_reason(self, product, user_profile, score):
 2. 리뷰 데이터를 실시간으로 분석하여 추천 이유 생성
 3. 사용자 맞춤 정보와 리뷰 요약을 결합한 하이브리드 방식 도입
 
+
+
