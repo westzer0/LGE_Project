@@ -78,6 +78,11 @@ def result_page(request):
     })
 
 
+def other_recommendations_page(request):
+    """다른 추천 후보 확인 페이지 렌더링"""
+    return render(request, "other_recommendations.html")
+
+
 def reservation_status_page(request):
     """예약 조회/변경 페이지 렌더링"""
     return render(request, "reservation_status.html")

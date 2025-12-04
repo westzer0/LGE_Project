@@ -174,3 +174,22 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
     ],
 }
+
+# ============================================================
+# 세션 설정
+# ============================================================
+# 세션 쿠키 유효 기간: 30일 (초 단위)
+# 기본값: 1209600 (2주)
+SESSION_COOKIE_AGE = 30 * 24 * 60 * 60  # 30일 = 2592000초
+
+# 브라우저 종료 시 세션 만료 여부 (False: 브라우저를 닫아도 세션 유지)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# 세션 쿠키 이름
+SESSION_COOKIE_NAME = 'sessionid'
+
+# 세션 쿠키를 HTTPOnly로 설정 (XSS 공격 방지)
+SESSION_COOKIE_HTTPONLY = True
+
+# 세션 쿠키를 Secure로 설정 (HTTPS에서만 전송, 개발 환경에서는 False)
+SESSION_COOKIE_SECURE = False  # 프로덕션에서는 True로 변경

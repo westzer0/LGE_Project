@@ -969,6 +969,352 @@
         }
 
         /* ============================================
+           장바구니 담기 완료 모달
+           ============================================ */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .cart-modal.active {
+            display: flex;
+        }
+
+        .cart-modal-content {
+            background: #fff;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin: auto;
+        }
+
+        .cart-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .cart-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .cart-modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #1a1a1a;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .cart-modal-close:hover {
+            color: #666;
+        }
+
+        .cart-modal-divider {
+            height: 1px;
+            background: #e5e5e5;
+        }
+
+        .cart-complete-message {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .cart-icon-wrapper {
+            width: 45px;
+            height: 45px;
+            flex-shrink: 0;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 4px;
+        }
+
+        .cart-icon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .cart-message-text {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .cart-go-button {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .cart-go-button:hover {
+            background: #f5f5f5;
+        }
+
+        .cart-promotion-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: linear-gradient(to right, #f5f5f5 0%, #f5f5f5 50%, #f3f3f3 70%, #f0f0f0 100%);
+            border-radius: 8px;
+            margin: 20px 24px;
+            gap: 16px;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cart-promotion-banner::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 140px;
+            background: linear-gradient(to right, rgba(245, 245, 245, 0) 0%, rgba(245, 245, 245, 0.5) 50%, #f5f5f5 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .promotion-text {
+            flex: 1;
+        }
+
+        .promotion-title {
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .promotion-subtitle {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .promotion-link {
+            font-size: 14px;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .promotion-link:hover {
+            text-decoration: underline;
+        }
+
+        .promotion-image {
+            width: 120px;
+            height: 80px;
+            flex-shrink: 0;
+            background: transparent;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .promotion-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.95;
+            mix-blend-mode: normal;
+            filter: brightness(1.02) contrast(0.98);
+        }
+
+        .cart-recommended-section {
+            padding: 24px;
+            position: relative;
+        }
+
+        .cart-recommended-section:first-of-type {
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .cart-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .cart-product-scroll-wrapper {
+            position: relative;
+        }
+
+        .cart-product-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .cart-product-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cart-scroll-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+
+        .cart-scroll-button:hover {
+            background: #f5f5f5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .cart-scroll-button.prev {
+            left: -16px;
+        }
+
+        .cart-scroll-button.next {
+            right: -16px;
+        }
+
+        .cart-scroll-button svg {
+            width: 18px;
+            height: 18px;
+            stroke: #1a1a1a;
+            stroke-width: 2;
+        }
+
+        .cart-scroll-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .cart-product-list {
+            display: flex;
+            gap: 12px;
+            padding-bottom: 8px;
+        }
+
+        .cart-product-card {
+            min-width: 160px;
+            width: 160px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-product-image-container {
+            width: 100%;
+            height: 120px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 1px solid #e5e5e5;
+            border-bottom: none;
+        }
+
+        .cart-product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .cart-product-info {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-product-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .cart-product-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .cart-product-model {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .cart-product-price {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .cart-product-discount {
+            color: #EA1917;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        /* ============================================
            구매상담예약 모달
            ============================================ */
         .consultation-modal {
@@ -1194,7 +1540,7 @@
             border-radius: 4px;
             background: #fff;
             position: relative;
-            height: 150px;
+            min-height: 150px;
         }
 
         .consultation-product-item:not(:last-child) {
@@ -1285,6 +1631,19 @@
             text-decoration: line-through;
             font-weight: 400;
             font-size: 14px;
+        }
+
+        .consultation-product-description {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         /* 상담목적 버튼 */
@@ -1672,6 +2031,13 @@
             background: #fff;
             padding: 40px;
             border-top: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .bottom-actions-row-single {
+            position: relative;
+            z-index: 10000;
         }
 
         .bottom-actions-container {
@@ -1701,8 +2067,10 @@
         }
 
         .action-button {
+            width: 280px;
+            height: 60px;
             padding: 14px 24px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
@@ -1716,8 +2084,6 @@
             background: #1a1a1a;
             flex-shrink: 0;
             white-space: nowrap;
-            height: auto;
-            min-height: 48px;
         }
 
         .action-button:hover {
@@ -1732,21 +2098,68 @@
         }
 
         .action-button-large {
+            width: 280px;
+            height: 60px;
             padding: 14px 24px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
-            cursor: pointer;
+            cursor: pointer !important;
             transition: all 0.2s;
             border: none;
-            color: #fff;
-            background: #FF456D;
+            color: #fff !important;
+            background: #FD312E !important;
             text-align: center;
-            margin-left: 30px;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            position: relative !important;
+            z-index: 99999 !important;
+            pointer-events: auto !important;
+            text-decoration: none !important;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        a.action-button-large,
+        a.action-button-large:link,
+        a.action-button-large:visited,
+        a.action-button-large:hover,
+        a.action-button-large:active,
+        a.action-button-large:focus {
+            cursor: pointer !important;
+            color: #fff !important;
+            pointer-events: auto !important;
+            z-index: 99999 !important;
+        }
+
+        #otherRecommendationsBtn {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            z-index: 99999 !important;
+        }
+
+        .action-button-large:visited {
+            color: #fff !important;
+        }
+
+        .action-button-large:active {
+            background: #c01f1c !important;
+            cursor: pointer !important;
         }
 
         .action-button-large:hover {
-            background: #ff5c7d;
+            background: #e02a27 !important;
+            cursor: pointer !important;
+            transform: none;
+        }
+
+        .action-button-large:focus {
+            outline: 2px solid #FD312E;
+            outline-offset: 2px;
+            cursor: pointer !important;
         }
 
         /* ============================================
@@ -1757,19 +2170,58 @@
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
+            width: 400px;
+            height: 70px;
             background: #1a1a1a;
             color: #fff;
-            padding: 16px 24px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 0 20px;
+            border-radius: 100px;
+            font-size: 16px;
             z-index: 10000;
             opacity: 0;
             transition: opacity 0.3s;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
 
         .toast.show {
+            opacity: 0.56;
+        }
+
+        .toast-message {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .toast-close {
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .toast-close:hover {
             opacity: 1;
+        }
+
+        .toast-close svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
         }
 
         /* ============================================
@@ -2020,17 +2472,19 @@
 
             .action-button {
                 width: 100%;
+                height: 60px;
                 font-size: 15px;
                 padding: 14px 20px;
-                border-radius: 8px;
+                border-radius: 10px;
             }
 
             .action-button-large {
                 width: 100%;
+                height: 60px;
                 margin-left: 0;
                 font-size: 15px;
                 padding: 14px 20px;
-                border-radius: 8px;
+                border-radius: 10px;
             }
 
             /* 시간 슬롯 */
@@ -2162,6 +2616,13 @@
                 font-size: 12px;
             }
 
+            .consultation-product-description {
+                font-size: 12px;
+                margin-top: 4px;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+            }
+
             .consultation-product-price-info {
                 font-size: 16px;
                 gap: 6px;
@@ -2287,9 +2748,60 @@
 
             .action-button,
             .action-button-large {
+                width: 100%;
+                height: 60px;
                 font-size: 14px;
                 padding: 12px 16px;
-                border-radius: 6px;
+                border-radius: 10px;
+            }
+
+            /* Toast 알림 모바일 스타일 */
+            .toast {
+                width: calc(100% - 32px);
+                max-width: 400px;
+                height: 70px;
+                border-radius: 100px;
+            }
+
+            /* 장바구니 모달 모바일 스타일 */
+            .cart-modal-content {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .cart-modal-header {
+                padding: 16px 20px;
+            }
+
+            .cart-complete-message {
+                padding: 16px 20px;
+                flex-wrap: wrap;
+            }
+
+            .cart-go-button {
+                width: 100%;
+                margin-top: 12px;
+            }
+
+            .cart-promotion-banner {
+                flex-direction: column;
+                padding: 16px 20px;
+                margin: 16px 20px;
+            }
+
+            .promotion-image {
+                width: 100%;
+                height: 120px;
+            }
+
+            .cart-recommended-section {
+                padding: 20px;
+            }
+
+            .cart-product-card {
+                min-width: 140px;
+                width: 140px;
             }
 
             /* 시간 슬롯 */
@@ -2372,6 +2884,13 @@
 
             .consultation-product-model {
                 font-size: 12px;
+            }
+
+            .consultation-product-description {
+                font-size: 12px;
+                margin-top: 4px;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
             }
 
             /* 제출 버튼 */
@@ -2707,16 +3226,25 @@
                     </button>
                 </div>
                 <div class="bottom-actions-row-single">
-                    <button class="action-button-large" onclick="checkOtherRecommendations()">
+                    <a href="/other-recommendations/" class="action-button-large" id="otherRecommendationsBtn"
+                        onclick="window.location.href='/other-recommendations/'; return false;"
+                        style="cursor: pointer !important; pointer-events: auto !important; position: relative !important; z-index: 99999 !important; display: inline-flex !important; text-decoration: none !important;">
                         다른 추천 후보 확인
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
     </main>
 
     <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast">
+        <span class="toast-message" id="toastMessage"></span>
+        <button class="toast-close" onclick="closeToast()" aria-label="닫기">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
 
     <!-- 페이지 오른쪽 하단 스크롤 버튼 -->
     <button class="scroll-to-top-button" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
@@ -2874,6 +3402,89 @@
         </div>
     </div>
 
+    <!-- 장바구니 담기 완료 모달 -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-modal-content">
+            <!-- 헤더 -->
+            <div class="cart-modal-header">
+                <h2 class="cart-modal-title">장바구니 담기 완료</h2>
+                <button class="cart-modal-close" onclick="closeCartModal()">×</button>
+            </div>
+            <div class="cart-modal-divider"></div>
+
+            <!-- 완료 메시지 -->
+            <div class="cart-complete-message">
+                <div class="cart-icon-wrapper">
+                    <img src="/static/images/가전 카테고리/냉장고.png" alt="장바구니" class="cart-icon">
+                </div>
+                <div class="cart-message-text">
+                    <span>장바구니에 담았습니다.</span>
+                </div>
+                <button class="cart-go-button" onclick="goToCart()">바로가기 ></button>
+            </div>
+
+            <!-- 프로모션 배너 -->
+            <div class="cart-promotion-banner">
+                <div class="promotion-text">
+                    <div class="promotion-title">2품목 이상 구매/구독 시</div>
+                    <div class="promotion-subtitle">놓치면 안될 혜택</div>
+                    <a href="#" class="promotion-link">다품목 구매 시 필독 ></a>
+                </div>
+                <div class="promotion-image">
+                    <img src="{% static 'images/cart.jpg' %}" alt="다품목 혜택">
+                </div>
+            </div>
+
+            <!-- 함께 쓰기 좋은 제품 -->
+            <div class="cart-recommended-section">
+                <h3 class="cart-section-title">함께 쓰기 좋은 제품</h3>
+                <div class="cart-product-scroll-wrapper">
+                    <button class="cart-scroll-button prev" onclick="scrollCartProducts('recommended', 'prev')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <div class="cart-product-scroll" id="cartRecommendedScroll">
+                        <div class="cart-product-list" id="cartRecommendedProducts">
+                            <!-- 제품 카드들이 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                    <button class="cart-scroll-button next" onclick="scrollCartProducts('recommended', 'next')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 함께 구매하면 혜택이 커지는 다품목 제품 -->
+            <div class="cart-recommended-section">
+                <h3 class="cart-section-title">함께 구매하면 혜택이 커지는 다품목 제품</h3>
+                <div class="cart-product-scroll-wrapper">
+                    <button class="cart-scroll-button prev" onclick="scrollCartProducts('multi', 'prev')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <div class="cart-product-scroll" id="cartMultiScroll">
+                        <div class="cart-product-list" id="cartMultiProducts">
+                            <!-- 제품 카드들이 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                    <button class="cart-scroll-button next" onclick="scrollCartProducts('multi', 'next')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 다시 추천받기 확인 모달 -->
     <div class="confirm-modal" id="retryOnboardingModal">
         <div class="confirm-modal-content">
@@ -2909,12 +3520,25 @@
                 const response = await fetch(`/api/onboarding/session/${sessionId}/`);
 
                 if (!response.ok) {
-                    console.warn('세션 조회 실패:', response.status);
+                    // 400 오류는 세션이 만료되었거나 존재하지 않는 경우
+                    if (response.status === 400 || response.status === 404) {
+                        console.warn('세션 조회 실패: 세션이 만료되었거나 존재하지 않습니다.', response.status);
+                        // 세션 ID를 제거하여 재시도 방지
+                        sessionStorage.removeItem('onboarding_session_id');
+                    } else {
+                        console.warn('세션 조회 실패:', response.status);
+                    }
                     // API 실패해도 페이지는 정상 표시되도록 함
                     return;
                 }
 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    console.error('응답 파싱 오류:', error);
+                    return;
+                }
 
                 if (data.success && data.session && data.session.recommendation_result) {
                     // recommendation_result가 문자열인 경우 파싱
@@ -3424,8 +4048,170 @@
         // 장바구니 모두 담기
         // ============================================
         function addAllToCart() {
-            // TODO: 장바구니에 모든 추천 제품 추가
-            showToast('장바구니에 추가되었습니다.');
+            // 장바구니 모달 열기
+            openCartModal();
+        }
+
+        // 장바구니 모달 열기
+        function openCartModal() {
+            const modal = document.getElementById('cartModal');
+            modal.classList.add('active');
+
+            // 제품 목록 로드
+            loadCartRecommendedProducts();
+            loadCartMultiProducts();
+        }
+
+        // 장바구니 모달 닫기
+        function closeCartModal() {
+            const modal = document.getElementById('cartModal');
+            modal.classList.remove('active');
+        }
+
+        // 장바구니로 이동
+        function goToCart() {
+            // TODO: 장바구니 페이지로 이동
+            window.location.href = '/cart/';
+        }
+
+        // 함께 쓰기 좋은 제품 로드
+        function loadCartRecommendedProducts() {
+            const container = document.getElementById('cartRecommendedProducts');
+            container.innerHTML = '';
+
+            // LG전자 가전 제품 목록
+            const recommendedProducts = [
+                {
+                    name: '오브제컬렉션 Fit & Max',
+                    subtitle: '냉장고 페어설치키트',
+                    model: 'OC-Kit7',
+                    image: '/static/images/가전 카테고리/냉장고.png',
+                    discount: 9,
+                    price: 100000
+                },
+                {
+                    name: 'LG 디오스 오브제컬렉션',
+                    subtitle: '광파오븐',
+                    model: 'MLJ32ERS',
+                    image: '/static/images/가전 카테고리/광파오븐.png',
+                    discount: 9,
+                    price: 950000
+                },
+                {
+                    name: 'LG 스탠바이미 2',
+                    subtitle: '',
+                    model: '27LX6TPGA',
+                    image: '/static/images/가전 카테고리/TV.png',
+                    discount: 3,
+                    price: 1290000
+                },
+                {
+                    name: 'LG 디오스 오브제컬렉션',
+                    subtitle: '식기세척기',
+                    model: 'DUE5BGHE',
+                    image: '/static/images/가전 카테고리/식기세척기.png',
+                    discount: 5,
+                    price: 850000
+                }
+            ];
+
+            recommendedProducts.forEach(product => {
+                const card = createCartProductCard(product, false); // 함께 쓰기 좋은 제품은 다품목할인 배지 제거
+                container.appendChild(card);
+            });
+        }
+
+        // 함께 구매하면 혜택이 커지는 다품목 제품 로드
+        function loadCartMultiProducts() {
+            const container = document.getElementById('cartMultiProducts');
+            container.innerHTML = '';
+
+            // LG전자 가전 제품 목록
+            const multiProducts = [
+                {
+                    name: 'LG 디오스 AI 오브제컬렉션',
+                    subtitle: 'STEM 얼음정수 냉장고',
+                    model: 'W826GBB482',
+                    image: '/static/images/가전 카테고리/냉장고.png',
+                    discount: 12,
+                    price: 1840000
+                },
+                {
+                    name: 'LG 디오스 오브제컬렉션',
+                    subtitle: '식기세척기',
+                    model: 'DUE5BGHE',
+                    image: '/static/images/가전 카테고리/식기세척기.png',
+                    discount: 10,
+                    price: 1200000
+                },
+                {
+                    name: 'LG 디오스 오브제컬렉션',
+                    subtitle: '광파오븐',
+                    model: 'MLJ32ERS',
+                    image: '/static/images/가전 카테고리/광파오븐.png',
+                    discount: 8,
+                    price: 1950000
+                },
+                {
+                    name: 'LG 스타일러 오브제컬렉션',
+                    subtitle: '(ALL NEW)',
+                    model: 'SC5MSR40',
+                    image: '/static/images/가전 카테고리/의류관리기.png',
+                    discount: 9,
+                    price: 1840000
+                }
+            ];
+
+            multiProducts.forEach(product => {
+                const card = createCartProductCard(product, false);
+                container.appendChild(card);
+            });
+        }
+
+        // 장바구니 제품 카드 생성
+        function createCartProductCard(product, showBadge = true) {
+            const card = document.createElement('div');
+            card.className = 'cart-product-card';
+
+            const formatPrice = (price) => {
+                return Math.round(price).toLocaleString('ko-KR');
+            };
+
+            // 제품명과 subtitle을 함께 표시
+            const fullProductName = product.subtitle ? `${product.name} ${product.subtitle}` : product.name;
+
+            card.innerHTML = `
+                <div class="cart-product-image-container">
+                    <img src="${product.image}" alt="${product.name}" class="cart-product-image" onerror="this.src='/static/images/가전 카테고리/냉장고.png'">
+                </div>
+                <div class="cart-product-info">
+                    ${showBadge ? '<span class="cart-product-badge">다품목할인</span>' : ''}
+                    <div class="cart-product-name">${fullProductName}</div>
+                    <div class="cart-product-model">${product.model}</div>
+                    <div class="cart-product-price">
+                        ${product.discount > 0 ? `<span class="cart-product-discount">${product.discount}%</span>` : ''}
+                        ${formatPrice(product.price)}원
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 장바구니 제품 스크롤 함수
+        function scrollCartProducts(type, direction) {
+            const scrollId = type === 'recommended' ? 'cartRecommendedScroll' : 'cartMultiScroll';
+            const scrollContainer = document.getElementById(scrollId);
+
+            if (!scrollContainer) return;
+
+            const scrollAmount = 180; // 한 번에 스크롤할 거리 (카드 너비 + gap)
+
+            if (direction === 'prev') {
+                scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
         }
 
         // ============================================
@@ -3579,33 +4365,47 @@
                 try {
                     const sessionId = sessionStorage.getItem('onboarding_session_id');
                     if (!sessionId) {
-                        console.warn('세션 ID가 없습니다.');
-                        productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">세션 정보를 찾을 수 없습니다.</div>';
-                        return;
-                    }
-
-                    const response = await fetch(`/api/onboarding/session/${sessionId}/`);
-                    if (!response.ok) {
-                        console.error('API 응답 오류:', response.status, response.statusText);
-                        // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                        console.warn('세션 ID가 없습니다. 페이지에서 제품 정보를 가져오는 중...');
+                        // 세션 ID가 없어도 페이지에서 직접 제품 정보 추출 시도
                         recommendations = getProductsFromPage();
                         if (!recommendations || recommendations.length === 0) {
                             productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
                             return;
                         }
                     } else {
-                        const data = await response.json();
-                        if (data.success && data.session && data.session.recommendation_result) {
-                            let recommendationResult = data.session.recommendation_result;
-                            if (typeof recommendationResult === 'string') {
-                                try {
-                                    recommendationResult = JSON.parse(recommendationResult);
-                                } catch (e) {
-                                    console.error('추천 결과 파싱 오류:', e);
-                                }
+                        const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                        if (!response.ok) {
+                            console.error('API 응답 오류:', response.status, response.statusText);
+                            // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                            recommendations = getProductsFromPage();
+                            if (!recommendations || recommendations.length === 0) {
+                                productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
+                                return;
                             }
-                            recommendations = recommendationResult.recommendations || [];
-                            globalRecommendations = recommendations; // 전역 변수에 저장
+                        } else {
+                            const data = await response.json();
+                            if (data.success && data.session && data.session.recommendation_result) {
+                                let recommendationResult = data.session.recommendation_result;
+                                if (typeof recommendationResult === 'string') {
+                                    try {
+                                        recommendationResult = JSON.parse(recommendationResult);
+                                    } catch (e) {
+                                        console.error('추천 결과 파싱 오류:', e);
+                                    }
+                                }
+                                recommendations = recommendationResult.recommendations || [];
+                                globalRecommendations = recommendations; // 전역 변수에 저장
+
+                                // API에서 가져온 recommendations가 비어있으면 페이지에서 가져오기 시도
+                                if (!recommendations || recommendations.length === 0) {
+                                    console.log('API 응답에 제품이 없어 페이지에서 제품 정보를 가져오는 중...');
+                                    recommendations = getProductsFromPage();
+                                }
+                            } else {
+                                // API 응답에 recommendation_result가 없으면 페이지에서 가져오기 시도
+                                console.log('API 응답에 recommendation_result가 없어 페이지에서 제품 정보를 가져오는 중...');
+                                recommendations = getProductsFromPage();
+                            }
                         }
                     }
                 } catch (error) {
@@ -3620,6 +4420,13 @@
             }
 
             console.log('최종 추천 제품 목록:', recommendations);
+
+            // 여전히 제품이 없으면 페이지에서 직접 가져오기 시도
+            if (!recommendations || recommendations.length === 0) {
+                console.log('추천 제품이 없어 페이지에서 제품 정보를 가져오는 중...');
+                recommendations = getProductsFromPage();
+                console.log('페이지에서 가져온 제품 정보:', recommendations);
+            }
 
             if (!recommendations || recommendations.length === 0) {
                 console.warn('추천 제품이 없습니다.');
@@ -3725,8 +4532,12 @@
             const products = [];
             const productIds = ['refrigerator', 'microwave', 'dishwasher'];
 
-            productIds.forEach(productId => {
+            console.log('페이지에서 제품 정보 추출 시작...');
+
+            productIds.forEach((productId, index) => {
                 const productElement = document.getElementById(`product-${productId}`);
+                console.log(`제품 ${productId} 요소 찾기:`, productElement ? '찾음' : '없음');
+
                 if (productElement) {
                     const titleElement = productElement.querySelector('.product-title');
                     const imageElement = document.getElementById(`product-image-${productId}`);
@@ -3734,6 +4545,11 @@
                     if (titleElement) {
                         const productName = titleElement.textContent.trim();
                         const imageUrl = imageElement ? imageElement.src : '';
+
+                        console.log(`제품 ${productId} 정보:`, {
+                            name: productName,
+                            imageUrl: imageUrl
+                        });
 
                         // 가격 정보 가져오기
                         const priceOriginalEl = productElement.querySelector('.price-original');
@@ -3754,18 +4570,31 @@
                             discountPrice = parseInt(priceFinalEl.textContent.replace(/[^0-9]/g, '')) || 0;
                         }
 
+                        // 제품 설명 가져오기 (추천 이유)
+                        const reasonTextEl = productElement.querySelector('.recommend-reason-text');
+                        const productDescription = reasonTextEl ? reasonTextEl.textContent.trim() : '';
+
                         products.push({
                             name: productName,
                             image_url: imageUrl,
                             original_price: originalPrice,
                             sale_price: salePrice,
                             discount_price: discountPrice || salePrice || originalPrice,
-                            price: originalPrice || salePrice || discountPrice
+                            price: originalPrice || salePrice || discountPrice,
+                            reason: productDescription,
+                            description: productDescription
                         });
+
+                        console.log(`제품 ${productId} 추가 완료:`, productName);
+                    } else {
+                        console.warn(`제품 ${productId}의 제목 요소를 찾을 수 없습니다.`);
                     }
+                } else {
+                    console.warn(`제품 요소 #product-${productId}를 찾을 수 없습니다.`);
                 }
             });
 
+            console.log(`페이지에서 총 ${products.length}개 제품 추출 완료:`, products);
             return products;
         }
 
@@ -4179,15 +5008,37 @@
                     notesCounter.textContent = this.value.length;
                 });
             }
+
+            // 다른 추천 후보 확인 버튼 이벤트 리스너 추가
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                // 모든 이벤트 리스너 추가
+                otherRecommendationsBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('다른 추천 후보 확인 버튼 클릭됨 (이벤트 리스너)');
+                    window.location.href = '/other-recommendations/';
+                    return false;
+                }, true);
+
+                // 스타일 강제 적용
+                otherRecommendationsBtn.style.cursor = 'pointer';
+                otherRecommendationsBtn.style.pointerEvents = 'auto';
+                otherRecommendationsBtn.style.zIndex = '99999';
+                otherRecommendationsBtn.style.position = 'relative';
+            }
         });
 
         // ============================================
         // 다른 추천 후보 확인
         // ============================================
         function checkOtherRecommendations() {
-            // TODO: 다른 추천 후보 확인 기능 구현
-            showToast('다른 추천 후보 확인 기능 준비 중입니다.');
+            // 다른 추천 후보 확인 페이지로 이동
+            console.log('다른 추천 후보 확인 버튼 클릭됨');
+            window.location.href = '/other-recommendations/';
+            return false;
         }
+
 
         // ============================================
         // 결과 저장하기
@@ -4227,12 +5078,19 @@
         // ============================================
         function showToast(message) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
             toast.classList.add('show');
 
             setTimeout(() => {
-                toast.classList.remove('show');
+                closeToast();
             }, 3000);
+        }
+
+        // Toast 알림 닫기
+        function closeToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('show');
         }
     </script>
 </body>

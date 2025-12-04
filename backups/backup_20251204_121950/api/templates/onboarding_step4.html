@@ -1,0 +1,1343 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG전자 | 가전 패키지 추천 - 4단계</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #fff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================
+           Header - main.html과 동일한 스타일
+           ============================================ */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            display: block;
+            height: 28px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-top-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-top-icon {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: #1a1a1a;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-top-icon:hover {
+            color: #A50034;
+        }
+
+        .header-top-link {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            padding: 0 12px;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .header-top-link:hover {
+            color: #A50034;
+        }
+
+        .header-top-link:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 12px;
+            background: #e5e5e5;
+        }
+
+        .header-bottom-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .gnb {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .gnb-item {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .gnb-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-separator {
+            width: 1px;
+            height: 14px;
+            background: #e5e5e5;
+            margin: 0 12px;
+        }
+
+        .gnb-item.home-style {
+            background: #FD312E;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.2;
+        }
+
+        .home-style-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .home-style-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .gnb-item.home-style:hover {
+            background: #B80D3D;
+            color: #fff;
+        }
+
+        .gnb-brand {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-shrink: 0;
+            background: #F4F6F8;
+            border-radius: 9999px;
+            padding: 6px 20px;
+            margin-left: 0;
+        }
+
+        .gnb-brand-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .gnb-brand-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-brand-item strong {
+            font-weight: 700;
+        }
+
+        /* ============================================
+           Breadcrumb - main.html과 동일한 스타일
+           ============================================ */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: none;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           Main Content
+           ============================================ */
+        .main-content {
+            margin-top: 160px;
+            min-height: calc(100vh - 160px);
+            padding: 60px 0 180px; /* 하단 버튼 공간 확보 */
+        }
+
+        .onboarding-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ============================================
+           Progress Bar (프로그레스 바)
+           ============================================ */
+        .progress-section {
+            margin-bottom: 48px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .progress-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0;
+            width: 500px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #e5e5e5;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a1a1a;
+            transition: width 0.3s ease;
+            width: 66.67%;
+            /* 4단계 / 6단계 = 66.67% */
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* ============================================
+           Question Section (질문 영역)
+           ============================================ */
+        .question-section {
+            margin-top: 0;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            display: none; /* 기본적으로 숨김 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .question-section.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .question-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.4;
+            margin-bottom: 13px;
+            text-align: center;
+        }
+
+        .question-title .bold {
+            font-weight: 700;
+        }
+
+        .question-subtitle {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* ============================================
+           Option Cards (선택 옵션 카드) - 텍스트 버전
+           ============================================ */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 60px;
+            max-width: 460px;
+            margin-left: auto;
+            margin-right: auto;
+            display: none; /* 기본적으로 숨김 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .options-grid.show {
+            display: grid;
+            opacity: 1;
+        }
+
+        .option-card {
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e5e5e5;
+            transition: all 0.3s ease;
+            background: #fff;
+            padding: 18px 24px;
+            text-align: left;
+            width: 460px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .option-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #ccc;
+        }
+
+        /* 선택된 카드: 검정색 테두리 */
+        .option-card.selected {
+            border-color: #1a1a1a;
+            border-width: 3px;
+            background: #f9f9f9;
+        }
+
+        .option-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           Button (하단 버튼) - 고정 및 Gradient
+           ============================================ */
+        .button-section {
+            position: fixed;
+            bottom: 48px;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.54) 54%, rgba(255, 255, 255, 0) 100%);
+            padding: 20px 0 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #BAAFB3;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 400;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 120px !important;
+            flex-shrink: 0;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .button-section .btn {
+            pointer-events: auto;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 400;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 300px;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #333;
+        }
+
+        .btn-primary:disabled {
+            background: #e5e5e5;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        /* ============================================
+           Exit Modal (중도 이탈 경고 모달)
+           ============================================ */
+        .exit-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exit-modal-overlay.show {
+            display: flex;
+        }
+
+        .exit-modal {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            min-width: 450px;
+            max-width: 500px;
+            width: auto;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .exit-modal-message {
+            font-size: 16px;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        .exit-modal-question {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .exit-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .exit-modal-btn {
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 120px;
+        }
+
+        .exit-modal-btn-cancel {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #1a1a1a;
+        }
+
+        .exit-modal-btn-cancel:hover {
+            background: #f5f5f5;
+        }
+
+        .exit-modal-btn-continue {
+            background: #EA1917;
+            color: #fff;
+        }
+
+        .exit-modal-btn-continue:hover {
+            background: #c01414;
+        }
+
+        /* ============================================
+           Responsive (반응형 디자인)
+           ============================================ */
+        @media (max-width: 1024px) {
+
+            .header-wrapper,
+            .breadcrumb-wrapper {
+                padding: 0 40px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .header-wrapper,
+            .breadcrumb-wrapper {
+                padding: 0 20px;
+            }
+
+            .main-content {
+                margin-top: 140px;
+            }
+
+            .breadcrumb {
+                top: 100px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .question-title {
+                font-size: 24px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 500px;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ============================================
+         Header - main.html과 동일한 구조
+         ============================================ -->
+    <header class="header">
+        <div class="header-wrapper">
+            <!-- 상단 줄 (Top Row) -->
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/" class="logo">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+                <div class="header-top-right">
+                    <div class="header-top-icons">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <a href="#" class="header-top-link">회사소개</a>
+                    <a href="#" class="header-top-link">사업자몰</a>
+                </div>
+            </div>
+            <!-- 하단 줄 (Bottom Row) -->
+            <div class="header-bottom-row">
+                <nav class="gnb">
+                    <a href="#" class="gnb-item">제품/소모품</a>
+                    <a href="#" class="gnb-item">고객지원</a>
+                    <a href="#" class="gnb-item">가전 구독</a>
+                    <a href="#" class="gnb-item">혜택/이벤트</a>
+                    <a href="#" class="gnb-item">스토리</a>
+                    <a href="#" class="gnb-item">베스트샵</a>
+                    <a href="#" class="gnb-item">LG AI</a>
+                    <span class="gnb-separator"></span>
+                    <a href="/lge/#" class="gnb-item home-style">
+                        <span class="home-style-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
+                        </span>
+                        홈스타일
+                    </a>
+                    <div class="gnb-brand">
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
+                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================
+         Breadcrumb - main.html과 동일한 구조
+         ============================================ -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/lge/#">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">가전패키지추천</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================
+         Main Content - 온보딩 페이지 본문
+         ============================================ -->
+    <main class="main-content">
+        <div class="onboarding-container">
+            <!-- 프로그레스 바 -->
+            <div class="progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">4단계 / 6단계</span>
+                </div>
+            </div>
+
+            <!-- 질문 1: 요리 (주방 선택 시) -->
+            <div class="question-section" id="cookingQuestionSection">
+                <h2 class="question-title">
+                    평소 집에서 <span class="bold">요리</span>는 얼마나 자주 하시나요?
+                </h2>
+                <p class="question-subtitle">1개 선택 가능해요.</p>
+            </div>
+
+            <div class="options-grid" id="cookingOptionsGrid">
+                <div class="option-card cooking-option" data-value="rarely" id="option-cooking-rarely">
+                    <span class="option-text">거의 하지 않아요(배달, 간편식 위주)</span>
+                </div>
+                <div class="option-card cooking-option" data-value="sometimes" id="option-cooking-sometimes">
+                    <span class="option-text">가끔 해요(주말 위주)</span>
+                </div>
+                <div class="option-card cooking-option" data-value="often" id="option-cooking-often">
+                    <span class="option-text">요리하는 걸 좋아하고 자주 해요</span>
+                </div>
+            </div>
+
+            <!-- 질문 2: 세탁 (드레스룸/전체 선택 시) -->
+            <div class="question-section" id="laundryQuestionSection">
+                <h2 class="question-title">
+                    <span class="bold">세탁</span>은 주로 어떻게 하시나요?
+                </h2>
+                <p class="question-subtitle">1개 선택 가능해요.</p>
+            </div>
+
+            <div class="options-grid" id="laundryOptionsGrid">
+                <div class="option-card laundry-option" data-value="weekly" id="option-laundry-weekly">
+                    <span class="option-text">일주일 1번 정도</span>
+                </div>
+                <div class="option-card laundry-option" data-value="few_times" id="option-laundry-few-times">
+                    <span class="option-text">일주일 2번~3번 정도</span>
+                </div>
+                <div class="option-card laundry-option" data-value="daily" id="option-laundry-daily">
+                    <span class="option-text">매일 조금씩</span>
+                </div>
+            </div>
+
+            <!-- 질문 3: 미디어 (거실/방/서재 선택 시) -->
+            <div class="question-section" id="mediaQuestionSection">
+                <h2 class="question-title">
+                    집에서 TV나 <span class="bold">영상</span>을 주로 어떻게 즐기시나요?
+                </h2>
+                <p class="question-subtitle">1개 선택 가능해요.</p>
+            </div>
+
+            <div class="options-grid" id="mediaOptionsGrid">
+                <div class="option-card media-option" data-value="ott" id="option-media-ott">
+                    <span class="option-text">넷플릭스, 영화, 드라마 등 OTT를 즐기는 편</span>
+                </div>
+                <div class="option-card media-option" data-value="gaming" id="option-media-gaming">
+                    <span class="option-text">게임이 취미라 주로 게임을 즐기는 편</span>
+                </div>
+                <div class="option-card media-option" data-value="tv" id="option-media-tv">
+                    <span class="option-text">뉴스나 예능 등 일반 프로그램 시청하는 편</span>
+                </div>
+                <div class="option-card media-option" data-value="none" id="option-media-none">
+                    <span class="option-text">TV나 영상을 즐기는 편은 아니에요</span>
+                </div>
+            </div>
+
+            <!-- 하단 버튼 -->
+            <div class="button-section">
+                <button id="prevBtn" class="btn btn-secondary" onclick="goToPreviousStep()">이전</button>
+                <button id="nextBtn" class="btn btn-primary" disabled>다음 단계로 이동</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 중도 이탈 경고 모달 -->
+    <div class="exit-modal-overlay" id="exitModal">
+        <div class="exit-modal">
+            <p class="exit-modal-message">지금 나가시면 입력하신 정보가 사라질 수 있어요.</p>
+            <p class="exit-modal-question">취향 분석을 계속 진행하시겠어요?</p>
+            <div class="exit-modal-buttons">
+                <button class="exit-modal-btn exit-modal-btn-cancel" onclick="cancelOnboarding()">취소</button>
+                <button class="exit-modal-btn exit-modal-btn-continue" onclick="continueOnboarding()">계속 진행하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 전역 변수
+        // ============================================
+        let selectedMainSpaces = []; // 3단계에서 선택한 주요 공간들
+        let selectedCooking = null; // 선택된 요리 답변
+        let selectedLaundry = null; // 선택된 세탁 답변
+        let selectedMedia = null; // 선택된 미디어 답변
+        let questionOrder = []; // 질문 표시 순서
+        let currentQuestionIndex = 0; // 현재 표시할 질문 인덱스
+
+        // ============================================
+        // 초기화: 3단계에서 선택한 주요 공간 확인
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // 3단계에서 선택한 주요 공간 가져오기
+            const step3MainSpace = sessionStorage.getItem('step3_main_space');
+            if (step3MainSpace) {
+                try {
+                    selectedMainSpaces = JSON.parse(step3MainSpace);
+                } catch (e) {
+                    selectedMainSpaces = [step3MainSpace]; // 문자열인 경우
+                }
+            }
+
+            console.log('3단계에서 선택한 주요 공간:', selectedMainSpaces);
+
+            // 주요 공간에 따라 질문 표시
+            showQuestionsBasedOnSpaces();
+        });
+
+        // ============================================
+        // 주요 공간에 따라 질문 순서 결정 및 첫 질문 표시
+        // ============================================
+        function showQuestionsBasedOnSpaces() {
+            console.log('showQuestionsBasedOnSpaces 호출됨, selectedMainSpaces:', selectedMainSpaces);
+            
+            // selectedMainSpaces가 배열이 아니거나 비어있으면 경고
+            if (!Array.isArray(selectedMainSpaces) || selectedMainSpaces.length === 0) {
+                console.warn('⚠️ 주요 공간이 선택되지 않았습니다. selectedMainSpaces:', selectedMainSpaces);
+                return;
+            }
+
+            const hasKitchen = selectedMainSpaces.includes('kitchen');
+            const hasDressing = selectedMainSpaces.includes('dressing');
+            const hasAll = selectedMainSpaces.includes('all');
+            const hasLiving = selectedMainSpaces.includes('living');
+            const hasBedroom = selectedMainSpaces.includes('bedroom');
+            const hasStudy = selectedMainSpaces.includes('study');
+
+            console.log('주요 공간 확인:', {
+                hasKitchen, hasDressing, hasAll, hasLiving, hasBedroom, hasStudy
+            });
+
+            // 질문 순서 결정 (우선순위: 요리 > 세탁 > 미디어)
+            questionOrder = [];
+            
+            if (hasAll) {
+                // 전체 선택 시 모든 질문 순서대로
+                questionOrder = ['cooking', 'laundry', 'media'];
+            } else {
+                // 주방 선택 시 요리 질문 추가
+                if (hasKitchen) {
+                    questionOrder.push('cooking');
+                }
+                // 드레스룸 선택 시 세탁 질문 추가
+                if (hasDressing) {
+                    questionOrder.push('laundry');
+                }
+                // 거실/방/서재 선택 시 미디어 질문 추가
+                if (hasLiving || hasBedroom || hasStudy) {
+                    questionOrder.push('media');
+                }
+            }
+
+            console.log('질문 순서:', questionOrder);
+
+            // 첫 번째 질문만 표시
+            currentQuestionIndex = 0;
+            if (questionOrder.length > 0) {
+                showQuestion(questionOrder[0]);
+            }
+        }
+
+        // ============================================
+        // 질문 표시 함수
+        // ============================================
+        function showQuestion(type) {
+            let questionSection, optionsGrid;
+            
+            if (type === 'cooking') {
+                questionSection = document.getElementById('cookingQuestionSection');
+                optionsGrid = document.getElementById('cookingOptionsGrid');
+            } else if (type === 'laundry') {
+                questionSection = document.getElementById('laundryQuestionSection');
+                optionsGrid = document.getElementById('laundryOptionsGrid');
+            } else if (type === 'media') {
+                questionSection = document.getElementById('mediaQuestionSection');
+                optionsGrid = document.getElementById('mediaOptionsGrid');
+            }
+
+            if (questionSection && optionsGrid) {
+                console.log(`${type} 질문 표시 시도:`, {
+                    questionSection: !!questionSection,
+                    optionsGrid: !!optionsGrid
+                });
+                questionSection.classList.add('show');
+                optionsGrid.classList.add('show');
+                console.log(`${type} 질문 표시 완료`);
+                
+                // 스크롤을 질문 위치로 이동
+                setTimeout(() => {
+                    questionSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                }, 100);
+            } else {
+                console.error(`${type} 질문 요소를 찾을 수 없습니다:`, {
+                    questionSection: !!questionSection,
+                    optionsGrid: !!optionsGrid
+                });
+            }
+        }
+
+        // ============================================
+        // 현재 질문에 답변 후 다음 질문 표시
+        // ============================================
+        function showNextQuestion() {
+            // 다음 질문 인덱스로 이동
+            currentQuestionIndex++;
+            
+            // 다음 질문이 있으면 표시
+            if (currentQuestionIndex < questionOrder.length) {
+                const nextQuestionType = questionOrder[currentQuestionIndex];
+                console.log('다음 질문 표시:', nextQuestionType);
+                showQuestion(nextQuestionType);
+            } else {
+                console.log('모든 질문에 답변 완료');
+            }
+        }
+
+        // ============================================
+        // 요리 옵션 카드 클릭 이벤트
+        // ============================================
+        document.querySelectorAll('.cooking-option').forEach(card => {
+            card.addEventListener('click', function () {
+                // 이미 선택된 카드를 다시 클릭하면 선택 해제
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedCooking = null;
+                } else {
+                    // 요리 카드의 선택 상태 제거
+                    document.querySelectorAll('.cooking-option').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+
+                    // 클릭한 카드에 선택 상태 추가
+                    this.classList.add('selected');
+                    selectedCooking = this.dataset.value;
+                    
+                    // 다음 질문 표시
+                    showNextQuestion();
+                }
+
+                // 버튼 활성화 확인
+                updateButton();
+            });
+        });
+
+        // ============================================
+        // 세탁 옵션 카드 클릭 이벤트
+        // ============================================
+        document.querySelectorAll('.laundry-option').forEach(card => {
+            card.addEventListener('click', function () {
+                // 이미 선택된 카드를 다시 클릭하면 선택 해제
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedLaundry = null;
+                } else {
+                    // 세탁 카드의 선택 상태 제거
+                    document.querySelectorAll('.laundry-option').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+
+                    // 클릭한 카드에 선택 상태 추가
+                    this.classList.add('selected');
+                    selectedLaundry = this.dataset.value;
+                    
+                    // 다음 질문 표시
+                    showNextQuestion();
+                }
+
+                // 버튼 활성화 확인
+                updateButton();
+            });
+        });
+
+        // ============================================
+        // 미디어 옵션 카드 클릭 이벤트
+        // ============================================
+        document.querySelectorAll('.media-option').forEach(card => {
+            card.addEventListener('click', function () {
+                // 이미 선택된 카드를 다시 클릭하면 선택 해제
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedMedia = null;
+                } else {
+                    // 미디어 카드의 선택 상태 제거
+                    document.querySelectorAll('.media-option').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+
+                    // 클릭한 카드에 선택 상태 추가
+                    this.classList.add('selected');
+                    selectedMedia = this.dataset.value;
+                    
+                    // 다음 질문 표시 (마지막 질문이면 표시 안 함)
+                    showNextQuestion();
+                }
+
+                // 버튼 활성화 확인
+                updateButton();
+            });
+        });
+
+        // ============================================
+        // 버튼 상태 업데이트 함수
+        // ============================================
+        function updateButton() {
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // 표시된 질문들에 대한 답변이 모두 있는지 확인
+            const hasKitchen = selectedMainSpaces.includes('kitchen');
+            const hasDressing = selectedMainSpaces.includes('dressing');
+            const hasAll = selectedMainSpaces.includes('all');
+            const hasLiving = selectedMainSpaces.includes('living');
+            const hasBedroom = selectedMainSpaces.includes('bedroom');
+            const hasStudy = selectedMainSpaces.includes('study');
+
+            let allAnswered = true;
+
+            // 전체 선택 시 모든 질문에 답변 필요
+            if (hasAll) {
+                if (!selectedCooking || !selectedLaundry || !selectedMedia) {
+                    allAnswered = false;
+                }
+            } else {
+                // 주방 선택 시 요리 답변 필요
+                if (hasKitchen && !selectedCooking) {
+                    allAnswered = false;
+                }
+
+                // 드레스룸 선택 시 세탁 답변 필요
+                if (hasDressing && !selectedLaundry) {
+                    allAnswered = false;
+                }
+
+                // 거실/방/서재 선택 시 미디어 답변 필요
+                if ((hasLiving || hasBedroom || hasStudy) && !selectedMedia) {
+                    allAnswered = false;
+                }
+            }
+
+            if (allAnswered) {
+                // 모두 답변되었으면 버튼 활성화 (블랙 색상)
+                nextBtn.disabled = false;
+                nextBtn.style.background = '#1a1a1a';
+                nextBtn.style.color = '#fff';
+            } else {
+                // 하나라도 답변되지 않았으면 버튼 비활성화 (회색)
+                nextBtn.disabled = true;
+                nextBtn.style.background = '#e5e5e5';
+                nextBtn.style.color = '#999';
+            }
+        }
+
+        // ============================================
+        // 다음 단계로 이동 버튼 클릭 이벤트
+        // ============================================
+        document.getElementById('nextBtn').addEventListener('click', function () {
+            if (this.disabled) return; // 비활성화 상태면 동작하지 않음
+
+            // 모든 질문에 답변되었는지 확인
+            console.log('선택된 요리:', selectedCooking);
+            console.log('선택된 세탁:', selectedLaundry);
+            console.log('선택된 미디어:', selectedMedia);
+
+            // 세션에 저장하고 다음 단계로 이동
+            saveStepAndNavigate();
+        });
+
+        // ============================================
+        // 세션 저장 및 다음 단계로 이동
+        // ============================================
+        function saveStepAndNavigate() {
+            // 세션 ID 가져오기 또는 생성
+            let sessionId = sessionStorage.getItem('onboarding_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now();
+                sessionStorage.setItem('onboarding_session_id', sessionId);
+            }
+
+            // 이전 단계에서 선택한 값 가져오기
+            const step1Vibe = sessionStorage.getItem('step1_vibe');
+            const step2Mate = sessionStorage.getItem('step2_mate');
+            const step2Pet = sessionStorage.getItem('step2_pet');
+            const step3HousingType = sessionStorage.getItem('step3_housing_type');
+            const step3Pyung = sessionStorage.getItem('step3_pyung');
+
+            // 4단계 데이터 준비
+            const step4Data = {
+                session_id: sessionId,
+                step: 4,
+                data: {
+                    vibe: step1Vibe,
+                    mate: step2Mate,
+                    pet: step2Pet,
+                    housing_type: step3HousingType,
+                    main_space: selectedMainSpaces,
+                    pyung: step3Pyung ? parseInt(step3Pyung) : null,
+                    cooking: selectedCooking,
+                    laundry: selectedLaundry,
+                    media: selectedMedia
+                }
+            };
+
+            // 버튼 비활성화 (중복 클릭 방지)
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = true;
+            nextBtn.textContent = '저장 중...';
+
+            // API 호출하여 세션 저장
+            fetch('/api/onboarding/step/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(step4Data)
+            })
+                .then(response => {
+                    console.log('API Response status:', response.status);
+                    return response.json().catch(() => {
+                        return { success: false, error: '응답 파싱 실패 (Status: ' + response.status + ')' };
+                    });
+                })
+                .then(data => {
+                    console.log('API Response data:', data);
+                    if (data.success) {
+                        console.log('✅ 4단계 데이터 저장 성공!');
+                        console.log('저장된 세션 ID:', data.session_id);
+                        console.log('현재 단계:', data.current_step);
+                        console.log('다음 단계:', data.next_step);
+                        
+                        // 4단계 선택 값 저장
+                        sessionStorage.setItem('step4_cooking', selectedCooking || '');
+                        sessionStorage.setItem('step4_laundry', selectedLaundry || '');
+                        sessionStorage.setItem('step4_media', selectedMedia || '');
+                        
+                        // 다음 단계로 이동 (5단계가 있으면 여기서 이동)
+                        // TODO: 5단계 URL로 변경
+                        console.log('4단계 데이터 저장 완료, 다음 단계로 이동합니다.');
+                        // window.location.href = '/onboarding/step5/';
+                    } else {
+                        console.warn('⚠️ 서버 저장 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                        console.warn('오류 내용:', data.error);
+                        // sessionStorage에 저장되어 있으므로 이동
+                        window.location.href = '/onboarding/step5/';
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ API Error:', error);
+                    console.warn('⚠️ API 호출 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                    // sessionStorage에 저장되어 있으므로 이동
+                    window.location.href = '/onboarding/step5/';
+                });
+        }
+
+        // ============================================
+        // CSRF 토큰 가져오기
+        // ============================================
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // ============================================
+        // 중도 이탈 경고 모달
+        // ============================================
+        let isNavigating = false; // 정상적인 네비게이션인지 확인
+
+        function showExitModal() {
+            const modal = document.getElementById('exitModal');
+            if (modal) {
+                modal.classList.add('show');
+            }
+        }
+
+        function hideExitModal() {
+            const modal = document.getElementById('exitModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        function continueOnboarding() {
+            // 계속 진행하기: 모달만 닫고 현재 페이지에서 계속 진행
+            hideExitModal();
+        }
+
+        function cancelOnboarding() {
+            // 취소: 메인 페이지로 이동
+            isNavigating = true; // 정상 네비게이션으로 표시
+            window.location.href = 'http://127.0.0.1:8000/';
+        }
+
+        // 페이지 이탈 시 경고 (beforeunload는 기본 확인창만 가능)
+        window.addEventListener('beforeunload', function (e) {
+            // 정상적인 네비게이션이면 경고하지 않음
+            if (isNavigating) {
+                return;
+            }
+
+            // 기본 확인창 표시 (브라우저가 자체 스타일로 표시)
+            const message = '지금 나가시면 입력하신 정보가 사라질 수 있어요.';
+            e.returnValue = message;
+            return message;
+        });
+
+        // 브라우저 뒤로가기 버튼 감지
+        window.addEventListener('popstate', function (e) {
+            if (!isNavigating) {
+                e.preventDefault();
+                showExitModal();
+                history.pushState(null, null, location.href);
+            }
+        });
+
+        // 페이지 로드 시 히스토리 상태 추가
+        history.pushState(null, null, location.href);
+
+        // 정상적인 네비게이션 시 플래그 설정
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            isNavigating = true;
+        });
+
+        // 외부 링크 클릭 시 모달 표시
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('a[href]');
+            if (link && !isNavigating) {
+                const href = link.getAttribute('href');
+                // 온보딩 관련 링크가 아니면 경고
+                if (href && !href.includes('/onboarding/') && !href.includes('/result/') && !href.startsWith('#')) {
+                    e.preventDefault();
+                    showExitModal();
+                    window.exitModalLinkHref = href;
+                }
+            }
+        });
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('exitModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideExitModal();
+            }
+        });
+
+        // ============================================
+        // 이전 단계로 이동
+        // ============================================
+        function goToPreviousStep() {
+            isNavigating = true;
+            window.location.href = '/onboarding/step3/';
+        }
+
+        // ============================================
+        // 페이지 로드 시 버튼 상태 초기화 및 이전 선택값 복원
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // sessionStorage에서 이전에 선택한 값 복원
+            const savedCooking = sessionStorage.getItem('step4_cooking');
+            const savedLaundry = sessionStorage.getItem('step4_laundry');
+            const savedMedia = sessionStorage.getItem('step4_media');
+            
+            if (savedCooking) {
+                selectedCooking = savedCooking;
+                const cookingCard = document.querySelector(`.cooking-option[data-value="${savedCooking}"]`);
+                if (cookingCard) {
+                    cookingCard.classList.add('selected');
+                }
+            }
+            
+            if (savedLaundry) {
+                selectedLaundry = savedLaundry;
+                const laundryCard = document.querySelector(`.laundry-option[data-value="${savedLaundry}"]`);
+                if (laundryCard) {
+                    laundryCard.classList.add('selected');
+                }
+            }
+            
+            if (savedMedia) {
+                selectedMedia = savedMedia;
+                const mediaCard = document.querySelector(`.media-option[data-value="${savedMedia}"]`);
+                if (mediaCard) {
+                    mediaCard.classList.add('selected');
+                }
+            }
+            
+            // 복원된 값에 따라 질문 표시 상태 업데이트
+            if (selectedCooking || selectedLaundry || selectedMedia) {
+                showQuestionsBasedOnSpaces();
+            }
+            
+            // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                nextBtn.textContent = '다음 단계로 이동';
+                updateButton();
+            }
+        });
+
+        // ============================================
+        // 뒤로가기 감지 시 현재 단계 데이터 저장
+        // ============================================
+        window.addEventListener('pageshow', function(event) {
+            // 뒤로가기로 돌아왔을 때 (bfcache에서 복원된 경우)
+            if (event.persisted) {
+                console.log('뒤로가기로 페이지 복원됨');
+                // 버튼 상태 초기화
+                const nextBtn = document.getElementById('nextBtn');
+                if (nextBtn) {
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = '다음 단계로 이동';
+                    updateButton();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
+
