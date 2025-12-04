@@ -361,6 +361,16 @@ class Portfolio(models.Model):
         help_text="포트폴리오 내부 키 (예: PF-001, PF-002)"
     )
     
+    # 내부 키 (UUID 또는 P001, P002 형식) - LGDX-3
+    internal_key = models.CharField(
+        max_length=50,
+        unique=True,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text="포트폴리오 내부 키 (UUID 또는 P001, P002 형식)"
+    )
+    
     # 사용자 식별 (추후 카카오 로그인 연동 시 활용)
     user_id = models.CharField(
         max_length=100,
@@ -474,13 +484,24 @@ class Portfolio(models.Model):
         return f"{self.portfolio_id} - {self.style_type}"
     
     def save(self, *args, **kwargs):
-        """포트폴리오 ID 자동 생성"""
+        """포트폴리오 ID 및 internal_key 자동 생성"""
         if not self.portfolio_id:
             # PF-XXXXXX 형식
             import random
             import string
             random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
             self.portfolio_id = f"PF-{random_str}"
+        
+        # internal_key 자동 생성 (없는 경우)
+        if not self.internal_key:
+            # P001, P002 형식으로 생성
+            last_portfolio = Portfolio.objects.order_by('-id').first()
+            if last_portfolio and last_portfolio.id:
+                next_num = last_portfolio.id + 1
+            else:
+                next_num = 1
+            self.internal_key = f"P{next_num:03d}"
+        
         super().save(*args, **kwargs)
     
     def calculate_totals(self):
@@ -490,3 +511,55 @@ class Portfolio(models.Model):
         self.total_original_price = original
         self.total_discount_price = discount
         self.save()
+
+
+class Cart(models.Model):
+    """
+    장바구니 모델 - LGDX-12
+    사용자별 장바구니에 담긴 제품 목록
+    """
+    
+    # 사용자 식별 (카카오 ID 또는 세션 ID)
+    user_id = models.CharField(
+        max_length=100,
+        db_index=True,
+        help_text="사용자 ID (카카오 ID 또는 세션 ID)"
+    )
+    
+    # 제품 정보
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        related_name='cart_items',
+        help_text="장바구니에 담긴 제품"
+    )
+    
+    # 수량
+    quantity = models.IntegerField(
+        default=1,
+        help_text="제품 수량"
+    )
+    
+    # 추가 정보 (JSON)
+    extra_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="추가 정보 (가격, 할인 정보 등)"
+    )
+    
+    # 타임스탬프
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = '장바구니'
+        verbose_name_plural = '장바구니'
+        ordering = ['-created_at']
+        unique_together = [['user_id', 'product']]  # 사용자별 제품 중복 방지
+        indexes = [
+            models.Index(fields=['user_id']),
+            models.Index(fields=['product']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user_id} - {self.product.name} (수량: {self.quantity})"

@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
-from .models import Product, OnboardingSession, Portfolio, ProductReview
+from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 from .services.playbook_recommendation_engine import playbook_recommendation_engine
@@ -468,6 +468,44 @@ def product_spec_view(request, product_id):
             'product_id': product.id,
             'product_name': product.name,
             'specs': specs
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Product.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': '제품을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@require_http_methods(["GET"])
+def product_reviews_view(request, product_id):
+    """GET /api/products/<product_id>/reviews/ - 제품 리뷰 조회 (최대 3개) - LGDX-40"""
+    try:
+        product = Product.objects.get(id=product_id)
+        
+        # 최대 3개의 리뷰만 가져오기
+        reviews = ProductReview.objects.filter(product=product).order_by('-created_at')[:3]
+        
+        reviews_list = []
+        for review in reviews:
+            reviews_list.append({
+                'id': review.id,
+                'star': review.star,
+                'review_text': review.review_text,
+                'created_at': review.created_at.isoformat() if review.created_at else None,
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'product_id': product.id,
+            'product_name': product.name,
+            'count': len(reviews_list),
+            'reviews': reviews_list
         }, json_dumps_params={'ensure_ascii': False})
     
     except Product.DoesNotExist:
@@ -1133,6 +1171,7 @@ def portfolio_save_view(request):
         return JsonResponse({
             'success': True,
             'portfolio_id': portfolio.portfolio_id,
+            'internal_key': portfolio.internal_key,  # LGDX-3
             'message': '포트폴리오가 저장되었습니다.',
             'share_url': f'/portfolio/{portfolio.portfolio_id}/'
         }, json_dumps_params={'ensure_ascii': False})
@@ -1150,14 +1189,21 @@ def portfolio_detail_view(request, portfolio_id):
     포트폴리오 상세 조회 API
     
     GET /api/portfolio/<portfolio_id>/
+    portfolio_id는 portfolio_id 또는 internal_key 모두 지원 (LGDX-3)
     """
     try:
-        portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+        # portfolio_id 또는 internal_key로 조회 시도
+        try:
+            portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+        except Portfolio.DoesNotExist:
+            # internal_key로 조회 시도
+            portfolio = Portfolio.objects.get(internal_key=portfolio_id)
         
         return JsonResponse({
             'success': True,
             'portfolio': {
                 'portfolio_id': portfolio.portfolio_id,
+                'internal_key': portfolio.internal_key,  # LGDX-3
                 'user_id': portfolio.user_id,
                 'style_type': portfolio.style_type,
                 'style_title': portfolio.style_title,
@@ -1428,3 +1474,186 @@ def ai_status_view(request):
         'chatgpt_available': chatgpt_service.is_available(),
         'model': chatgpt_service.MODEL if chatgpt_service.is_available() else None
     })
+
+
+# ============================================================
+# 장바구니 API - LGDX-12
+# ============================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def cart_add_view(request):
+    """
+    장바구니 추가 API
+    
+    POST /api/cart/add/
+    {
+        "user_id": "kakao_12345" 또는 "session_xxx",
+        "product_id": 123,
+        "quantity": 1,
+        "extra_data": {"price": 1000000, "discount_price": 900000}
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        user_id = data.get('user_id', f"guest_{timezone.now().strftime('%Y%m%d%H%M%S')}")
+        product_id = data.get('product_id')
+        quantity = int(data.get('quantity', 1))
+        extra_data = data.get('extra_data', {})
+        
+        if not product_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'product_id 필수'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': '제품을 찾을 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=404)
+        
+        # 기존 장바구니 항목이 있으면 수량 증가, 없으면 생성
+        cart_item, created = Cart.objects.get_or_create(
+            user_id=user_id,
+            product=product,
+            defaults={
+                'quantity': quantity,
+                'extra_data': extra_data
+            }
+        )
+        
+        if not created:
+            # 기존 항목이 있으면 수량 증가
+            cart_item.quantity += quantity
+            if extra_data:
+                cart_item.extra_data.update(extra_data)
+            cart_item.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '장바구니에 추가되었습니다.',
+            'cart_item': {
+                'id': cart_item.id,
+                'product_id': cart_item.product.id,
+                'product_name': cart_item.product.name,
+                'quantity': cart_item.quantity,
+            }
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def cart_remove_view(request):
+    """
+    장바구니 삭제 API
+    
+    POST /api/cart/remove/
+    {
+        "user_id": "kakao_12345",
+        "product_id": 123  # 또는 "cart_item_id": 456
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        user_id = data.get('user_id')
+        product_id = data.get('product_id')
+        cart_item_id = data.get('cart_item_id')
+        
+        if not user_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'user_id 필수'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        if cart_item_id:
+            # cart_item_id로 삭제
+            try:
+                cart_item = Cart.objects.get(id=cart_item_id, user_id=user_id)
+                cart_item.delete()
+            except Cart.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': '장바구니 항목을 찾을 수 없습니다.'
+                }, json_dumps_params={'ensure_ascii': False}, status=404)
+        elif product_id:
+            # product_id로 삭제
+            try:
+                cart_item = Cart.objects.get(user_id=user_id, product_id=product_id)
+                cart_item.delete()
+            except Cart.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'error': '장바구니 항목을 찾을 수 없습니다.'
+                }, json_dumps_params={'ensure_ascii': False}, status=404)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'product_id 또는 cart_item_id 필수'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'message': '장바구니에서 삭제되었습니다.'
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@require_http_methods(["GET"])
+def cart_list_view(request):
+    """
+    장바구니 목록 조회 API
+    
+    GET /api/cart/list/?user_id=xxx
+    """
+    user_id = request.GET.get('user_id')
+    
+    if not user_id:
+        return JsonResponse({
+            'success': False,
+            'error': 'user_id 필수'
+        }, status=400)
+    
+    cart_items = Cart.objects.filter(user_id=user_id).select_related('product')
+    
+    cart_list = []
+    total_price = 0
+    for item in cart_items:
+        product_price = item.extra_data.get('discount_price') or item.extra_data.get('price') or float(item.product.price)
+        item_total = product_price * item.quantity
+        total_price += item_total
+        
+        cart_list.append({
+            'id': item.id,
+            'product_id': item.product.id,
+            'product_name': item.product.name,
+            'product_image_url': item.product.image_url,
+            'quantity': item.quantity,
+            'price': float(item.product.price),
+            'discount_price': item.extra_data.get('discount_price'),
+            'item_total': item_total,
+            'extra_data': item.extra_data,
+            'created_at': item.created_at.isoformat(),
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'count': len(cart_list),
+        'total_price': total_price,
+        'items': cart_list
+    }, json_dumps_params={'ensure_ascii': False})

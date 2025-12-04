@@ -7,6 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LG전자 | 가전 패키지 추천 결과</title>
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    
+    <!-- OG 태그 (카카오톡 공유용) - LGDX-25 -->
+    <meta property="og:title" content="LG전자 | 나에게 딱 맞는 가전 패키지 추천">
+    <meta property="og:description" content="당신의 라이프스타일에 맞춘 LG 가전 제품을 추천받아보세요">
+    <meta property="og:image" content="https://www.lge.co.kr/kr/images/brand/objet-collection/2024/visual/kv_visual_bg_w.webp">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="website">
+    
+    <!-- 카카오 SDK - LGDX-25 -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" as="style" crossorigin
@@ -737,8 +747,8 @@
 
         .price-original {
             font-size: 16px;
-            color: #666666;
-            text-decoration: none;
+            color: #999999;  /* 회색 - LGDX-41 */
+            text-decoration: line-through;  /* 취소선 - LGDX-41 */
             text-align: left;
             padding-left: 208px;
             margin-top: 2px;
@@ -746,7 +756,8 @@
 
         .price-sale {
             font-size: 20px;
-            color: #1a1a1a;
+            color: #1a1a1a;  /* 검정 - LGDX-41 */
+            font-weight: 500;
             text-align: left;
             padding-left: 179px;
             margin-top: 0;
@@ -764,7 +775,7 @@
         .price-final {
             font-size: 20px;
             font-weight: 700;
-            color: #FF0000;
+            color: #FF0000;  /* 붉은색 - LGDX-41 */
             margin-top: 0;
             text-align: left;
             padding-left: 150px;
@@ -791,8 +802,139 @@
             line-height: 1.5;
         }
 
+        /* 포트폴리오 상세 금액 요약 스타일 - LGDX-26 */
+        .portfolio-price-summary-section {
+            max-width: 1920px;
+            margin: 60px auto 0;
+            padding: 0 60px 40px;
+        }
+
+        .portfolio-price-summary-container {
+            background: #F8F9FA;
+            border-radius: 12px;
+            padding: 32px;
+            border: 1px solid #E5E5E5;
+        }
+
+        .price-summary-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        .price-summary-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .price-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #E5E5E5;
+        }
+
+        .price-summary-row.highlight {
+            background: #FFF5F5;
+            border-color: #FD312E;
+        }
+
+        .price-summary-row.discount {
+            background: #F0F9FF;
+            border-color: #0EA5E9;
+        }
+
+        .price-summary-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a1a1a;
+        }
+
+        .price-summary-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .price-summary-value.original {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .price-summary-value.sale {
+            color: #1a1a1a;
+        }
+
+        .price-summary-value.final {
+            color: #FD312E;
+        }
+
+        .price-summary-value.discount-amount {
+            color: #0EA5E9;
+        }
+
+        .price-summary-disclaimer {
+            font-size: 12px;
+            color: #666;
+            margin-top: 16px;
+            line-height: 1.5;
+        }
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* 추천 기준 카드 UI 스타일 - LGDX-30 */
+        .recommend-criteria-cards {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 16px;
+            background: #F8F9FA;
+            border-radius: 8px;
+        }
+
+        .criteria-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #E5E5E5;
+        }
+
+        .criteria-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .criteria-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .criteria-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* 제품 액션 버튼 컨테이너 */
+        .product-action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
         .spec-button {
-            margin-top: 20px;
+            flex: 1;
             padding: 0;
             background: #fff;
             border: 1px solid #e5e5e5;
@@ -801,7 +943,6 @@
             color: #666;
             cursor: pointer;
             transition: all 0.2s;
-            width: 130px;
             height: 50px;
             text-align: center;
             display: flex;
@@ -813,6 +954,30 @@
             background: #f5f5f5;
             border-color: #FD312E;
             color: #FD312E;
+        }
+
+        /* 구매하러가기 버튼 스타일 - LGDX-10 */
+        .purchase-button {
+            flex: 1;
+            padding: 0;
+            background: #FD312E;
+            border: 1px solid #FD312E;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            height: 50px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .purchase-button:hover {
+            background: #B80D3D;
+            border-color: #B80D3D;
         }
 
         .scroll-to-top-button {
@@ -2014,7 +2179,30 @@
                             </div>
                             <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
                         </div>
-                        <button class="spec-button" onclick="openSpecModal('refrigerator')">스펙 요약 정보</button>
+                        
+                        <!-- 추천 기준 카드 UI - LGDX-30 -->
+                        <div class="recommend-criteria-cards" id="recommend-criteria-refrigerator">
+                            <div class="criteria-card">
+                                <div class="criteria-icon">⚙️</div>
+                                <div class="criteria-label">스펙</div>
+                                <div class="criteria-value" id="criteria-spec-refrigerator">-</div>
+                            </div>
+                            <div class="criteria-card">
+                                <div class="criteria-icon">💰</div>
+                                <div class="criteria-label">가격</div>
+                                <div class="criteria-value" id="criteria-price-refrigerator">-</div>
+                            </div>
+                            <div class="criteria-card">
+                                <div class="criteria-icon">✨</div>
+                                <div class="criteria-label">기능</div>
+                                <div class="criteria-value" id="criteria-feature-refrigerator">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-action-buttons">
+                            <button class="spec-button" onclick="openSpecModal('refrigerator')">스펙 요약 정보</button>
+                            <button class="purchase-button" onclick="goToPurchase('refrigerator')">구매하러가기</button>
+                        </div>
                     </div>
                 </div>
 
@@ -2054,7 +2242,30 @@
                             </div>
                             <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
                         </div>
-                        <button class="spec-button" onclick="openSpecModal('microwave')">스펙 요약 정보</button>
+                        
+                        <!-- 추천 기준 카드 UI - LGDX-30 -->
+                        <div class="recommend-criteria-cards" id="recommend-criteria-microwave">
+                            <div class="criteria-card">
+                                <div class="criteria-icon">⚙️</div>
+                                <div class="criteria-label">스펙</div>
+                                <div class="criteria-value" id="criteria-spec-microwave">-</div>
+                            </div>
+                            <div class="criteria-card">
+                                <div class="criteria-icon">💰</div>
+                                <div class="criteria-label">가격</div>
+                                <div class="criteria-value" id="criteria-price-microwave">-</div>
+                            </div>
+                            <div class="criteria-card">
+                                <div class="criteria-icon">✨</div>
+                                <div class="criteria-label">기능</div>
+                                <div class="criteria-value" id="criteria-feature-microwave">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-action-buttons">
+                            <button class="spec-button" onclick="openSpecModal('microwave')">스펙 요약 정보</button>
+                            <button class="purchase-button" onclick="goToPurchase('microwave')">구매하러가기</button>
+                        </div>
                     </div>
                 </div>
 
@@ -2094,8 +2305,59 @@
                             </div>
                             <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
                         </div>
-                        <button class="spec-button" onclick="openSpecModal('dishwasher')">스펙 요약 정보</button>
+                        
+                        <!-- 추천 기준 카드 UI - LGDX-30 -->
+                        <div class="recommend-criteria-cards" id="recommend-criteria-dishwasher">
+                            <div class="criteria-card">
+                                <div class="criteria-icon">⚙️</div>
+                                <div class="criteria-label">스펙</div>
+                                <div class="criteria-value" id="criteria-spec-dishwasher">-</div>
+                            </div>
+                            <div class="criteria-card">
+                                <div class="criteria-icon">💰</div>
+                                <div class="criteria-label">가격</div>
+                                <div class="criteria-value" id="criteria-price-dishwasher">-</div>
+                            </div>
+                            <div class="criteria-card">
+                                <div class="criteria-icon">✨</div>
+                                <div class="criteria-label">기능</div>
+                                <div class="criteria-value" id="criteria-feature-dishwasher">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-action-buttons">
+                            <button class="spec-button" onclick="openSpecModal('dishwasher')">스펙 요약 정보</button>
+                            <button class="purchase-button" onclick="goToPurchase('dishwasher')">구매하러가기</button>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 포트폴리오 상세 금액 요약 - LGDX-26 -->
+        <div class="portfolio-price-summary-section">
+            <div class="portfolio-price-summary-container">
+                <h2 class="price-summary-title">패키지 가격 요약</h2>
+                <div class="price-summary-content">
+                    <div class="price-summary-row">
+                        <span class="price-summary-label">정가 합계</span>
+                        <span class="price-summary-value original" id="total-original-price">-</span>
+                    </div>
+                    <div class="price-summary-row">
+                        <span class="price-summary-label">판매가 합계</span>
+                        <span class="price-summary-value sale" id="total-sale-price">-</span>
+                    </div>
+                    <div class="price-summary-row highlight">
+                        <span class="price-summary-label">최대 혜택가 합계</span>
+                        <span class="price-summary-value final" id="total-final-price">-</span>
+                    </div>
+                    <div class="price-summary-row discount">
+                        <span class="price-summary-label">총 할인 금액</span>
+                        <span class="price-summary-value discount-amount" id="total-discount-amount">-</span>
+                    </div>
+                </div>
+                <div class="price-summary-disclaimer">
+                    *카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다
                 </div>
             </div>
         </div>
@@ -2279,6 +2541,16 @@
 
     <script>
         // ============================================
+        // 카카오 SDK 초기화 - LGDX-25
+        // ============================================
+        {% if kakao_js_key %}
+        Kakao.init('{{ kakao_js_key }}');
+        console.log('카카오 SDK 초기화 완료');
+        {% else %}
+        console.warn('카카오 JS 키가 설정되지 않았습니다.');
+        {% endif %}
+
+        // ============================================
         // 제품 데이터 로드 및 이미지 설정
         // ============================================
         async function loadProductImages() {
@@ -2304,6 +2576,7 @@
 
                 if (data.success && data.session && data.session.recommendation_result) {
                     const recommendations = data.session.recommendation_result.recommendations || [];
+                    const householdSize = data.session.household_size || 2; // 가족 수 정보
 
                     // 제품 순서대로 매핑 (첫 번째: 냉장고, 두 번째: 광파오븐, 세 번째: 식기세척기)
                     const productIds = ['refrigerator', 'microwave', 'dishwasher'];
@@ -2323,13 +2596,16 @@
                                 }
                             }
 
-                            // 제품 정보 업데이트
-                            updateProductInfo(productId, product);
+                            // 제품 정보 업데이트 (가족 수 정보 전달)
+                            updateProductInfo(productId, product, householdSize);
                         }
                     });
 
                     // 제품 정보 업데이트 후 취향 일치도 색상 설정
                     updateMatchBadgeColors();
+                    
+                    // 포트폴리오 금액 요약 업데이트 - LGDX-26
+                    updatePortfolioPriceSummary(recommendations);
                 } else {
                     console.warn('추천 결과가 없습니다. 기본 이미지 사용');
                 }
@@ -2400,7 +2676,7 @@
         }
 
         // 제품 정보 업데이트 함수
-        function updateProductInfo(productId, product) {
+        function updateProductInfo(productId, product, householdSize = 2) {
             // 제품명 업데이트
             const titleElement = document.querySelector(`#product-${productId} .product-title`);
             if (titleElement && product.name) {
@@ -2423,11 +2699,28 @@
                 }
             }
 
-            // 추천 이유 업데이트
+            // 추천 이유 업데이트 (가족 수에 적합한 용량 문구 추가) - LGDX-29
             const reasonText = document.querySelector(`#product-${productId} .recommend-reason-text`);
-            if (reasonText && product.reason) {
-                reasonText.textContent = product.reason;
+            if (reasonText) {
+                let reasonContent = '';
+                if (householdSize) {
+                    reasonContent = `가족 수에 적합한 용량 - ${householdSize}인 가구에 최적화된 제품입니다. `;
+                }
+                if (product.reason) {
+                    reasonContent += product.reason;
+                } else {
+                    reasonContent += '당신의 라이프스타일에 맞춘 추천 제품입니다.';
+                }
+                reasonText.textContent = reasonContent;
             }
+
+            // 리뷰 업데이트 (최대 3개) - LGDX-40
+            if (product.product_id) {
+                loadProductReviews(productId, product.product_id);
+            }
+
+            // 추천 기준 카드 업데이트 - LGDX-30
+            updateRecommendCriteria(productId, product);
 
             // 가격 업데이트
             if (product.price !== undefined) {
@@ -2463,6 +2756,152 @@
         function formatPrice(price) {
             if (!price) return '0';
             return Math.round(price).toLocaleString('ko-KR');
+        }
+
+        // 추천 기준 카드 업데이트 함수 - LGDX-30
+        function updateRecommendCriteria(productId, product) {
+            // 스펙 점수
+            const specScore = product.score_breakdown?.SpecScore || product.spec_score || 0;
+            const specElement = document.getElementById(`criteria-spec-${productId}`);
+            if (specElement) {
+                specElement.textContent = specScore > 0 ? `${Math.round(specScore)}점` : '-';
+            }
+
+            // 가격 점수
+            const priceScore = product.score_breakdown?.PriceScore || product.price_score || 0;
+            const priceElement = document.getElementById(`criteria-price-${productId}`);
+            if (priceElement) {
+                priceElement.textContent = priceScore > 0 ? `${Math.round(priceScore)}점` : '-';
+            }
+
+            // 기능 점수 (LifestyleScore + PreferenceScore)
+            const lifestyleScore = product.score_breakdown?.LifestyleScore || 0;
+            const preferenceScore = product.score_breakdown?.PreferenceScore || 0;
+            const featureScore = lifestyleScore + preferenceScore;
+            const featureElement = document.getElementById(`criteria-feature-${productId}`);
+            if (featureElement) {
+                featureElement.textContent = featureScore > 0 ? `${Math.round(featureScore)}점` : '-';
+            }
+        }
+
+        // 포트폴리오 금액 요약 업데이트 함수 - LGDX-26
+        function updatePortfolioPriceSummary(recommendations) {
+            let totalOriginal = 0;
+            let totalSale = 0;
+            let totalFinal = 0;
+
+            recommendations.forEach(product => {
+                const original = product.original_price || product.price || 0;
+                const sale = product.sale_price || product.price || 0;
+                const final = product.discount_price || product.sale_price || product.price || 0;
+
+                totalOriginal += original;
+                totalSale += sale;
+                totalFinal += final;
+            });
+
+            // 정가 합계
+            const originalElement = document.getElementById('total-original-price');
+            if (originalElement) {
+                originalElement.textContent = `${formatPrice(totalOriginal)}원`;
+            }
+
+            // 판매가 합계
+            const saleElement = document.getElementById('total-sale-price');
+            if (saleElement) {
+                saleElement.textContent = `${formatPrice(totalSale)}원`;
+            }
+
+            // 최대 혜택가 합계
+            const finalElement = document.getElementById('total-final-price');
+            if (finalElement) {
+                finalElement.textContent = `${formatPrice(totalFinal)}원`;
+            }
+
+            // 총 할인 금액
+            const discountAmount = totalOriginal - totalFinal;
+            const discountElement = document.getElementById('total-discount-amount');
+            if (discountElement) {
+                discountElement.textContent = `-${formatPrice(discountAmount)}원`;
+            }
+        }
+
+        // 구매하러가기 함수 - LGDX-10
+        function goToPurchase(productId) {
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            if (!sessionId) {
+                alert('세션 정보를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 세션에서 제품 정보 가져오기
+            fetch(`/api/onboarding/session/${sessionId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.session && data.session.recommendation_result) {
+                        const recommendations = data.session.recommendation_result.recommendations || [];
+                        const productIds = ['refrigerator', 'microwave', 'dishwasher'];
+                        const index = productIds.indexOf(productId);
+
+                        if (index >= 0 && index < recommendations.length) {
+                            const product = recommendations[index];
+                            const productDbId = product.product_id || product.id;
+                            
+                            if (productDbId) {
+                                // LG 결제 페이지로 이동 (제품 ID 포함)
+                                // 실제 LG 결제 페이지 URL로 변경 필요
+                                const purchaseUrl = `https://www.lge.co.kr/kr/products/${productDbId}`;
+                                window.open(purchaseUrl, '_blank');
+                            } else {
+                                alert('제품 정보를 찾을 수 없습니다.');
+                            }
+                        }
+                    } else {
+                        alert('제품 정보를 불러올 수 없습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('구매 페이지 이동 오류:', error);
+                    alert('구매 페이지로 이동하는 중 오류가 발생했습니다.');
+                });
+        }
+
+        // 제품 리뷰 로드 함수 (최대 3개) - LGDX-40
+        async function loadProductReviews(productId, productDbId) {
+            try {
+                const response = await fetch(`/api/products/${productDbId}/reviews/`);
+                if (!response.ok) {
+                    console.warn(`리뷰 로드 실패: ${response.status}`);
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.success && data.reviews && data.reviews.length > 0) {
+                    const reviewBox = document.querySelector(`#product-${productId} .review-analysis-box`);
+                    if (reviewBox) {
+                        const reviewTexts = reviewBox.querySelectorAll('.review-analysis-text');
+                        // 기존 리뷰 텍스트 제거 (제목 제외)
+                        reviewTexts.forEach((el, index) => {
+                            if (index > 0) {  // 첫 번째는 제목이므로 제외
+                                el.remove();
+                            }
+                        });
+
+                        // 최대 3개의 리뷰 추가
+                        const reviewsToShow = data.reviews.slice(0, 3);
+                        reviewsToShow.forEach(review => {
+                            if (review.review_text) {
+                                const reviewElement = document.createElement('div');
+                                reviewElement.className = 'review-analysis-text';
+                                reviewElement.textContent = review.review_text;
+                                reviewBox.appendChild(reviewElement);
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error(`리뷰 로드 오류 (제품 ID: ${productDbId}):`, error);
+            }
         }
 
         // 스펙 모달 열기
@@ -2781,9 +3220,82 @@
         }
 
         // ============================================
-        // 장바구니 모두 담기
+        // 장바구니 모두 담기 - LGDX-12
         // ============================================
-        function addAllToCart() {
+        async function addAllToCart() {
+            try {
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                if (!sessionId) {
+                    showToast('세션 정보를 찾을 수 없습니다.');
+                    return;
+                }
+
+                // 세션에서 추천 결과 가져오기
+                const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                if (!response.ok) {
+                    throw new Error('세션 조회 실패');
+                }
+
+                const data = await response.json();
+                if (!data.success || !data.session) {
+                    throw new Error('세션 데이터 없음');
+                }
+
+                const recommendations = data.session.recommendation_result?.recommendations || [];
+                if (recommendations.length === 0) {
+                    showToast('담을 제품이 없습니다.');
+                    return;
+                }
+
+                const user_id = `session_${sessionId}`;
+                let successCount = 0;
+                let failCount = 0;
+
+                // 모든 제품을 장바구니에 추가
+                for (const product of recommendations) {
+                    try {
+                        const productId = product.product_id || product.id;
+                        if (!productId) continue;
+
+                        const addResponse = await fetch('/api/cart/add/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                user_id: user_id,
+                                product_id: productId,
+                                quantity: 1,
+                                extra_data: {
+                                    price: product.price || product.original_price || 0,
+                                    discount_price: product.discount_price || product.sale_price || product.price || 0,
+                                    name: product.name,
+                                },
+                            }),
+                        });
+
+                        const addData = await addResponse.json();
+                        if (addData.success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    } catch (error) {
+                        console.error(`제품 ${product.name} 장바구니 추가 실패:`, error);
+                        failCount++;
+                    }
+                }
+
+                if (successCount > 0) {
+                    showToast(`${successCount}개 제품이 장바구니에 추가되었습니다.`);
+                } else {
+                    showToast('장바구니 추가에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('장바구니 추가 오류:', error);
+                showToast('장바구니 추가 중 오류가 발생했습니다.');
+            }
+        }
             // TODO: 장바구니에 모든 추천 제품 추가
             showToast('장바구니에 추가되었습니다.');
         }
@@ -3331,14 +3843,111 @@
         // ============================================
         // 결과 저장하기
         // ============================================
+        // 포트폴리오 저장하기 - LGDX-27
         async function saveResult() {
             try {
-                // TODO: API 호출하여 결과 저장
-                showToast('결과가 저장되었습니다.');
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                if (!sessionId) {
+                    showToast('세션 정보를 찾을 수 없습니다.');
+                    return;
+                }
+
+                // 세션에서 추천 결과 가져오기
+                const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                if (!response.ok) {
+                    throw new Error('세션 조회 실패');
+                }
+
+                const data = await response.json();
+                if (!data.success || !data.session) {
+                    throw new Error('세션 데이터 없음');
+                }
+
+                const session = data.session;
+                const recommendations = session.recommendation_result?.recommendations || [];
+                
+                // 스타일 정보 추출
+                const styleType = session.vibe || 'modern';
+                const styleTitle = getStyleTitle(styleType);
+                const styleSubtitle = getStyleSubtitle(session);
+
+                // 제품 목록 준비
+                const products = recommendations.map(rec => ({
+                    id: rec.product_id || rec.id,
+                    name: rec.name,
+                    price: rec.price || rec.original_price || 0,
+                    discountPrice: rec.discount_price || rec.sale_price || rec.price || 0,
+                    image_url: rec.image_url,
+                    score: rec.score || rec.total_score || 0,
+                }));
+
+                // 온보딩 데이터 준비
+                const onboardingData = {
+                    vibe: session.vibe,
+                    household_size: session.household_size,
+                    housing_type: session.housing_type,
+                    pyung: session.pyung,
+                    priority: session.priority,
+                    budget_level: session.budget_level,
+                    selected_categories: session.selected_categories,
+                };
+
+                // 매칭 점수 계산 (평균)
+                const matchScore = products.length > 0 
+                    ? Math.round(products.reduce((sum, p) => sum + (p.score || 0), 0) / products.length)
+                    : 0;
+
+                // 포트폴리오 저장 API 호출
+                const saveResponse = await fetch('/api/portfolio/save/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: `session_${sessionId}`,
+                        style_type: styleType,
+                        style_title: styleTitle,
+                        style_subtitle: styleSubtitle,
+                        onboarding_data: onboardingData,
+                        products: products,
+                        match_score: matchScore,
+                    }),
+                });
+
+                const saveData = await saveResponse.json();
+                if (saveData.success) {
+                    showToast('포트폴리오가 저장되었습니다.');
+                    // internal_key를 세션 스토리지에 저장
+                    if (saveData.internal_key) {
+                        sessionStorage.setItem('portfolio_internal_key', saveData.internal_key);
+                    }
+                } else {
+                    throw new Error(saveData.error || '저장 실패');
+                }
             } catch (error) {
                 console.error('저장 오류:', error);
-                showToast('저장 중 오류가 발생했습니다.');
+                showToast('저장 중 오류가 발생했습니다: ' + error.message);
             }
+        }
+
+        // 스타일 타이틀 생성
+        function getStyleTitle(vibe) {
+            const titles = {
+                'modern': '모던 & 미니멀 라이프를 위한 오브제 스타일',
+                'cozy': '따뜻한 코지 라이프를 위한 가전 패키지',
+                'pop': '팝 & 생기있는 라이프를 위한 컬러풀 스타일',
+                'luxury': '럭셔리 & 프리미엄 라이프를 위한 시그니처 스타일',
+            };
+            return titles[vibe] || '나에게 딱 맞는 가전 패키지';
+        }
+
+        // 스타일 서브타이틀 생성
+        function getStyleSubtitle(session) {
+            const householdSize = session.household_size || 2;
+            const housingType = session.housing_type || 'apartment';
+            const pyung = session.pyung || 25;
+            
+            return `${householdSize}인 가구를 위한 ${pyung}평 ${housingType} 라이프스타일에 최적화된 LG 가전 패키지입니다.`;
         }
 
         // ============================================
@@ -3354,11 +3963,102 @@
         }
 
         // ============================================
-        // 카카오톡 공유하기
+        // 카카오톡 공유하기 - LGDX-25
         // ============================================
         function shareKakao() {
-            // TODO: 카카오톡 공유 기능 구현
-            showToast('카카오톡 공유 기능 준비 중입니다.');
+            {% if kakao_js_key %}
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            
+            // 세션에서 추천 결과 가져오기
+            if (sessionId) {
+                fetch(`/api/onboarding/session/${sessionId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.session) {
+                            const session = data.session;
+                            const recommendations = session.recommendation_result?.recommendations || [];
+                            
+                            // 공유할 제품 목록 생성
+                            let productNames = recommendations.slice(0, 3).map(p => p.name).join(', ');
+                            if (productNames.length > 50) {
+                                productNames = productNames.substring(0, 50) + '...';
+                            }
+                            
+                            const shareTitle = 'LG전자 | 나에게 딱 맞는 가전 패키지 추천';
+                            const shareDescription = `추천 제품: ${productNames}`;
+                            const shareImage = 'https://www.lge.co.kr/kr/images/brand/objet-collection/2024/visual/kv_visual_bg_w.webp';
+                            const shareUrl = window.location.href;
+                            
+                            // 카카오톡 공유
+                            if (Kakao.isInitialized()) {
+                                Kakao.Share.sendDefault({
+                                    objectType: 'feed',
+                                    content: {
+                                        title: shareTitle,
+                                        description: shareDescription,
+                                        imageUrl: shareImage,
+                                        link: {
+                                            mobileWebUrl: shareUrl,
+                                            webUrl: shareUrl,
+                                        },
+                                    },
+                                    buttons: [
+                                        {
+                                            title: '추천 결과 보기',
+                                            link: {
+                                                mobileWebUrl: shareUrl,
+                                                webUrl: shareUrl,
+                                            },
+                                        },
+                                    ],
+                                });
+                            } else {
+                                showToast('카카오 SDK가 초기화되지 않았습니다.');
+                            }
+                        } else {
+                            // 기본 공유
+                            shareKakaoDefault();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('카카오톡 공유 오류:', error);
+                        shareKakaoDefault();
+                    });
+            } else {
+                shareKakaoDefault();
+            }
+            {% else %}
+            showToast('카카오톡 공유 기능을 사용할 수 없습니다.');
+            {% endif %}
+        }
+
+        // 기본 카카오톡 공유
+        function shareKakaoDefault() {
+            if (Kakao.isInitialized()) {
+                Kakao.Share.sendDefault({
+                    objectType: 'feed',
+                    content: {
+                        title: 'LG전자 | 나에게 딱 맞는 가전 패키지 추천',
+                        description: '당신의 라이프스타일에 맞춘 LG 가전 제품을 추천받아보세요',
+                        imageUrl: 'https://www.lge.co.kr/kr/images/brand/objet-collection/2024/visual/kv_visual_bg_w.webp',
+                        link: {
+                            mobileWebUrl: window.location.href,
+                            webUrl: window.location.href,
+                        },
+                    },
+                    buttons: [
+                        {
+                            title: '추천 결과 보기',
+                            link: {
+                                mobileWebUrl: window.location.href,
+                                webUrl: window.location.href,
+                            },
+                        },
+                    ],
+                });
+            } else {
+                showToast('카카오 SDK가 초기화되지 않았습니다.');
+            }
         }
 
         // ============================================

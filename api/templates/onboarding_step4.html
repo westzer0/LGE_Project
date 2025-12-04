@@ -9,7 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -1283,7 +1284,7 @@
             const savedCooking = sessionStorage.getItem('step4_cooking');
             const savedLaundry = sessionStorage.getItem('step4_laundry');
             const savedMedia = sessionStorage.getItem('step4_media');
-            
+
             if (savedCooking) {
                 selectedCooking = savedCooking;
                 const cookingCard = document.querySelector(`.cooking-option[data-value="${savedCooking}"]`);
@@ -1291,7 +1292,7 @@
                     cookingCard.classList.add('selected');
                 }
             }
-            
+
             if (savedLaundry) {
                 selectedLaundry = savedLaundry;
                 const laundryCard = document.querySelector(`.laundry-option[data-value="${savedLaundry}"]`);
@@ -1299,7 +1300,7 @@
                     laundryCard.classList.add('selected');
                 }
             }
-            
+
             if (savedMedia) {
                 selectedMedia = savedMedia;
                 const mediaCard = document.querySelector(`.media-option[data-value="${savedMedia}"]`);
@@ -1307,12 +1308,12 @@
                     mediaCard.classList.add('selected');
                 }
             }
-            
+
             // 복원된 값에 따라 질문 표시 상태 업데이트
             if (selectedCooking || selectedLaundry || selectedMedia) {
                 showQuestionsBasedOnSpaces();
             }
-            
+
             // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {

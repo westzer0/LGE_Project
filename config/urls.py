@@ -3,13 +3,14 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
-    index_view, recommend, products, recommend_view, recommend_playbook_view, recommend_column_based_view, product_spec_view, product_image_by_name_view,
+    index_view, recommend, products, recommend_view, recommend_playbook_view, recommend_column_based_view, product_spec_view, product_image_by_name_view, product_reviews_view,
     onboarding_page, onboarding_step2_page, onboarding_step3_page, onboarding_step4_page, onboarding_step5_page, onboarding_step6_page, onboarding_step7_page, main_page, onboarding_new_page, result_page,
     fake_lg_main_page,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
     ai_chat_view, ai_status_view,
+    cart_add_view, cart_remove_view, cart_list_view,
 )
 from api.views_drf import convert_figma_to_code
 
@@ -50,6 +51,7 @@ urlpatterns = [
     path('api/recommend/column-based/', recommend_column_based_view, name='recommend_column_based'),
     path('api/products/', products, name='products'),
     path('api/products/<int:product_id>/spec/', product_spec_view, name='product_spec'),
+    path('api/products/<int:product_id>/reviews/', product_reviews_view, name='product_reviews'),  # LGDX-40
     path('api/products/image-by-name/', product_image_by_name_view, name='product_image_by_name'),
     path('api/onboarding/step/', onboarding_step_view, name='onboarding_step'),
     path('api/onboarding/complete/', onboarding_complete_view, name='onboarding_complete'),
@@ -60,6 +62,11 @@ urlpatterns = [
     path('api/portfolio/list/', portfolio_list_view, name='portfolio_list'),
     path('api/portfolio/<str:portfolio_id>/', portfolio_detail_view, name='portfolio_detail'),
     path('api/portfolio/<str:portfolio_id>/share/', portfolio_share_view, name='portfolio_share'),
+    
+    # 장바구니 API - LGDX-12
+    path('api/cart/add/', cart_add_view, name='cart_add'),
+    path('api/cart/remove/', cart_remove_view, name='cart_remove'),
+    path('api/cart/list/', cart_list_view, name='cart_list'),
     
     # DRF API 엔드포인트 (새로운 방식)
     # path('api/drf/recommend/', RecommendAPIView.as_view(), name='drf_recommend'),

@@ -1,28 +1,72 @@
 """
 Taste별 MAIN CATEGORY 선택 로직
 
-각 taste에 따라 PRODUCT 테이블의 MAIN CATEGORY를 N개 선택합니다.
+각 taste에 따라 Oracle DB의 PRODUCT 테이블 MAIN_CATEGORY 컬럼을 기준으로 N개 선택합니다.
 """
 from typing import List, Dict
 from api.utils.taste_classifier import taste_classifier
+from api.db.oracle_client import get_connection
 
 
 class TasteCategorySelector:
     """
     Taste별로 MAIN CATEGORY를 선택하는 클래스
     
-    MAIN CATEGORY 목록:
-    - TV: TV/오디오
-    - KITCHEN: 주방가전
-    - LIVING: 생활가전
-    - AIR: 에어컨/에어케어
-    - AI: AI Home
-    - OBJET: LG Objet
-    - SIGNATURE: LG SIGNATURE
+    Oracle DB의 PRODUCT 테이블 MAIN_CATEGORY 컬럼 값을 기준으로 동적으로 카테고리를 가져옵니다.
     """
     
-    # 모든 MAIN CATEGORY
-    ALL_CATEGORIES = ['TV', 'KITCHEN', 'LIVING', 'AIR', 'AI', 'OBJET', 'SIGNATURE']
+    # 실제 Oracle DB에서 카테고리 목록을 가져오는 메서드
+    @staticmethod
+    def get_available_categories() -> List[str]:
+        """
+        Oracle DB의 PRODUCT 테이블에서 실제 존재하는 MAIN_CATEGORY 목록 가져오기
+        
+        Returns:
+            활성 제품이 있는 카테고리 리스트 (제품 수 많은 순서)
+        """
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT MAIN_CATEGORY, COUNT(*) as cnt
+                    FROM PRODUCT
+                    WHERE MAIN_CATEGORY IS NOT NULL
+                      AND STATUS = '판매중'
+                      AND PRICE > 0
+                      AND PRICE IS NOT NULL
+                    GROUP BY MAIN_CATEGORY
+                    ORDER BY cnt DESC
+                """)
+                results = cur.fetchall()
+                return [row[0] for row in results]
+    
+    @staticmethod
+    def get_essential_categories() -> List[str]:
+        """
+        필수 카테고리 가져오기 (제품 수가 많은 상위 카테고리)
+        
+        필수 카테고리: TV, 냉장고, 에어컨, 세탁 (제품 수 기준 상위 3-4개)
+        
+        Returns:
+            필수 카테고리 리스트
+        """
+        all_categories = TasteCategorySelector.get_available_categories()
+        
+        # 필수 카테고리 우선순위 (제품 수가 많은 순서)
+        essential_priority = ['TV', '냉장고', '에어컨', '세탁']
+        
+        essential = []
+        for cat in essential_priority:
+            if cat in all_categories:
+                essential.append(cat)
+                if len(essential) >= 3:  # 최소 3개
+                    break
+        
+        # 부족하면 제품 수 많은 순서대로 추가
+        for cat in all_categories:
+            if cat not in essential and len(essential) < 4:
+                essential.append(cat)
+        
+        return essential
     
     @staticmethod
     def select_categories_for_taste(taste_id: int, onboarding_data: Dict, num_categories: int = None) -> List[str]:
@@ -37,8 +81,8 @@ class TasteCategorySelector:
         Returns:
             선택된 MAIN CATEGORY 리스트
         """
-        # 1. 필수 카테고리 (항상 포함)
-        essential_categories = ['TV', 'KITCHEN', 'LIVING']
+        # 1. 필수 카테고리 (PRODUCT 테이블 기준으로 동적 가져오기)
+        essential_categories = TasteCategorySelector.get_essential_categories()
         
         # 2. num_categories가 지정되지 않으면 온보딩 데이터 기반으로 결정
         if num_categories is None:
@@ -110,7 +154,9 @@ class TasteCategorySelector:
         Returns:
             추가 선택된 카테고리 리스트
         """
-        available = [cat for cat in TasteCategorySelector.ALL_CATEGORIES if cat not in already_selected]
+        # 실제 DB에 존재하는 카테고리만 사용
+        all_available = TasteCategorySelector.get_available_categories()
+        available = [cat for cat in all_available if cat not in already_selected]
         
         if not available or count <= 0:
             return []
@@ -167,8 +213,9 @@ class TasteCategorySelector:
             if 'AI' in available_categories:
                 priority.append('AI')
         
-        # 나머지 카테고리 추가
-        for cat in ['AIR', 'AI', 'OBJET', 'SIGNATURE']:
+        # 나머지 카테고리 추가 (실제 DB에 존재하는 카테고리만)
+        all_available = TasteCategorySelector.get_available_categories()
+        for cat in all_available:
             if cat in available_categories and cat not in priority:
                 priority.append(cat)
         
