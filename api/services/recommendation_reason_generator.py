@@ -94,7 +94,11 @@ class RecommendationReasonGenerator:
         """기존 추천 문구를 사용자 취향에 맞게 개인화"""
         # 취향 정보 추출
         vibe = user_profile.get('vibe', '').lower()
-        priority = user_profile.get('priority', '').lower()
+        priority_raw = user_profile.get('priority', '')
+        if isinstance(priority_raw, list):
+            priority = ', '.join(priority_raw).lower() if priority_raw else ''
+        else:
+            priority = str(priority_raw).lower() if priority_raw else ''
         household_size = user_profile.get('household_size', 2)
         budget = user_profile.get('budget_level', 'medium')
         
@@ -189,7 +193,11 @@ class RecommendationReasonGenerator:
             keywords.extend(self.taste_keywords[vibe])
         
         # 우선순위 키워드
-        priority = user_profile.get('priority', '').lower()
+        priority_raw = user_profile.get('priority', '')
+        if isinstance(priority_raw, list):
+            priority = ', '.join(priority_raw).lower() if priority_raw else ''
+        else:
+            priority = str(priority_raw).lower() if priority_raw else ''
         if priority in self.priority_keywords:
             keywords.extend(self.priority_keywords[priority])
         
@@ -397,7 +405,11 @@ class RecommendationReasonGenerator:
         import random
         
         vibe = user_profile.get('vibe', '').lower()
-        priority = user_profile.get('priority', '').lower()
+        priority_raw = user_profile.get('priority', '')
+        if isinstance(priority_raw, list):
+            priority = ', '.join(priority_raw).lower() if priority_raw else ''
+        else:
+            priority = str(priority_raw).lower() if priority_raw else ''
         household_size = user_profile.get('household_size', 2)
         household_category = self._get_household_category(household_size)
         

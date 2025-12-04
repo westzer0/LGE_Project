@@ -168,3 +168,4 @@ Get-ChildItem -Path C:\oraclexe -Recurse -Filter "oci.dll" -ErrorAction Silently
 이 명령이 `oci.dll` 파일의 전체 경로를 보여줍니다.
 
 
+

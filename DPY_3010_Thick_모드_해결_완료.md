@@ -150,3 +150,4 @@ C:\oracle\instantclient_19_23
 - `oracle_init.py` - Django 초기화 모듈
 
 
+

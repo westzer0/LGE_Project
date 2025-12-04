@@ -93,3 +93,4 @@ print(f"  - 예산 범위: {len(budget_levels)}개 옵션")
 print(f"  - 총 조합: {total:,}개")
 
 
+

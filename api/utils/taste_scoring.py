@@ -41,8 +41,23 @@ def load_taste_scoring_logics() -> List[Dict]:
     return _taste_scoring_logics
 
 
-def get_logic_for_taste_id(taste_id: int) -> Optional[Dict]:
-    """taste_id에 해당하는 Scoring Logic 반환"""
+def get_logic_for_taste_id(taste_id: int, onboarding_data: Dict = None) -> Optional[Dict]:
+    """
+    taste_id에 해당하는 Scoring Logic 반환
+    
+    Args:
+        taste_id: 취향 ID
+        onboarding_data: 온보딩 데이터 (동적 logic 생성 시 사용)
+    
+    Returns:
+        Scoring Logic 딕셔너리
+    """
+    # 온보딩 데이터가 있으면 동적 logic 생성 우선
+    if onboarding_data:
+        from .dynamic_taste_scoring import get_dynamic_scoring_logic_for_taste
+        return get_dynamic_scoring_logic_for_taste(taste_id, onboarding_data)
+    
+    # 기존 JSON 파일 기반 logic 사용
     global _taste_id_to_logic
     
     if _taste_id_to_logic is None:
@@ -59,7 +74,8 @@ def get_logic_for_taste_id(taste_id: int) -> Optional[Dict]:
 def calculate_product_score_with_taste_logic(
     product: Product,
     profile: UserProfile,
-    taste_id: Optional[int] = None
+    taste_id: Optional[int] = None,
+    onboarding_data: Optional[Dict] = None
 ) -> float:
     """
     취향별 독립적인 Scoring Logic을 적용한 제품 점수 계산
@@ -68,6 +84,7 @@ def calculate_product_score_with_taste_logic(
         product: 제품 객체
         profile: 사용자 프로필
         taste_id: 취향 ID (선택사항, 없으면 기본 scoring 사용)
+        onboarding_data: 온보딩 데이터 (동적 logic 생성 시 사용)
     
     Returns:
         제품 점수 (0.0 ~ 1.0)
@@ -77,8 +94,8 @@ def calculate_product_score_with_taste_logic(
         from .scoring import calculate_product_score
         return calculate_product_score(product, profile)
     
-    # 해당 taste_id의 Scoring Logic 가져오기
-    logic = get_logic_for_taste_id(taste_id)
+    # 해당 taste_id의 Scoring Logic 가져오기 (온보딩 데이터 기반 동적 생성 가능)
+    logic = get_logic_for_taste_id(taste_id, onboarding_data)
     if logic is None:
         # Logic이 없으면 기본 scoring 사용
         from .scoring import calculate_product_score

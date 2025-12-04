@@ -10,6 +10,8 @@ from .services.recommendation_engine import recommendation_engine
 from .services.playbook_recommendation_engine import playbook_recommendation_engine
 from .services.column_based_recommendation_engine import column_based_recommendation_engine
 from .services.chatgpt_service import chatgpt_service
+from .services.onboarding_db_service import onboarding_db_service
+from .services.taste_calculation_service import taste_calculation_service
 
 
 def index_view(request):
@@ -384,7 +386,17 @@ def recommend_view(request):
         print(f"\n[API] 추천 요청: {user_profile}")
         
         # 2. Service 호출 (모든 로직은 Service에서)
-        result = recommendation_engine.get_recommendations(user_profile)
+        # taste_id가 있으면 taste 기반 추천, 없으면 기본 추천
+        taste_id = None
+        if 'member_id' in data:
+            from .services.taste_calculation_service import taste_calculation_service
+            member_id = data.get('member_id')
+            taste_id = taste_calculation_service.get_taste_for_member(member_id)
+        
+        result = recommendation_engine.get_recommendations(
+            user_profile=user_profile,
+            taste_id=taste_id
+        )
         
         # 3. 응답
         if result['success']:
@@ -676,6 +688,161 @@ def onboarding_step_view(request):
         session.updated_at = timezone.now()
         session.save()
         
+        # ============================================================
+        # Oracle DB에도 저장
+        # ============================================================
+        try:
+            # 세션 정보 준비
+            session_status = 'IN_PROGRESS'
+            if step == 6:
+                session_status = 'COMPLETED'
+            elif session.status == 'abandoned':
+                session_status = 'ABANDONED'
+            
+            # Oracle DB 세션 저장/업데이트
+            onboarding_db_service.create_or_update_session(
+                session_id=session_id,
+                current_step=step,
+                status=session_status,
+                vibe=session.vibe,
+                household_size=session.household_size,
+                housing_type=session.housing_type,
+                pyung=session.pyung,
+                priority=session.priority,
+                budget_level=session.budget_level,
+                selected_categories=session.selected_categories,
+                recommended_products=session.recommended_products,
+                recommendation_result=session.recommendation_result
+            )
+            
+            # Step별 사용자 응답 저장
+            if step == 1:
+                # Step 1: vibe
+                if step_data.get('vibe'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=1,
+                        question_type='vibe',
+                        answer_value=step_data.get('vibe')
+                    )
+            
+            elif step == 2:
+                # Step 2: mate
+                if step_data.get('mate'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=2,
+                        question_type='mate',
+                        answer_value=step_data.get('mate')
+                    )
+                # Step 2: pet
+                if step_data.get('pet'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=2,
+                        question_type='pet',
+                        answer_value=step_data.get('pet')
+                    )
+            
+            elif step == 3:
+                # Step 3: housing_type
+                if step_data.get('housing_type'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=3,
+                        question_type='housing_type',
+                        answer_value=step_data.get('housing_type')
+                    )
+                # Step 3: main_space (다중 선택)
+                if step_data.get('main_space'):
+                    main_spaces = step_data.get('main_space')
+                    if isinstance(main_spaces, list):
+                        onboarding_db_service.save_multiple_responses(
+                            session_id=session_id,
+                            step_number=3,
+                            question_type='main_space',
+                            answer_values=main_spaces
+                        )
+                    else:
+                        onboarding_db_service.save_user_response(
+                            session_id=session_id,
+                            step_number=3,
+                            question_type='main_space',
+                            answer_value=main_spaces
+                        )
+                # Step 3: pyung (텍스트 입력)
+                if step_data.get('pyung'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=3,
+                        question_type='pyung',
+                        answer_value=str(step_data.get('pyung')),
+                        answer_text=str(step_data.get('pyung'))
+                    )
+            
+            elif step == 4:
+                # Step 4: cooking
+                if step_data.get('cooking'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=4,
+                        question_type='cooking',
+                        answer_value=step_data.get('cooking')
+                    )
+                # Step 4: laundry
+                if step_data.get('laundry'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=4,
+                        question_type='laundry',
+                        answer_value=step_data.get('laundry')
+                    )
+                # Step 4: media
+                if step_data.get('media'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=4,
+                        question_type='media',
+                        answer_value=step_data.get('media')
+                    )
+            
+            elif step == 5:
+                # Step 5: priority (다중 선택, 순서 중요)
+                if step_data.get('priority'):
+                    priorities = step_data.get('priority')
+                    if isinstance(priorities, list):
+                        onboarding_db_service.save_multiple_responses(
+                            session_id=session_id,
+                            step_number=5,
+                            question_type='priority',
+                            answer_values=priorities
+                        )
+                    else:
+                        onboarding_db_service.save_user_response(
+                            session_id=session_id,
+                            step_number=5,
+                            question_type='priority',
+                            answer_value=priorities
+                        )
+            
+            elif step == 6:
+                # Step 6: budget
+                if step_data.get('budget'):
+                    onboarding_db_service.save_user_response(
+                        session_id=session_id,
+                        step_number=6,
+                        question_type='budget',
+                        answer_value=step_data.get('budget')
+                    )
+            
+            print(f"[Oracle DB 저장 성공] 세션 ID: {session_id}, 단계: {step}")
+        
+        except Exception as oracle_error:
+            # Oracle DB 저장 실패해도 Django DB 저장은 성공했으므로 계속 진행
+            print(f"[Oracle DB 저장 실패] {str(oracle_error)}")
+            import traceback
+            traceback.print_exc()
+        
         print(f"\n[온보딩 저장 성공]")
         print(f"  세션 ID: {session_id}")
         print(f"  단계: {step}")
@@ -785,7 +952,18 @@ def onboarding_complete_view(request):
         print(f"[Profile] {user_profile}")
         
         # 3. 추천 엔진 호출
-        result = recommendation_engine.get_recommendations(user_profile, limit=3)
+        # taste_id 계산
+        taste_id = None
+        if member_id:
+            try:
+                taste_id = taste_calculation_service.get_taste_for_member(member_id)
+            except:
+                pass
+        
+        result = recommendation_engine.get_recommendations(
+            user_profile=user_profile,
+            taste_id=taste_id
+        )
         
         # 4. 추천 결과 저장 (온보딩 데이터 포함)
         if result['success']:
@@ -799,6 +977,38 @@ def onboarding_complete_view(request):
             session.save()
             
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")
+            
+            # 5. Taste 계산 및 MEMBER 테이블에 저장 (member_id가 있는 경우)
+            member_id = data.get('member_id')
+            if member_id:
+                try:
+                    # 온보딩 데이터 준비
+                    onboarding_data_for_taste = {
+                        'vibe': session.vibe,
+                        'household_size': session.household_size,
+                        'housing_type': session.housing_type,
+                        'pyung': session.pyung,
+                        'budget_level': session.budget_level,
+                        'priority': session.priority if isinstance(session.priority, list) else [session.priority] if session.priority else ['value'],
+                        'has_pet': onboarding_data.get('pet') == 'yes',
+                        'main_space': data.get('main_space', []),
+                        'cooking': onboarding_data.get('cooking', 'sometimes'),
+                        'laundry': onboarding_data.get('laundry', 'weekly'),
+                        'media': onboarding_data.get('media', 'balanced'),
+                    }
+                    
+                    # Taste 계산 및 저장
+                    taste_id = taste_calculation_service.calculate_and_save_taste(
+                        member_id=member_id,
+                        onboarding_data=onboarding_data_for_taste
+                    )
+                    print(f"[Taste 계산 완료] Member: {member_id}, Taste ID: {taste_id}")
+                    
+                    # 응답에 taste_id 포함
+                    result_with_data['taste_id'] = taste_id
+                except Exception as taste_error:
+                    print(f"[Taste 계산 실패] {str(taste_error)}")
+                    # Taste 계산 실패해도 추천 결과는 반환
             
             return JsonResponse({
                 'success': True,

@@ -1,0 +1,304 @@
+Taste별 제품 추천 시뮬레이션 결과
+================================================================================
+
+[상세 추천 결과]
+================================================================================
+시나리오: 시나리오 1: 3인 officetel (Taste 88, high)
+- 가구구성: 3인
+- 주거형태: officetel
+- 평수: 20평
+- 예산: high
+- 우선순위: performance
+- 요리빈도: sometimes
+- 세탁빈도: rarely
+- 미디어: none
+- Taste ID: 88
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 2: 5인 studio (Taste 50, medium)
+- 가구구성: 5인
+- 주거형태: studio
+- 평수: 15평
+- 예산: medium
+- 우선순위: value
+- 요리빈도: often
+- 세탁빈도: weekly
+- 미디어: gaming
+- Taste ID: 50
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 3: 2인 apartment (Taste 12, low)
+- 가구구성: 2인
+- 주거형태: apartment
+- 평수: 50평
+- 예산: low
+- 우선순위: design, comfort
+- 요리빈도: sometimes
+- 세탁빈도: rarely
+- 미디어: none
+- Taste ID: 12
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 4: 1인 studio (Taste 24, low)
+- 가구구성: 1인
+- 주거형태: studio
+- 평수: 35평
+- 예산: low
+- 우선순위: design
+- 요리빈도: rarely
+- 세탁빈도: rarely
+- 미디어: gaming
+- Taste ID: 24
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 5: 1인 detached (Taste 45, high)
+- 가구구성: 1인
+- 주거형태: detached
+- 평수: 35평
+- 예산: high
+- 우선순위: tech, value
+- 요리빈도: rarely
+- 세탁빈도: daily
+- 미디어: high
+- Taste ID: 45
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 6: 1인 house (Taste 20, low)
+- 가구구성: 1인
+- 주거형태: house
+- 평수: 50평
+- 예산: low
+- 우선순위: design, tech
+- 요리빈도: often
+- 세탁빈도: weekly
+- 미디어: balanced
+- Taste ID: 20
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 7: 1인 apartment (Taste 80, low)
+- 가구구성: 1인
+- 주거형태: apartment
+- 평수: 40평
+- 예산: low
+- 우선순위: value, eco
+- 요리빈도: often
+- 세탁빈도: rarely
+- 미디어: low
+- Taste ID: 80
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 8: 1인 officetel (Taste 97, medium)
+- 가구구성: 1인
+- 주거형태: officetel
+- 평수: 25평
+- 예산: medium
+- 우선순위: tech, value
+- 요리빈도: rarely
+- 세탁빈도: daily
+- 미디어: gaming
+- Taste ID: 97
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 9: 5인 studio (Taste 61, high)
+- 가구구성: 5인
+- 주거형태: studio
+- 평수: 45평
+- 예산: high
+- 우선순위: performance, eco
+- 요리빈도: daily
+- 세탁빈도: daily
+- 미디어: none
+- Taste ID: 61
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 10: 3인 studio (Taste 61, medium)
+- 가구구성: 3인
+- 주거형태: studio
+- 평수: 15평
+- 예산: medium
+- 우선순위: performance, design
+- 요리빈도: rarely
+- 세탁빈도: daily
+- 미디어: none
+- Taste ID: 61
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 11: 1인 house (Taste 33, medium)
+- 가구구성: 1인
+- 주거형태: house
+- 평수: 45평
+- 예산: medium
+- 우선순위: tech
+- 요리빈도: rarely
+- 세탁빈도: rarely
+- 미디어: high
+- Taste ID: 33
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 12: 2인 house (Taste 77, low)
+- 가구구성: 2인
+- 주거형태: house
+- 평수: 40평
+- 예산: low
+- 우선순위: performance, comfort
+- 요리빈도: often
+- 세탁빈도: rarely
+- 미디어: balanced
+- Taste ID: 77
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 13: 3인 house (Taste 45, high)
+- 가구구성: 3인
+- 주거형태: house
+- 평수: 25평
+- 예산: high
+- 우선순위: value, eco
+- 요리빈도: often
+- 세탁빈도: weekly
+- 미디어: gaming
+- Taste ID: 45
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 14: 1인 house (Taste 28, medium)
+- 가구구성: 1인
+- 주거형태: house
+- 평수: 15평
+- 예산: medium
+- 우선순위: design
+- 요리빈도: daily
+- 세탁빈도: rarely
+- 미디어: none
+- Taste ID: 28
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 15: 5인 officetel (Taste 107, medium)
+- 가구구성: 5인
+- 주거형태: officetel
+- 평수: 15평
+- 예산: medium
+- 우선순위: tech
+- 요리빈도: rarely
+- 세탁빈도: rarely
+- 미디어: balanced
+- Taste ID: 107
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 16: 2인 apartment (Taste 80, high)
+- 가구구성: 2인
+- 주거형태: apartment
+- 평수: 35평
+- 예산: high
+- 우선순위: tech, eco
+- 요리빈도: sometimes
+- 세탁빈도: daily
+- 미디어: high
+- Taste ID: 80
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 17: 2인 studio (Taste 44, medium)
+- 가구구성: 2인
+- 주거형태: studio
+- 평수: 35평
+- 예산: medium
+- 우선순위: design, comfort
+- 요리빈도: sometimes
+- 세탁빈도: daily
+- 미디어: gaming
+- Taste ID: 44
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 18: 4인 studio (Taste 24, low)
+- 가구구성: 4인
+- 주거형태: studio
+- 평수: 25평
+- 예산: low
+- 우선순위: design, eco
+- 요리빈도: daily
+- 세탁빈도: rarely
+- 미디어: high
+- Taste ID: 24
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 19: 2인 apartment (Taste 3, medium)
+- 가구구성: 2인
+- 주거형태: apartment
+- 평수: 50평
+- 예산: medium
+- 우선순위: value, performance
+- 요리빈도: sometimes
+- 세탁빈도: rarely
+- 미디어: balanced
+- Taste ID: 3
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+
+
+시나리오: 시나리오 20: 3인 officetel (Taste 29, high)
+- 가구구성: 3인
+- 주거형태: officetel
+- 평수: 30평
+- 예산: high
+- 우선순위: value
+- 요리빈도: sometimes
+- 세탁빈도: weekly
+- 미디어: low
+- Taste ID: 29
+- 선택된 카테고리:  (0개)
+
+추천 제품 없음
+

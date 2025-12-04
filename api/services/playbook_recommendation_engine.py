@@ -255,9 +255,10 @@ class PlaybookRecommendationEngine:
             .filter(
                 is_active=True,
                 category__in=categories,
+                price__gt=0,  # 가격 0원 제외
+                price__isnull=False,  # 가격 null 제외
                 price__gte=min_price,
                 price__lte=max_price,
-                price__gt=0,
             )
             .filter(spec__isnull=False)
         )

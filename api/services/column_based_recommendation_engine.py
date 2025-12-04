@@ -172,9 +172,10 @@ class ColumnBasedRecommendationEngine:
             .filter(
                 is_active=True,
                 category__in=categories,
+                price__gt=0,  # 가격 0원 제외
+                price__isnull=False,  # 가격 null 제외
                 price__gte=min_price,
                 price__lte=max_price,
-                price__gt=0,
             )
             .filter(spec__isnull=False)
         )
@@ -314,10 +315,13 @@ class ColumnBasedRecommendationEngine:
         for product in products[:50]:  # 최대 50개만 처리
             try:
                 if taste_id is not None:
+                    # onboarding_data 전달 (동적 logic 생성에 사용)
+                    onboarding_data = user_profile.get('onboarding_data', {})
                     score = calculate_product_score_with_taste_logic(
                         product=product,
                         profile=profile,
-                        taste_id=taste_id
+                        taste_id=taste_id,
+                        onboarding_data=onboarding_data
                     )
                 else:
                     score = calculate_product_score(
@@ -370,4 +374,5 @@ class ColumnBasedRecommendationEngine:
 
 # Singleton 인스턴스
 column_based_recommendation_engine = ColumnBasedRecommendationEngine()
+
 

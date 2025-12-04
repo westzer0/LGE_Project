@@ -375,3 +375,4 @@ class SpecColumnScorer:
 # Singleton 인스턴스
 spec_column_scorer = SpecColumnScorer()
 
+
