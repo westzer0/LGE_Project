@@ -1,0 +1,271 @@
+{
+    "rules": [
+        {
+            "key": [
+                "원룸",
+                "냉장고"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "depth_mm",
+                    "operator": ">",
+                    "value": 750
+                },
+                {
+                    "spec_key": "capacity_l",
+                    "operator": ">",
+                    "value": 500
+                }
+            ]
+        },
+        {
+            "key": [
+                "1인",
+                "냉장고"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_l",
+                    "operator": ">=",
+                    "value": 200
+                }
+            ]
+        },
+        {
+            "key": [
+                "2인",
+                "냉장고"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_l",
+                    "operator": ">=",
+                    "value": 900
+                }
+            ]
+        },
+        {
+            "key": [
+                "4인 이상",
+                "냉장고"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_l",
+                    "operator": "<",
+                    "value": 300
+                }
+            ]
+        },
+        {
+            "key": [
+                "1인",
+                "세탁기"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_kg",
+                    "operator": ">=",
+                    "value": 7
+                }
+            ]
+        },
+        {
+            "key": [
+                "2인",
+                "세탁기"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_kg",
+                    "operator": ">=",
+                    "value": 15
+                }
+            ]
+        },
+        {
+            "key": [
+                "4인 이상",
+                "세탁기"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_kg",
+                    "operator": "<",
+                    "value": 4
+                }
+            ]
+        },
+        {
+            "key": [
+                "1인",
+                "건조기"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_kg",
+                    "operator": ">=",
+                    "value": 10
+                }
+            ]
+        },
+        {
+            "key": [
+                "4인 이상",
+                "건조기"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_kg",
+                    "operator": "<",
+                    "value": 5
+                }
+            ]
+        },
+        {
+            "key": [
+                "원룸",
+                "TV"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "size_inch",
+                    "operator": ">=",
+                    "value": 55
+                }
+            ]
+        },
+        {
+            "key": [
+                "20평 이하",
+                "냉장고"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_l",
+                    "operator": ">",
+                    "value": 600
+                }
+            ]
+        },
+        {
+            "key": [
+                "20평 이하",
+                "TV"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "size_inch",
+                    "operator": ">",
+                    "value": 65
+                }
+            ]
+        },
+        {
+            "key": [
+                "20~30평",
+                "냉장고"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "capacity_l",
+                    "operator": ">",
+                    "value": 900
+                }
+            ]
+        },
+        {
+            "key": [
+                "20~30평",
+                "TV"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "size_inch",
+                    "operator": ">",
+                    "value": 85
+                }
+            ]
+        },
+        {
+            "key": [
+                "예산_low",
+                "전체"
+            ],
+            "conditions": [
+                {
+                    "spec_key": "price",
+                    "operator": ">",
+                    "value": 2000000
+                }
+            ]
+        },
+        {
+            "key": [
+                "미디어_none",
+                "TV"
+            ],
+            "conditions": [
+                {
+                    "type": "ignore_category",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "key": [
+                "요리_rarely",
+                "전기레인지"
+            ],
+            "conditions": [
+                {
+                    "type": "ignore_category",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "key": [
+                "세탁_rarely",
+                "세탁기"
+            ],
+            "conditions": [
+                {
+                    "type": "ignore_category",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "key": [
+                "세탁_rarely",
+                "건조기"
+            ],
+            "conditions": [
+                {
+                    "type": "ignore_category",
+                    "value": true
+                }
+            ]
+        },
+        {
+            "key": [
+                "펫_false",
+                "펫_전용"
+            ],
+            "conditions": [
+                {
+                    "type": "ignore_keywords",
+                    "keywords": [
+                        "펫",
+                        "PET",
+                        "반려동물",
+                        "애완동물",
+                        "동물케어",
+                        "펫케어"
+                    ]
+                }
+            ]
+        }
+    ]
+}
