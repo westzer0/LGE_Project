@@ -1,0 +1,849 @@
+{
+  "connection": {
+    "status": "success",
+    "message": "Oracle DB 연결 성공"
+  },
+  "data_checks": {
+    "status": "success",
+    "checks": {
+      "product_count": 1487,
+      "spec_count": 212532,
+      "categories": [
+        {
+          "MAIN_CATEGORY": "TV",
+          "CNT": 263
+        },
+        {
+          "MAIN_CATEGORY": "냉장고",
+          "CNT": 221
+        },
+        {
+          "MAIN_CATEGORY": "에어컨",
+          "CNT": 153
+        },
+        {
+          "MAIN_CATEGORY": "상업용 디스플레이",
+          "CNT": 117
+        },
+        {
+          "MAIN_CATEGORY": "김치냉장고",
+          "CNT": 95
+        },
+        {
+          "MAIN_CATEGORY": "세탁",
+          "CNT": 88
+        },
+        {
+          "MAIN_CATEGORY": "컨버터블 패키",
+          "CNT": 83
+        },
+        {
+          "MAIN_CATEGORY": "전기레인지",
+          "CNT": 48
+        },
+        {
+          "MAIN_CATEGORY": "청소기",
+          "CNT": 48
+        },
+        {
+          "MAIN_CATEGORY": "식기세척기",
+          "CNT": 46
+        },
+        {
+          "MAIN_CATEGORY": "AIHome",
+          "CNT": 39
+        },
+        {
+          "MAIN_CATEGORY": "공기청정기",
+          "CNT": 33
+        },
+        {
+          "MAIN_CATEGORY": "의류관리기",
+          "CNT": 33
+        },
+        {
+          "MAIN_CATEGORY": "식물생활가전",
+          "CNT": 31
+        },
+        {
+          "MAIN_CATEGORY": "시스템 에어컨",
+          "CNT": 31
+        },
+        {
+          "MAIN_CATEGORY": "광파오븐전자레인지",
+          "CNT": 23
+        },
+        {
+          "MAIN_CATEGORY": "프로젝터",
+          "CNT": 21
+        },
+        {
+          "MAIN_CATEGORY": "정수기",
+          "CNT": 21
+        },
+        {
+          "MAIN_CATEGORY": "제습기",
+          "CNT": 20
+        },
+        {
+          "MAIN_CATEGORY": "오디오",
+          "CNT": 16
+        },
+        {
+          "MAIN_CATEGORY": "맥주제조기",
+          "CNT": 11
+        },
+        {
+          "MAIN_CATEGORY": "안마의자",
+          "CNT": 11
+        },
+        {
+          "MAIN_CATEGORY": "스탠바이미",
+          "CNT": 10
+        },
+        {
+          "MAIN_CATEGORY": "와인셀러",
+          "CNT": 8
+        },
+        {
+          "MAIN_CATEGORY": "환기 시스템",
+          "CNT": 8
+        },
+        {
+          "MAIN_CATEGORY": "가습기",
+          "CNT": 7
+        },
+        {
+          "MAIN_CATEGORY": "신발관리",
+          "CNT": 2
+        }
+      ],
+      "price_range": {
+        "min": 5000,
+        "max": 100000000,
+        "avg": 2303254.4190665344
+      },
+      "django_product_count": 1420
+    }
+  },
+  "recommendation_tests": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "results": [
+      {
+        "name": "기본 추천 엔진 - 1인 가구 저예산",
+        "success": true,
+        "count": 6,
+        "validation": {
+          "has_recommendations": true,
+          "count_valid": true,
+          "scores_valid": true,
+          "scores_sorted": true,
+          "price_within_budget": true,
+          "categories_match": true
+        },
+        "result": {
+          "success": true,
+          "count": 6,
+          "recommendations": [
+            {
+              "product_id": 1016,
+              "model": "오브제컬렉션 Fit & Max 냉장고 페어설치키트",
+              "name": "오브제컬렉션 Fit & Max 냉장고 페어설치키트",
+              "model_number": "OC-Kit6",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "price": 100000.0,
+              "discount_price": 100000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/refrigerators/md10540851/gallery/small01.jpg",
+              "score": 1.0,
+              "reason": "1인 가구를 위한 미니멀한 디자인과 최신 기술이 결합된 제품이에요. 깔끔한 공간에 어울리는 컴팩트한 사이즈와 뛰어난 성능을 갖췄어요. 선명한 화질로 몰입감 있는 시청이 가능해요."
+            },
+            {
+              "product_id": 932,
+              "model": "오브제컬렉션 Fit & Max 냉장고 페어설치키트",
+              "name": "오브제컬렉션 Fit & Max 냉장고 페어설치키트",
+              "model_number": "OC-Kit7",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "price": 100000.0,
+              "discount_price": 100000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/refrigerators/md10540851/gallery/small01.jpg",
+              "score": 1.0,
+              "reason": "혼자 사는 공간에 딱 맞는 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 공간 활용도 높고 사용하기 편리해요. 선명한 화질로 몰입감 있는 시청이 가능해요."
+            },
+            {
+              "product_id": 931,
+              "model": "오브제컬렉션 Fit & Max 냉장고 페어설치키트",
+              "name": "오브제컬렉션 Fit & Max 냉장고 페어설치키트",
+              "model_number": "OC-Kit8",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "price": 100000.0,
+              "discount_price": 100000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/refrigerators/md10540851/gallery/small01.jpg",
+              "score": 1.0,
+              "reason": "1인 가구를 위한 미니멀한 디자인과 최신 기술이 결합된 제품이에요. 깔끔한 공간에 어울리는 컴팩트한 사이즈와 뛰어난 성능을 갖췄어요. 선명한 화질로 몰입감 있는 시청이 가능해요."
+            },
+            {
+              "product_id": 514,
+              "model": "LG 트롬 오브제컬렉션 키높이 수납함",
+              "name": "LG 트롬 오브제컬렉션 키높이 수납함",
+              "model_number": "FP7G",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "price": 200000.0,
+              "discount_price": 200000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/washing-machines/md09089828/gallery/small01.jpg",
+              "score": 1.0,
+              "reason": "혼자 사는 공간에 딱 맞는 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 공간 활용도 높고 사용하기 편리해요. 생활을 더욱 편리하게 만들어줘요."
+            },
+            {
+              "product_id": 656,
+              "model": "자동 급배수 키트",
+              "name": "자동 급배수 키트",
+              "model_number": "VFA-WD01N",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "price": 200000.0,
+              "discount_price": 200000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10455828/gallery/small01.jpg",
+              "score": 0.96,
+              "reason": "혼자 사는 공간에 딱 맞는 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 공간 활용도 높고 사용하기 편리해요. 생활을 더욱 편리하게 만들어줘요."
+            },
+            {
+              "product_id": 641,
+              "model": "LG 코드제로 A5흡입 전용",
+              "name": "LG 코드제로 A5흡입 전용",
+              "model_number": "AS520HA",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "price": 500000.0,
+              "discount_price": 470000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10555910/gallery/small-interior01.jpg",
+              "score": 0.96,
+              "reason": "1인 가구를 위한 미니멀한 디자인과 최신 기술이 결합된 제품이에요. 깔끔한 공간에 어울리는 컴팩트한 사이즈와 뛰어난 성능을 갖췄어요. 생활을 더욱 편리하게 만들어줘요."
+            }
+          ]
+        }
+      },
+      {
+        "name": "기본 추천 엔진 - 4인 가족 중예산",
+        "success": true,
+        "count": 9,
+        "validation": {
+          "has_recommendations": true,
+          "count_valid": true,
+          "scores_valid": true,
+          "scores_sorted": false,
+          "price_within_budget": true,
+          "categories_match": true
+        },
+        "result": {
+          "success": true,
+          "count": 9,
+          "recommendations": [
+            {
+              "product_id": 1400,
+              "model": "LG 컨버터블 패키지 오브제컬렉션(김치전용고, 좌열림)324L3등급",
+              "name": "LG 컨버터블 패키지 오브제컬렉션(김치전용고, 좌열림)324L3등급",
+              "model_number": "Z321MG3CS",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "price": 1400000.0,
+              "discount_price": 1236900.0,
+              "image_url": "https://www.lge.co.kr/kr/images/convertible-refrigerators/md10011909/gallery/small-interior01.jpg",
+              "score": 0.35,
+              "reason": "4인 이상 가족에게 적합한 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 대용량이면서도 공간을 효율적으로 활용해요. 선명한 화질로 몰입감 있는 시청이 가능해요."
+            },
+            {
+              "product_id": 1399,
+              "model": "LG 컨버터블 패키지 오브제컬렉션(김치전용고, 좌열림)324L3등급",
+              "name": "LG 컨버터블 패키지 오브제컬렉션(김치전용고, 좌열림)324L3등급",
+              "model_number": "Z321MW3CS",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "price": 1400000.0,
+              "discount_price": 1236900.0,
+              "image_url": "https://www.lge.co.kr/kr/images/convertible-refrigerators/md10011910/gallery/small-interior01.jpg",
+              "score": 0.35,
+              "reason": "4인 이상 가족에게 적합한 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 대용량이면서도 공간을 효율적으로 활용해요. 선명한 화질로 몰입감 있는 시청이 가능해요."
+            },
+            {
+              "product_id": 1398,
+              "model": "LG 컨버터블 패키지 오브제컬렉션(냉장전용고, 좌열림)384L1등급",
+              "name": "LG 컨버터블 패키지 오브제컬렉션(냉장전용고, 좌열림)384L1등급",
+              "model_number": "X321SG3S",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "price": 1550000.0,
+              "discount_price": 1348500.0,
+              "image_url": "https://www.lge.co.kr/kr/images/convertible-refrigerators/md09120834/gallery/small-interior01.jpg",
+              "score": 0.35,
+              "reason": "가족을 위한 모던한 디자인과 최신 기술이 결합된 제품이에요. 넉넉한 용량과 뛰어난 성능으로 가족 모두가 만족할 거예요. 선명한 화질로 몰입감 있는 시청이 가능해요."
+            },
+            {
+              "product_id": 1339,
+              "model": "LG 퓨리케어 오브제컬렉션 정수기 (스탠드, 냉온정)",
+              "name": "LG 퓨리케어 오브제컬렉션 정수기 (스탠드, 냉온정)",
+              "model_number": "WS513SH",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "price": 1853000.0,
+              "discount_price": 1630300.0,
+              "image_url": "https://www.lge.co.kr/kr/images/water-purifiers/md10646833/gallery/small-interior01.jpg",
+              "score": 0.51,
+              "reason": "4인 이상 가족에게 적합한 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 대용량이면서도 공간을 효율적으로 활용해요. 주방 공간을 효율적으로 활용할 수 있어요."
+            },
+            {
+              "product_id": 1338,
+              "model": "LG 퓨리케어 오브제컬렉션 정수기(맞춤 출수, 냉온정)",
+              "name": "LG 퓨리케어 오브제컬렉션 정수기(맞춤 출수, 냉온정)",
+              "model_number": "WD523VS",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "price": 1513000.0,
+              "discount_price": 1314100.0,
+              "image_url": "https://www.lge.co.kr/kr/images/water-purifiers/md10598874/gallery/small-interior01.jpg",
+              "score": 0.51,
+              "reason": "가족을 위한 모던한 디자인과 최신 기술이 결합된 제품이에요. 넉넉한 용량과 뛰어난 성능으로 가족 모두가 만족할 거예요. 주방 공간을 효율적으로 활용할 수 있어요."
+            },
+            {
+              "product_id": 1337,
+              "model": "LG 퓨리케어 오브제컬렉션 정수기 (슬림스탠드, 냉온정)",
+              "name": "LG 퓨리케어 오브제컬렉션 정수기 (슬림스탠드, 냉온정)",
+              "model_number": "WS511SH",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "price": 1092000.0,
+              "discount_price": 987700.0,
+              "image_url": "https://www.lge.co.kr/kr/images/water-purifiers/md10646834/gallery/small-interior01.jpg",
+              "score": 0.51,
+              "reason": "4인 이상 가족에게 적합한 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 대용량이면서도 공간을 효율적으로 활용해요. 주방 공간을 효율적으로 활용할 수 있어요."
+            },
+            {
+              "product_id": 640,
+              "model": "LG 코드제로 오브제컬렉션 A7 Core흡입 전용",
+              "name": "LG 코드제로 오브제컬렉션 A7 Core흡입 전용",
+              "model_number": "AS720WA",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "price": 550000.0,
+              "discount_price": 483600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10536827/gallery/small-interior01.jpg",
+              "score": 0.94,
+              "reason": "4인 이상 가족에게 적합한 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 대용량이면서도 공간을 효율적으로 활용해요. 생활을 더욱 편리하게 만들어줘요."
+            },
+            {
+              "product_id": 625,
+              "model": "LG 코드제로 오브제컬렉션 A7 Core흡입 전용",
+              "name": "LG 코드제로 오브제컬렉션 A7 Core흡입 전용",
+              "model_number": "T-ST2WL.BKOR",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "price": 650000.0,
+              "discount_price": 576600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10572836/gallery/small-interior01.jpg",
+              "score": 0.94,
+              "reason": "가족을 위한 모던한 디자인과 최신 기술이 결합된 제품이에요. 넉넉한 용량과 뛰어난 성능으로 가족 모두가 만족할 거예요. 생활을 더욱 편리하게 만들어줘요."
+            },
+            {
+              "product_id": 592,
+              "model": "LG 스타일러 오브제컬렉션 (NEW) + 스티머5벌",
+              "name": "LG 스타일러 오브제컬렉션 (NEW) + 스티머5벌",
+              "model_number": "SC5MSR72",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "price": 1750000.0,
+              "discount_price": 1534500.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-styler/md10544844/gallery/small-interior01.jpg",
+              "score": 0.94,
+              "reason": "4인 이상 가족에게 적합한 세련된 디자인과 스마트 기능을 갖춘 제품이에요. 대용량이면서도 공간을 효율적으로 활용해요. 생활을 더욱 편리하게 만들어줘요."
+            }
+          ]
+        }
+      },
+      {
+        "name": "Taste 기반 추천 엔진",
+        "success": true,
+        "count": 9,
+        "validation": {
+          "has_recommendations": true,
+          "count_valid": true,
+          "scores_valid": true,
+          "scores_sorted": true,
+          "price_within_budget": true,
+          "categories_match": false
+        },
+        "result": {
+          "success": true,
+          "count": 9,
+          "categories": [
+            "TV",
+            "냉장고",
+            "에어컨"
+          ],
+          "recommendations": [
+            {
+              "product_id": 665,
+              "category": "TV",
+              "model": "43NANO80ANA",
+              "name": "LG 나노셀 AI (스탠드형) 107cm",
+              "price": 740000,
+              "discount_price": 947700,
+              "image_url": "https://www.lge.co.kr/kr/images/humidifiers/md10704827/gallery/small-interior01.jpg",
+              "score": 0.7388888888888889,
+              "product_type": "TV"
+            },
+            {
+              "product_id": 693,
+              "category": "TV",
+              "model": "43UT8300NNA",
+              "name": "LG 울트라 HD TV (스탠드형) 107cm",
+              "price": 740000,
+              "discount_price": 985800,
+              "image_url": "https://www.lge.co.kr/kr/images/air-purifier/md10526827/gallery/small-interior01.jpg",
+              "score": 0.7388888888888889,
+              "product_type": "TV"
+            },
+            {
+              "product_id": 666,
+              "category": "TV",
+              "model": "55UT8300ENA",
+              "name": "LG 울트라 HD TV (스탠드형) 138cm",
+              "price": 970000,
+              "discount_price": 1140400,
+              "image_url": "https://www.lge.co.kr/kr/images/humidifiers/md10709842/gallery/small-interior01.jpg",
+              "score": 0.7388888888888889,
+              "product_type": "TV"
+            },
+            {
+              "product_id": 1134,
+              "category": "냉장고",
+              "model": "D215MHH13",
+              "name": "LG 일반냉장고 오브제컬렉션 215L 3등급",
+              "price": 500000,
+              "discount_price": 3134100,
+              "image_url": "https://www.lge.co.kr/kr/images/refrigerators/md10555865/gallery/small-interior01.jpg",
+              "score": 0.6736842105263158,
+              "product_type": "냉장고"
+            },
+            {
+              "product_id": 1144,
+              "category": "냉장고",
+              "model": "B245W22",
+              "name": "LG 일반냉장고 241L 2등급",
+              "price": 540000,
+              "discount_price": 3831600,
+              "image_url": "https://www.lge.co.kr/kr/images/refrigerators/md10555879/gallery/small-interior01.jpg",
+              "score": 0.6736842105263158,
+              "product_type": "냉장고"
+            },
+            {
+              "product_id": 1135,
+              "category": "냉장고",
+              "model": "D265MEE22",
+              "name": "LG 일반냉장고 오브제컬렉션 264L 2등급",
+              "price": 599000,
+              "discount_price": 3552600,
+              "image_url": "https://www.lge.co.kr/kr/images/refrigerators/md10553851/gallery/small-interior01.jpg",
+              "score": 0.6736842105263158,
+              "product_type": "냉장고"
+            },
+            {
+              "product_id": 1665,
+              "category": "에어컨",
+              "model": "SQ06EA1WCS",
+              "name": "LG 휘센 벽걸이에어컨 18.7㎡",
+              "price": 699000,
+              "discount_price": 699000,
+              "image_url": "https://www.lge.co.kr/air-conditioners/sq06ea1wcs-akor",
+              "score": 0.5,
+              "product_type": "에어컨"
+            },
+            {
+              "product_id": 1696,
+              "category": "에어컨",
+              "model": "SQ06FS1EAS",
+              "name": "LG 휘센 AI 오브제컬렉션 듀얼쿨 벽걸이에어컨 18.7㎡ 2등급",
+              "price": 920000,
+              "discount_price": 920000,
+              "image_url": "https://www.lge.co.kr/air-conditioners/sq06fs1eas-akor",
+              "score": 0.5,
+              "product_type": "에어컨"
+            },
+            {
+              "product_id": 1664,
+              "category": "에어컨",
+              "model": "SQ07EA3WAS",
+              "name": "LG 휘센 벽걸이에어컨 22.8㎡",
+              "price": 990000,
+              "discount_price": 990000,
+              "image_url": "https://www.lge.co.kr/air-conditioners/sq07ea3was-akor",
+              "score": 0.5,
+              "product_type": "에어컨"
+            }
+          ]
+        }
+      },
+      {
+        "name": "칼럼 기반 추천 엔진",
+        "success": true,
+        "count": 21,
+        "validation": {
+          "has_recommendations": true,
+          "count_valid": true,
+          "scores_valid": true,
+          "scores_sorted": false,
+          "price_within_budget": true,
+          "categories_match": true
+        },
+        "result": {
+          "success": true,
+          "count": 21,
+          "product_types": [
+            "TV",
+            "LAUNDRY",
+            "김치냉장고",
+            "스타일러",
+            "청소기",
+            "맥주제조기",
+            "정수기"
+          ],
+          "column_scores": {
+            "냉장고": 0.6685897435897435,
+            "정수기": 0.6766666666666666,
+            "전기레인지": 0.7,
+            "와인셀러": 0.7,
+            "식기세척기": 0.7,
+            "맥주제조기": 0.6999999999999998,
+            "LAUNDRY": 0.7,
+            "김치냉장고": 0.7,
+            "광파오븐전자레인지": 0.7,
+            "청소기": 0.7,
+            "스타일러": 0.7,
+            "안마의자": 0.6999999999999998,
+            "기타": 0.6999999999999998,
+            "TV": 0.7
+          },
+          "recommendations": [
+            {
+              "product_id": 423,
+              "name": "LG 스탠바이미 Go",
+              "model_number": "27LX5QKNA",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "product_type": "TV",
+              "price": 1170000.0,
+              "discount_price": 1060200.0,
+              "image_url": "https://www.lge.co.kr/kr/images/tvs/md10009827/gallery/small-interior01.jpg",
+              "score": 0.67
+            },
+            {
+              "product_id": 266,
+              "name": "LG 울트라 HD TV (스탠드형)107cm",
+              "model_number": "43UT8300ENA",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "product_type": "TV",
+              "price": 680000.0,
+              "discount_price": 604500.0,
+              "image_url": "https://www.lge.co.kr/kr/images/tvs/md10319890/gallery/small-interior02.jpg",
+              "score": 0.67
+            },
+            {
+              "product_id": 199,
+              "name": "LG 울트라 HD TV (스탠드형)107cm",
+              "model_number": "43UT8300NNA",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "product_type": "TV",
+              "price": 740000.0,
+              "discount_price": 660300.0,
+              "image_url": "https://www.lge.co.kr/kr/images/tvs/md10319906/gallery/small-interior01.jpg",
+              "score": 0.67
+            },
+            {
+              "product_id": 535,
+              "name": "LG 트롬 오브제컬렉션 세탁기 + 스태킹키트24kg1등급",
+              "model_number": "FX24ENE-KE",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "LAUNDRY",
+              "price": 1290000.0,
+              "discount_price": 1134600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/washing-machines/md10631845/gallery/small01.jpg",
+              "score": 0.58
+            },
+            {
+              "product_id": 532,
+              "name": "LG 트롬 오브제컬렉션 세탁기 + 미니워시24kg1등급",
+              "model_number": "FX24KNTX",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "LAUNDRY",
+              "price": 1700000.0,
+              "discount_price": 1488000.0,
+              "image_url": "https://www.lge.co.kr/kr/images/washing-machines/md10635845/gallery/small01.jpg",
+              "score": 0.58
+            },
+            {
+              "product_id": 531,
+              "name": "LG 트롬 오브제컬렉션 세탁기23kg1등급",
+              "model_number": "FX23KN",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "LAUNDRY",
+              "price": 1120000.0,
+              "discount_price": 1013700.0,
+              "image_url": "https://www.lge.co.kr/kr/images/washing-machines/md09668831/gallery/small-interior01.jpg",
+              "score": 0.58
+            },
+            {
+              "product_id": 974,
+              "name": "LG 디오스 오브제컬렉션 김치톡톡 Fit & Max324L2등급",
+              "model_number": "Z334MQQ172",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "product_type": "김치냉장고",
+              "price": 1940000.0,
+              "discount_price": 1711200.0,
+              "image_url": "https://www.lge.co.kr/kr/images/kimchi-refrigerators/md10367018/gallery/small-interior01.jpg",
+              "score": 0.51
+            },
+            {
+              "product_id": 971,
+              "name": "LG 디오스 오브제컬렉션 김치톡톡 Fit & Max324L2등급",
+              "model_number": "Z334MQQ172S",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "product_type": "김치냉장고",
+              "price": 1940000.0,
+              "discount_price": 1711200.0,
+              "image_url": "https://www.lge.co.kr/kr/images/kimchi-refrigerators/md10367018/gallery/small-interior01.jpg",
+              "score": 0.51
+            },
+            {
+              "product_id": 969,
+              "name": "LG 디오스 오브제컬렉션 김치톡톡 Fit & Max324L1등급",
+              "model_number": "Z334MRR101",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "product_type": "김치냉장고",
+              "price": 2000000.0,
+              "discount_price": 1748400.0,
+              "image_url": "https://www.lge.co.kr/kr/images/kimchi-refrigerators/md10657830/gallery/small-interior01.jpg",
+              "score": 0.51
+            },
+            {
+              "product_id": 592,
+              "name": "LG 스타일러 오브제컬렉션 (NEW) + 스티머5벌",
+              "model_number": "SC5MSR72",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "스타일러",
+              "price": 1750000.0,
+              "discount_price": 1534500.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-styler/md10544844/gallery/small-interior01.jpg",
+              "score": 0.94
+            },
+            {
+              "product_id": 588,
+              "name": "LG 스타일러 오브제컬렉션 (ALL NEW) + 스티머5벌+바지 1벌",
+              "model_number": "SC5MSR82H",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "스타일러",
+              "price": 1890000.0,
+              "discount_price": 1664700.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-styler/md10362828/gallery/small-interior01.jpg",
+              "score": 0.94
+            },
+            {
+              "product_id": 613,
+              "name": "LG 스타일러 오브제컬렉션3벌+바지 1벌",
+              "model_number": "S3GOF",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "스타일러",
+              "price": 1690000.0,
+              "discount_price": 1478700.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-styler/md10513828/gallery/small-interior01.jpg",
+              "score": 0.58
+            },
+            {
+              "product_id": 640,
+              "name": "LG 코드제로 오브제컬렉션 A7 Core흡입 전용",
+              "model_number": "AS720WA",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "청소기",
+              "price": 550000.0,
+              "discount_price": 483600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10536827/gallery/small-interior01.jpg",
+              "score": 0.94
+            },
+            {
+              "product_id": 625,
+              "name": "LG 코드제로 오브제컬렉션 A7 Core흡입 전용",
+              "model_number": "T-ST2WL.BKOR",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "청소기",
+              "price": 650000.0,
+              "discount_price": 576600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10572836/gallery/small-interior01.jpg",
+              "score": 0.94
+            },
+            {
+              "product_id": 624,
+              "name": "LG 코드제로 AI 오브제컬렉션 A9흡입+물걸레",
+              "model_number": "T-ST6B5.BKOR",
+              "category": "LIVING",
+              "category_display": "생활가전",
+              "product_type": "청소기",
+              "price": 1230000.0,
+              "discount_price": 1078800.0,
+              "image_url": "https://www.lge.co.kr/kr/images/vacuum-cleaners/md10624830/gallery/small-interior01.jpg",
+              "score": 0.58
+            },
+            {
+              "product_id": 1221,
+              "name": "LG 홈브루 오브제컬렉션",
+              "model_number": "BBC53SGB",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "product_type": "맥주제조기",
+              "price": 1490000.0,
+              "discount_price": 1320600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-homebrew/md10107827/gallery/small-interior01.jpg",
+              "score": 0.35
+            },
+            {
+              "product_id": 1219,
+              "name": "LG 홈브루 오브제컬렉션",
+              "model_number": "BBC53NBB",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "product_type": "맥주제조기",
+              "price": 1490000.0,
+              "discount_price": 1320600.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-homebrew/md10107826/gallery/small-interior01.jpg",
+              "score": 0.35
+            },
+            {
+              "product_id": 1220,
+              "name": "LG 홈브루",
+              "model_number": "BBC53S",
+              "category": "TV",
+              "category_display": "TV/오디오",
+              "product_type": "맥주제조기",
+              "price": 1440000.0,
+              "discount_price": 1274100.0,
+              "image_url": "https://www.lge.co.kr/kr/images/lg-homebrew/md10107828/gallery/small-interior01.jpg",
+              "score": 0.32
+            },
+            {
+              "product_id": 1339,
+              "name": "LG 퓨리케어 오브제컬렉션 정수기 (스탠드, 냉온정)",
+              "model_number": "WS513SH",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "product_type": "정수기",
+              "price": 1853000.0,
+              "discount_price": 1630300.0,
+              "image_url": "https://www.lge.co.kr/kr/images/water-purifiers/md10646833/gallery/small-interior01.jpg",
+              "score": 0.51
+            },
+            {
+              "product_id": 1338,
+              "name": "LG 퓨리케어 오브제컬렉션 정수기(맞춤 출수, 냉온정)",
+              "model_number": "WD523VS",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "product_type": "정수기",
+              "price": 1513000.0,
+              "discount_price": 1314100.0,
+              "image_url": "https://www.lge.co.kr/kr/images/water-purifiers/md10598874/gallery/small-interior01.jpg",
+              "score": 0.51
+            },
+            {
+              "product_id": 1337,
+              "name": "LG 퓨리케어 오브제컬렉션 정수기 (슬림스탠드, 냉온정)",
+              "model_number": "WS511SH",
+              "category": "KITCHEN",
+              "category_display": "주방가전",
+              "product_type": "정수기",
+              "price": 1092000.0,
+              "discount_price": 987700.0,
+              "image_url": "https://www.lge.co.kr/kr/images/water-purifiers/md10646834/gallery/small-interior01.jpg",
+              "score": 0.51
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "filtering_tests": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "results": [
+      {
+        "name": "예산 필터링",
+        "success": true,
+        "count": 6
+      },
+      {
+        "name": "카테고리 필터링",
+        "success": true,
+        "count": 3
+      },
+      {
+        "name": "가족 구성원 필터링",
+        "success": true,
+        "count": 6
+      }
+    ]
+  },
+  "scoring_tests": {
+    "total": 10,
+    "valid": 0,
+    "invalid": 10,
+    "skipped": 0,
+    "success_rate": 0.0
+  },
+  "api_tests": {
+    "total": 3,
+    "success": 3,
+    "failed": 0,
+    "results": [
+      {
+        "name": "기본 추천 API",
+        "endpoint": "/api/recommend/",
+        "status": "success",
+        "response_status": 200,
+        "has_recommendations": true,
+        "count": 6
+      },
+      {
+        "name": "Playbook 추천 API",
+        "endpoint": "/api/recommend/playbook/",
+        "status": "success",
+        "response_status": 200,
+        "has_recommendations": true,
+        "count": 9
+      },
+      {
+        "name": "칼럼 기반 추천 API",
+        "endpoint": "/api/recommend/column-based/",
+        "status": "success",
+        "response_status": 200,
+        "has_recommendations": true,
+        "count": 21
+      }
+    ]
+  },
+  "summary": {}
+}

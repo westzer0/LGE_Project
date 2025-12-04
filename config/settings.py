@@ -39,7 +39,12 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-8zb-1$0d6^f=&c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'testserver',  # Django 테스트 클라이언트용
+    '*',  # 개발 환경에서 모든 호스트 허용 (프로덕션에서는 제거 필요)
+]
 
 # ============================================================
 # 외부 API 키 설정

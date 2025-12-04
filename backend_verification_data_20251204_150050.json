@@ -1,0 +1,349 @@
+{
+  "timestamp": "2025-12-04T14:56:33.912679",
+  "connection": {
+    "status": "success",
+    "message": "Oracle DB 연결 성공"
+  },
+  "data_stats": {
+    "product_count": 1487,
+    "spec_count": 212532,
+    "categories": [
+      {
+        "MAIN_CATEGORY": "TV",
+        "CNT": 263
+      },
+      {
+        "MAIN_CATEGORY": "냉장고",
+        "CNT": 221
+      },
+      {
+        "MAIN_CATEGORY": "에어컨",
+        "CNT": 153
+      },
+      {
+        "MAIN_CATEGORY": "상업용 디스플레이",
+        "CNT": 117
+      },
+      {
+        "MAIN_CATEGORY": "김치냉장고",
+        "CNT": 95
+      },
+      {
+        "MAIN_CATEGORY": "세탁",
+        "CNT": 88
+      },
+      {
+        "MAIN_CATEGORY": "컨버터블 패키",
+        "CNT": 83
+      },
+      {
+        "MAIN_CATEGORY": "전기레인지",
+        "CNT": 48
+      },
+      {
+        "MAIN_CATEGORY": "청소기",
+        "CNT": 48
+      },
+      {
+        "MAIN_CATEGORY": "식기세척기",
+        "CNT": 46
+      },
+      {
+        "MAIN_CATEGORY": "AIHome",
+        "CNT": 39
+      },
+      {
+        "MAIN_CATEGORY": "공기청정기",
+        "CNT": 33
+      },
+      {
+        "MAIN_CATEGORY": "의류관리기",
+        "CNT": 33
+      },
+      {
+        "MAIN_CATEGORY": "식물생활가전",
+        "CNT": 31
+      },
+      {
+        "MAIN_CATEGORY": "시스템 에어컨",
+        "CNT": 31
+      },
+      {
+        "MAIN_CATEGORY": "광파오븐전자레인지",
+        "CNT": 23
+      },
+      {
+        "MAIN_CATEGORY": "프로젝터",
+        "CNT": 21
+      },
+      {
+        "MAIN_CATEGORY": "정수기",
+        "CNT": 21
+      },
+      {
+        "MAIN_CATEGORY": "제습기",
+        "CNT": 20
+      },
+      {
+        "MAIN_CATEGORY": "오디오",
+        "CNT": 16
+      },
+      {
+        "MAIN_CATEGORY": "맥주제조기",
+        "CNT": 11
+      },
+      {
+        "MAIN_CATEGORY": "안마의자",
+        "CNT": 11
+      },
+      {
+        "MAIN_CATEGORY": "스탠바이미",
+        "CNT": 10
+      },
+      {
+        "MAIN_CATEGORY": "와인셀러",
+        "CNT": 8
+      },
+      {
+        "MAIN_CATEGORY": "환기 시스템",
+        "CNT": 8
+      },
+      {
+        "MAIN_CATEGORY": "가습기",
+        "CNT": 7
+      },
+      {
+        "MAIN_CATEGORY": "신발관리",
+        "CNT": 2
+      }
+    ],
+    "price_stats": {
+      "min": 5000,
+      "max": 100000000,
+      "avg": 2303254.4190665344,
+      "count": 1007
+    },
+    "django_product_count": 1420
+  },
+  "recommendation_tests": {
+    "total": 500,
+    "success": 500,
+    "failed": 0,
+    "success_rate": 100.0,
+    "total_recommendations": 5485,
+    "avg_recommendations": 10.97,
+    "avg_score": 0.7071205300847359,
+    "category_distribution": {
+      "TV": 1789,
+      "LIVING": 1053,
+      "KITCHEN": 1587,
+      "냉장고": 528,
+      "에어컨": 528
+    },
+    "price_ranges": {
+      "low": 160,
+      "medium": 175,
+      "high": 165
+    },
+    "score_distribution": {
+      "min": 0.27,
+      "max": 1.0,
+      "avg": 0.7071205300847359
+    },
+    "sample_results": [
+      {
+        "scenario": "1인 가구 - 저예산",
+        "engine": "recommendation_engine",
+        "success": true,
+        "count": 6,
+        "user_profile": {
+          "vibe": "modern",
+          "household_size": 1,
+          "housing_type": "apartment",
+          "pyung": 20,
+          "priority": "value",
+          "budget_level": "low",
+          "categories": [
+            "TV",
+            "LIVING"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "2인 가구 - 중예산",
+        "engine": "recommendation_engine",
+        "success": true,
+        "count": 6,
+        "user_profile": {
+          "vibe": "modern",
+          "household_size": 2,
+          "housing_type": "apartment",
+          "pyung": 25,
+          "priority": "tech",
+          "budget_level": "medium",
+          "categories": [
+            "TV",
+            "KITCHEN"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "4인 가족 - 중예산",
+        "engine": "recommendation_engine",
+        "success": true,
+        "count": 9,
+        "user_profile": {
+          "vibe": "modern",
+          "household_size": 4,
+          "housing_type": "apartment",
+          "pyung": 30,
+          "priority": "tech",
+          "budget_level": "medium",
+          "categories": [
+            "TV",
+            "KITCHEN",
+            "LIVING"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "프리미엄 가구 - 고예산",
+        "engine": "recommendation_engine",
+        "success": true,
+        "count": 6,
+        "user_profile": {
+          "vibe": "luxury",
+          "household_size": 3,
+          "housing_type": "house",
+          "pyung": 40,
+          "priority": "design",
+          "budget_level": "high",
+          "categories": [
+            "TV",
+            "KITCHEN"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "랜덤 시나리오 #1",
+        "engine": "taste_based",
+        "success": true,
+        "count": 9,
+        "user_profile": {
+          "vibe": "pop",
+          "household_size": 5,
+          "housing_type": "apartment",
+          "pyung": 48,
+          "priority": "tech",
+          "budget_level": "high",
+          "categories": [
+            "TV",
+            "KITCHEN",
+            "LIVING"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "랜덤 시나리오 #2",
+        "engine": "column_based",
+        "success": true,
+        "count": 18,
+        "user_profile": {
+          "vibe": "luxury",
+          "household_size": 5,
+          "housing_type": "apartment",
+          "pyung": 26,
+          "priority": "eco",
+          "budget_level": "low",
+          "categories": [
+            "TV",
+            "LIVING"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "랜덤 시나리오 #3",
+        "engine": "recommendation_engine",
+        "success": true,
+        "count": 9,
+        "user_profile": {
+          "vibe": "modern",
+          "household_size": 3,
+          "housing_type": "house",
+          "pyung": 28,
+          "priority": "tech",
+          "budget_level": "medium",
+          "categories": [
+            "TV",
+            "KITCHEN",
+            "LIVING"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "랜덤 시나리오 #4",
+        "engine": "taste_based",
+        "success": true,
+        "count": 9,
+        "user_profile": {
+          "vibe": "cozy",
+          "household_size": 3,
+          "housing_type": "house",
+          "pyung": 21,
+          "priority": "design",
+          "budget_level": "low",
+          "categories": [
+            "TV",
+            "KITCHEN"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "랜덤 시나리오 #5",
+        "engine": "column_based",
+        "success": true,
+        "count": 9,
+        "user_profile": {
+          "vibe": "modern",
+          "household_size": 4,
+          "housing_type": "apartment",
+          "pyung": 50,
+          "priority": "design",
+          "budget_level": "low",
+          "categories": [
+            "TV"
+          ],
+          "has_pet": false
+        }
+      },
+      {
+        "scenario": "랜덤 시나리오 #6",
+        "engine": "column_based",
+        "success": true,
+        "count": 18,
+        "user_profile": {
+          "vibe": "pop",
+          "household_size": 4,
+          "housing_type": "house",
+          "pyung": 26,
+          "priority": "value",
+          "budget_level": "low",
+          "categories": [
+            "TV",
+            "LIVING"
+          ],
+          "has_pet": true
+        }
+      }
+    ]
+  },
+  "summary": {}
+}
