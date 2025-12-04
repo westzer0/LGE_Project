@@ -12,7 +12,369 @@ from ..rule_engine import UserProfile
 # 스코어링 가중치 설정 (Constants)
 # ============================================================================
 
-# 카테고리별 가중치
+# 취향 조합별 완전히 다른 가중치 구조 (Vibe + Priority 조합)
+TASTE_COMBINATION_WEIGHTS = {
+    # Modern + Tech: 최신 기술 중시
+    ("modern", "tech"): {
+        "TV": {
+            "resolution": 0.35,      # 해상도 최우선
+            "refresh_rate": 0.25,    # 주사율 중요
+            "brightness": 0.20,      # 밝기
+            "panel_type": 0.10,      # 패널 타입
+            "features": 0.05,        # 기능
+            "price_match": 0.05,     # 가격은 낮은 가중치
+        },
+        "KITCHEN": {
+            "features": 0.35,        # 스마트 기능 최우선
+            "capacity": 0.25,        # 용량
+            "energy_efficiency": 0.15,
+            "design": 0.15,          # 모던 디자인
+            "price_match": 0.10,     # 가격 낮은 가중치
+        },
+        "LIVING": {
+            "features": 0.35,        # 스마트 기능
+            "connectivity": 0.25,    # 연결성
+            "audio_quality": 0.20,
+            "design": 0.15,
+            "price_match": 0.05,     # 가격 낮은 가중치
+        },
+    },
+    # Modern + Design: 디자인 중시
+    ("modern", "design"): {
+        "TV": {
+            "design": 0.40,          # 디자인 최우선
+            "panel_type": 0.25,      # 고급 패널
+            "resolution": 0.15,
+            "size": 0.10,            # 공간 연출
+            "price_match": 0.10,
+        },
+        "KITCHEN": {
+            "design": 0.40,          # 디자인 최우선
+            "capacity": 0.20,
+            "features": 0.20,
+            "energy_efficiency": 0.10,
+            "price_match": 0.10,
+        },
+        "LIVING": {
+            "design": 0.40,          # 디자인 최우선
+            "features": 0.25,
+            "audio_quality": 0.20,
+            "price_match": 0.15,
+        },
+    },
+    # Cozy + Value: 가성비와 실용성 중시
+    ("cozy", "value"): {
+        "TV": {
+            "price_match": 0.40,     # 가격 최우선
+            "power_consumption": 0.25,  # 전력 효율
+            "size": 0.15,            # 적정 크기
+            "resolution": 0.10,
+            "design": 0.10,
+        },
+        "KITCHEN": {
+            "price_match": 0.40,     # 가격 최우선
+            "capacity": 0.25,        # 적정 용량
+            "energy_efficiency": 0.20,  # 에너지 효율
+            "features": 0.10,
+            "design": 0.05,
+        },
+        "LIVING": {
+            "price_match": 0.40,     # 가격 최우선
+            "features": 0.25,        # 실용 기능
+            "power_consumption": 0.20,
+            "design": 0.15,
+        },
+    },
+    # Cozy + Eco: 에너지 효율과 친환경 중시
+    ("cozy", "eco"): {
+        "TV": {
+            "power_consumption": 0.40,  # 전력 효율 최우선
+            "energy_efficiency": 0.25,
+            "price_match": 0.15,
+            "size": 0.10,
+            "design": 0.10,
+        },
+        "KITCHEN": {
+            "energy_efficiency": 0.40,  # 에너지 효율 최우선
+            "power_consumption": 0.25,
+            "capacity": 0.15,
+            "price_match": 0.15,
+            "design": 0.05,
+        },
+        "LIVING": {
+            "power_consumption": 0.40,  # 전력 효율 최우선
+            "energy_efficiency": 0.25,
+            "price_match": 0.20,
+            "features": 0.15,
+        },
+    },
+    # Luxury + Design: 프리미엄 디자인 중시
+    ("luxury", "design"): {
+        "TV": {
+            "design": 0.40,          # 디자인 최우선
+            "panel_type": 0.25,      # 최고급 패널
+            "resolution": 0.15,
+            "brightness": 0.10,
+            "price_match": 0.10,     # 가격은 낮은 가중치
+        },
+        "KITCHEN": {
+            "design": 0.40,          # 디자인 최우선
+            "features": 0.25,        # 프리미엄 기능
+            "capacity": 0.20,
+            "price_match": 0.15,     # 가격은 낮은 가중치
+        },
+        "LIVING": {
+            "design": 0.40,          # 디자인 최우선
+            "audio_quality": 0.30,   # 고급 오디오
+            "features": 0.20,
+            "price_match": 0.10,     # 가격은 낮은 가중치
+        },
+    },
+    # Luxury + Tech: 프리미엄 기술 중시
+    ("luxury", "tech"): {
+        "TV": {
+            "resolution": 0.30,      # 최고 해상도
+            "brightness": 0.25,      # 최고 밝기
+            "refresh_rate": 0.20,    # 최고 주사율
+            "panel_type": 0.15,      # 최고급 패널
+            "features": 0.10,        # 프리미엄 기능
+        },
+        "KITCHEN": {
+            "features": 0.35,        # 최고 기능
+            "capacity": 0.25,
+            "design": 0.20,          # 프리미엄 디자인
+            "energy_efficiency": 0.20,
+        },
+        "LIVING": {
+            "features": 0.35,        # 최고 기능
+            "audio_quality": 0.30,
+            "connectivity": 0.25,
+            "design": 0.10,
+        },
+    },
+    # Pop + Value: 트렌디하고 가성비 중시
+    ("pop", "value"): {
+        "TV": {
+            "price_match": 0.35,     # 가격 중요
+            "design": 0.25,          # 트렌디한 디자인
+            "resolution": 0.15,
+            "features": 0.15,
+            "size": 0.10,
+        },
+        "KITCHEN": {
+            "price_match": 0.35,     # 가격 중요
+            "design": 0.25,          # 트렌디한 디자인
+            "capacity": 0.20,
+            "features": 0.20,
+        },
+        "LIVING": {
+            "price_match": 0.35,     # 가격 중요
+            "design": 0.30,          # 트렌디한 디자인
+            "features": 0.20,
+            "audio_quality": 0.15,
+        },
+    },
+    # Modern + Eco: 모던하고 친환경
+    ("modern", "eco"): {
+        "TV": {
+            "power_consumption": 0.35,  # 전력 효율 최우선
+            "energy_efficiency": 0.25,
+            "design": 0.20,          # 모던 디자인
+            "resolution": 0.10,
+            "price_match": 0.10,
+        },
+        "KITCHEN": {
+            "energy_efficiency": 0.40,  # 에너지 효율 최우선
+            "power_consumption": 0.25,
+            "design": 0.15,          # 모던 디자인
+            "capacity": 0.10,
+            "price_match": 0.10,
+        },
+        "LIVING": {
+            "power_consumption": 0.40,  # 전력 효율 최우선
+            "energy_efficiency": 0.25,
+            "design": 0.20,          # 모던 디자인
+            "price_match": 0.15,
+        },
+    },
+    # Modern + Value: 모던하고 가성비
+    ("modern", "value"): {
+        "TV": {
+            "price_match": 0.40,     # 가격 최우선
+            "design": 0.25,          # 모던 디자인
+            "resolution": 0.15,
+            "power_consumption": 0.10,
+            "size": 0.10,
+        },
+        "KITCHEN": {
+            "price_match": 0.40,     # 가격 최우선
+            "design": 0.25,          # 모던 디자인
+            "capacity": 0.20,
+            "energy_efficiency": 0.15,
+        },
+        "LIVING": {
+            "price_match": 0.40,     # 가격 최우선
+            "design": 0.30,          # 모던 디자인
+            "features": 0.20,
+            "power_consumption": 0.10,
+        },
+    },
+    # Cozy + Design: 따뜻하고 디자인 중시
+    ("cozy", "design"): {
+        "TV": {
+            "design": 0.40,          # 디자인 최우선
+            "size": 0.25,            # 적정 크기
+            "brightness": 0.15,      # 따뜻한 밝기
+            "price_match": 0.10,
+            "power_consumption": 0.10,
+        },
+        "KITCHEN": {
+            "design": 0.40,          # 디자인 최우선
+            "capacity": 0.25,
+            "features": 0.20,
+            "price_match": 0.15,
+        },
+        "LIVING": {
+            "design": 0.40,          # 디자인 최우선
+            "audio_quality": 0.30,
+            "features": 0.20,
+            "price_match": 0.10,
+        },
+    },
+    # Cozy + Tech: 따뜻하고 기술 중시
+    ("cozy", "tech"): {
+        "TV": {
+            "features": 0.30,        # 스마트 기능
+            "brightness": 0.25,      # 따뜻한 밝기
+            "resolution": 0.20,
+            "design": 0.15,
+            "price_match": 0.10,
+        },
+        "KITCHEN": {
+            "features": 0.35,        # 스마트 기능
+            "capacity": 0.25,
+            "design": 0.20,
+            "energy_efficiency": 0.20,
+        },
+        "LIVING": {
+            "features": 0.35,        # 스마트 기능
+            "connectivity": 0.25,
+            "design": 0.20,
+            "audio_quality": 0.20,
+        },
+    },
+    # Luxury + Eco: 프리미엄이면서 친환경
+    ("luxury", "eco"): {
+        "TV": {
+            "power_consumption": 0.30,  # 전력 효율
+            "design": 0.25,          # 프리미엄 디자인
+            "panel_type": 0.20,      # 고급 패널
+            "energy_efficiency": 0.15,
+            "resolution": 0.10,
+        },
+        "KITCHEN": {
+            "energy_efficiency": 0.35,  # 에너지 효율
+            "design": 0.30,          # 프리미엄 디자인
+            "capacity": 0.20,
+            "features": 0.15,
+        },
+        "LIVING": {
+            "power_consumption": 0.35,  # 전력 효율
+            "design": 0.30,          # 프리미엄 디자인
+            "energy_efficiency": 0.25,
+            "features": 0.10,
+        },
+    },
+    # Luxury + Value: 프리미엄이면서 합리적 가격
+    ("luxury", "value"): {
+        "TV": {
+            "price_match": 0.35,     # 합리적 가격
+            "design": 0.25,          # 프리미엄 디자인
+            "resolution": 0.20,
+            "panel_type": 0.20,
+        },
+        "KITCHEN": {
+            "price_match": 0.35,     # 합리적 가격
+            "design": 0.30,          # 프리미엄 디자인
+            "capacity": 0.20,
+            "features": 0.15,
+        },
+        "LIVING": {
+            "price_match": 0.35,     # 합리적 가격
+            "design": 0.30,          # 프리미엄 디자인
+            "audio_quality": 0.25,
+            "features": 0.10,
+        },
+    },
+    # Pop + Design: 트렌디하고 디자인 중시
+    ("pop", "design"): {
+        "TV": {
+            "design": 0.40,          # 트렌디한 디자인
+            "brightness": 0.20,      # 생생한 색감
+            "resolution": 0.15,
+            "features": 0.15,
+            "price_match": 0.10,
+        },
+        "KITCHEN": {
+            "design": 0.40,          # 트렌디한 디자인
+            "features": 0.25,
+            "capacity": 0.20,
+            "price_match": 0.15,
+        },
+        "LIVING": {
+            "design": 0.45,          # 트렌디한 디자인
+            "features": 0.25,
+            "audio_quality": 0.20,
+            "price_match": 0.10,
+        },
+    },
+    # Pop + Tech: 트렌디하고 기술 중시
+    ("pop", "tech"): {
+        "TV": {
+            "features": 0.30,        # 최신 기술
+            "refresh_rate": 0.25,    # 게이밍 주사율
+            "brightness": 0.20,      # 생생한 색감
+            "resolution": 0.15,
+            "design": 0.10,
+        },
+        "KITCHEN": {
+            "features": 0.40,        # 최신 기술
+            "capacity": 0.25,
+            "design": 0.20,
+            "energy_efficiency": 0.15,
+        },
+        "LIVING": {
+            "features": 0.40,        # 최신 기술
+            "connectivity": 0.30,
+            "design": 0.20,
+            "audio_quality": 0.10,
+        },
+    },
+    # Pop + Eco: 트렌디하고 친환경
+    ("pop", "eco"): {
+        "TV": {
+            "power_consumption": 0.35,  # 전력 효율
+            "design": 0.25,          # 트렌디한 디자인
+            "energy_efficiency": 0.20,
+            "brightness": 0.10,
+            "price_match": 0.10,
+        },
+        "KITCHEN": {
+            "energy_efficiency": 0.40,  # 에너지 효율
+            "design": 0.25,          # 트렌디한 디자인
+            "power_consumption": 0.20,
+            "capacity": 0.15,
+        },
+        "LIVING": {
+            "power_consumption": 0.40,  # 전력 효율
+            "design": 0.30,          # 트렌디한 디자인
+            "energy_efficiency": 0.20,
+            "features": 0.10,
+        },
+    },
+}
+
+# 기본 카테고리별 가중치 (취향 조합이 없을 때 사용)
 CATEGORY_WEIGHTS = {
     "TV": {
         "resolution": 0.25,      # 해상도 (4K > FHD > HD)
@@ -48,7 +410,7 @@ CATEGORY_WEIGHTS = {
     }
 }
 
-# Priority별 가중치 조정
+# Priority별 가중치 조정 (기존 호환성 유지)
 PRIORITY_MULTIPLIERS = {
     "design": {
         "design": 1.5,
@@ -621,12 +983,26 @@ def calculate_product_score(product: Product, profile: UserProfile) -> float:
     
     category = product.category
     priority = profile.priority.lower() if profile.priority else ""
+    vibe = profile.vibe.lower() if profile.vibe else ""
     
-    # 카테고리별 가중치 가져오기
-    weights = CATEGORY_WEIGHTS.get(category, CATEGORY_WEIGHTS["default"])
+    # 취향 조합별 가중치 가져오기 (우선 적용)
+    taste_key = (vibe, priority)
+    weights = None
     
-    # Priority별 가중치 조정
-    multipliers = PRIORITY_MULTIPLIERS.get(priority, {})
+    if taste_key in TASTE_COMBINATION_WEIGHTS:
+        # 취향 조합별 가중치가 있으면 사용
+        taste_weights = TASTE_COMBINATION_WEIGHTS[taste_key]
+        weights = taste_weights.get(category, taste_weights.get("default", None))
+    
+    # 취향 조합별 가중치가 없으면 기본 카테고리별 가중치 사용
+    if weights is None:
+        weights = CATEGORY_WEIGHTS.get(category, CATEGORY_WEIGHTS["default"])
+        
+        # Priority별 가중치 조정 (기본 가중치 사용 시만)
+        multipliers = PRIORITY_MULTIPLIERS.get(priority, {})
+    else:
+        # 취향 조합별 가중치 사용 시에는 multiplier 적용하지 않음 (이미 취향별로 최적화됨)
+        multipliers = {}
     
     # 각 스펙 점수 계산
     scores = {}

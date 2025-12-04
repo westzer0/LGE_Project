@@ -351,3 +351,4 @@ def apply_all_filters(products, user_profile: dict) -> list:
     
     return filtered
 
+

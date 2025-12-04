@@ -175,3 +175,4 @@ DATABASES = {
 2. Django Oracle 백엔드의 내부 설정 확인
 3. 학원에서 제공한 정확한 Service Name 값 확인
 
+

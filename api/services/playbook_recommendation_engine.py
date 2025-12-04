@@ -146,20 +146,27 @@ class PlaybookRecommendationEngine:
                 all_recommendations.extend(type_recommendations)
                 print(f"[Playbook Recommendation] 제품 타입 '{product_type}': {len(type_recommendations)}개 추천")
             
-            # 중복 제품 제거 (product_id 기반)
+            # 중복 제품 제거 (product_id 및 name 기반)
             seen_product_ids = set()
+            seen_product_names = set()
             unique_recommendations = []
             for rec in all_recommendations:
                 product_id = rec.get('product_id')
+                product_name = rec.get('name') or rec.get('model', '')
+                
+                # product_id로 먼저 체크
                 if product_id and product_id not in seen_product_ids:
                     seen_product_ids.add(product_id)
+                    if product_name:
+                        seen_product_names.add(product_name)
                     unique_recommendations.append(rec)
-                elif not product_id:
-                    # product_id가 없으면 name으로 중복 체크
-                    product_name = rec.get('name') or rec.get('model', '')
-                    if product_name and product_name not in seen_product_ids:
-                        seen_product_ids.add(product_name)
-                        unique_recommendations.append(rec)
+                # product_id가 없거나 중복이면 name으로 체크
+                elif product_name and product_name not in seen_product_names:
+                    seen_product_names.add(product_name)
+                    if product_id:
+                        seen_product_ids.add(product_id)
+                    unique_recommendations.append(rec)
+                # 둘 다 중복이면 스킵
             
             # 제품 타입별로 그룹화하여 순위 매기기 (각 타입별 3개씩)
             # 제품 타입 우선순위: 필수 제품 타입 먼저, 그 다음 조건부

@@ -70,16 +70,27 @@ def extract_product_type(product: Product) -> Optional[str]:
     product_name_upper = product.name.upper()
     product_name = product.name
     
+    # 특수 케이스: 컨버터블은 무조건 냉장고 (카테고리 오분류 방지)
+    if '컨버터블' in product_name or 'CONVERTIBLE' in product_name_upper:
+        return '냉장고'
+    
     # 제품 종류별로 키워드 매칭 (우선순위 순서대로)
     for product_type, keywords in PRODUCT_TYPE_KEYWORDS.items():
         for keyword in keywords:
             keyword_upper = keyword.upper()
             if keyword_upper in product_name_upper or keyword in product_name:
+                # 냉장고 키워드가 있으면 무조건 냉장고 (TV 카테고리 오분류 방지)
+                if product_type == '냉장고' and ('냉장고' in product_name or '냉동고' in product_name or 
+                                                  '컨버터블' in product_name or 'DIOS' in product_name_upper):
+                    return '냉장고'
                 return product_type
     
-    # 카테고리 기반 기본 분류
+    # 카테고리 기반 기본 분류 (제품명 키워드가 없을 때만)
     category = product.category
     if category == 'TV':
+        # TV 카테고리지만 냉장고 키워드가 있으면 냉장고로 분류
+        if any(kw in product_name_upper for kw in ['냉장고', '냉동고', '컨버터블', 'DIOS']):
+            return '냉장고'
         return 'TV'
     elif category == 'KITCHEN':
         # 주방가전은 더 세분화 필요

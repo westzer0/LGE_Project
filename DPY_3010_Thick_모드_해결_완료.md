@@ -149,3 +149,4 @@ C:\oracle\instantclient_19_23
 - `test_oracle_thick.py` - Thick 모드 테스트 스크립트
 - `oracle_init.py` - Django 초기화 모듈
 
+

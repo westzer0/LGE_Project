@@ -105,25 +105,61 @@ class RecommendationEngine:
                     'recommendations': []
                 }
             
-            # 3. Soft Scoring (가중치 기반 점수)
-            scored_products = self._score_products(
-                filtered_products,
-                user_profile,
-                taste_id=taste_id
+            # 3. 제품 종류별로 그룹화 및 각 제품 종류에서 상위 3개씩 추천
+            from api.utils.product_type_classifier import (
+                group_products_by_type,
+                get_product_types_for_scenario,
+                extract_product_type
             )
             
-            # 4. 정렬 및 상위 K개 선택
-            top_products = sorted(
-                scored_products,
-                key=lambda x: x['score'],
-                reverse=True
-            )[:limit]
+            # 필터링된 제품을 리스트로 변환
+            products_list = list(filtered_products)
             
-            # 5. 최종 포맷팅
-            recommendations = [
-                self._format_recommendation(item, user_profile, taste_id=taste_id, taste_info=taste_info)
-                for item in top_products
-            ]
+            # 제품 종류별로 그룹화
+            products_by_type = group_products_by_type(products_list)
+            
+            # 시나리오별 추천할 제품 종류 목록 결정
+            onboarding_data = user_profile.get('onboarding_data', {})
+            target_product_types = get_product_types_for_scenario(user_profile, onboarding_data)
+            
+            all_recommendations = []
+            
+            # 각 제품 종류별로 처리
+            for product_type in target_product_types:
+                if product_type not in products_by_type:
+                    print(f"[Recommendation] 제품 종류 '{product_type}': 추천 제품 없음")
+                    continue
+                
+                type_products = products_by_type[product_type]
+                
+                if not type_products:
+                    continue
+                
+                # 제품 종류별 스코어링 (시나리오별 점수 산정 방식 적용)
+                scored_products = self._score_products_by_type(
+                    type_products,
+                    user_profile,
+                    product_type,
+                    taste_id=taste_id
+                )
+                
+                # 제품 종류별 상위 3개 선택
+                top_type_products = sorted(
+                    scored_products,
+                    key=lambda x: x['score'],
+                    reverse=True
+                )[:3]  # 각 제품 종류별로 최대 3개
+                
+                # 제품 종류별 추천 포맷팅
+                type_recommendations = [
+                    self._format_recommendation(item, user_profile, taste_id=taste_id, taste_info=taste_info)
+                    for item in top_type_products
+                ]
+                
+                all_recommendations.extend(type_recommendations)
+                print(f"[Recommendation] 제품 종류 '{product_type}': {len(type_recommendations)}개 추천")
+            
+            recommendations = all_recommendations
             
             return {
                 'success': True,
@@ -257,6 +293,172 @@ class RecommendationEngine:
         print(f"[Filter Step 2] 추가 필터링 후: {products.count()}개")
         
         return products
+    
+    def _score_products_by_type(
+        self,
+        products: List[Product],
+        user_profile: dict,
+        product_type: str,
+        taste_id: int = None
+    ) -> List[dict]:
+        """
+        제품 종류별 스코어링 (시나리오별 점수 산정 방식 차등화)
+        
+        Args:
+            products: 제품 리스트
+            user_profile: 사용자 프로필
+            product_type: 제품 종류 (예: '세탁기', '청소기', '냉장고')
+            taste_id: 취향 ID
+            
+        Returns:
+            스코어링된 제품 리스트
+        """
+        scored = []
+        
+        # UserProfile 객체 생성
+        has_pet_value = user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True']
+        profile = UserProfile(
+            vibe=user_profile.get('vibe', ''),
+            household_size=str(user_profile.get('household_size', 2)),
+            has_pet=has_pet_value,
+            housing_type=user_profile.get('housing_type', ''),
+            main_space=user_profile.get('main_space', 'living'),
+            space_size=user_profile.get('space_size', 'medium'),
+            priority=user_profile.get('priority', 'value'),
+            budget_level=user_profile.get('budget_level', 'medium'),
+            target_categories=user_profile.get('categories', []),
+        )
+        
+        # 추가 사용자 정보
+        profile._household_size_int = user_profile.get('household_size', 2)
+        profile._has_pet = has_pet_value
+        profile._cooking = user_profile.get('cooking', 'sometimes')
+        profile._laundry = user_profile.get('laundry', 'weekly')
+        
+        for idx, product in enumerate(products[:50], 1):
+            try:
+                # 제품 종류별 가중치 적용 (시나리오별 차등화)
+                base_score = 0.0
+                
+                if taste_id is not None:
+                    base_score = calculate_product_score_with_taste_logic(
+                        product=product,
+                        profile=profile,
+                        taste_id=taste_id
+                    )
+                else:
+                    base_score = calculate_product_score(
+                        product=product,
+                        profile=profile
+                    )
+                
+                # 제품 종류별 추가 점수 조정 (시나리오별 차등화)
+                type_multiplier = self._get_product_type_multiplier(
+                    product_type,
+                    user_profile,
+                    user_profile.get('onboarding_data', {})
+                )
+                
+                final_score = base_score * type_multiplier
+                
+                # 점수 범위 검증 (0.0 ~ 1.0)
+                if final_score < 0.0:
+                    final_score = 0.0
+                elif final_score > 1.0:
+                    final_score = 1.0
+                
+                scored.append({
+                    'product': product,
+                    'score': final_score,
+                })
+                
+                if idx <= 3:
+                    print(f"[Score by Type] {idx}. [{product_type}] {product.name}: {final_score:.2f} (base: {base_score:.2f}, multiplier: {type_multiplier:.2f})")
+            
+            except Exception as e:
+                logger.warning(f"Score calculation failed for product {product.id}: {str(e)}", exc_info=True)
+                print(f"[Score Error] {product.name}: {e}")
+                scored.append({
+                    'product': product,
+                    'score': 0.5,
+                })
+        
+        return scored
+    
+    def _get_product_type_multiplier(
+        self,
+        product_type: str,
+        user_profile: dict,
+        onboarding_data: dict
+    ) -> float:
+        """
+        제품 종류별 가중치 배율 반환 (시나리오별 차등화)
+        
+        예시:
+        - 4인 가족 + 세탁기 → 높은 가중치
+        - 1인 가구 + 대형 냉장고 → 낮은 가중치
+        """
+        household_size = user_profile.get('household_size', 2)
+        cooking = onboarding_data.get('cooking', 'sometimes')
+        laundry = onboarding_data.get('laundry', 'weekly')
+        media = onboarding_data.get('media', 'balanced')
+        priority = user_profile.get('priority', 'value')
+        
+        multiplier = 1.0  # 기본 배율
+        
+        # 제품 종류별 + 시나리오별 가중치 조정
+        if product_type == '세탁기':
+            if laundry in ['daily', 'few_times'] and household_size >= 3:
+                multiplier = 1.2  # 세탁 빈도 높고 가족이 많으면
+            elif household_size == 1:
+                multiplier = 0.9  # 1인 가구는 조금 낮게
+        
+        elif product_type == '워시타워':
+            if household_size >= 4:
+                multiplier = 1.3  # 4인 이상 가족에게 높은 가중치
+            elif household_size == 1:
+                multiplier = 0.7  # 1인 가구는 낮게
+        
+        elif product_type == '냉장고':
+            if household_size >= 4:
+                multiplier = 1.2  # 큰 가족에게 높은 가중치
+            elif household_size == 1:
+                multiplier = 0.8  # 1인 가구는 낮게
+        
+        elif product_type == '식기세척기':
+            if cooking in ['high', 'often'] and household_size >= 3:
+                multiplier = 1.3  # 요리 많이 하는 가족에게 높은 가중치
+            elif cooking == 'rarely':
+                multiplier = 0.7  # 요리 안 하는 경우 낮게
+        
+        elif product_type == 'TV':
+            if media in ['gaming', 'heavy', 'ott']:
+                multiplier = 1.3  # 미디어 소비 많으면 높은 가중치
+            elif media == 'none':
+                multiplier = 0.5  # 미디어 안 보면 낮게
+        
+        elif product_type == '청소기':
+            # 청소기는 모든 시나리오에서 기본적으로 필요
+            if priority == 'tech':
+                multiplier = 1.1  # 기술 선호 시 조금 높게
+        
+        elif product_type == '에어컨':
+            housing_type = user_profile.get('housing_type', 'apartment')
+            if housing_type in ['apartment', 'detached']:
+                multiplier = 1.1  # 아파트/단독주택은 높게
+        
+        elif product_type == '공기청정기':
+            housing_type = user_profile.get('housing_type', 'apartment')
+            if housing_type in ['apartment', 'detached']:
+                multiplier = 1.1
+        
+        elif product_type == '스타일러':
+            if household_size >= 3:
+                multiplier = 1.2  # 큰 가족에게 높은 가중치
+            else:
+                multiplier = 0.8  # 작은 가족은 낮게
+        
+        return multiplier
     
     def _score_products(self, products: QuerySet, user_profile: dict, taste_id: int = None) -> List[dict]:
         """

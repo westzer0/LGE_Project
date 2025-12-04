@@ -177,3 +177,4 @@ if __name__ == "__main__":
     main()
     print(f"\n✅ 분석 완료! 결과는 '{result_file}' 파일을 확인하세요.")
 
+

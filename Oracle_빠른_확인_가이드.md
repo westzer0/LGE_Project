@@ -134,3 +134,4 @@ cd "C:\Users\134\Desktop\DX Project"
 - `oracle_quick.bat` 파일을 더블클릭
 - 자동으로 연결 확인하고 결과를 보여줍니다
 
+

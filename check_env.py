@@ -65,3 +65,4 @@ else:
     print("\n다음 단계: python test_oracle.py 실행")
 print("="*60)
 
+

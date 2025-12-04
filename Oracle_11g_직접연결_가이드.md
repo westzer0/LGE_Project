@@ -153,3 +153,4 @@ python api/db/사용_예시.py
 - `api/db/사용_예시.py` - 사용 예시 코드
 - `test_oracle_thick.py` - 연결 테스트 스크립트
 
+

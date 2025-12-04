@@ -44,3 +44,4 @@ git commit -m "feat: Oracle 11g 연결 설정 완료 (Thick 모드 + 직접 연�
 - test_oracle_direct_module.py: 직접 연결 모듈 테스트"
 ```
 
+

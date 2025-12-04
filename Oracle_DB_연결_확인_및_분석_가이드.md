@@ -174,3 +174,4 @@ python -c "from api.db.oracle_client import fetch_all_dict; tables = fetch_all_d
 
 성공하면 연결이 정상적으로 작동하는 것입니다!
 
+

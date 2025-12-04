@@ -173,3 +173,4 @@ A:
 - `api/services/recommendation_reason_generator.py`: 추천 문구 생성
 - `api/management/commands/simulate_taste_recommendations.py`: 시뮬레이션 스크립트
 
+
