@@ -112,28 +112,89 @@ class RecommendationEngine:
             if taste_id is not None:
                 # Taste 기반 MAIN CATEGORY 선택
                 from api.utils.taste_category_selector import get_categories_for_taste
-                selected_categories = get_categories_for_taste(
+                selected_main_categories = get_categories_for_taste(
                     taste_id=taste_id,
                     onboarding_data=onboarding_data,
                     num_categories=None  # 자동 결정
                 )
             else:
-                # 기존 categories 사용
-                selected_categories = user_profile.get('categories', ['TV', 'KITCHEN', 'LIVING'])
+                # 기존 categories 사용 (MAIN_CATEGORY 형식일 수도 있고 Django category 형식일 수도 있음)
+                selected_main_categories = user_profile.get('categories', ['TV', 'KITCHEN', 'LIVING'])
             
-            if not selected_categories:
+            if not selected_main_categories:
                 return {
                     'success': False,
                     'message': '선택된 카테고리가 없습니다.',
                     'recommendations': []
                 }
             
+            # MAIN_CATEGORY를 Django category로 매핑
+            from api.utils.category_mapping import get_django_categories_for_main_categories, validate_category_match
+            django_categories = get_django_categories_for_main_categories(selected_main_categories)
+            
+            # 필터링된 제품이 없으면 저예산 대가족 fallback 로직
+            if not filtered_products.exists():
+                budget_level = user_profile.get('budget_level', 'medium')
+                household_size = user_profile.get('household_size', 2)
+                
+                # 저예산 대가족인 경우 예산 범위 확대
+                if budget_level == 'low' and household_size >= 4:
+                    print(f"[Fallback] 저예산 대가족 감지: 예산 범위 확대")
+                    min_price, max_price = self.budget_mapping.get('medium', (500000, 2000000))
+                    filtered_products = self._filter_products_with_budget(
+                        user_profile, 
+                        min_price=min_price, 
+                        max_price=max_price
+                    )
+                    if not filtered_products.exists():
+                        print(f"[Fallback] 예산 확대 후에도 제품 없음")
+                        return {
+                            'success': False,
+                            'message': '조건에 맞는 제품이 없습니다.',
+                            'recommendations': []
+                        }
+            
             all_recommendations = []
             
             # 각 MAIN CATEGORY별로 처리
-            for category in selected_categories:
-                # 카테고리별 제품 필터링
-                category_products = filtered_products.filter(category=category)
+            for main_category in selected_main_categories:
+                # MAIN_CATEGORY를 Django category로 매핑
+                django_category = get_django_categories_for_main_categories([main_category])[0]
+                
+                # 카테고리별 제품 필터링 (Django category 기준)
+                category_products = filtered_products.filter(category=django_category)
+                
+                # 추가 검증: product_type이 MAIN_CATEGORY와 매칭되는지 확인
+                # (spec_json에서 product_type 추출하여 검증)
+                valid_products = []
+                for product in category_products:
+                    # spec_json에서 product_type 확인
+                    if hasattr(product, 'spec') and product.spec.spec_json:
+                        import json
+                        try:
+                            spec_data = json.loads(product.spec.spec_json)
+                            product_type = spec_data.get('PRODUCT_TYPE', '').strip()
+                            main_cat_from_spec = spec_data.get('MAIN_CATEGORY', '').strip()
+                            
+                            # MAIN_CATEGORY가 일치하는지 확인
+                            if main_cat_from_spec == main_category or product_type == main_category:
+                                valid_products.append(product)
+                            elif not product_type:  # product_type이 없으면 category만으로 판단
+                                valid_products.append(product)
+                        except:
+                            # JSON 파싱 실패 시 category만으로 판단
+                            valid_products.append(product)
+                    else:
+                        # spec이 없으면 category만으로 판단
+                        valid_products.append(product)
+                
+                if not valid_products:
+                    print(f"[Recommendation] 카테고리 '{main_category}' (Django: '{django_category}'): 추천 제품 없음")
+                    continue
+                
+                # QuerySet으로 변환
+                product_ids = [p.id for p in valid_products]
+                category_products = filtered_products.filter(id__in=product_ids)
                 
                 if not category_products.exists():
                     print(f"[Recommendation] 카테고리 '{category}': 추천 제품 없음")
@@ -159,12 +220,13 @@ class RecommendationEngine:
                     for item in top_category_products
                 ]
                 
-                # category 정보 추가
+                # category 정보 추가 (MAIN_CATEGORY와 Django category 모두)
                 for rec in category_recommendations:
-                    rec['category'] = category
+                    rec['category'] = django_category  # Django category
+                    rec['main_category'] = main_category  # 원본 MAIN_CATEGORY
                 
                 all_recommendations.extend(category_recommendations)
-                print(f"[Recommendation] 카테고리 '{category}': {len(category_recommendations)}개 추천")
+                print(f"[Recommendation] 카테고리 '{main_category}' (Django: '{django_category}'): {len(category_recommendations)}개 추천")
             
             recommendations = all_recommendations
             
@@ -240,13 +302,17 @@ class RecommendationEngine:
         household_size = user_profile.get('household_size', 2)
         has_pet = user_profile.get('has_pet', False)
         
+        # MAIN_CATEGORY를 Django category로 매핑
+        from api.utils.category_mapping import get_django_categories_for_main_categories
+        django_categories = get_django_categories_for_main_categories(categories)
+        
         # Step 1: 기본 필터 (Django ORM 쿼리)
-        # 카테고리 필터링: 정확히 일치하는 카테고리만
+        # 카테고리 필터링: Django category 기준으로 필터링
         products = (
             Product.objects
             .filter(
                 is_active=True,
-                category__in=categories,  # 정확히 선택한 카테고리만
+                category__in=django_categories,  # Django category 기준
                 price__gt=0,  # 가격 0원 제외
                 price__isnull=False,  # 가격 null 제외
                 price__gte=min_price,
@@ -299,6 +365,59 @@ class RecommendationEngine:
             products = Product.objects.none()
         
         print(f"[Filter Step 2] 추가 필터링 후: {products.count()}개")
+        
+        return products
+    
+    def _filter_products_with_budget(self, user_profile: dict, min_price: int, max_price: int) -> QuerySet:
+        """
+        예산 범위를 지정하여 제품 필터링 (fallback용)
+        """
+        from api.utils.product_filters import apply_all_filters
+        
+        categories = user_profile.get('categories', [])
+        household_size = user_profile.get('household_size', 2)
+        has_pet = user_profile.get('has_pet', False)
+        
+        # MAIN_CATEGORY를 Django category로 매핑
+        from api.utils.category_mapping import get_django_categories_for_main_categories
+        django_categories = get_django_categories_for_main_categories(categories)
+        
+        # 기본 필터
+        products = (
+            Product.objects
+            .filter(
+                is_active=True,
+                category__in=django_categories,
+                price__gt=0,
+                price__isnull=False,
+                price__gte=min_price,
+                price__lte=max_price,
+            )
+        )
+        
+        # 스펙이 있는 제품만
+        products = products.filter(spec__isnull=False)
+        
+        # 펫 관련 필터링
+        has_pet = user_profile.get('has_pet', False) or user_profile.get('pet') in ['yes', 'Y', True, 'true', 'True']
+        if not has_pet:
+            from django.db.models import Q
+            pet_keywords = ['펫', 'PET', '반려동물', '애완동물', '동물케어', '펫케어', 'PET CARE']
+            pet_filter = Q()
+            for keyword in pet_keywords:
+                pet_filter |= Q(name__icontains=keyword) | Q(description__icontains=keyword)
+            if pet_filter:
+                products = products.exclude(pet_filter)
+        
+        # 추가 필터링
+        products_list = list(products)
+        filtered_products = apply_all_filters(products_list, user_profile)
+        
+        if filtered_products:
+            product_ids = [p.id for p in filtered_products]
+            products = Product.objects.filter(id__in=product_ids)
+        else:
+            products = Product.objects.none()
         
         return products
     
