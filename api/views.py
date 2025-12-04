@@ -78,6 +78,11 @@ def result_page(request):
     })
 
 
+def reservation_status_page(request):
+    """예약 조회/변경 페이지 렌더링"""
+    return render(request, "reservation_status.html")
+
+
 @csrf_exempt
 def recommend(request):
     """

@@ -561,6 +561,44 @@
             height: 1000px;
         }
 
+        /* 모바일에서 제품 아이템 세로 배치 */
+        @media (max-width: 768px) {
+            .product-item {
+                grid-template-columns: 1fr;
+                height: auto;
+                min-height: auto;
+            }
+
+            .product-image-wrapper {
+                width: 100%;
+                height: auto;
+                min-height: 300px;
+                max-height: 60vh;
+                aspect-ratio: 1 / 1;
+                background: #f5f5f5;
+            }
+
+            .product-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+            .product-info {
+                height: auto;
+                padding: 24px 20px;
+                padding-right: 20px;
+                overflow-y: visible;
+            }
+
+            .product-title {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+        }
+
 
         .product-item:last-child {
             margin-bottom: 0;
@@ -613,17 +651,19 @@
             height: 1000px;
             background: #f5f5f5;
             display: flex;
-            align-items: flex-start;
-            justify-content: flex-start;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
         }
 
         .product-image {
-            width: 1000px;
-            height: 1000px;
-            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             background: #f5f5f5;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .product-info {
@@ -1014,7 +1054,7 @@
         }
 
         .confirm-modal-message {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 400;
             color: #1a1a1a;
             line-height: 1.6;
@@ -1022,7 +1062,7 @@
         }
 
         .confirm-modal-question {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 400;
             color: #1a1a1a;
             line-height: 1.6;
@@ -1114,10 +1154,11 @@
         .consultation-products-wrapper {
             max-height: 400px;
             overflow-y: auto;
-            border: 1px solid #e5e5e5;
+            overflow-x: hidden;
+            border: 1px solid #1a1a1a;
             border-radius: 4px;
             padding: 12px;
-            background: #f5f5f5;
+            background: #fff;
         }
 
         .consultation-products-wrapper::-webkit-scrollbar {
@@ -1146,14 +1187,18 @@
 
         .consultation-product-item {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 16px;
-            padding: 16px;
+            padding: 12px;
             border: 1px solid #e5e5e5;
             border-radius: 4px;
             background: #fff;
             position: relative;
-            min-height: 120px;
+            height: 150px;
+        }
+
+        .consultation-product-item:not(:last-child) {
+            margin-bottom: 12px;
         }
 
         .consultation-product-remove {
@@ -1180,14 +1225,14 @@
         }
 
         .consultation-product-image {
-            width: 70px;
+            width: 120px;
             height: 140px;
             object-fit: contain;
             background: #fff;
             border-radius: 4px;
             flex-shrink: 0;
-            border: 1px solid #e5e5e5;
-            padding: 10px;
+            border: 1px solid #fff;
+            padding: 8px;
         }
 
         .consultation-product-info {
@@ -1195,69 +1240,51 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             padding-right: 30px;
         }
 
-        .consultation-product-field {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            line-height: 1.5;
-        }
-
-        .consultation-product-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #EA1917;
-            min-width: 140px;
-            flex-shrink: 0;
-        }
-
-        .consultation-product-value {
-            font-size: 13px;
-            color: #1a1a1a;
-            flex: 1;
-            word-break: break-word;
-        }
-
         .consultation-product-name {
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 700;
             color: #1a1a1a;
             line-height: 1.4;
         }
 
         .consultation-product-model {
-            font-size: 13px;
+            font-size: 12px;
             color: #1a1a1a;
             line-height: 1.4;
+            margin-top: 4px;
         }
 
         .consultation-product-price-info {
-            font-size: 13px;
+            font-size: 14px;
             color: #1a1a1a;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         .consultation-product-discount-rate {
-            color: #1a1a1a;
+            color: #EA1917;
             font-weight: 600;
+            font-size: 16px;
         }
 
         .consultation-product-benefit-price {
             color: #1a1a1a;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 16px;
         }
 
         .consultation-product-original-price {
             color: #999;
             text-decoration: line-through;
             font-weight: 400;
+            font-size: 14px;
         }
 
         /* 상담목적 버튼 */
@@ -1749,45 +1776,264 @@
            Responsive
            ============================================ */
         @media (max-width: 768px) {
-            .header-wrapper {
-                padding: 0 20px;
+
+            /* 헤더 반응형 - LG전자 스타일 */
+            .header {
+                border-bottom: 1px solid #e5e5e5;
             }
 
+            .header-wrapper {
+                padding: 0 16px;
+            }
+
+            .header-top-row {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 0;
+                gap: 0;
+            }
+
+            .header-top-left {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .logo {
+                height: 24px;
+            }
+
+            .header-top-right {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                flex-shrink: 0;
+            }
+
+            .header-top-link {
+                display: none;
+                /* 모바일에서 링크 숨김 */
+            }
+
+            .header-top-icons {
+                gap: 16px;
+            }
+
+            .header-top-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .header-bottom-row {
+                padding: 12px 0;
+                border-top: 1px solid #f0f0f0;
+            }
+
+            .gnb {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                gap: 20px;
+                padding-bottom: 4px;
+            }
+
+            .gnb::-webkit-scrollbar {
+                display: none;
+            }
+
+            .gnb-item {
+                font-size: 14px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 0;
+            }
+
+            /* 브레드크럼 */
             .breadcrumb-wrapper {
                 padding: 0 20px;
             }
 
+            .breadcrumb-nav {
+                font-size: 12px;
+                flex-wrap: wrap;
+            }
+
+            /* 메인 콘텐츠 */
+            .main-content {
+                margin-top: 100px;
+            }
+
+            /* 배너 섹션 - LG전자 스타일 */
             .banner-section {
-                height: 500px;
+                height: auto;
+                min-height: 280px;
+                max-height: 55vh;
+                aspect-ratio: 16 / 9;
+                margin-bottom: 0;
+            }
+
+            .banner-image {
+                object-fit: cover;
+                width: 100%;
+                height: 100%;
+            }
+
+            .banner-overlay {
+                padding: 24px 20px;
+                position: relative;
+                justify-content: flex-start;
+                align-items: flex-start;
+                text-align: left;
             }
 
             .banner-title {
                 font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 12px;
+                line-height: 1.3;
             }
 
             .banner-description {
-                font-size: 16px;
+                font-size: 14px;
+                line-height: 1.5;
+                margin-bottom: 8px;
             }
 
+            .style-analysis-label {
+                font-size: 12px;
+                margin-bottom: 12px;
+                padding: 6px 12px;
+            }
+
+            /* 플로팅 액션 버튼 - 모바일에서 숨김 또는 조정 */
             .top-action-bar {
-                right: 20px;
-                top: 140px;
+                display: none;
+                /* 모바일에서 플로팅 버튼 숨김 */
             }
 
             .retry-section {
-                left: 20px;
-                top: 140px;
+                display: none;
+                /* 모바일에서 플로팅 버튼 숨김 */
             }
 
+            /* 제품 그리드 */
             .product-content {
                 grid-template-columns: 1fr;
-                gap: 24px;
+                gap: 0;
+                padding: 0;
             }
 
             .product-item {
-                padding: 24px;
+                padding: 0;
+                margin-bottom: 0;
+                border-bottom: 1px solid #e5e5e5;
             }
 
+            .product-item:last-child {
+                border-bottom: none;
+            }
+
+            .product-image-wrapper {
+                width: 100%;
+                height: auto;
+                min-height: 320px;
+                max-height: 65vh;
+                aspect-ratio: 1 / 1;
+                background: #f5f5f5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .product-image {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                max-width: 100%;
+                max-height: 100%;
+                padding: 20px;
+            }
+
+            .product-info {
+                height: auto;
+                padding: 20px 16px;
+                overflow-y: visible;
+            }
+
+            .product-title {
+                font-size: 18px;
+                margin-bottom: 12px;
+                line-height: 1.4;
+            }
+
+            .recommend-reason-title {
+                font-size: 13px;
+            }
+
+            .recommend-reason-text {
+                font-size: 14px;
+            }
+
+            .review-analysis-title {
+                font-size: 13px;
+            }
+
+            .review-analysis-text {
+                font-size: 13px;
+            }
+
+            .product-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .product-item-title {
+                font-size: 18px;
+            }
+
+            .product-item-subtitle {
+                font-size: 14px;
+            }
+
+            /* 하단 액션 버튼 - LG전자 스타일 */
+            .bottom-actions {
+                padding: 20px 16px;
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+
+            .bottom-actions-container {
+                max-width: 100%;
+            }
+
+            .bottom-actions-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .bottom-actions-row-single {
+                width: 100%;
+            }
+
+            .action-button {
+                width: 100%;
+                font-size: 15px;
+                padding: 14px 20px;
+                border-radius: 8px;
+            }
+
+            .action-button-large {
+                width: 100%;
+                margin-left: 0;
+                font-size: 15px;
+                padding: 14px 20px;
+                border-radius: 8px;
+            }
+
+            /* 시간 슬롯 */
             .time-slot-buttons {
                 grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
             }
@@ -1796,9 +2042,257 @@
                 padding: 8px 10px;
                 font-size: 13px;
             }
+
+            /* 모달 반응형 */
+            .consultation-modal-content {
+                width: 95%;
+                max-width: 95%;
+                max-height: 90vh;
+                padding: 24px 20px;
+                overflow-y: auto;
+            }
+
+            .consultation-modal-title {
+                font-size: 20px;
+            }
+
+            .consultation-modal-description {
+                font-size: 13px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .consultation-section {
+                margin-bottom: 24px;
+            }
+
+            .consultation-section-title {
+                font-size: 15px;
+            }
+
+            /* 상담목적 버튼 */
+            .consultation-purpose-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .purpose-btn {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            /* 캘린더 */
+            .consultation-calendar-wrapper {
+                width: 100%;
+            }
+
+            .calendar-header {
+                padding: 12px 0;
+            }
+
+            .calendar-month-year {
+                font-size: 16px;
+            }
+
+            .calendar-days {
+                gap: 4px;
+            }
+
+            .calendar-day {
+                font-size: 13px;
+                padding: 8px 4px;
+            }
+
+            /* 시간 슬롯 */
+            .time-slot-period {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .time-period-section {
+                width: 100%;
+            }
+
+            /* 입력 필드 */
+            .consultation-input,
+            .consultation-textarea {
+                font-size: 14px;
+                padding: 12px 14px;
+            }
+
+            /* 제품 정보 */
+            .consultation-products-wrapper {
+                max-height: 300px;
+                padding: 10px;
+            }
+
+            .consultation-product-item {
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+                padding: 12px;
+                height: 150px;
+            }
+
+            .consultation-product-image {
+                width: 100px;
+                height: 120px;
+                object-fit: contain;
+                background: #fff;
+                border-radius: 4px;
+                border: 1px solid #fff;
+                padding: 8px;
+            }
+
+            .consultation-product-label {
+                min-width: 90px;
+                font-size: 12px;
+            }
+
+            .consultation-product-value {
+                font-size: 12px;
+            }
+
+            .consultation-product-name {
+                font-size: 16px;
+            }
+
+            .consultation-product-model {
+                font-size: 12px;
+            }
+
+            .consultation-product-price-info {
+                font-size: 16px;
+                gap: 6px;
+            }
+
+            .consultation-product-discount-rate,
+            .consultation-product-benefit-price {
+                font-size: 16px;
+            }
+
+            .consultation-product-original-price {
+                font-size: 14px;
+            }
+
+            /* 제출 버튼 */
+            .consultation-submit-btn {
+                width: 100%;
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            .confirm-modal-content {
+                width: 90%;
+                padding: 24px 20px;
+            }
+
+            .confirm-modal-message,
+            .confirm-modal-question {
+                font-size: 15px;
+            }
+
+            .confirm-modal-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .confirm-modal-btn {
+                width: 100%;
+            }
         }
 
         @media (max-width: 480px) {
+
+            /* 헤더 */
+            .header-wrapper {
+                padding: 0 16px;
+            }
+
+            .header-top-link {
+                font-size: 11px;
+                padding: 0 6px;
+            }
+
+            .gnb-item {
+                font-size: 12px;
+            }
+
+            /* 배너 */
+            .banner-section {
+                height: auto;
+                min-height: 250px;
+                max-height: 45vh;
+            }
+
+            .banner-title {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .banner-description {
+                font-size: 12px;
+            }
+
+            .banner-overlay {
+                padding: 20px 16px;
+            }
+
+            /* 플로팅 버튼 - 모바일에서 숨김 */
+            .top-action-bar {
+                display: none;
+            }
+
+            .retry-section {
+                display: none;
+            }
+
+            /* 제품 */
+            .product-content {
+                padding: 0;
+                gap: 0;
+            }
+
+            .product-item {
+                padding: 0;
+            }
+
+            .product-image-wrapper {
+                min-height: 280px;
+                max-height: 60vh;
+            }
+
+            .product-image {
+                padding: 16px;
+            }
+
+            .product-info {
+                padding: 18px 16px;
+            }
+
+            .product-title {
+                font-size: 17px;
+            }
+
+            .product-item-title {
+                font-size: 16px;
+            }
+
+            /* 하단 버튼 */
+            .bottom-actions {
+                padding: 16px;
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            }
+
+            .action-button,
+            .action-button-large {
+                font-size: 14px;
+                padding: 12px 16px;
+                border-radius: 6px;
+            }
+
+            /* 시간 슬롯 */
             .time-slot-buttons {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -1806,6 +2300,94 @@
             .time-slot-btn {
                 padding: 8px 6px;
                 font-size: 12px;
+            }
+
+            /* 모달 */
+            .consultation-modal-content {
+                width: 98%;
+                max-width: 98%;
+                padding: 20px 16px;
+            }
+
+            .consultation-modal-title {
+                font-size: 18px;
+            }
+
+            .consultation-modal-description {
+                font-size: 12px;
+                padding: 12px 0;
+            }
+
+            .consultation-section {
+                margin-bottom: 20px;
+            }
+
+            .consultation-section-title {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            /* 상담목적 버튼 */
+            .purpose-btn {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+
+            /* 캘린더 */
+            .calendar-month-year {
+                font-size: 14px;
+            }
+
+            .calendar-day {
+                font-size: 12px;
+                padding: 6px 2px;
+            }
+
+            /* 시간 슬롯 */
+            .time-slot-btn {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+
+            /* 입력 필드 */
+            .consultation-input,
+            .consultation-textarea {
+                font-size: 13px;
+                padding: 10px 12px;
+            }
+
+            /* 제품 정보 */
+            .consultation-product-label {
+                min-width: 80px;
+                font-size: 11px;
+            }
+
+            .consultation-product-value {
+                font-size: 11px;
+            }
+
+            .consultation-product-name {
+                font-size: 16px;
+            }
+
+            .consultation-product-model {
+                font-size: 12px;
+            }
+
+            /* 제출 버튼 */
+            .consultation-submit-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .confirm-modal-content {
+                width: 95%;
+                padding: 20px 16px;
+            }
+
+            .confirm-modal-message,
+            .confirm-modal-question {
+                font-size: 14px;
             }
         }
 
@@ -2155,9 +2737,9 @@
     </div>
 
     <!-- 구매상담예약 모달 -->
-    <div class="consultation-modal" id="consultationModal" onclick="handleModalClick(event)">
+    <div class="consultation-modal" id="consultationModal">
         <div class="consultation-modal-content" onclick="event.stopPropagation()">
-            <button class="consultation-modal-close" onclick="closeConsultationModal()">×</button>
+            <button type="button" class="consultation-modal-close" onclick="closeConsultationModal(event)">×</button>
             <h2 class="consultation-modal-title">구매상담예약</h2>
             <p class="consultation-modal-description">
                 <span class="consultation-icon">🎧</span>
@@ -2264,15 +2846,44 @@
         </div>
     </div>
 
-    <!-- 확인 모달 -->
-    <div class="confirm-modal" id="confirmModal">
+    <!-- 예약 완료 모달 -->
+    <div class="confirm-modal" id="reservationCompleteModal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-message" style="font-weight: 700;">전화 상담 예약이 완료되었습니다.</div>
+            <div class="confirm-modal-question" style="font-weight: 700;">예약하신 내용을 확인하시겠습니까?</div>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn confirm-modal-btn-cancel"
+                    onclick="closeReservationCompleteModal(false)">취소</button>
+                <button class="confirm-modal-btn confirm-modal-btn-confirm"
+                    onclick="closeReservationCompleteModal(true)">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구매상담예약 모달 닫기 확인 모달 -->
+    <div class="confirm-modal" id="closeConsultationConfirmModal">
         <div class="confirm-modal-content">
             <div class="confirm-modal-message">구매상담예약을 취소하시겠습니까?</div>
             <div class="confirm-modal-question">입력하신 내용은 저장되지 않습니다.</div>
             <div class="confirm-modal-buttons">
-                <button class="confirm-modal-btn confirm-modal-btn-cancel" onclick="closeConfirmModal(true)">취소</button>
-                <button class="confirm-modal-btn confirm-modal-btn-confirm" onclick="closeConfirmModal(false)">계속
-                    진행하기</button>
+                <button class="confirm-modal-btn confirm-modal-btn-cancel"
+                    onclick="closeConsultationConfirmModal(true)">취소</button>
+                <button class="confirm-modal-btn confirm-modal-btn-confirm"
+                    onclick="closeConsultationConfirmModal(false)">계속 진행하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 다시 추천받기 확인 모달 -->
+    <div class="confirm-modal" id="retryOnboardingModal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-message">취향 분석을 다시 진행하고</div>
+            <div class="confirm-modal-question">새로운 패키지를 추천 받으시겠어요?</div>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn confirm-modal-btn-cancel"
+                    onclick="closeRetryOnboardingModal(false)">취소</button>
+                <button class="confirm-modal-btn confirm-modal-btn-confirm"
+                    onclick="closeRetryOnboardingModal(true)">확인</button>
             </div>
         </div>
     </div>
@@ -2281,6 +2892,9 @@
         // ============================================
         // 제품 데이터 로드 및 이미지 설정
         // ============================================
+        // 전역 변수: 추천 제품 정보 저장
+        let globalRecommendations = [];
+
         async function loadProductImages() {
             try {
                 // 세션 ID 가져오기
@@ -2303,7 +2917,21 @@
                 const data = await response.json();
 
                 if (data.success && data.session && data.session.recommendation_result) {
-                    const recommendations = data.session.recommendation_result.recommendations || [];
+                    // recommendation_result가 문자열인 경우 파싱
+                    let recommendationResult = data.session.recommendation_result;
+                    if (typeof recommendationResult === 'string') {
+                        try {
+                            recommendationResult = JSON.parse(recommendationResult);
+                        } catch (e) {
+                            console.error('추천 결과 파싱 오류:', e);
+                        }
+                    }
+
+                    const recommendations = recommendationResult.recommendations || [];
+
+                    // 전역 변수에 저장 (구매상담예약 모달에서 사용)
+                    globalRecommendations = recommendations;
+                    console.log('전역 추천 제품 정보 저장:', globalRecommendations);
 
                     // 제품 순서대로 매핑 (첫 번째: 냉장고, 두 번째: 광파오븐, 세 번째: 식기세척기)
                     const productIds = ['refrigerator', 'microwave', 'dishwasher'];
@@ -2776,8 +3404,20 @@
         // 취향분석 다시하기
         // ============================================
         function retryOnboarding() {
-            // 온보딩 1단계로 이동 (저장된 정보는 그대로 유지)
-            window.location.href = '/onboarding/';
+            // 다시 추천받기 확인 모달 표시
+            const retryModal = document.getElementById('retryOnboardingModal');
+            retryModal.classList.add('active');
+        }
+
+        // 다시 추천받기 모달 닫기
+        function closeRetryOnboardingModal(shouldConfirm) {
+            const retryModal = document.getElementById('retryOnboardingModal');
+            retryModal.classList.remove('active');
+
+            if (shouldConfirm) {
+                // 확인 버튼 클릭 시 온보딩 1단계로 이동
+                window.location.href = '/onboarding/';
+            }
         }
 
         // ============================================
@@ -2831,7 +3471,16 @@
             updateSubmitButton();
         }
 
-        function closeConsultationModal() {
+        function closeConsultationModal(event) {
+            // 이벤트 전파 및 기본 동작 방지
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // 스크롤 위치 저장
+            const scrollY = window.scrollY;
+
             // 입력된 정보 확인
             const name = document.getElementById('consultationName').value.trim();
             const phone = document.getElementById('consultationPhone').value.trim();
@@ -2842,24 +3491,29 @@
 
             if (hasInput) {
                 // 확인 모달 표시
-                const confirmModal = document.getElementById('confirmModal');
+                const confirmModal = document.getElementById('closeConsultationConfirmModal');
                 confirmModal.classList.add('active');
+                // 스크롤 위치 복원
+                window.scrollTo(0, scrollY);
             } else {
                 // 입력이 없으면 바로 닫기
-                actuallyCloseConsultationModal();
+                actuallyCloseConsultationModal(scrollY);
             }
         }
 
-        function closeConfirmModal(shouldClose) {
-            const confirmModal = document.getElementById('confirmModal');
+        // 구매상담예약 모달 닫기 확인 모달 닫기
+        function closeConsultationConfirmModal(shouldClose) {
+            const confirmModal = document.getElementById('closeConsultationConfirmModal');
             confirmModal.classList.remove('active');
 
             if (shouldClose) {
-                actuallyCloseConsultationModal();
+                // 스크롤 위치 저장
+                const scrollY = window.scrollY;
+                actuallyCloseConsultationModal(scrollY);
             }
         }
 
-        function actuallyCloseConsultationModal() {
+        function actuallyCloseConsultationModal(savedScrollY) {
             const modal = document.getElementById('consultationModal');
             modal.classList.remove('active');
 
@@ -2881,14 +3535,21 @@
             document.getElementById('consultationNotes').value = '';
             document.getElementById('notesCounter').textContent = '0';
             document.getElementById('earlyContactCheckbox').checked = false;
-        }
 
-        // 모달 외부 클릭 시 닫기
-        function handleModalClick(event) {
-            if (event.target.id === 'consultationModal') {
-                closeConsultationModal();
+            // 스크롤 위치 복원 (스크롤 방지)
+            if (savedScrollY !== undefined) {
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, savedScrollY);
+                });
             }
         }
+
+        // 모달 외부 클릭 시 닫기 (비활성화됨 - 창닫기 버튼으로만 닫을 수 있음)
+        // function handleModalClick(event) {
+        //     if (event.target.id === 'consultationModal') {
+        //         closeConsultationModal(event);
+        //     }
+        // }
 
         // 제품 제거
         function removeProduct(btn) {
@@ -2901,71 +3562,211 @@
         // 제품 정보 로드
         async function loadConsultationProducts() {
             const productsContainer = document.getElementById('consultationProducts');
+            if (!productsContainer) {
+                console.error('제품 컨테이너를 찾을 수 없습니다.');
+                return;
+            }
+
             productsContainer.innerHTML = '';
 
-            try {
-                const sessionId = sessionStorage.getItem('onboarding_session_id');
-                if (!sessionId) {
-                    console.warn('세션 ID가 없습니다.');
-                    return;
+            // 먼저 전역 변수에서 추천 제품 정보 사용 시도
+            let recommendations = globalRecommendations;
+            console.log('전역 추천 제품 정보 사용:', recommendations);
+
+            // 전역 변수에 데이터가 없으면 API 호출 시도
+            if (!recommendations || recommendations.length === 0) {
+                console.log('전역 변수에 데이터가 없어 API 호출 시도');
+                try {
+                    const sessionId = sessionStorage.getItem('onboarding_session_id');
+                    if (!sessionId) {
+                        console.warn('세션 ID가 없습니다.');
+                        productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">세션 정보를 찾을 수 없습니다.</div>';
+                        return;
+                    }
+
+                    const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                    if (!response.ok) {
+                        console.error('API 응답 오류:', response.status, response.statusText);
+                        // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                        recommendations = getProductsFromPage();
+                        if (!recommendations || recommendations.length === 0) {
+                            productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
+                            return;
+                        }
+                    } else {
+                        const data = await response.json();
+                        if (data.success && data.session && data.session.recommendation_result) {
+                            let recommendationResult = data.session.recommendation_result;
+                            if (typeof recommendationResult === 'string') {
+                                try {
+                                    recommendationResult = JSON.parse(recommendationResult);
+                                } catch (e) {
+                                    console.error('추천 결과 파싱 오류:', e);
+                                }
+                            }
+                            recommendations = recommendationResult.recommendations || [];
+                            globalRecommendations = recommendations; // 전역 변수에 저장
+                        }
+                    }
+                } catch (error) {
+                    console.error('API 호출 오류:', error);
+                    // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                    recommendations = getProductsFromPage();
+                    if (!recommendations || recommendations.length === 0) {
+                        productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러오는 중 오류가 발생했습니다.</div>';
+                        return;
+                    }
                 }
-
-                const response = await fetch(`/api/onboarding/session/${sessionId}/`);
-                if (!response.ok) return;
-
-                const data = await response.json();
-                if (data.success && data.session && data.session.recommendation_result) {
-                    const recommendations = data.session.recommendation_result.recommendations || [];
-
-                    recommendations.forEach((product, index) => {
-                        const productItem = document.createElement('div');
-                        productItem.className = 'consultation-product-item';
-
-                        const imageUrl = product.image_url || 'https://via.placeholder.com/70x140?text=Product';
-                        const productName = product.name || '제품명 없음';
-                        const modelNumber = product.model_number || product.model || '';
-
-                        // 가격 정보: 정가, 판매가, 최대 혜택가
-                        const originalPrice = product.original_price || product.price || 0;
-                        const salePrice = product.sale_price || product.price || 0;
-                        const discountPrice = product.discount_price || salePrice || product.price || 0;
-
-                        // 할인율 계산: 정가 기준으로 최대 혜택가와 비교
-                        const discountRate = originalPrice > 0 && discountPrice < originalPrice
-                            ? Math.round((1 - discountPrice / originalPrice) * 100)
-                            : 0;
-
-                        productItem.innerHTML = `
-                            <button class="consultation-product-remove" onclick="removeProduct(this)">×</button>
-                            <img src="${imageUrl}" alt="${productName}" class="consultation-product-image" onerror="this.src='https://via.placeholder.com/70x140?text=Product'">
-                            <div class="consultation-product-info">
-                                <div class="consultation-product-field">
-                                    <span class="consultation-product-label">제품명</span>
-                                    <span class="consultation-product-value consultation-product-name">${productName}</span>
-                                </div>
-                                ${modelNumber ? `
-                                <div class="consultation-product-field">
-                                    <span class="consultation-product-label">모델명</span>
-                                    <span class="consultation-product-value consultation-product-model">${modelNumber}</span>
-                                </div>
-                                ` : ''}
-                                <div class="consultation-product-field">
-                                    <span class="consultation-product-label">할인율 최대 혜택가 정가</span>
-                                    <span class="consultation-product-value consultation-product-price-info">
-                                        ${discountRate > 0 ? `<span class="consultation-product-discount-rate">${discountRate}%</span>` : ''}
-                                        <span class="consultation-product-benefit-price">${formatPrice(discountPrice)}</span>
-                                        <span class="consultation-product-original-price">${formatPrice(originalPrice)}</span>
-                                    </span>
-                                </div>
-                            </div>
-                        `;
-
-                        productsContainer.appendChild(productItem);
-                    });
-                }
-            } catch (error) {
-                console.error('제품 정보 로드 오류:', error);
             }
+
+            console.log('최종 추천 제품 목록:', recommendations);
+
+            if (!recommendations || recommendations.length === 0) {
+                console.warn('추천 제품이 없습니다.');
+                productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">추천 제품이 없습니다.</div>';
+                return;
+            }
+
+            // 제품 이미지 로드를 위한 비동기 함수
+            const loadProductImageForConsultation = async (productName, imgElement) => {
+                try {
+                    const response = await fetch(`/api/products/image-by-name/?name=${encodeURIComponent(productName)}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.image_url) {
+                            imgElement.src = data.image_url;
+                        }
+                    }
+                } catch (error) {
+                    console.error('제품 이미지 로드 오류:', error);
+                }
+            };
+
+            // 제품 타입에 따른 가전 카테고리 이미지 매핑
+            const getApplianceCategoryImage = (productName, index) => {
+                const categoryImages = {
+                    '냉장고': '/static/images/가전 카테고리/냉장고.png',
+                    '광파오븐': '/static/images/가전 카테고리/광파오븐.png',
+                    '식기세척기': '/static/images/가전 카테고리/식기세척기.png'
+                };
+
+                // 제품명에서 카테고리 추출
+                if (productName.includes('냉장고')) {
+                    return categoryImages['냉장고'];
+                } else if (productName.includes('광파오븐') || productName.includes('오븐')) {
+                    return categoryImages['광파오븐'];
+                } else if (productName.includes('식기세척기')) {
+                    return categoryImages['식기세척기'];
+                }
+
+                // 인덱스 기반 매핑 (첫 번째: 냉장고, 두 번째: 광파오븐, 세 번째: 식기세척기)
+                const indexMapping = [
+                    categoryImages['냉장고'],
+                    categoryImages['광파오븐'],
+                    categoryImages['식기세척기']
+                ];
+
+                return indexMapping[index] || categoryImages['냉장고'];
+            };
+
+            // 모델명 매핑 (순서대로: 냉장고, 광파오븐, 식기세척기)
+            const modelNumberMapping = ['W826GBB482', 'MLJ32ERS', 'DUE5BGHE'];
+
+            recommendations.forEach((product, index) => {
+                console.log(`제품 ${index + 1} 처리 중:`, product);
+                const productItem = document.createElement('div');
+                productItem.className = 'consultation-product-item';
+
+                // 가전 카테고리 이미지 사용
+                const imageUrl = getApplianceCategoryImage(product.name || '', index);
+                const productName = product.name || '제품명 없음';
+                // 모델명: 제품 데이터에 있으면 사용, 없으면 매핑된 모델명 사용
+                const modelNumber = product.model_number || product.model || (modelNumberMapping[index] || '');
+
+                // 가격 정보: 정가, 판매가, 최대 혜택가
+                const originalPrice = product.original_price || product.price || 0;
+                const salePrice = product.sale_price || product.price || 0;
+                const discountPrice = product.discount_price || salePrice || product.price || 0;
+
+                // 할인율 계산: 정가 기준으로 최대 혜택가와 비교
+                const discountRate = originalPrice > 0 && discountPrice < originalPrice
+                    ? Math.round((1 - discountPrice / originalPrice) * 100)
+                    : 0;
+
+                // 가격 포맷팅 (원 단위 제거, 숫자만)
+                const formatPriceNumber = (price) => {
+                    if (!price || price === 0) return '0';
+                    return formatPrice(price);
+                };
+
+                productItem.innerHTML = `
+                    <button class="consultation-product-remove" onclick="removeProduct(this)">×</button>
+                    <img src="${imageUrl}" alt="${productName}" class="consultation-product-image" onerror="this.src='/static/images/가전 카테고리/냉장고.png'">
+                    <div class="consultation-product-info">
+                        <div class="consultation-product-name">${productName}</div>
+                        <div class="consultation-product-model">${modelNumber}</div>
+                        <div class="consultation-product-price-info">
+                            ${discountRate > 0 ? `<span class="consultation-product-discount-rate">${discountRate}%</span>` : ''}
+                            <span class="consultation-product-benefit-price">${formatPriceNumber(discountPrice)}</span>
+                            <span class="consultation-product-original-price">${formatPriceNumber(originalPrice)}</span>
+                        </div>
+                    </div>
+                `;
+
+                productsContainer.appendChild(productItem);
+                console.log(`제품 ${index + 1} 추가 완료:`, productName);
+            });
+
+            console.log(`총 ${recommendations.length}개 제품이 추가되었습니다.`);
+        }
+
+        // 페이지에서 직접 제품 정보 가져오기 (API 실패 시 대체 방법)
+        function getProductsFromPage() {
+            const products = [];
+            const productIds = ['refrigerator', 'microwave', 'dishwasher'];
+
+            productIds.forEach(productId => {
+                const productElement = document.getElementById(`product-${productId}`);
+                if (productElement) {
+                    const titleElement = productElement.querySelector('.product-title');
+                    const imageElement = document.getElementById(`product-image-${productId}`);
+
+                    if (titleElement) {
+                        const productName = titleElement.textContent.trim();
+                        const imageUrl = imageElement ? imageElement.src : '';
+
+                        // 가격 정보 가져오기
+                        const priceOriginalEl = productElement.querySelector('.price-original');
+                        const priceSaleEl = productElement.querySelector('.price-sale');
+                        const priceFinalEl = productElement.querySelector('.price-final');
+
+                        let originalPrice = 0;
+                        let salePrice = 0;
+                        let discountPrice = 0;
+
+                        if (priceOriginalEl) {
+                            originalPrice = parseInt(priceOriginalEl.textContent.replace(/[^0-9]/g, '')) || 0;
+                        }
+                        if (priceSaleEl) {
+                            salePrice = parseInt(priceSaleEl.textContent.replace(/[^0-9]/g, '')) || 0;
+                        }
+                        if (priceFinalEl) {
+                            discountPrice = parseInt(priceFinalEl.textContent.replace(/[^0-9]/g, '')) || 0;
+                        }
+
+                        products.push({
+                            name: productName,
+                            image_url: imageUrl,
+                            original_price: originalPrice,
+                            sale_price: salePrice,
+                            discount_price: discountPrice || salePrice || originalPrice,
+                            price: originalPrice || salePrice || discountPrice
+                        });
+                    }
+                }
+            });
+
+            return products;
         }
 
         // 상담목적 선택
@@ -3276,10 +4077,8 @@
             console.log('예약 정보:', reservationData);
 
             // 예약 완료 확인 모달 표시
-            if (confirm('구매상담예약이 완료되었습니다.\n예약하신 내용을 확인하시겠습니까?')) {
-                // 확인 버튼 클릭 시 처리 (예: 예약 내역 페이지로 이동)
-                // window.location.href = '/consultation/confirm/';
-            }
+            const reservationCompleteModal = document.getElementById('reservationCompleteModal');
+            reservationCompleteModal.classList.add('active');
 
             // 실제로는 여기서 API 호출
             // fetch('/api/consultation/reserve/', {
@@ -3304,8 +4103,70 @@
             //     alert('예약 중 오류가 발생했습니다.');
             // });
 
-            // 모달 닫기
+            // 모달 닫기 (예약 완료 모달이 표시되므로 여기서는 닫지 않음)
+        }
+
+        // 예약 완료 모달 닫기
+        function closeReservationCompleteModal(shouldConfirm) {
+            const reservationCompleteModal = document.getElementById('reservationCompleteModal');
+            reservationCompleteModal.classList.remove('active');
+
+            // 구매상담예약 모달도 닫기
             closeConsultationModal();
+
+            if (shouldConfirm) {
+                // 확인 버튼 클릭 시 예약 조회 페이지로 이동
+                // 예약 데이터 수집
+                const name = document.getElementById('consultationName').value.trim();
+                const phone = document.getElementById('consultationPhone').value.trim();
+                const notes = document.getElementById('consultationNotes').value.trim();
+                const selectedProducts = Array.from(document.querySelectorAll('.consultation-product-item.selected'))
+                    .map(item => {
+                        const nameEl = item.querySelector('.consultation-product-name');
+                        const modelEl = item.querySelector('.consultation-product-model');
+                        return {
+                            name: nameEl ? nameEl.textContent : '',
+                            model: modelEl ? modelEl.textContent : ''
+                        };
+                    });
+
+                // 날짜 포맷팅
+                const formatDate = (date) => {
+                    if (!date) return '';
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}.${month}.${day}`;
+                };
+
+                const formatDateTime = (date) => {
+                    if (!date) return '';
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    return `${year}.${month}.${day} ${hours}:${minutes}`;
+                };
+
+                const reservationData = {
+                    receiptDate: formatDateTime(new Date()),
+                    status: '상담예정',
+                    scheduledDate: selectedDate ? formatDate(selectedDate) : '',
+                    scheduledTime: selectedTime || '',
+                    purpose: selectedPurpose || '',
+                    name: name,
+                    phone: phone,
+                    notes: notes,
+                    products: selectedProducts
+                };
+
+                // 세션 스토리지에 저장
+                sessionStorage.setItem('reservation_data', JSON.stringify(reservationData));
+
+                // 예약 조회 페이지로 이동
+                window.location.href = '/reservation/status/';
+            }
         }
 
         // 텍스트 영역 글자 수 카운터

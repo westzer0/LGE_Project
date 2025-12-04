@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG Home Styling - 이사 가전 포트폴리오 추천</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">LG Home Styling</div>
+            <nav class="gnb">
+                <a href="#hero" class="gnb-item">홈</a>
+                <a href="#recommend-flow" class="gnb-item">이사 가전 추천</a>
+                <a href="#products-preview" class="gnb-item">제품 탐색</a>
+                <a href="#bestshop" class="gnb-item">베스트샵 연동</a>
+                <a href="#about" class="gnb-item">ABOUT</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>이사 한 번에 끝내는<br>가전 포트폴리오</h1>
+                        <p class="hero-subtitle">간단한 질문 몇 개로 우리 집에 딱 맞는 TV/오디오 포트폴리오를 추천해드립니다.</p>
+                        <div class="hero-cta">
+                            <a href="#survey" class="btn primary">지금 추천 받기</a>
+                            <a href="#products-preview" class="btn ghost">제품 먼저 구경하기</a>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="visual-card">
+                            <div class="card-icon">📺</div>
+                            <h3>OLED TV</h3>
+                            <p>최고의 화질 경험</p>
+                        </div>
+                        <div class="visual-card">
+                            <div class="card-icon">🔊</div>
+                            <h3>사운드바</h3>
+                            <p>몰입감 있는 오디오</p>
+                        </div>
+                        <div class="visual-card">
+                            <div class="card-icon">📱</div>
+                            <h3>스탠바이미</h3>
+                            <p>언제 어디서나</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="recommend-flow" class="recommend-flow">
+            <div class="container">
+                <h2 class="section-title">세 가지 정보만 알려주세요</h2>
+                <div class="flow-cards">
+                    <div class="flow-card">
+                        <div class="flow-number">1</div>
+                        <h3>집 구조</h3>
+                        <p>아파트, 오피스텔, 주택 등<br>주거 형태를 선택하세요</p>
+                    </div>
+                    <div class="flow-card">
+                        <div class="flow-number">2</div>
+                        <h3>인테리어 무드</h3>
+                        <p>모던, 코지, 팝, 럭셔리<br>선호하는 스타일을 알려주세요</p>
+                    </div>
+                    <div class="flow-card">
+                        <div class="flow-number">3</div>
+                        <h3>예산</h3>
+                        <p>실속형부터 프리미엄까지<br>예산 범위를 선택하세요</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="survey" class="survey-section">
+            <div class="container">
+                <h2 class="section-title">맞춤 추천 받기</h2>
+                <div class="survey-grid">
+                    <div class="survey-form-panel">
+                        <h3>기본 정보 입력</h3>
+                        <form id="recommend-form">
+                            <div class="form-row">
+                                <label>
+                                    인테리어 무드
+                                    <select name="vibe">
+                                        <option value="modern">모던 / 미니멀</option>
+                                        <option value="cozy">코지 / 따뜻함</option>
+                                        <option value="pop">유니크 / 팝</option>
+                                        <option value="luxury">럭셔리 / 아티스틱</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    가구 인원
+                                    <input type="number" name="household_size" min="1" value="2">
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    주거 형태
+                                    <select name="housing_type">
+                                        <option value="apartment">아파트</option>
+                                        <option value="officetel">오피스텔</option>
+                                        <option value="house">주택</option>
+                                        <option value="studio">원룸</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    예산 레벨
+                                    <select name="budget_level">
+                                        <option value="budget">실속형</option>
+                                        <option value="standard" selected>보통</option>
+                                        <option value="premium">프리미엄</option>
+                                        <option value="luxury">럭셔리</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div class="form-row">
+                                <label>
+                                    우선순위
+                                    <select name="priority">
+                                        <option value="design">디자인</option>
+                                        <option value="tech">기술</option>
+                                        <option value="eco">에너지 효율</option>
+                                        <option value="value">가성비</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn primary full">이 조건으로 추천 받기</button>
+                        </form>
+                    </div>
+
+                    <div class="survey-result-panel">
+                        <h3>추천 결과</h3>
+                        <div id="loading" style="display:none;">추천을 불러오는 중입니다...</div>
+                        <div id="recommend-result"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="products-preview" class="products-preview">
+            <div class="container">
+                <h2 class="section-title">이런 조합으로 추천해 드립니다</h2>
+                <div class="preview-cards">
+                    <div class="preview-card">
+                        <h3>신혼부부 패키지</h3>
+                        <p>600L 냉장고 + 워시타워 컴팩트 + MoodUP 컬러 조합</p>
+                        <div class="preview-price">총 720만원</div>
+                    </div>
+                    <div class="preview-card">
+                        <h3>가족 패키지</h3>
+                        <p>870L 냉장고 + 24kg 세탁기 + OLED TV 65형</p>
+                        <div class="preview-price">총 1,260만원</div>
+                    </div>
+                    <div class="preview-card">
+                        <h3>프리미엄 패키지</h3>
+                        <p>LG SIGNATURE 키친 스위트 + OLED evo 86형</p>
+                        <div class="preview-price">총 2,500만원</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="bestshop" class="bestshop-section">
+            <div class="container">
+                <h2 class="section-title">베스트샵 상담 예약</h2>
+                <p class="section-subtitle">전문 상담사와 함께 최적의 가전 포트폴리오를 구성해보세요</p>
+                <a href="https://bestshop.lge.co.kr/counselReserve/main/MC11420001?inflow=lgekor" target="_blank" class="btn primary">베스트샵 방문 예약</a>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">ABOUT</h2>
+                <p class="about-text">
+                    LG Home Styling은 이사와 신혼 등 라이프 이벤트 시점에 맞춰<br>
+                    공간·취향·예산 데이터를 바탕으로 최적의 LG 가전 패키지를 제안합니다.<br>
+                    공간 시각화부터 견적·상담까지 이어주는 엔드투엔드 홈스타일링 경험을 제공합니다.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 LG Electronics. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
