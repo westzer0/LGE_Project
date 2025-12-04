@@ -7,6 +7,8 @@ Recommendation Engine Service Layer
 3. Soft Score (스코어링)
 4. 최종 추천 반환
 """
+import logging
+import traceback
 from typing import Dict, List
 from django.db.models import QuerySet, Count
 from api.models import Product
@@ -14,6 +16,8 @@ from api.rule_engine import UserProfile, build_profile
 from api.utils.scoring import calculate_product_score
 from api.utils.taste_scoring import calculate_product_score_with_taste_logic
 from .recommendation_reason_generator import reason_generator
+
+logger = logging.getLogger(__name__)
 
 
 class RecommendationEngine:
@@ -128,13 +132,14 @@ class RecommendationEngine:
             }
         
         except ValueError as e:
+            logger.warning(f"Recommendation validation error: {str(e)}", exc_info=True)
             return {
                 'success': False,
                 'error': str(e),
                 'recommendations': []
             }
         except Exception as e:
-            import traceback
+            logger.error(f"Recommendation engine error: {str(e)}", exc_info=True)
             print(f"Recommendation Error: {traceback.format_exc()}")
             return {
                 'success': False,
@@ -169,13 +174,18 @@ class RecommendationEngine:
     
     def _filter_products(self, user_profile: dict) -> QuerySet:
         """
-        Step 1: Hard Filtering
+        Step 1: Hard Filtering (엄격한 필터링)
         - 카테고리 필터
         - 가격 범위 필터
         - 스펙 존재 필터
-        - 가족 인원 필터 (ProductDemographics 기반)
-        - 반려동물 필터 (제품 스펙/이름 기반)
+        - 반려동물 필터
+        - 가족 구성 기반 용량 필터 (NEW)
+        - 주거 형태/평수 기반 크기 필터 (NEW)
+        - 생활 패턴 기반 필터 (NEW)
+        - 우선순위 기반 필터 (NEW)
         """
+        from api.utils.product_filters import apply_all_filters
+        
         # 예산 범위 계산
         budget_level = user_profile.get('budget_level', 'medium')
         min_price, max_price = self.budget_mapping.get(
@@ -187,7 +197,7 @@ class RecommendationEngine:
         household_size = user_profile.get('household_size', 2)
         has_pet = user_profile.get('has_pet', False)
         
-        # Django ORM 쿼리
+        # Step 1: 기본 필터 (Django ORM 쿼리)
         # 카테고리 필터링: 정확히 일치하는 카테고리만
         products = (
             Product.objects
@@ -227,7 +237,24 @@ class RecommendationEngine:
                 products = products.exclude(pet_filter)
                 print(f"[Filter] 펫 관련 제품 제외 (반려동물 없음)")
         
-        print(f"[Filter] 카테고리: {categories}, 가격: {min_price}~{max_price}원, 가족: {household_size}명, 반려동물: {has_pet}, 결과: {products.count()}개")
+        print(f"[Filter Step 1] 기본 필터: 카테고리={categories}, 가격={min_price}~{max_price}원, 가족={household_size}명, 반려동물={has_pet}, 결과={products.count()}개")
+        
+        # Step 2: 추가 필터링 (Python 레벨에서 처리)
+        # QuerySet을 리스트로 변환하여 상세 필터링 적용
+        products_list = list(products)
+        
+        # 엄격한 필터링 적용
+        filtered_products = apply_all_filters(products_list, user_profile)
+        
+        # 필터링된 제품 ID 리스트로 QuerySet 재생성
+        if filtered_products:
+            product_ids = [p.id for p in filtered_products]
+            products = Product.objects.filter(id__in=product_ids)
+        else:
+            # 필터링 결과가 없으면 빈 QuerySet 반환
+            products = Product.objects.none()
+        
+        print(f"[Filter Step 2] 추가 필터링 후: {products.count()}개")
         
         return products
     
@@ -274,6 +301,12 @@ class RecommendationEngine:
                         profile=profile
                     )
                 
+                # 점수 범위 검증 (0.0 ~ 1.0)
+                if score < 0.0:
+                    score = 0.0
+                elif score > 1.0:
+                    score = 1.0
+                
                 scored.append({
                     'product': product,
                     'score': score,
@@ -283,6 +316,7 @@ class RecommendationEngine:
                     print(f"[Score] {idx}. {product.name}: {score:.2f}")
             
             except Exception as e:
+                logger.warning(f"Score calculation failed for product {product.id}: {str(e)}", exc_info=True)
                 print(f"[Score Error] {product.name}: {e}")
                 # 스코어 계산 실패 시 기본값 0.5
                 scored.append({
@@ -328,44 +362,8 @@ class RecommendationEngine:
             'reason': reason,
         }
     
-    def _build_recommendation_reason(
-        self,
-        product: Product,
-        user_profile: dict,
-        score: float
-    ) -> str:
-        """
-        추천 이유 생성
-        """
-        reasons = []
-        
-        # 점수 기반 이유
-        if score >= 0.8:
-            priority = user_profile.get('priority', 'value')
-            priority_labels = {
-                'design': '디자인',
-                'tech': '기술 사양',
-                'eco': '에너지 효율',
-                'value': '가성비',
-            }
-            reasons.append(
-                f"당신의 선호도({priority_labels.get(priority, '개인맞춤')})에 "
-                f"가장 잘 맞는 제품입니다."
-            )
-        elif score >= 0.6:
-            reasons.append("우수한 성능과 가성비를 갖춘 제품입니다.")
-        else:
-            reasons.append("조건에 맞는 추천 제품입니다.")
-        
-        # 할인 정보
-        if product.discount_price and product.price and product.price > 0:
-            discount_pct = (
-                (float(product.price) - float(product.discount_price)) / float(product.price) * 100
-            )
-            if discount_pct > 10:
-                reasons.append(f"{int(discount_pct)}% 할인 중입니다.")
-        
-        return " ".join(reasons)
+    # _build_recommendation_reason 메서드는 제거됨
+    # 추천 이유 생성은 recommendation_reason_generator.py의 RecommendationReasonGenerator를 사용
 
 
 # ============================================================

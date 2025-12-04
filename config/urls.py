@@ -1,4 +1,4 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
@@ -11,13 +11,14 @@ from api.views import (
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
     ai_chat_view, ai_status_view,
 )
+from api.views_drf import convert_figma_to_code
 
 # DRF ViewSet 라우터
-from api.views_drf import RecommendAPIView, PortfolioViewSet, OnboardingSessionViewSet
+# from api.views_drf import RecommendAPIView, PortfolioViewSet, OnboardingSessionViewSet
 
-router = DefaultRouter()
-router.register(r'portfolios', PortfolioViewSet, basename='portfolio')
-router.register(r'onboarding-sessions', OnboardingSessionViewSet, basename='onboarding-session')
+# router = DefaultRouter()
+# router.register(r'portfolios', PortfolioViewSet, basename='portfolio')
+# router.register(r'onboarding-sessions', OnboardingSessionViewSet, basename='onboarding-session')
 
 urlpatterns = [
     # 메인 페이지
@@ -59,8 +60,8 @@ urlpatterns = [
     path('api/portfolio/<str:portfolio_id>/share/', portfolio_share_view, name='portfolio_share'),
     
     # DRF API 엔드포인트 (새로운 방식)
-    path('api/drf/recommend/', RecommendAPIView.as_view(), name='drf_recommend'),
-    path('api/drf/', include(router.urls)),  # /api/drf/portfolios/, /api/drf/onboarding-sessions/
+    # path('api/drf/recommend/', RecommendAPIView.as_view(), name='drf_recommend'),
+    # path('api/drf/', include(router.urls)),  # /api/drf/portfolios/, /api/drf/onboarding-sessions/
     
     # AI (ChatGPT) API
     path('api/ai/status/', ai_status_view, name='ai_status'),
@@ -68,4 +69,7 @@ urlpatterns = [
     path('api/ai/style-message/', ai_style_message_view, name='ai_style_message'),
     path('api/ai/review-summary/', ai_review_summary_view, name='ai_review_summary'),
     path('api/ai/chat/', ai_chat_view, name='ai_chat'),
+    
+    # Figma 이미지 → 코드 변환 API
+    path('api/figma-to-code/', convert_figma_to_code, name='figma_to_code'),
 ]

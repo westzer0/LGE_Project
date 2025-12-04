@@ -50,3 +50,7 @@ Thumbs.db
 *.temp
 scripts/
 merged_data_analysis.csv
+
+# Test files (optional - remove if you want to commit tests)
+test_oracle_connection.py
+test_figma_conversion.py
