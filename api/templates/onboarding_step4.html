@@ -9,7 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -266,7 +267,8 @@
         .main-content {
             margin-top: 160px;
             min-height: calc(100vh - 160px);
-            padding: 60px 0 180px; /* 하단 버튼 공간 확보 */
+            padding: 60px 0 180px;
+            /* 하단 버튼 공간 확보 */
         }
 
         .onboarding-container {
@@ -325,7 +327,8 @@
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
-            display: none; /* 기본적으로 숨김 */
+            display: none;
+            /* 기본적으로 숨김 */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -365,7 +368,8 @@
             max-width: 460px;
             margin-left: auto;
             margin-right: auto;
-            display: none; /* 기본적으로 숨김 */
+            display: none;
+            /* 기본적으로 숨김 */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -800,7 +804,7 @@
         // ============================================
         // 초기화: 3단계에서 선택한 주요 공간 확인
         // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // 3단계에서 선택한 주요 공간 가져오기
             const step3MainSpace = sessionStorage.getItem('step3_main_space');
             if (step3MainSpace) {
@@ -822,7 +826,7 @@
         // ============================================
         function showQuestionsBasedOnSpaces() {
             console.log('showQuestionsBasedOnSpaces 호출됨, selectedMainSpaces:', selectedMainSpaces);
-            
+
             // selectedMainSpaces가 배열이 아니거나 비어있으면 경고
             if (!Array.isArray(selectedMainSpaces) || selectedMainSpaces.length === 0) {
                 console.warn('⚠️ 주요 공간이 선택되지 않았습니다. selectedMainSpaces:', selectedMainSpaces);
@@ -842,7 +846,7 @@
 
             // 질문 순서 결정 (우선순위: 요리 > 세탁 > 미디어)
             questionOrder = [];
-            
+
             if (hasAll) {
                 // 전체 선택 시 모든 질문 순서대로
                 questionOrder = ['cooking', 'laundry', 'media'];
@@ -875,7 +879,7 @@
         // ============================================
         function showQuestion(type) {
             let questionSection, optionsGrid;
-            
+
             if (type === 'cooking') {
                 questionSection = document.getElementById('cookingQuestionSection');
                 optionsGrid = document.getElementById('cookingOptionsGrid');
@@ -895,11 +899,11 @@
                 questionSection.classList.add('show');
                 optionsGrid.classList.add('show');
                 console.log(`${type} 질문 표시 완료`);
-                
+
                 // 스크롤을 질문 위치로 이동
                 setTimeout(() => {
-                    questionSection.scrollIntoView({ 
-                        behavior: 'smooth', 
+                    questionSection.scrollIntoView({
+                        behavior: 'smooth',
                         block: 'start',
                         inline: 'nearest'
                     });
@@ -918,7 +922,7 @@
         function showNextQuestion() {
             // 다음 질문 인덱스로 이동
             currentQuestionIndex++;
-            
+
             // 다음 질문이 있으면 표시
             if (currentQuestionIndex < questionOrder.length) {
                 const nextQuestionType = questionOrder[currentQuestionIndex];
@@ -947,7 +951,7 @@
                     // 클릭한 카드에 선택 상태 추가
                     this.classList.add('selected');
                     selectedCooking = this.dataset.value;
-                    
+
                     // 다음 질문 표시
                     showNextQuestion();
                 }
@@ -975,7 +979,7 @@
                     // 클릭한 카드에 선택 상태 추가
                     this.classList.add('selected');
                     selectedLaundry = this.dataset.value;
-                    
+
                     // 다음 질문 표시
                     showNextQuestion();
                 }
@@ -1003,7 +1007,7 @@
                     // 클릭한 카드에 선택 상태 추가
                     this.classList.add('selected');
                     selectedMedia = this.dataset.value;
-                    
+
                     // 다음 질문 표시 (마지막 질문이면 표시 안 함)
                     showNextQuestion();
                 }
@@ -1018,7 +1022,7 @@
         // ============================================
         function updateButton() {
             const nextBtn = document.getElementById('nextBtn');
-            
+
             // 표시된 질문들에 대한 답변이 모두 있는지 확인
             const hasKitchen = selectedMainSpaces.includes('kitchen');
             const hasDressing = selectedMainSpaces.includes('dressing');
@@ -1141,12 +1145,12 @@
                         console.log('저장된 세션 ID:', data.session_id);
                         console.log('현재 단계:', data.current_step);
                         console.log('다음 단계:', data.next_step);
-                        
+
                         // 4단계 선택 값 저장
                         sessionStorage.setItem('step4_cooking', selectedCooking || '');
                         sessionStorage.setItem('step4_laundry', selectedLaundry || '');
                         sessionStorage.setItem('step4_media', selectedMedia || '');
-                        
+
                         // 다음 단계로 이동 (5단계가 있으면 여기서 이동)
                         // TODO: 5단계 URL로 변경
                         console.log('4단계 데이터 저장 완료, 다음 단계로 이동합니다.');
@@ -1240,7 +1244,7 @@
         history.pushState(null, null, location.href);
 
         // 정상적인 네비게이션 시 플래그 설정
-        document.getElementById('nextBtn').addEventListener('click', function() {
+        document.getElementById('nextBtn').addEventListener('click', function () {
             isNavigating = true;
         });
 
@@ -1259,7 +1263,7 @@
         });
 
         // 모달 외부 클릭 시 닫기
-        document.getElementById('exitModal').addEventListener('click', function(e) {
+        document.getElementById('exitModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 hideExitModal();
             }
@@ -1276,12 +1280,12 @@
         // ============================================
         // 페이지 로드 시 버튼 상태 초기화 및 이전 선택값 복원
         // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // sessionStorage에서 이전에 선택한 값 복원
             const savedCooking = sessionStorage.getItem('step4_cooking');
             const savedLaundry = sessionStorage.getItem('step4_laundry');
             const savedMedia = sessionStorage.getItem('step4_media');
-            
+
             if (savedCooking) {
                 selectedCooking = savedCooking;
                 const cookingCard = document.querySelector(`.cooking-option[data-value="${savedCooking}"]`);
@@ -1289,7 +1293,7 @@
                     cookingCard.classList.add('selected');
                 }
             }
-            
+
             if (savedLaundry) {
                 selectedLaundry = savedLaundry;
                 const laundryCard = document.querySelector(`.laundry-option[data-value="${savedLaundry}"]`);
@@ -1297,7 +1301,7 @@
                     laundryCard.classList.add('selected');
                 }
             }
-            
+
             if (savedMedia) {
                 selectedMedia = savedMedia;
                 const mediaCard = document.querySelector(`.media-option[data-value="${savedMedia}"]`);
@@ -1305,12 +1309,12 @@
                     mediaCard.classList.add('selected');
                 }
             }
-            
+
             // 복원된 값에 따라 질문 표시 상태 업데이트
             if (selectedCooking || selectedLaundry || selectedMedia) {
                 showQuestionsBasedOnSpaces();
             }
-            
+
             // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
@@ -1323,7 +1327,7 @@
         // ============================================
         // 뒤로가기 감지 시 현재 단계 데이터 저장
         // ============================================
-        window.addEventListener('pageshow', function(event) {
+        window.addEventListener('pageshow', function (event) {
             // 뒤로가기로 돌아왔을 때 (bfcache에서 복원된 경우)
             if (event.persisted) {
                 console.log('뒤로가기로 페이지 복원됨');
@@ -1340,4 +1344,3 @@
 </body>
 
 </html>
-
