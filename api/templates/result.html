@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
             background-color: #fff;
             color: #1a1a1a;
             line-height: 1.6;
@@ -555,10 +555,10 @@
             position: relative;
             scroll-margin-top: 200px;
             display: grid;
-            grid-template-columns: 3fr 2.5fr;
+            grid-template-columns: 1000px 1fr;
             gap: 0;
             width: 100%;
-            min-height: 100vh;
+            height: 1000px;
         }
 
 
@@ -570,18 +570,37 @@
             position: relative;
             display: inline-block;
             background: transparent;
-            color: #FD312E;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 12px;
+            padding: 0;
+            border-radius: 0;
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 0;
             z-index: 10;
+            transition: none;
+            letter-spacing: 0;
+            width: fit-content;
+            box-shadow: none;
         }
 
-        .match-badge.gray {
-            background: transparent;
-            color: #999;
+        .match-badge::before {
+            display: none;
+        }
+
+        .match-badge:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .match-badge .match-percent {
+            font-weight: 700;
+        }
+
+        .match-badge.high {
+            color: #FD312E;
+        }
+
+        .match-badge.low {
+            color: #626262;
         }
 
         .product-content {
@@ -590,16 +609,19 @@
 
         .product-image-wrapper {
             position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 100vh;
+            width: 1000px;
+            height: 1000px;
             background: #f5f5f5;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .product-image {
-            width: 100%;
-            height: 100%;
-            min-height: 100vh;
+            width: 1000px;
+            height: 1000px;
             object-fit: cover;
             background: #f5f5f5;
         }
@@ -607,22 +629,24 @@
         .product-info {
             background: #fff;
             padding: 40px 40px 40px 40px;
-            padding-right: 180px; /* 저장, 카카오톡 공유, URL 복사 버튼 공간 확보 */
+            padding-right: 180px;
+            /* 저장, 카카오톡 공유, URL 복사 버튼 공간 확보 */
             display: flex;
             flex-direction: column;
             gap: 24px;
             position: relative;
-            height: 100%;
-            min-height: 100vh;
+            height: 1000px;
             overflow-y: auto;
         }
 
         .product-title {
-            font-size: 20px;
+            font-size: 23px;
             font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 0;
             line-height: 1.5;
+            word-break: break-word;
+            max-width: 50ch;
         }
 
         .recommend-reason-box {
@@ -633,13 +657,14 @@
 
         .recommend-reason-title {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 8px;
         }
 
         .recommend-reason-text {
             font-size: 15px;
+            font-weight: 400;
             color: #1a1a1a;
             line-height: 1.6;
         }
@@ -652,14 +677,15 @@
 
         .review-analysis-title {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 8px;
         }
 
         .review-analysis-text {
             font-size: 14px;
-            color: #666;
+            font-weight: 400;
+            color: #1a1a1a;
             line-height: 1.6;
             margin-bottom: 8px;
             list-style: none;
@@ -668,7 +694,7 @@
 
         .review-analysis-text:before {
             content: "• ";
-            color: #666;
+            color: #1a1a1a;
             margin-right: 4px;
         }
 
@@ -684,7 +710,7 @@
 
         .price-section-title {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 8px;
         }
@@ -692,13 +718,13 @@
         .price-row {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: flex-start;
             gap: 8px;
             flex-wrap: wrap;
         }
 
         .price-row .price-label {
-            margin-right: auto;
+            margin-right: 0;
         }
 
         .price-label {
@@ -711,51 +737,82 @@
 
         .price-original {
             font-size: 16px;
-            color: #999;
-            text-decoration: line-through;
-            text-align: right;
+            color: #666666;
+            text-decoration: none;
+            text-align: left;
+            padding-left: 208px;
+            margin-top: 2px;
+        }
+
+        .price-sale {
+            font-size: 20px;
+            color: #1a1a1a;
+            text-align: left;
+            padding-left: 179px;
+            margin-top: 0;
         }
 
         .price-discount {
             font-size: 16px;
             color: #999;
             text-decoration: line-through;
-            text-align: right;
+            text-align: left;
+            padding-left: 150px;
+            margin-top: 2px;
         }
 
         .price-final {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
-            color: #FD312E;
-            margin-top: 4px;
-            text-align: right;
+            color: #FF0000;
+            margin-top: 0;
+            text-align: left;
+            padding-left: 150px;
         }
+
+        /* 두번째 가전(광파오븐)의 가격 숫자들을 오른쪽으로 이동 */
+        #product-microwave .price-original {
+            padding-left: 210px;
+        }
+
+        #product-microwave .price-sale {
+            padding-left: 190.5px;
+        }
+
+        #product-microwave .price-final {
+            padding-left: 163px;
+        }
+
 
         .price-disclaimer {
             font-size: 12px;
-            color: #999;
+            color: #666666;
             margin-top: 8px;
             line-height: 1.5;
         }
 
         .spec-button {
-            margin-top: 0;
-            padding: 14px 24px;
+            margin-top: 20px;
+            padding: 0;
             background: #fff;
             border: 1px solid #e5e5e5;
-            border-radius: 8px;
+            border-radius: 999px;
             font-size: 14px;
             color: #666;
             cursor: pointer;
             transition: all 0.2s;
-            width: 100%;
+            width: 130px;
+            height: 50px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .spec-button:hover {
             background: #f5f5f5;
-            border-color: #A50034;
-            color: #A50034;
+            border-color: #FD312E;
+            color: #FD312E;
         }
 
         .scroll-to-top-button {
@@ -872,6 +929,716 @@
         }
 
         /* ============================================
+           구매상담예약 모달
+           ============================================ */
+        .consultation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .consultation-modal.active {
+            display: flex;
+        }
+
+        .consultation-modal-content {
+            background: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin: auto;
+        }
+
+        .consultation-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #1a1a1a;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .consultation-modal-close:hover {
+            color: #666;
+        }
+
+        /* 확인 모달 */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10002;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-modal.active {
+            display: flex;
+        }
+
+        .confirm-modal-content {
+            background: #fff;
+            border-radius: 8px;
+            padding: 32px 40px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .confirm-modal-message {
+            font-size: 14px;
+            font-weight: 400;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .confirm-modal-question {
+            font-size: 14px;
+            font-weight: 400;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .confirm-modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .confirm-modal-btn {
+            padding: 12px 32px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            min-width: 100px;
+        }
+
+        .confirm-modal-btn-cancel {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #1a1a1a;
+        }
+
+        .confirm-modal-btn-cancel:hover {
+            background: #f5f5f5;
+        }
+
+        .confirm-modal-btn-confirm {
+            background: #EA1917;
+            color: #fff;
+        }
+
+        .confirm-modal-btn-confirm:hover {
+            background: #c01415;
+        }
+
+        .consultation-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .consultation-modal-description {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 400;
+            margin-bottom: 15px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .consultation-icon {
+            font-size: 18px;
+        }
+
+        .consultation-section {
+            margin-bottom: 32px;
+        }
+
+        .consultation-section:last-of-type {
+            margin-bottom: 24px;
+        }
+
+        .consultation-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .required {
+            color: #FF0000;
+            margin-left: 4px;
+        }
+
+        /* 제품정보 */
+        .consultation-products-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 12px;
+            background: #f5f5f5;
+        }
+
+        .consultation-products-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .consultation-products-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .consultation-products-wrapper::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        .consultation-products-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        .consultation-products {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .consultation-product-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            position: relative;
+            min-height: 120px;
+        }
+
+        .consultation-product-remove {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #999;
+            padding: 0;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .consultation-product-remove:hover {
+            color: #1a1a1a;
+        }
+
+        .consultation-product-image {
+            width: 70px;
+            height: 140px;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 4px;
+            flex-shrink: 0;
+            border: 1px solid #e5e5e5;
+            padding: 10px;
+        }
+
+        .consultation-product-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 30px;
+        }
+
+        .consultation-product-field {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            line-height: 1.5;
+        }
+
+        .consultation-product-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #EA1917;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .consultation-product-value {
+            font-size: 13px;
+            color: #1a1a1a;
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .consultation-product-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        .consultation-product-model {
+            font-size: 13px;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        .consultation-product-price-info {
+            font-size: 13px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            line-height: 1.4;
+        }
+
+        .consultation-product-discount-rate {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .consultation-product-benefit-price {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .consultation-product-original-price {
+            color: #999;
+            text-decoration: line-through;
+            font-weight: 400;
+        }
+
+        /* 상담목적 버튼 */
+        .consultation-purpose-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .purpose-btn {
+            flex: 1;
+            min-width: 120px;
+            max-width: 140px;
+            padding: 12px 20px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .purpose-btn:hover {
+            border-color: #EA1917;
+            color: #EA1917;
+        }
+
+        .purpose-btn.selected {
+            border-color: #EA1917;
+            background: #EA1917;
+            color: #fff;
+        }
+
+        .purpose-btn:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        /* 캘린더 */
+        .consultation-calendar-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .calendar-nav-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #1a1a1a;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            border-color: #A50034;
+            color: #A50034;
+        }
+
+        .calendar-month-year {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 100%;
+        }
+
+        .weekday.sunday {
+            color: #FF0000;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            align-items: center;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: none;
+            position: relative;
+            min-width: 40px;
+            min-height: 40px;
+            line-height: 1.2;
+            height: 40px;
+            width: 100%;
+        }
+
+        .calendar-day.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.today {
+            font-weight: 700;
+        }
+
+        .calendar-day.today:not(.selected) {
+            background: transparent;
+        }
+
+        .calendar-day.available:hover {
+            background: transparent;
+        }
+
+        .calendar-day.available:hover span {
+            text-decoration: underline;
+        }
+
+        .calendar-day.selected {
+            background: #EA1917 !important;
+            color: #fff !important;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+            line-height: 1.2;
+            font-size: 14px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .calendar-day.selected:hover {
+            background: #EA1917 !important;
+        }
+
+        .calendar-day.selected:hover span {
+            text-decoration: none !important;
+        }
+
+        .calendar-day.selected,
+        .calendar-day.selected * {
+            color: #fff !important;
+        }
+
+        .calendar-day.today.selected {
+            background: #EA1917;
+            color: #fff !important;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            padding: 0;
+            line-height: 1.2;
+            font-size: 14px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .calendar-day.today.selected,
+        .calendar-day.today.selected * {
+            color: #fff !important;
+        }
+
+        /* 시간 선택 */
+        .consultation-time-slots {
+            margin-top: 20px;
+        }
+
+        .time-slot-group {
+            margin-bottom: 16px;
+        }
+
+        .time-slot-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .time-slot-period {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .time-period-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-period-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .time-slot-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+            gap: 8px;
+            width: 100%;
+        }
+
+        .time-slot-btn {
+            padding: 10px 12px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            height: auto;
+            box-sizing: border-box;
+            text-align: center;
+            white-space: nowrap;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .time-slot-btn:hover:not(.selected):not(:disabled) {
+            border-color: #EA1917;
+            color: #EA1917;
+            background: #fff;
+        }
+
+        .time-slot-btn {
+            border: 2px solid transparent;
+            box-sizing: border-box;
+        }
+
+        .time-slot-btn.selected {
+            border: 2px solid #EA1917 !important;
+            background: #fff !important;
+            color: #EA1917 !important;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .time-slot-btn.selected:hover {
+            border-color: #EA1917 !important;
+            color: #EA1917 !important;
+            background: #fff !important;
+        }
+
+        /* 선택되지 않은 버튼도 동일한 border 두께 유지 */
+        .time-slot-btn:not(.selected) {
+            border: 2px solid #e5e5e5;
+        }
+
+        .early-contact-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+        }
+
+        .early-contact-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #EA1917;
+        }
+
+        /* 입력 필드 */
+        .consultation-form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .consultation-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1a1a1a;
+            background: #F3F5F7;
+        }
+
+        .consultation-input:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        .consultation-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1a1a1a;
+            background: #fff;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .consultation-textarea:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        .textarea-counter {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* 예약하기 버튼 */
+        .consultation-submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            background: #ccc;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: not-allowed;
+            transition: all 0.2s;
+        }
+
+        .consultation-submit-btn:enabled {
+            background: #EA1917;
+            cursor: pointer;
+        }
+
+        .consultation-submit-btn:enabled:hover {
+            background: #c01415;
+        }
+
+        /* ============================================
            Bottom Action Buttons
            ============================================ */
         .bottom-actions {
@@ -899,6 +1666,13 @@
             justify-content: center;
         }
 
+        .bottom-actions-row-vertical {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
         .action-button {
             padding: 14px 24px;
             border-radius: 8px;
@@ -908,10 +1682,15 @@
             transition: all 0.2s;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             border: none;
             color: #fff;
             background: #1a1a1a;
+            flex-shrink: 0;
+            white-space: nowrap;
+            height: auto;
+            min-height: 48px;
         }
 
         .action-button:hover {
@@ -936,6 +1715,7 @@
             color: #fff;
             background: #FF456D;
             text-align: center;
+            margin-left: 30px;
         }
 
         .action-button-large:hover {
@@ -1006,6 +1786,38 @@
 
             .product-item {
                 padding: 24px;
+            }
+
+            .time-slot-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            }
+
+            .time-slot-btn {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .time-slot-buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .time-slot-btn {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .time-slot-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .time-slot-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             }
         }
     </style>
@@ -1111,13 +1923,17 @@
             </div>
             <div class="action-icon-button kakao" onclick="shareKakao()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                    </path>
                 </svg>
                 <span class="tooltip">카카오톡 공유하기</span>
             </div>
             <div class="action-icon-button link" onclick="copyLink()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                    </path>
                 </svg>
                 <span class="tooltip">URL 복사하기</span>
             </div>
@@ -1130,7 +1946,8 @@
                 <div class="style-analysis-label">스타일 분석</div>
                 <h1 class="banner-title" id="bannerTitle">둘만의 신혼 무드를 완성하는 오브제 스타일</h1>
                 <p class="banner-description" id="bannerDescription">
-                    당신의 공간 분위기와 요리 중심의 라이프스타일을 반영해 Essence White 컬러의 오브제컬렉션 냉장고, 광파오븐, 식기세척기로 구성했어요. 완성도와 기능성을 모두 갖춘 표준 예산 범위 내의 추천이에요.
+                    당신의 공간 분위기와 요리 중심의 라이프스타일을 반영해 Essence White 컬러의 오브제컬렉션 냉장고, 광파오븐, 식기세척기로 구성했어요. 완성도와 기능성을 모두 갖춘 표준
+                    예산 범위 내의 추천이에요.
                 </p>
                 <div class="appliance-icons-container">
                     <div class="appliance-icons">
@@ -1164,10 +1981,13 @@
                 <!-- 제품 1: 냉장고 -->
                 <div class="product-item" id="product-refrigerator">
                     <div class="product-image-wrapper">
-                        <img id="product-image-refrigerator" src="" alt="LG Dios AI Objet Collection 냉장고" class="product-image" onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+AI+Objet+Collection+Refrigerator'">
+                        <img id="product-image-refrigerator"
+                            src="https://www.lge.co.kr/kr/images/refrigerators/md10625884/gallery/medium-interior01.jpg"
+                            alt="LG Dios AI Objet Collection 냉장고" class="product-image"
+                            onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+AI+Objet+Collection+Refrigerator'">
                     </div>
                     <div class="product-info">
-                        <div class="match-badge">취향 89% 일치</div>
+                        <div class="match-badge high">취향 <span class="match-percent">89%</span> 일치</div>
                         <h2 class="product-title">LG 디오스 AI 오브제컬렉션 STEM 얼음정수 냉장고 (노크온 매직스페이스)</h2>
                         <div class="recommend-reason-box">
                             <div class="recommend-reason-title">추천 이유</div>
@@ -1181,11 +2001,12 @@
                         <div class="price-section">
                             <div class="price-section-title">구매 가격</div>
                             <div class="price-row">
+                                <span class="price-label">정가</span>
                                 <span class="price-original">3,340,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">판매가</span>
-                                <span class="price-original">2,140,000원</span>
+                                <span class="price-sale">2,140,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">최대 혜택가</span>
@@ -1200,10 +2021,13 @@
                 <!-- 제품 2: 광파오븐 -->
                 <div class="product-item" id="product-microwave">
                     <div class="product-image-wrapper">
-                        <img id="product-image-microwave" src="" alt="LG Dios Objet Collection 광파오븐" class="product-image" onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+Objet+Collection+Microwave'">
+                        <img id="product-image-microwave"
+                            src="https://www.lge.co.kr/kr/images/microwaves-and-ovens/md10200826/gallery/medium-interior01.jpg"
+                            alt="LG Dios Objet Collection 광파오븐" class="product-image"
+                            onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+Objet+Collection+Microwave'">
                     </div>
                     <div class="product-info">
-                        <div class="match-badge gray">취향 69% 일치</div>
+                        <div class="match-badge low">취향 <span class="match-percent">69%</span> 일치</div>
                         <h2 class="product-title">LG 디오스 오브제컬렉션 광파오븐</h2>
                         <div class="recommend-reason-box">
                             <div class="recommend-reason-title">추천 이유</div>
@@ -1217,11 +2041,12 @@
                         <div class="price-section">
                             <div class="price-section-title">구매 가격</div>
                             <div class="price-row">
+                                <span class="price-label">정가</span>
                                 <span class="price-original">1,065,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">판매가</span>
-                                <span class="price-original">950,000원</span>
+                                <span class="price-sale">950,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">최대 혜택가</span>
@@ -1236,10 +2061,13 @@
                 <!-- 제품 3: 식기세척기 -->
                 <div class="product-item" id="product-dishwasher">
                     <div class="product-image-wrapper">
-                        <img id="product-image-dishwasher" src="" alt="LG Dios AI Objet Collection 식기세척기" class="product-image" onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+AI+Objet+Collection+Dishwasher'">
+                        <img id="product-image-dishwasher"
+                            src="https://www.lge.co.kr/kr/images/dishwashers/md10539834/gallery/medium-interior01.jpg"
+                            alt="LG Dios AI Objet Collection 식기세척기" class="product-image"
+                            onerror="this.src='https://via.placeholder.com/800x600?text=LG+Dios+AI+Objet+Collection+Dishwasher'">
                     </div>
                     <div class="product-info">
-                        <div class="match-badge">취향 75% 일치</div>
+                        <div class="match-badge high">취향 <span class="match-percent">75%</span> 일치</div>
                         <h2 class="product-title">LG 디오스 AI 오브제컬렉션 식기세척기</h2>
                         <div class="recommend-reason-box">
                             <div class="recommend-reason-title">추천 이유</div>
@@ -1253,11 +2081,12 @@
                         <div class="price-section">
                             <div class="price-section-title">구매 가격</div>
                             <div class="price-row">
+                                <span class="price-label">정가</span>
                                 <span class="price-original">2,080,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">판매가</span>
-                                <span class="price-original">1,960,000원</span>
+                                <span class="price-sale">1,960,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">최대 혜택가</span>
@@ -1277,13 +2106,17 @@
                 <div class="bottom-actions-row">
                     <button class="action-button" onclick="addAllToCart()">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
                         </svg>
                         장바구니 모두 담기
                     </button>
                     <button class="action-button" onclick="retryOnboarding()">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
                         </svg>
                         다시 추천받기
                     </button>
@@ -1321,6 +2154,129 @@
         </div>
     </div>
 
+    <!-- 구매상담예약 모달 -->
+    <div class="consultation-modal" id="consultationModal" onclick="handleModalClick(event)">
+        <div class="consultation-modal-content" onclick="event.stopPropagation()">
+            <button class="consultation-modal-close" onclick="closeConsultationModal()">×</button>
+            <h2 class="consultation-modal-title">구매상담예약</h2>
+            <p class="consultation-modal-description">
+                <span class="consultation-icon">🎧</span>
+                처음 구매 하시는 분들을 위한 전용 구매상담 예약 서비스입니다.
+            </p>
+
+            <!-- 제품정보 섹션 -->
+            <div class="consultation-section">
+                <h3 class="consultation-section-title">제품정보</h3>
+                <div class="consultation-products-wrapper">
+                    <div class="consultation-products" id="consultationProducts">
+                        <!-- 제품 정보가 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상담목적 섹션 -->
+            <div class="consultation-section">
+                <h3 class="consultation-section-title">상담목적<span class="required">*</span></h3>
+                <div class="consultation-purpose-buttons">
+                    <button class="purpose-btn" data-purpose="single" onclick="selectPurpose(this, 'single')">단품
+                        구매</button>
+                    <button class="purpose-btn" data-purpose="multiple" onclick="selectPurpose(this, 'multiple')">다품목
+                        구매</button>
+                    <button class="purpose-btn" data-purpose="wedding"
+                        onclick="selectPurpose(this, 'wedding')">혼수</button>
+                    <button class="purpose-btn" data-purpose="moving"
+                        onclick="selectPurpose(this, 'moving')">이사</button>
+                </div>
+            </div>
+
+            <!-- 상담 희망 일시 섹션 -->
+            <div class="consultation-section">
+                <h3 class="consultation-section-title">상담 희망 일시<span class="required">*</span></h3>
+                <div class="consultation-calendar-wrapper">
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">‹</button>
+                        <span class="calendar-month-year" id="calendarMonthYear"></span>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">›</button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div class="weekday sunday">일</div>
+                        <div class="weekday">월</div>
+                        <div class="weekday">화</div>
+                        <div class="weekday">수</div>
+                        <div class="weekday">목</div>
+                        <div class="weekday">금</div>
+                        <div class="weekday">토</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays">
+                        <!-- 캘린더 날짜가 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+                <div class="consultation-time-slots" id="consultationTimeSlots" style="display: none;">
+                    <div class="time-slot-group">
+                        <label class="time-slot-label">예약 가능 시간</label>
+                        <div class="time-slot-period">
+                            <div class="time-period-section">
+                                <label class="time-period-label">오전</label>
+                                <div class="time-slot-buttons" id="timeSlotButtonsAM">
+                                    <!-- 오전 시간 슬롯이 동적으로 생성됩니다 -->
+                                </div>
+                            </div>
+                            <div class="time-period-section">
+                                <label class="time-period-label">오후</label>
+                                <div class="time-slot-buttons" id="timeSlotButtonsPM">
+                                    <!-- 오후 시간 슬롯이 동적으로 생성됩니다 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <label class="early-contact-checkbox">
+                        <input type="checkbox" id="earlyContactCheckbox">
+                        <span>더 일찍 연락 주셔도 좋아요!</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 신청자 정보 섹션 -->
+            <div class="consultation-section">
+                <h3 class="consultation-section-title">신청자 정보</h3>
+                <div class="consultation-form-group">
+                    <input type="text" class="consultation-input" id="consultationName" placeholder="이름" value="">
+                </div>
+                <div class="consultation-form-group">
+                    <input type="tel" class="consultation-input" id="consultationPhone" placeholder="전화번호" value="">
+                </div>
+            </div>
+
+            <!-- 추가 전달 사항 섹션 -->
+            <div class="consultation-section">
+                <h3 class="consultation-section-title">추가 전달 사항</h3>
+                <div class="consultation-form-group">
+                    <textarea class="consultation-textarea" id="consultationNotes"
+                        placeholder="상담사에게 전달할 내용을 입력해 주세요.&#10;전화번호, 주소 등 개인정보를 입력하지 않도록 유의 해주세요."
+                        maxlength="100"></textarea>
+                    <div class="textarea-counter"><span id="notesCounter">0</span>/100자</div>
+                </div>
+            </div>
+
+            <!-- 예약하기 버튼 -->
+            <button class="consultation-submit-btn" id="consultationSubmitBtn" onclick="submitConsultation()"
+                disabled>예약하기</button>
+        </div>
+    </div>
+
+    <!-- 확인 모달 -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-message">구매상담예약을 취소하시겠습니까?</div>
+            <div class="confirm-modal-question">입력하신 내용은 저장되지 않습니다.</div>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn confirm-modal-btn-cancel" onclick="closeConfirmModal(true)">취소</button>
+                <button class="confirm-modal-btn confirm-modal-btn-confirm" onclick="closeConfirmModal(false)">계속
+                    진행하기</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // 제품 데이터 로드 및 이미지 설정
@@ -1337,25 +2293,25 @@
 
                 // 온보딩 세션에서 추천 결과 가져오기
                 const response = await fetch(`/api/onboarding/session/${sessionId}/`);
-                
+
                 if (!response.ok) {
                     console.warn('세션 조회 실패:', response.status);
                     // API 실패해도 페이지는 정상 표시되도록 함
                     return;
                 }
-                
+
                 const data = await response.json();
 
                 if (data.success && data.session && data.session.recommendation_result) {
                     const recommendations = data.session.recommendation_result.recommendations || [];
-                    
+
                     // 제품 순서대로 매핑 (첫 번째: 냉장고, 두 번째: 광파오븐, 세 번째: 식기세척기)
                     const productIds = ['refrigerator', 'microwave', 'dishwasher'];
-                    
+
                     recommendations.forEach((product, index) => {
                         if (index < productIds.length) {
                             const productId = productIds[index];
-                            
+
                             // 제품명으로 이미지 URL 가져오기
                             if (product.name) {
                                 loadProductImageByName(productId, product.name);
@@ -1366,12 +2322,12 @@
                                     imgElement.src = product.image_url;
                                 }
                             }
-                            
+
                             // 제품 정보 업데이트
                             updateProductInfo(productId, product);
                         }
                     });
-                    
+
                     // 제품 정보 업데이트 후 취향 일치도 색상 설정
                     updateMatchBadgeColors();
                 } else {
@@ -1386,21 +2342,61 @@
         // 제품명으로 이미지 URL 가져오기
         async function loadProductImageByName(productId, productName) {
             try {
+                console.log(`이미지 로드 시도: ${productId}, 제품명: "${productName}"`);
                 const response = await fetch(`/api/products/image-by-name/?name=${encodeURIComponent(productName)}`);
+
+                if (!response.ok) {
+                    console.error(`API 응답 오류: ${response.status} ${response.statusText}`);
+                    return;
+                }
+
                 const data = await response.json();
-                
+                console.log(`API 응답:`, data);
+
                 if (data.success && data.image_url) {
                     const imgElement = document.getElementById(`product-image-${productId}`);
                     if (imgElement) {
                         imgElement.src = data.image_url;
-                        console.log(`제품 이미지 로드: ${productId} -> ${data.image_url}`);
+                        console.log(`✅ 제품 이미지 로드 성공: ${productId} -> ${data.image_url.substring(0, 100)}...`);
+                    } else {
+                        console.error(`이미지 엘리먼트를 찾을 수 없음: product-image-${productId}`);
                     }
                 } else {
-                    console.warn(`이미지 URL을 찾을 수 없습니다: ${productName}`);
+                    console.warn(`⚠️ 이미지 URL을 찾을 수 없습니다: ${productName}`, data);
                 }
             } catch (error) {
-                console.error(`제품 이미지 로드 오류 (${productName}):`, error);
+                console.error(`❌ 제품 이미지 로드 오류 (${productName}):`, error);
             }
+        }
+
+        // 제품명을 70바이트마다 줄바꿈하는 함수
+        function insertLineBreaksByByte(text, bytesPerLine = 70) {
+            if (!text) return '';
+
+            const encoder = new TextEncoder();
+            let result = '';
+            let currentByteCount = 0;
+            let currentLine = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const charBytes = encoder.encode(char).length;
+
+                if (currentByteCount + charBytes > bytesPerLine && currentLine.length > 0) {
+                    result += currentLine + '<br>';
+                    currentLine = char;
+                    currentByteCount = charBytes;
+                } else {
+                    currentLine += char;
+                    currentByteCount += charBytes;
+                }
+            }
+
+            if (currentLine.length > 0) {
+                result += currentLine;
+            }
+
+            return result;
         }
 
         // 제품 정보 업데이트 함수
@@ -1408,42 +2404,57 @@
             // 제품명 업데이트
             const titleElement = document.querySelector(`#product-${productId} .product-title`);
             if (titleElement && product.name) {
-                titleElement.textContent = product.name;
+                titleElement.innerHTML = insertLineBreaksByByte(product.name, 70);
             }
-            
+
             // 취향 일치도 업데이트 및 색상 설정
             const matchBadge = document.querySelector(`#product-${productId} .match-badge`);
             if (matchBadge && product.score !== undefined) {
                 const matchPercent = Math.round(product.score * 100);
-                matchBadge.textContent = `취향 ${matchPercent}% 일치`;
-                
-                // 70% 이상이면 빨간색, 미만이면 회색
-                if (matchPercent >= 70) {
-                    matchBadge.classList.remove('gray');
+                matchBadge.innerHTML = `취향 <span class="match-percent">${matchPercent}%</span> 일치`;
+
+                // 60% 이상이면 빨간색, 미만이면 회색
+                if (matchPercent >= 60) {
+                    matchBadge.classList.remove('low');
+                    matchBadge.classList.add('high');
                 } else {
-                    matchBadge.classList.add('gray');
+                    matchBadge.classList.remove('high');
+                    matchBadge.classList.add('low');
                 }
             }
-            
+
             // 추천 이유 업데이트
             const reasonText = document.querySelector(`#product-${productId} .recommend-reason-text`);
             if (reasonText && product.reason) {
                 reasonText.textContent = product.reason;
             }
-            
+
             // 가격 업데이트
             if (product.price !== undefined) {
+                // 정가 (원래 가격)
+                const priceOriginal = document.querySelector(`#product-${productId} .price-original`);
+                if (priceOriginal && product.original_price) {
+                    priceOriginal.textContent = `${formatPrice(product.original_price)}원`;
+                } else if (priceOriginal && product.price) {
+                    priceOriginal.textContent = `${formatPrice(product.price)}원`;
+                }
+
+                // 판매가
+                const priceSale = document.querySelector(`#product-${productId} .price-sale`);
+                if (priceSale && product.sale_price) {
+                    priceSale.textContent = `${formatPrice(product.sale_price)}원`;
+                } else if (priceSale && product.price) {
+                    priceSale.textContent = `${formatPrice(product.price)}원`;
+                }
+
+                // 최대 혜택가
                 const priceFinal = document.querySelector(`#product-${productId} .price-final`);
-                if (priceFinal) {
-                    priceFinal.textContent = `${formatPrice(product.discount_price || product.price)}원`;
-                }
-                
-                const priceOriginal = document.querySelectorAll(`#product-${productId} .price-original`);
-                if (priceOriginal.length > 0 && product.price) {
-                    priceOriginal[0].textContent = `${formatPrice(product.price)}원`;
-                }
-                if (priceOriginal.length > 1 && product.discount_price) {
-                    priceOriginal[1].textContent = `${formatPrice(product.discount_price)}원`;
+                if (priceFinal && product.discount_price) {
+                    priceFinal.textContent = `${formatPrice(product.discount_price)}원`;
+                } else if (priceFinal && product.sale_price) {
+                    priceFinal.textContent = `${formatPrice(product.sale_price)}원`;
+                } else if (priceFinal && product.price) {
+                    priceFinal.textContent = `${formatPrice(product.price)}원`;
                 }
             }
         }
@@ -1458,14 +2469,14 @@
         function openSpecModal(productId) {
             const modal = document.getElementById('specModal');
             const specList = document.getElementById('specList');
-            
+
             // 제품 스펙 데이터 가져오기
             const sessionId = sessionStorage.getItem('onboarding_session_id');
             if (!sessionId) {
                 alert('세션 정보를 찾을 수 없습니다.');
                 return;
             }
-            
+
             // 세션에서 제품 정보 가져오기
             fetch(`/api/onboarding/session/${sessionId}/`)
                 .then(response => response.json())
@@ -1474,7 +2485,7 @@
                         const recommendations = data.session.recommendation_result.recommendations || [];
                         const productIds = ['refrigerator', 'microwave', 'dishwasher'];
                         const index = productIds.indexOf(productId);
-                        
+
                         if (index >= 0 && index < recommendations.length) {
                             const product = recommendations[index];
                             displaySpecModal(product);
@@ -1486,7 +2497,7 @@
                     // 기본 스펙 정보 표시
                     displaySpecModal(null, productId);
                 });
-            
+
             modal.classList.add('active');
         }
 
@@ -1500,7 +2511,7 @@
         function displaySpecModal(product, productId = null) {
             const specList = document.getElementById('specList');
             specList.innerHTML = '';
-            
+
             if (product && product.product_id) {
                 // API에서 제품 스펙 가져오기
                 fetch(`/api/products/${product.product_id}/spec/`)
@@ -1508,7 +2519,7 @@
                     .then(data => {
                         if (data.success && data.specs) {
                             const specs = data.specs;
-                            
+
                             // 스펙 키 매핑 (다양한 키 이름 지원)
                             const specMappings = {
                                 '전체 용량 (L)': [
@@ -1530,12 +2541,12 @@
                                     specs['효율등급'], specs['에너지등급'], specs['소비효율등급']
                                 ]
                             };
-                            
+
                             // 각 스펙 항목 생성
                             Object.keys(specMappings).forEach(key => {
                                 const values = specMappings[key];
                                 const value = values.find(v => v !== undefined && v !== null && v !== '');
-                                
+
                                 if (value) {
                                     const li = document.createElement('li');
                                     li.className = 'spec-item';
@@ -1543,7 +2554,7 @@
                                     specList.appendChild(li);
                                 }
                             });
-                            
+
                             // 스펙이 하나도 없으면 메시지 표시
                             if (specList.children.length === 0) {
                                 specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
@@ -1566,21 +2577,28 @@
         // 취향 일치도 배지 색상 업데이트
         function updateMatchBadgeColors() {
             document.querySelectorAll('.match-badge').forEach(badge => {
-                const text = badge.textContent;
+                const text = badge.textContent || badge.innerText;
                 const match = text.match(/(\d+)%/);
                 if (match) {
                     const percent = parseInt(match[1]);
-                    if (percent >= 70) {
-                        badge.classList.remove('gray');
+                    // 숫자를 bold 처리
+                    if (!badge.querySelector('.match-percent')) {
+                        badge.innerHTML = text.replace(/(\d+%)/, '<span class="match-percent">$1</span>');
+                    }
+                    // 60% 이상이면 빨간색, 미만이면 회색
+                    if (percent >= 60) {
+                        badge.classList.remove('low');
+                        badge.classList.add('high');
                     } else {
-                        badge.classList.add('gray');
+                        badge.classList.remove('high');
+                        badge.classList.add('low');
                     }
                 }
             });
         }
 
         // 모달 외부 클릭 시 닫기
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const modal = document.getElementById('specModal');
             if (event.target === modal) {
                 closeSpecModal();
@@ -1591,16 +2609,27 @@
         // vibe 값에 따라 배너 이미지 변경
         // ============================================
         let isInitialized = false;
-        
+
+        // 초기 제품 이름들에 줄바꿈 적용
+        function applyLineBreaksToInitialTitles() {
+            document.querySelectorAll('.product-title').forEach(titleElement => {
+                if (titleElement.textContent && !titleElement.innerHTML.includes('<br>')) {
+                    titleElement.innerHTML = insertLineBreaksByByte(titleElement.textContent, 70);
+                }
+            });
+        }
+
         function initPage() {
+            // 초기 제품 이름들에 줄바꿈 적용
+            applyLineBreaksToInitialTitles();
             // 제품 이미지 로드 (비동기이므로 await하지 않음)
             loadProductImages().catch(err => {
                 console.error('제품 이미지 로드 실패:', err);
             });
-            
+
             // sessionStorage에서 vibe 값 가져오기
             const vibe = sessionStorage.getItem('step1_vibe');
-            
+
             // vibe 값에 따른 이미지 매핑
             const vibeImagePaths = {
                 'modern': '{% static "images/신혼 무드_모던_미니멀.png" %}',
@@ -1641,13 +2670,15 @@
             if (vibe && vibeDescriptionMap[vibe]) {
                 document.getElementById('bannerDescription').innerHTML = vibeDescriptionMap[vibe];
             }
-            
+
             // 하이엔드_럭셔리.png와 신혼 무드_유니크_팝.png 사용 시 모든 텍스트를 흰색으로 변경
             const styleAnalysisLabel = document.querySelector('.style-analysis-label');
             const bannerTitle = document.getElementById('bannerTitle');
             const bannerDescription = document.getElementById('bannerDescription');
             const bannerOverlay = document.querySelector('.banner-overlay');
-            
+            const retryButtonText = document.querySelector('.retry-button-text');
+            const retryButtonIcon = document.querySelector('.retry-button-icon');
+
             if (vibe === 'luxury' || vibe === 'pop') {
                 // 텍스트 색상을 흰색으로 변경
                 if (styleAnalysisLabel) {
@@ -1669,11 +2700,37 @@
                     bannerOverlay.classList.add('has-overlay');
                 }
             }
+
+            // 하이엔드_럭셔리.png 사용 시 취향분석 다시하기 버튼과 텍스트를 흰색으로 변경
+            if (vibe === 'luxury') {
+                if (retryButtonText) {
+                    retryButtonText.style.color = '#fff';
+                }
+                if (retryButtonIcon) {
+                    retryButtonIcon.style.background = '#fff';
+                    const iconSvg = retryButtonIcon.querySelector('svg');
+                    if (iconSvg) {
+                        iconSvg.style.color = '#1a1a1a';
+                    }
+                }
+            } else {
+                // 다른 vibe일 때는 기본 색상으로 복원
+                if (retryButtonText) {
+                    retryButtonText.style.color = '#1a1a1a';
+                }
+                if (retryButtonIcon) {
+                    retryButtonIcon.style.background = '#1a1a1a';
+                    const iconSvg = retryButtonIcon.querySelector('svg');
+                    if (iconSvg) {
+                        iconSvg.style.color = '#fff';
+                    }
+                }
+            }
         }
-        
+
         // DOMContentLoaded 이벤트 리스너 등록 (한 번만 실행되도록 보장)
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 if (!isInitialized) {
                     isInitialized = true;
                     initPage();
@@ -1701,13 +2758,13 @@
         // 배너의 가전 아이콘 클릭 시에도 스크롤
         function initApplianceIcons() {
             document.querySelectorAll('.appliance-icon').forEach(icon => {
-                icon.addEventListener('click', function() {
+                icon.addEventListener('click', function () {
                     const applianceId = this.dataset.appliance;
                     scrollToProduct(applianceId);
                 });
             });
         }
-        
+
         // DOMContentLoaded에서 한 번만 실행
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initApplianceIcons);
@@ -1732,12 +2789,536 @@
         }
 
         // ============================================
-        // 베스트샵 상담예약
+        // 베스트샵 상담예약 모달
         // ============================================
+        let currentCalendarDate = new Date();
+        let selectedDate = null;
+        let selectedTime = null;
+        let selectedPurpose = null;
+
         function bookBestShop() {
-            // 베스트샵 예약 페이지로 이동
-            window.open('https://bestshop.lge.co.kr/counselReserve/main/MC11420001?inflow=lgekor', '_blank');
+            // 모달 열기
+            openConsultationModal();
         }
+
+        function openConsultationModal() {
+            const modal = document.getElementById('consultationModal');
+            modal.classList.add('active');
+
+            // 제품 정보 로드
+            loadConsultationProducts();
+
+            // 캘린더 초기화
+            initCalendar();
+
+            // 초기화
+            selectedTime = null;
+            selectedPurpose = null;
+
+            // 기본적으로 오늘 날짜 선택
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate = today;
+
+            // 오늘 날짜가 선택된 상태로 표시
+            renderCalendar();
+
+            // 오늘 날짜면 시간 슬롯 표시 (기본값: 오늘 날짜)
+            if (selectedDate) {
+                updateAvailableTimes(selectedDate);
+            }
+
+            updateSubmitButton();
+        }
+
+        function closeConsultationModal() {
+            // 입력된 정보 확인
+            const name = document.getElementById('consultationName').value.trim();
+            const phone = document.getElementById('consultationPhone').value.trim();
+            const notes = document.getElementById('consultationNotes').value.trim();
+
+            // 조건 확인: 이름이나 전화번호에 텍스트가 있거나, 추가 전달 사항에 3글자 이상 입력
+            const hasInput = (name.length > 0 || phone.length > 0) || notes.length >= 3;
+
+            if (hasInput) {
+                // 확인 모달 표시
+                const confirmModal = document.getElementById('confirmModal');
+                confirmModal.classList.add('active');
+            } else {
+                // 입력이 없으면 바로 닫기
+                actuallyCloseConsultationModal();
+            }
+        }
+
+        function closeConfirmModal(shouldClose) {
+            const confirmModal = document.getElementById('confirmModal');
+            confirmModal.classList.remove('active');
+
+            if (shouldClose) {
+                actuallyCloseConsultationModal();
+            }
+        }
+
+        function actuallyCloseConsultationModal() {
+            const modal = document.getElementById('consultationModal');
+            modal.classList.remove('active');
+
+            // 선택 초기화
+            selectedDate = null;
+            selectedTime = null;
+            selectedPurpose = null;
+
+            // 시간 슬롯 숨기기
+            document.getElementById('consultationTimeSlots').style.display = 'none';
+
+            // 선택 해제
+            document.querySelectorAll('.purpose-btn').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // 입력 필드 초기화
+            document.getElementById('consultationName').value = '';
+            document.getElementById('consultationPhone').value = '';
+            document.getElementById('consultationNotes').value = '';
+            document.getElementById('notesCounter').textContent = '0';
+            document.getElementById('earlyContactCheckbox').checked = false;
+        }
+
+        // 모달 외부 클릭 시 닫기
+        function handleModalClick(event) {
+            if (event.target.id === 'consultationModal') {
+                closeConsultationModal();
+            }
+        }
+
+        // 제품 제거
+        function removeProduct(btn) {
+            const productItem = btn.closest('.consultation-product-item');
+            if (productItem) {
+                productItem.remove();
+            }
+        }
+
+        // 제품 정보 로드
+        async function loadConsultationProducts() {
+            const productsContainer = document.getElementById('consultationProducts');
+            productsContainer.innerHTML = '';
+
+            try {
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                if (!sessionId) {
+                    console.warn('세션 ID가 없습니다.');
+                    return;
+                }
+
+                const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+                if (data.success && data.session && data.session.recommendation_result) {
+                    const recommendations = data.session.recommendation_result.recommendations || [];
+
+                    recommendations.forEach((product, index) => {
+                        const productItem = document.createElement('div');
+                        productItem.className = 'consultation-product-item';
+
+                        const imageUrl = product.image_url || 'https://via.placeholder.com/70x140?text=Product';
+                        const productName = product.name || '제품명 없음';
+                        const modelNumber = product.model_number || product.model || '';
+
+                        // 가격 정보: 정가, 판매가, 최대 혜택가
+                        const originalPrice = product.original_price || product.price || 0;
+                        const salePrice = product.sale_price || product.price || 0;
+                        const discountPrice = product.discount_price || salePrice || product.price || 0;
+
+                        // 할인율 계산: 정가 기준으로 최대 혜택가와 비교
+                        const discountRate = originalPrice > 0 && discountPrice < originalPrice
+                            ? Math.round((1 - discountPrice / originalPrice) * 100)
+                            : 0;
+
+                        productItem.innerHTML = `
+                            <button class="consultation-product-remove" onclick="removeProduct(this)">×</button>
+                            <img src="${imageUrl}" alt="${productName}" class="consultation-product-image" onerror="this.src='https://via.placeholder.com/70x140?text=Product'">
+                            <div class="consultation-product-info">
+                                <div class="consultation-product-field">
+                                    <span class="consultation-product-label">제품명</span>
+                                    <span class="consultation-product-value consultation-product-name">${productName}</span>
+                                </div>
+                                ${modelNumber ? `
+                                <div class="consultation-product-field">
+                                    <span class="consultation-product-label">모델명</span>
+                                    <span class="consultation-product-value consultation-product-model">${modelNumber}</span>
+                                </div>
+                                ` : ''}
+                                <div class="consultation-product-field">
+                                    <span class="consultation-product-label">할인율 최대 혜택가 정가</span>
+                                    <span class="consultation-product-value consultation-product-price-info">
+                                        ${discountRate > 0 ? `<span class="consultation-product-discount-rate">${discountRate}%</span>` : ''}
+                                        <span class="consultation-product-benefit-price">${formatPrice(discountPrice)}</span>
+                                        <span class="consultation-product-original-price">${formatPrice(originalPrice)}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+
+                        productsContainer.appendChild(productItem);
+                    });
+                }
+            } catch (error) {
+                console.error('제품 정보 로드 오류:', error);
+            }
+        }
+
+        // 상담목적 선택
+        function selectPurpose(btn, purpose) {
+            document.querySelectorAll('.purpose-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedPurpose = purpose;
+            updateSubmitButton();
+        }
+
+        // 캘린더 초기화
+        function initCalendar() {
+            currentCalendarDate = new Date();
+            renderCalendar();
+        }
+
+        // 캘린더 렌더링
+        function renderCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+
+            // 월/년 표시
+            document.getElementById('calendarMonthYear').textContent = `${year}.${String(month + 1).padStart(2, '0')}`;
+
+            // 첫 날과 마지막 날
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            // 오늘 날짜 (시간 제거)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+            const todayDate = today.getDate();
+
+            // 활성화 가능한 날짜 범위 (오늘 이후 10일, 오늘 날짜 미포함)
+            const maxAvailableDate = new Date(today);
+            maxAvailableDate.setDate(today.getDate() + 10);
+            maxAvailableDate.setHours(23, 59, 59, 999);
+
+            const calendarDays = document.getElementById('calendarDays');
+            calendarDays.innerHTML = '';
+
+            // 빈 칸 추가 (첫 날 전)
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarDays.appendChild(emptyDay);
+            }
+
+            // 날짜 추가
+            for (let date = 1; date <= daysInMonth; date++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                const dateSpan = document.createElement('span');
+                dateSpan.textContent = date;
+                dayElement.appendChild(dateSpan);
+
+                const currentDate = new Date(year, month, date);
+                currentDate.setHours(0, 0, 0, 0);
+                const isToday = isCurrentMonth && date === todayDate;
+                const isAvailable = currentDate > today && currentDate <= maxAvailableDate;
+
+                if (isToday) {
+                    dayElement.classList.add('today');
+                }
+
+                if (!isAvailable && !isToday) {
+                    dayElement.classList.add('disabled');
+                } else {
+                    // 오늘 날짜와 활성화 가능한 날짜 모두 클릭 가능
+                    dayElement.classList.add('available');
+                    // mousedown 이벤트로 즉시 선택 표시
+                    dayElement.onmousedown = (e) => {
+                        e.preventDefault();
+                        selectDate(dayElement, date);
+                    };
+                    dayElement.onclick = () => selectDate(dayElement, date);
+                }
+
+                // 선택된 날짜 표시
+                if (selectedDate && selectedDate.getDate() === date &&
+                    selectedDate.getMonth() === month &&
+                    selectedDate.getFullYear() === year) {
+                    dayElement.classList.add('selected');
+                } else if (isToday && !selectedDate) {
+                    // 기본적으로 오늘 날짜 선택 (selectedDate가 없을 때만)
+                    dayElement.classList.add('selected');
+                    selectedDate = new Date(year, month, date);
+                    selectedDate.setHours(0, 0, 0, 0);
+                }
+
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        // 날짜 선택
+        function selectDate(dayElement, date) {
+            // 이전 선택 해제 (오늘 날짜 포함)
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+
+            // 새 선택 - 즉시 활성화 표시
+            dayElement.classList.add('selected');
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            selectedDate = new Date(year, month, date);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            // 선택된 시간 초기화
+            selectedTime = null;
+            document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // 오늘 날짜면 시간 슬롯 표시
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const daysDiff = Math.ceil((selectedDate - today) / (1000 * 60 * 60 * 24));
+
+            // 날짜 선택 시마다 시간 슬롯 업데이트
+            if (daysDiff === 0) {
+                // CASE 1: 오늘 날짜 선택 시 - 지나간 시간 필터링
+                updateAvailableTimes(selectedDate);
+            } else if (daysDiff >= 1) {
+                // CASE 2: 내일 이후 날짜 선택 시 (1일 이상) - 모든 시간 표시
+                updateAvailableTimes(selectedDate);
+            }
+
+            updateSubmitButton();
+        }
+
+        // 월 변경
+        function changeMonth(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        /**
+         * 예약 가능한 시간 슬롯을 동적으로 생성하고 필터링하는 함수
+         * @param {Date} selectedDate - 선택된 날짜
+         */
+        function updateAvailableTimes(selectedDate) {
+            const timeSlotButtonsAM = document.getElementById('timeSlotButtonsAM');
+            const timeSlotButtonsPM = document.getElementById('timeSlotButtonsPM');
+            const timeSlotsContainer = document.getElementById('consultationTimeSlots');
+
+            // 기존 시간 버튼 제거
+            timeSlotButtonsAM.innerHTML = '';
+            timeSlotButtonsPM.innerHTML = '';
+
+            // 오늘 날짜인지 확인
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDateOnly = new Date(selectedDate);
+            selectedDateOnly.setHours(0, 0, 0, 0);
+            const isToday = selectedDateOnly.getTime() === today.getTime();
+
+            // 현재 시간 가져오기 (오늘 날짜 선택 시 필터링에 사용)
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+            // 시간 슬롯 생성: 10:00부터 16:30까지 30분 간격
+            const startHour = 10;
+            const startMinute = 0;
+            const endHour = 16;
+            const endMinute = 30;
+
+            // 시작 시간을 분 단위로 변환
+            const startTimeInMinutes = startHour * 60 + startMinute;
+            const endTimeInMinutes = endHour * 60 + endMinute;
+
+            // 30분 간격으로 시간 슬롯 생성
+            for (let timeInMinutes = startTimeInMinutes; timeInMinutes <= endTimeInMinutes; timeInMinutes += 30) {
+                const hour = Math.floor(timeInMinutes / 60);
+                const minute = timeInMinutes % 60;
+                const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+                // 시간 버튼 생성
+                const timeBtn = document.createElement('button');
+                timeBtn.className = 'time-slot-btn';
+                timeBtn.setAttribute('data-time', timeStr);
+                timeBtn.setAttribute('tabindex', '-1');
+                timeBtn.textContent = timeStr;
+                timeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectTime(timeBtn, timeStr);
+                };
+                timeBtn.onmousedown = (e) => {
+                    e.preventDefault();
+                };
+
+                // CASE 1: 오늘 날짜 선택 시 - 지나간 시간은 비활성화 표시
+                if (isToday && timeInMinutes <= currentTimeInMinutes) {
+                    // 지나간 시간은 연한 회색으로 비활성화 (빗금 없이)
+                    timeBtn.disabled = true;
+                    timeBtn.style.opacity = '1';
+                    timeBtn.style.backgroundColor = '#f5f5f5';
+                    timeBtn.style.color = '#999';
+                    timeBtn.style.borderColor = '#e5e5e5';
+                    timeBtn.style.cursor = 'not-allowed';
+                } else {
+                    // CASE 2: 내일 이후 날짜 선택 시 또는 오늘 날짜의 남은 시간 - 모든 시간 활성화
+                    timeBtn.disabled = false;
+                    timeBtn.style.opacity = '';
+                    timeBtn.style.backgroundColor = '';
+                    timeBtn.style.color = '';
+                    timeBtn.style.borderColor = '';
+                    timeBtn.style.cursor = 'pointer';
+                }
+
+                // 오전(10:00-11:59) 또는 오후(12:00-16:30)로 구분
+                if (hour < 12) {
+                    timeSlotButtonsAM.appendChild(timeBtn);
+                } else {
+                    timeSlotButtonsPM.appendChild(timeBtn);
+                }
+            }
+
+            // 시간 슬롯 컨테이너 표시
+            timeSlotsContainer.style.display = 'block';
+        }
+
+        // 시간 슬롯 업데이트 (기존 함수 호환성 유지)
+        function updateTimeSlots() {
+            if (selectedDate) {
+                updateAvailableTimes(selectedDate);
+            }
+        }
+
+        // 시간 선택
+        function selectTime(btn, time) {
+            if (btn.disabled) return;
+
+            // 모든 버튼에서 selected 클래스 제거 및 인라인 스타일 초기화
+            document.querySelectorAll('.time-slot-btn').forEach(b => {
+                b.classList.remove('selected');
+                if (!b.disabled) {
+                    b.style.borderColor = '';
+                    b.style.color = '';
+                }
+            });
+
+            // 선택된 버튼에 selected 클래스 추가 및 스타일 적용
+            btn.classList.add('selected');
+            btn.style.borderColor = '#EA1917';
+            btn.style.color = '#EA1917';
+            selectedTime = time;
+            updateSubmitButton();
+        }
+
+        // 예약하기 버튼 활성화/비활성화
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('consultationSubmitBtn');
+            const daysDiff = selectedDate ? Math.ceil((selectedDate - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+
+            if (selectedPurpose && selectedDate && (daysDiff < 7 || selectedTime)) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // 예약 제출
+        function submitConsultation() {
+            if (!selectedPurpose || !selectedDate) {
+                alert('상담목적과 상담 희망 일시를 선택해주세요.');
+                return;
+            }
+
+            const daysDiff = Math.ceil((selectedDate - new Date()) / (1000 * 60 * 60 * 24));
+            if (daysDiff >= 7 && !selectedTime) {
+                alert('시간을 선택해주세요.');
+                return;
+            }
+
+            const name = document.getElementById('consultationName').value;
+            const phone = document.getElementById('consultationPhone').value;
+            const notes = document.getElementById('consultationNotes').value;
+            const earlyContact = document.getElementById('earlyContactCheckbox').checked;
+
+            // 예약 정보 수집
+            const selectedProducts = Array.from(document.querySelectorAll('.consultation-product-item.selected'))
+                .map(item => {
+                    const nameEl = item.querySelector('.consultation-product-name');
+                    const modelEl = item.querySelector('.consultation-product-model');
+                    return {
+                        name: nameEl ? nameEl.textContent : '',
+                        model: modelEl ? modelEl.textContent : ''
+                    };
+                });
+
+            const reservationData = {
+                purpose: selectedPurpose,
+                date: selectedDate.toISOString().split('T')[0],
+                time: selectedTime || null,
+                name: name,
+                phone: phone,
+                notes: notes,
+                earlyContact: earlyContact,
+                products: selectedProducts
+            };
+
+            console.log('예약 정보:', reservationData);
+
+            // 예약 완료 확인 모달 표시
+            if (confirm('구매상담예약이 완료되었습니다.\n예약하신 내용을 확인하시겠습니까?')) {
+                // 확인 버튼 클릭 시 처리 (예: 예약 내역 페이지로 이동)
+                // window.location.href = '/consultation/confirm/';
+            }
+
+            // 실제로는 여기서 API 호출
+            // fetch('/api/consultation/reserve/', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'X-CSRFToken': getCookie('csrftoken')
+            //     },
+            //     body: JSON.stringify(reservationData)
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //     if (data.success) {
+            //         alert('예약이 완료되었습니다.');
+            //         closeConsultationModal();
+            //     } else {
+            //         alert('예약 중 오류가 발생했습니다: ' + data.error);
+            //     }
+            // })
+            // .catch(error => {
+            //     console.error('예약 오류:', error);
+            //     alert('예약 중 오류가 발생했습니다.');
+            // });
+
+            // 모달 닫기
+            closeConsultationModal();
+        }
+
+        // 텍스트 영역 글자 수 카운터
+        document.addEventListener('DOMContentLoaded', function () {
+            const notesTextarea = document.getElementById('consultationNotes');
+            const notesCounter = document.getElementById('notesCounter');
+
+            if (notesTextarea && notesCounter) {
+                notesTextarea.addEventListener('input', function () {
+                    notesCounter.textContent = this.value.length;
+                });
+            }
+        });
 
         // ============================================
         // 다른 추천 후보 확인
@@ -1787,7 +3368,7 @@
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000);
@@ -1796,5 +3377,3 @@
 </body>
 
 </html>
-
-

@@ -9,8 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -23,12 +23,16 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #fff;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #000;
             color: #1a1a1a;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+        }
+
+        .main-content {
+            background-color: #fff;
         }
 
         /* Header - 2단 구조 (fake_lg_main.html 스타일 유지) */
@@ -268,18 +272,17 @@
             margin-top: 160px;
         }
 
-        /* Image Sections - Max Width 1380px */
+        /* Image Sections - Full Width */
         .image-section {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 0 20px;
+            display: block;
+            padding: 0;
             margin-top: 0;
             margin-bottom: 0;
+            overflow: hidden;
         }
 
         .image-section img {
-            max-width: 1380px;
             width: 100%;
             height: auto;
             display: block;
@@ -389,25 +392,42 @@
         }
 
         .floating-cta-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             border: none;
-            background: transparent;
+            background: #2B2226;
+            color: #fff;
             padding: 0;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
+            box-shadow: 0 4px 12px rgba(43, 34, 38, 0.3);
+            width: 420px;
+            height: 60px;
+            white-space: nowrap;
         }
 
-        .floating-cta-btn img {
-            display: block;
-            height: auto;
-            max-width: 400px;
-            width: auto;
+        .floating-cta-btn-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
         }
 
         .floating-cta-btn:hover {
             transform: translateY(-2px);
-            opacity: 0.9;
+            background: #1a1518;
+            box-shadow: 0 6px 16px rgba(43, 34, 38, 0.4);
+        }
+
+        .floating-cta-btn:active {
+            transform: translateY(0);
         }
 
         /* Footer */
@@ -415,7 +435,11 @@
             padding: 60px 40px;
             background: #1a1a1a;
             color: #9e9e9e;
-            margin-bottom: 80px;
+            margin-bottom: 0;
+        }
+
+        body {
+            background: #000;
         }
 
         .footer-container {
@@ -557,9 +581,10 @@
                 padding: 16px 20px;
             }
 
-            .floating-cta-btn img {
-                max-width: 100%;
-                width: 100%;
+            .floating-cta-btn {
+                min-width: 240px;
+                padding: 14px 40px;
+                font-size: 16px;
             }
 
         }
@@ -640,43 +665,14 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Group7 Image -->
-        <section class="image-section" id="group1">
-            <img src="{% static 'images/Group7.png' %}" alt="Group 7">
+        <!-- Group11 Image -->
+        <section class="image-section" id="group11">
+            <img src="{% static 'images/Group11.png' %}" alt="Group 11">
         </section>
 
-        <!-- Navigation Buttons -->
-        <section class="nav-buttons-section">
-            <div class="nav-buttons-container">
-                <a href="#group2" class="nav-button">맞춤 추천</a>
-                <a href="#group3" class="nav-button">패키지 구성</a>
-                <a href="#group4" class="nav-button">견적 및 구매</a>
-            </div>
-        </section>
-
-        <!-- Group2 Image -->
-        <section class="image-section scroll-target" id="group2">
-            <img src="{% static 'images/Group2.png' %}" alt="Group 2">
-        </section>
-
-        <!-- Group3 Image -->
-        <section class="image-section scroll-target" id="group3">
-            <img src="{% static 'images/Group3.png' %}" alt="Group 3">
-        </section>
-
-        <!-- Group4 Image -->
-        <section class="image-section scroll-target" id="group4">
-            <img src="{% static 'images/Group4.png' %}" alt="Group 4">
-        </section>
-
-        <!-- Group5 Image -->
-        <section class="image-section" id="group5">
-            <img src="{% static 'images/Group 5.png' %}" alt="Group 5">
-        </section>
-
-        <!-- Group6 Image -->
-        <section class="image-section" id="group6">
-            <img src="{% static 'images/Group 6.png' %}" alt="Group 6">
+        <!-- Group14 Image -->
+        <section class="image-section" id="group14">
+            <img src="{% static 'images/Group 14.png' %}" alt="Group 14">
         </section>
     </main>
 
@@ -696,7 +692,8 @@
     <div class="floating-cta">
         <div class="floating-cta-container">
             <a href="/onboarding/" class="floating-cta-btn">
-                <img src="{% static 'images/button.png' %}" alt="가전 패키지 추천받기">
+                <img src="{% static 'images/Vector.png' %}" alt="선물 상자" class="floating-cta-btn-icon">
+                가전 패키지 추천받기
             </a>
         </div>
     </div>

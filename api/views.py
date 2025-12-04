@@ -62,6 +62,11 @@ def onboarding_step6_page(request):
     return render(request, "onboarding_step6.html")
 
 
+def onboarding_step7_page(request):
+    """온보딩 페이지 렌더링 (7단계)"""
+    return render(request, "onboarding_step7.html")
+
+
 def onboarding_new_page(request):
     """새 온보딩 페이지 (4단계 설문)"""
     return render(request, "onboarding_new.html")
@@ -468,13 +473,11 @@ def product_spec_view(request, product_id):
 @require_http_methods(["GET"])
 def product_image_by_name_view(request):
     """GET /api/products/image-by-name/?name=제품명 - 제품명으로 이미지 URL 조회"""
-    import csv
-    import os
-    import json
-    import ast
-    from pathlib import Path
+    from .utils import get_image_url_from_csv
     
     product_name = request.GET.get('name', '').strip()
+    category_hint = request.GET.get('category', None)  # 선택적 카테고리 힌트
+    
     if not product_name:
         return JsonResponse({
             'success': False,
@@ -482,115 +485,21 @@ def product_image_by_name_view(request):
         }, json_dumps_params={'ensure_ascii': False}, status=400)
     
     try:
-        # 제품명에서 카테고리 추출
-        category_map = {
-            '냉장고': ('주방가전', '냉장고_제품스펙.csv'),
-            '광파오븐': ('주방가전', '광파오븐전자레인지_제품스펙.csv'),
-            '전자레인지': ('주방가전', '광파오븐전자레인지_제품스펙.csv'),
-            '식기세척기': ('주방가전', '식기세척기_제품스펙.csv'),
-            '전기레인지': ('주방가전', '전기레인지_제품스펙.csv'),
-            '정수기': ('주방가전', '정수기_제품스펙.csv'),
-            '세탁기': ('생활가전', '세탁_제품스펙.csv'),
-            '의류건조기': ('생활가전', '의류건조기_제품스펙.xls'),
-            '워시타워': ('생활가전', '워시타워_제품스펙.xls'),
-            '워시콤보': ('생활가전', '워시콤보_제품스펙.xls'),
-            'TV': ('TV오디오', 'TV_제품스펙.csv'),
-            '에어컨': ('에어컨에어케어', '에어컨_제품스펙.csv'),
-            '공기청정기': ('에어컨에어케어', '공기청정기_제품스펙.csv'),
-        }
+        # 유틸리티 함수를 사용하여 이미지 URL 가져오기
+        image_url = get_image_url_from_csv(product_name, category_hint=category_hint)
         
-        # 제품명에서 카테고리 키워드 찾기
-        category_info = None
-        for keyword, info in category_map.items():
-            if keyword in product_name:
-                category_info = info
-                break
-        
-        if not category_info:
-            # 기본값으로 냉장고 시도
-            category_info = ('주방가전', '냉장고_제품스펙.csv')
-        
-        category_folder, csv_filename = category_info
-        
-        # CSV 파일 경로
-        base_dir = Path(__file__).resolve().parent.parent.parent
-        csv_path = base_dir / 'data' / '제품스펙' / category_folder / csv_filename
-        
-        if not csv_path.exists():
+        if not image_url or image_url.startswith('https://via.placeholder.com'):
             return JsonResponse({
                 'success': False,
-                'error': f'CSV 파일을 찾을 수 없습니다: {csv_path}'
+                'error': f'제품을 찾을 수 없습니다: {product_name}',
+                'image_url': image_url  # placeholder URL 반환
             }, json_dumps_params={'ensure_ascii': False}, status=404)
         
-        # CSV 파일 읽기
-        try:
-            import pandas as pd
-        except ImportError:
-            return JsonResponse({
-                'success': False,
-                'error': 'pandas 라이브러리가 필요합니다.'
-            }, json_dumps_params={'ensure_ascii': False}, status=500)
-        
-        if csv_path.suffix == '.csv':
-            df = pd.read_csv(csv_path, encoding='utf-8-sig')
-        else:
-            df = pd.read_excel(csv_path)
-        
-        # 제품명으로 검색 (부분 일치)
-        matching_rows = df[df['제품명'].str.contains(product_name, na=False, regex=False)]
-        
-        if matching_rows.empty:
-            # 정확한 일치 시도
-            matching_rows = df[df['제품명'] == product_name]
-        
-        if matching_rows.empty:
-            return JsonResponse({
-                'success': False,
-                'error': f'제품을 찾을 수 없습니다: {product_name}'
-            }, json_dumps_params={'ensure_ascii': False}, status=404)
-        
-        # 첫 번째 매칭 결과 사용
-        row = matching_rows.iloc[0]
-        image_list_str = row.get('이미지리스트', '')
-        
-        if not image_list_str or pd.isna(image_list_str):
-            return JsonResponse({
-                'success': False,
-                'error': '이미지 URL이 없습니다.'
-            }, json_dumps_params={'ensure_ascii': False}, status=404)
-        
-        # 이미지 리스트 파싱
-        try:
-            # 문자열이 리스트 형태인 경우
-            if image_list_str.startswith('['):
-                image_list = ast.literal_eval(image_list_str)
-            elif isinstance(image_list_str, str):
-                # JSON 형태인 경우
-                image_list = json.loads(image_list_str)
-            else:
-                image_list = [str(image_list_str)]
-            
-            # 첫 번째 이미지 URL 반환
-            image_url = image_list[0] if image_list else None
-            
-            if not image_url:
-                return JsonResponse({
-                    'success': False,
-                    'error': '이미지 URL이 없습니다.'
-                }, json_dumps_params={'ensure_ascii': False}, status=404)
-            
-            return JsonResponse({
-                'success': True,
-                'product_name': row.get('제품명', product_name),
-                'image_url': image_url,
-                'image_list': image_list
-            }, json_dumps_params={'ensure_ascii': False})
-            
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'error': f'이미지 URL 파싱 오류: {str(e)}'
-            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        return JsonResponse({
+            'success': True,
+            'product_name': product_name,
+            'image_url': image_url
+        }, json_dumps_params={'ensure_ascii': False})
     
     except Exception as e:
         import traceback
