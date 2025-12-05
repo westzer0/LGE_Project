@@ -294,3 +294,4 @@ function getProductsFromPage() {
    - 모든 방법이 실패하면 "제품 정보를 불러올 수 없습니다." 메시지 표시
 */
 
+

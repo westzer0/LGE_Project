@@ -658,12 +658,14 @@
         }
 
         .product-image {
-            width: 100%;
-            height: 100%;
+            width: 1000px;
+            height: 1000px;
             object-fit: contain;
             background: #f5f5f5;
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 1000px;
+            max-height: 1000px;
+            min-width: 1000px;
+            min-height: 1000px;
         }
 
         .product-info {
@@ -778,7 +780,7 @@
         .price-original {
             font-size: 16px;
             color: #666666;
-            text-decoration: none;
+            text-decoration: line-through;
             text-align: left;
             padding-left: 208px;
             margin-top: 2px;
@@ -2128,7 +2130,11 @@
         a.action-button-large:visited,
         a.action-button-large:hover,
         a.action-button-large:active,
-        a.action-button-large:focus {
+        a.action-button-large:focus,
+        button.action-button-large,
+        button.action-button-large:hover,
+        button.action-button-large:active,
+        button.action-button-large:focus {
             cursor: pointer !important;
             color: #fff !important;
             pointer-events: auto !important;
@@ -2139,6 +2145,8 @@
             cursor: pointer !important;
             pointer-events: auto !important;
             z-index: 99999 !important;
+            width: 100%;
+            max-width: 280px;
         }
 
         .action-button-large:visited {
@@ -2227,6 +2235,119 @@
         /* ============================================
            Responsive
            ============================================ */
+
+        /* 큰 노트북 화면 (1440px ~ 1600px) */
+        @media (min-width: 1440px) and (max-width: 1600px) {
+            .product-item {
+                grid-template-columns: 774px 1fr;
+                height: 774px;
+            }
+
+            .product-image-wrapper {
+                width: 774px;
+                height: 774px;
+            }
+
+            .product-image {
+                width: 774px;
+                height: 774px;
+                max-width: 774px;
+                max-height: 774px;
+                min-width: 774px;
+                min-height: 774px;
+            }
+
+            .product-info {
+                height: 774px;
+                padding: 35px 35px 35px 35px;
+                padding-right: 150px;
+            }
+        }
+
+        /* 일반 노트북 화면 (1280px ~ 1440px) */
+        @media (min-width: 1280px) and (max-width: 1440px) {
+            .product-item {
+                grid-template-columns: 674px 1fr;
+                height: 674px;
+            }
+
+            .product-image-wrapper {
+                width: 674px;
+                height: 674px;
+            }
+
+            .product-image {
+                width: 674px;
+                height: 674px;
+                max-width: 674px;
+                max-height: 674px;
+                min-width: 674px;
+                min-height: 674px;
+            }
+
+            .product-info {
+                height: 674px;
+                padding: 30px 30px 30px 30px;
+                padding-right: 120px;
+            }
+        }
+
+        /* 작은 노트북 화면 (1024px ~ 1280px) */
+        @media (min-width: 1024px) and (max-width: 1280px) {
+            .product-item {
+                grid-template-columns: 574px 1fr;
+                height: 574px;
+            }
+
+            .product-image-wrapper {
+                width: 574px;
+                height: 574px;
+            }
+
+            .product-image {
+                width: 574px;
+                height: 574px;
+                max-width: 574px;
+                max-height: 574px;
+                min-width: 574px;
+                min-height: 574px;
+            }
+
+            .product-info {
+                height: 574px;
+                padding: 24px 24px 24px 24px;
+                padding-right: 100px;
+            }
+        }
+
+        /* 작은 노트북/태블릿 화면 (768px ~ 1024px) */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .product-item {
+                grid-template-columns: 524px 1fr;
+                height: 524px;
+            }
+
+            .product-image-wrapper {
+                width: 524px;
+                height: 524px;
+            }
+
+            .product-image {
+                width: 524px;
+                height: 524px;
+                max-width: 524px;
+                max-height: 524px;
+                min-width: 524px;
+                min-height: 524px;
+            }
+
+            .product-info {
+                height: 524px;
+                padding: 20px 20px 20px 20px;
+                padding-right: 80px;
+            }
+        }
+
         @media (max-width: 768px) {
 
             /* 헤더 반응형 - LG전자 스타일 */
@@ -2943,10 +3064,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                        <a href="/my-page/" style="display: flex; align-items: center;">
+                            <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </a>
                         <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
@@ -3226,11 +3349,10 @@
                     </button>
                 </div>
                 <div class="bottom-actions-row-single">
-                    <a href="/other-recommendations/" class="action-button-large" id="otherRecommendationsBtn"
-                        onclick="window.location.href='/other-recommendations/'; return false;"
-                        style="cursor: pointer !important; pointer-events: auto !important; position: relative !important; z-index: 99999 !important; display: inline-flex !important; text-decoration: none !important;">
+                    <button type="button" class="action-button-large" id="otherRecommendationsBtn"
+                        onclick="goToOtherRecommendations()">
                         다른 추천 후보 확인
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -3377,7 +3499,7 @@
     <!-- 예약 완료 모달 -->
     <div class="confirm-modal" id="reservationCompleteModal">
         <div class="confirm-modal-content">
-            <div class="confirm-modal-message" style="font-weight: 700;">전화 상담 예약이 완료되었습니다.</div>
+            <div class="confirm-modal-message" style="font-weight: 700;">구매상담예약이 완료되었습니다.</div>
             <div class="confirm-modal-question" style="font-weight: 700;">예약하신 내용을 확인하시겠습니까?</div>
             <div class="confirm-modal-buttons">
                 <button class="confirm-modal-btn confirm-modal-btn-cancel"
@@ -3418,7 +3540,7 @@
                     <img src="/static/images/가전 카테고리/냉장고.png" alt="장바구니" class="cart-icon">
                 </div>
                 <div class="cart-message-text">
-                    <span>장바구니에 담았습니다.</span>
+                    <span>장바구니에 모두 담았습니다.</span>
                 </div>
                 <button class="cart-go-button" onclick="goToCart()">바로가기 ></button>
             </div>
@@ -5009,36 +5131,15 @@
                 });
             }
 
-            // 다른 추천 후보 확인 버튼 이벤트 리스너 추가
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                // 모든 이벤트 리스너 추가
-                otherRecommendationsBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('다른 추천 후보 확인 버튼 클릭됨 (이벤트 리스너)');
-                    window.location.href = '/other-recommendations/';
-                    return false;
-                }, true);
-
-                // 스타일 강제 적용
-                otherRecommendationsBtn.style.cursor = 'pointer';
-                otherRecommendationsBtn.style.pointerEvents = 'auto';
-                otherRecommendationsBtn.style.zIndex = '99999';
-                otherRecommendationsBtn.style.position = 'relative';
-            }
         });
 
         // ============================================
         // 다른 추천 후보 확인
         // ============================================
-        function checkOtherRecommendations() {
+        function goToOtherRecommendations() {
             // 다른 추천 후보 확인 페이지로 이동
-            console.log('다른 추천 후보 확인 버튼 클릭됨');
             window.location.href = '/other-recommendations/';
-            return false;
         }
-
 
         // ============================================
         // 결과 저장하기
