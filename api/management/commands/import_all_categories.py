@@ -139,6 +139,22 @@ class Command(BaseCommand):
         # 통계 출력
         self.print_statistics(category_stats, total_products)
 
+    def _get_main_category_from_filepath(self, filepath, category):
+        """
+        파일명에서 MAIN_CATEGORY 추출
+        예: "TV.csv" -> "TV", "냉장고.csv" -> "냉장고"
+        """
+        filename = filepath.name if hasattr(filepath, 'name') else str(filepath)
+        filename_lower = filename.lower()
+        
+        # 파일명 기반으로 MAIN_CATEGORY 추출
+        for key, (django_cat, display_name) in self.CATEGORY_MAP.items():
+            if key.lower() in filename_lower:
+                return key
+        
+        # 매핑이 없으면 카테고리명 그대로 사용
+        return category
+    
     def import_csv_file(self, filepath, category):
         """CSV 파일을 JSON 필드 방식으로 import"""
         count = 0
@@ -202,6 +218,9 @@ class Command(BaseCommand):
                         # 3. 스펙을 JSON으로 저장 (카테고리별 유연하게)
                         # ============================================================
                         specs_dict = self._build_specs_dict(row, category)
+                        # 파일명 기반으로 MAIN_CATEGORY 업데이트
+                        main_category = self._get_main_category_from_filepath(filepath, category)
+                        specs_dict['MAIN_CATEGORY'] = main_category
                         specs_json = json.dumps(specs_dict, ensure_ascii=False)
                         
                         # ============================================================
@@ -318,12 +337,18 @@ class Command(BaseCommand):
         JSON 구조:
         {
             "category": "TV",
+            "MAIN_CATEGORY": "TV",  # 파일명 기반 MAIN_CATEGORY
             "common": { ... },
             "specific": { ... }
         }
         """
+        # 파일명에서 MAIN_CATEGORY 추출 (filepath는 _build_specs_dict 호출 시 전달 필요)
+        # 일단 category 기반으로 추출
+        main_category = self._get_main_category_from_category(category)
+        
         specs = {
             "category": category,
+            "MAIN_CATEGORY": main_category,  # MAIN_CATEGORY 추가
             "common": {},
             "specific": {}
         }

@@ -3212,92 +3212,152 @@
         }
 
         // ============================================
-        // 취향분석 다시하기
+        // 취향분석 다시하기 (포트폴리오 다시 추천받기)
         // ============================================
-        function retryOnboarding() {
-            // 온보딩 1단계로 이동 (저장된 정보는 그대로 유지)
-            window.location.href = '/onboarding/';
+        async function retryOnboarding() {
+            try {
+                const portfolioId = sessionStorage.getItem('portfolio_id') || sessionStorage.getItem('portfolio_internal_key');
+                if (!portfolioId) {
+                    // 포트폴리오 ID가 없으면 온보딩으로 이동
+                    window.location.href = '/onboarding/';
+                    return;
+                }
+
+                showToast('새로운 추천을 받고 있습니다...');
+
+                // 포트폴리오 refresh API 호출
+                const response = await fetch(`/api/portfolio/${portfolioId}/refresh/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    // 새로운 추천 결과로 페이지 새로고침
+                    showToast('새로운 추천 결과를 받았습니다.');
+                    // 결과를 세션에 저장하고 페이지 새로고침
+                    if (data.recommendations) {
+                        const sessionId = sessionStorage.getItem('onboarding_session_id');
+                        if (sessionId) {
+                            // 세션 업데이트 (선택적)
+                            window.location.reload();
+                        }
+                    }
+                } else {
+                    throw new Error(data.error || '다시 추천받기 실패');
+                }
+            } catch (error) {
+                console.error('다시 추천받기 오류:', error);
+                showToast('다시 추천받기 중 오류가 발생했습니다: ' + error.message);
+                // 실패 시 온보딩으로 이동
+                window.location.href = '/onboarding/';
+            }
         }
 
         // ============================================
-        // 장바구니 모두 담기 - LGDX-12
+        // 장바구니 모두 담기 - LGDX-12 (포트폴리오 전체 담기)
         // ============================================
         async function addAllToCart() {
             try {
+                const portfolioId = sessionStorage.getItem('portfolio_id') || sessionStorage.getItem('portfolio_internal_key');
                 const sessionId = sessionStorage.getItem('onboarding_session_id');
-                if (!sessionId) {
-                    showToast('세션 정보를 찾을 수 없습니다.');
+                
+                if (!portfolioId && !sessionId) {
+                    showToast('포트폴리오 또는 세션 정보를 찾을 수 없습니다.');
                     return;
                 }
 
-                // 세션에서 추천 결과 가져오기
-                const response = await fetch(`/api/onboarding/session/${sessionId}/`);
-                if (!response.ok) {
-                    throw new Error('세션 조회 실패');
-                }
+                const user_id = sessionId ? `session_${sessionId}` : 'guest';
 
-                const data = await response.json();
-                if (!data.success || !data.session) {
-                    throw new Error('세션 데이터 없음');
-                }
+                // 포트폴리오 ID가 있으면 포트폴리오 전체 담기 API 사용
+                if (portfolioId) {
+                    showToast('장바구니에 추가하는 중...');
 
-                const recommendations = data.session.recommendation_result?.recommendations || [];
-                if (recommendations.length === 0) {
-                    showToast('담을 제품이 없습니다.');
-                    return;
-                }
+                    const response = await fetch(`/api/portfolio/${portfolioId}/add-to-cart/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: user_id,
+                        }),
+                    });
 
-                const user_id = `session_${sessionId}`;
-                let successCount = 0;
-                let failCount = 0;
+                    const data = await response.json();
+                    if (data.success) {
+                        showToast(`${data.added_count || 0}개 제품이 장바구니에 추가되었습니다.`);
+                    } else {
+                        throw new Error(data.error || '장바구니 추가 실패');
+                    }
+                } else {
+                    // 포트폴리오 ID가 없으면 기존 방식 (개별 추가)
+                    const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                    if (!response.ok) {
+                        throw new Error('세션 조회 실패');
+                    }
 
-                // 모든 제품을 장바구니에 추가
-                for (const product of recommendations) {
-                    try {
-                        const productId = product.product_id || product.id;
-                        if (!productId) continue;
+                    const sessionData = await response.json();
+                    if (!sessionData.success || !sessionData.session) {
+                        throw new Error('세션 데이터 없음');
+                    }
 
-                        const addResponse = await fetch('/api/cart/add/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                user_id: user_id,
-                                product_id: productId,
-                                quantity: 1,
-                                extra_data: {
-                                    price: product.price || product.original_price || 0,
-                                    discount_price: product.discount_price || product.sale_price || product.price || 0,
-                                    name: product.name,
+                    const recommendations = sessionData.session.recommendation_result?.recommendations || [];
+                    if (recommendations.length === 0) {
+                        showToast('담을 제품이 없습니다.');
+                        return;
+                    }
+
+                    let successCount = 0;
+                    let failCount = 0;
+
+                    // 모든 제품을 장바구니에 추가
+                    for (const product of recommendations) {
+                        try {
+                            const productId = product.product_id || product.id;
+                            if (!productId) continue;
+
+                            const addResponse = await fetch('/api/cart/add/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
                                 },
-                            }),
-                        });
+                                body: JSON.stringify({
+                                    user_id: user_id,
+                                    product_id: productId,
+                                    quantity: 1,
+                                    extra_data: {
+                                        price: product.price || product.original_price || 0,
+                                        discount_price: product.discount_price || product.sale_price || product.price || 0,
+                                        name: product.name,
+                                    },
+                                }),
+                            });
 
-                        const addData = await addResponse.json();
-                        if (addData.success) {
-                            successCount++;
-                        } else {
+                            const addData = await addResponse.json();
+                            if (addData.success) {
+                                successCount++;
+                            } else {
+                                failCount++;
+                            }
+                        } catch (error) {
+                            console.error(`제품 ${product.name} 장바구니 추가 실패:`, error);
                             failCount++;
                         }
-                    } catch (error) {
-                        console.error(`제품 ${product.name} 장바구니 추가 실패:`, error);
-                        failCount++;
                     }
-                }
 
-                if (successCount > 0) {
-                    showToast(`${successCount}개 제품이 장바구니에 추가되었습니다.`);
-                } else {
-                    showToast('장바구니 추가에 실패했습니다.');
+                    if (successCount > 0) {
+                        showToast(`${successCount}개 제품이 장바구니에 추가되었습니다.`);
+                    } else {
+                        showToast('장바구니 추가에 실패했습니다.');
+                    }
                 }
             } catch (error) {
                 console.error('장바구니 추가 오류:', error);
-                showToast('장바구니 추가 중 오류가 발생했습니다.');
+                showToast('장바구니 추가 중 오류가 발생했습니다: ' + error.message);
             }
-        }
-            // TODO: 장바구니에 모든 추천 제품 추가
-            showToast('장바구니에 추가되었습니다.');
         }
 
         // ============================================
@@ -3746,7 +3806,7 @@
         }
 
         // 예약 제출
-        function submitConsultation() {
+        async function submitConsultation() {
             if (!selectedPurpose || !selectedDate) {
                 alert('상담목적과 상담 희망 일시를 선택해주세요.');
                 return;
@@ -3774,28 +3834,67 @@
                     };
                 });
 
-            const reservationData = {
-                purpose: selectedPurpose,
-                date: selectedDate.toISOString().split('T')[0],
-                time: selectedTime || null,
-                name: name,
-                phone: phone,
-                notes: notes,
-                earlyContact: earlyContact,
-                products: selectedProducts
-            };
+            const portfolioId = sessionStorage.getItem('portfolio_id') || sessionStorage.getItem('portfolio_internal_key');
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            const user_id = sessionId ? `session_${sessionId}` : 'guest';
 
-            console.log('예약 정보:', reservationData);
+            try {
+                // 베스트샵 상담 예약 API 호출
+                if (portfolioId) {
+                    const response = await fetch('/api/bestshop/consultation/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            portfolio_id: portfolioId,
+                            user_id: user_id,
+                            consultation_purpose: selectedPurpose || '이사',
+                            preferred_date: selectedDate.toISOString().split('T')[0],
+                            preferred_time: selectedTime || null,
+                            store_location: notes || '서울 강남점',
+                        }),
+                    });
 
-            // 예약 완료 확인 모달 표시
-            if (confirm('구매상담예약이 완료되었습니다.\n예약하신 내용을 확인하시겠습니까?')) {
-                // 확인 버튼 클릭 시 처리 (예: 예약 내역 페이지로 이동)
-                // window.location.href = '/consultation/confirm/';
+                    const data = await response.json();
+                    if (data.success) {
+                        // 예약 완료 확인 모달 표시
+                        if (confirm('구매상담예약이 완료되었습니다.\n예약하신 내용을 확인하시겠습니까?')) {
+                            // 베스트샵 페이지로 이동
+                            if (data.bestshop_url) {
+                                window.open(data.bestshop_url, '_blank');
+                            }
+                        }
+                        closeConsultationModal();
+                    } else {
+                        throw new Error(data.error || '상담 예약 실패');
+                    }
+                } else {
+                    // 포트폴리오 ID가 없으면 기존 방식
+                    const reservationData = {
+                        purpose: selectedPurpose,
+                        date: selectedDate.toISOString().split('T')[0],
+                        time: selectedTime || null,
+                        name: name,
+                        phone: phone,
+                        notes: notes,
+                        earlyContact: earlyContact,
+                        products: selectedProducts
+                    };
+
+                    console.log('예약 정보:', reservationData);
+
+                    // 예약 완료 확인 모달 표시
+                    if (confirm('구매상담예약이 완료되었습니다.\n예약하신 내용을 확인하시겠습니까?')) {
+                        // 확인 버튼 클릭 시 처리 (예: 예약 내역 페이지로 이동)
+                        // window.location.href = '/consultation/confirm/';
+                    }
+                }
+            } catch (error) {
+                console.error('상담 예약 오류:', error);
+                alert('상담 예약 중 오류가 발생했습니다: ' + error.message);
             }
-
-            // 실제로는 여기서 API 호출
-            // fetch('/api/consultation/reserve/', {
-            //     method: 'POST',
+        }
             //     headers: {
             //         'Content-Type': 'application/json',
             //         'X-CSRFToken': getCookie('csrftoken')
@@ -3835,9 +3934,42 @@
         // ============================================
         // 다른 추천 후보 확인
         // ============================================
-        function checkOtherRecommendations() {
-            // TODO: 다른 추천 후보 확인 기능 구현
-            showToast('다른 추천 후보 확인 기능 준비 중입니다.');
+        async function checkOtherRecommendations() {
+            try {
+                const portfolioId = sessionStorage.getItem('portfolio_id') || sessionStorage.getItem('portfolio_internal_key');
+                if (!portfolioId) {
+                    showToast('포트폴리오 정보를 찾을 수 없습니다.');
+                    return;
+                }
+
+                showToast('다른 추천 후보를 불러오는 중...');
+
+                // alternatives API 호출
+                const response = await fetch(`/api/portfolio/${portfolioId}/alternatives/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+                if (data.success && data.alternatives) {
+                    // 추천 후보를 모달이나 새 섹션에 표시
+                    // 현재는 간단하게 토스트 메시지로 표시
+                    const totalProducts = data.alternatives.reduce((sum, alt) => sum + (alt.products?.length || 0), 0);
+                    showToast(`${totalProducts}개의 다른 추천 후보를 찾았습니다.`);
+                    
+                    // 추천 후보 데이터를 콘솔에 출력 (디버깅용)
+                    console.log('추천 후보:', data.alternatives);
+                    
+                    // TODO: 추천 후보를 화면에 표시하는 로직 추가 (UI는 건들지 않고 데이터만 표시)
+                } else {
+                    throw new Error(data.error || '추천 후보 조회 실패');
+                }
+            } catch (error) {
+                console.error('추천 후보 확인 오류:', error);
+                showToast('추천 후보 확인 중 오류가 발생했습니다: ' + error.message);
+            }
         }
 
         // ============================================
@@ -3897,13 +4029,14 @@
                     ? Math.round(products.reduce((sum, p) => sum + (p.score || 0), 0) / products.length)
                     : 0;
 
-                // 포트폴리오 저장 API 호출
+                // 포트폴리오 저장 API 호출 (새로운 로직: session_id 포함)
                 const saveResponse = await fetch('/api/portfolio/save/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        session_id: sessionId,  // 새로운 백엔드 로직 사용
                         user_id: `session_${sessionId}`,
                         style_type: styleType,
                         style_title: styleTitle,
@@ -3917,7 +4050,10 @@
                 const saveData = await saveResponse.json();
                 if (saveData.success) {
                     showToast('포트폴리오가 저장되었습니다.');
-                    // internal_key를 세션 스토리지에 저장
+                    // portfolio_id와 internal_key를 세션 스토리지에 저장
+                    if (saveData.portfolio_id) {
+                        sessionStorage.setItem('portfolio_id', saveData.portfolio_id);
+                    }
                     if (saveData.internal_key) {
                         sessionStorage.setItem('portfolio_internal_key', saveData.internal_key);
                     }

@@ -361,16 +361,6 @@ class Portfolio(models.Model):
         help_text="포트폴리오 내부 키 (예: PF-001, PF-002)"
     )
     
-    # 내부 키 (UUID 또는 P001, P002 형식) - LGDX-3
-    internal_key = models.CharField(
-        max_length=50,
-        unique=True,
-        null=True,
-        blank=True,
-        db_index=True,
-        help_text="포트폴리오 내부 키 (UUID 또는 P001, P002 형식)"
-    )
-    
     # 사용자 식별 (추후 카카오 로그인 연동 시 활용)
     user_id = models.CharField(
         max_length=100,
@@ -484,24 +474,13 @@ class Portfolio(models.Model):
         return f"{self.portfolio_id} - {self.style_type}"
     
     def save(self, *args, **kwargs):
-        """포트폴리오 ID 및 internal_key 자동 생성"""
+        """포트폴리오 ID 자동 생성"""
         if not self.portfolio_id:
             # PF-XXXXXX 형식
             import random
             import string
             random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
             self.portfolio_id = f"PF-{random_str}"
-        
-        # internal_key 자동 생성 (없는 경우)
-        if not self.internal_key:
-            # P001, P002 형식으로 생성
-            last_portfolio = Portfolio.objects.order_by('-id').first()
-            if last_portfolio and last_portfolio.id:
-                next_num = last_portfolio.id + 1
-            else:
-                next_num = 1
-            self.internal_key = f"P{next_num:03d}"
-        
         super().save(*args, **kwargs)
     
     def calculate_totals(self):
@@ -514,52 +493,77 @@ class Portfolio(models.Model):
 
 
 class Cart(models.Model):
+    """장바구니 모델 - LGDX-12"""
+    user_id = models.CharField(max_length=100, db_index=True, help_text="사용자 ID (카카오 ID 또는 세션 ID)")
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='cart_items', help_text="장바구니에 담긴 제품")
+    quantity = models.IntegerField(default=1, help_text="제품 수량")
+    extra_data = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = '장바구니'
+        verbose_name_plural = '장바구니'
+        unique_together = ['user_id', 'product']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Cart({self.user_id}, {self.product.name})"
+
+
+class TasteConfig(models.Model):
     """
-    장바구니 모델 - LGDX-12
-    사용자별 장바구니에 담긴 제품 목록
+    Taste별 추천 설정 관리
+    - 각 taste_id에 대해 카테고리와 추천 제품을 미리 정의
+    - 변동사항이 있으면 이 테이블만 업데이트하면 됨
     """
+    taste_id = models.IntegerField(unique=True, primary_key=True, help_text="Taste ID (1-120)")
     
-    # 사용자 식별 (카카오 ID 또는 세션 ID)
-    user_id = models.CharField(
-        max_length=100,
-        db_index=True,
-        help_text="사용자 ID (카카오 ID 또는 세션 ID)"
+    # Taste 설명
+    description = models.CharField(max_length=500, blank=True, help_text="Taste 설명")
+    
+    # 대표 온보딩 특성 (참고용)
+    representative_vibe = models.CharField(max_length=20, blank=True)
+    representative_household_size = models.IntegerField(null=True, blank=True)
+    representative_main_space = models.CharField(max_length=50, blank=True)
+    representative_has_pet = models.BooleanField(null=True, blank=True)
+    representative_priority = models.CharField(max_length=20, blank=True)
+    representative_budget_level = models.CharField(max_length=20, blank=True)
+    
+    # 추천 카테고리 (JSON 배열)
+    recommended_categories = models.JSONField(
+        default=list,
+        help_text="추천 MAIN_CATEGORY 리스트 (예: ['TV', '냉장고', '에어컨'])"
     )
     
-    # 제품 정보
-    product = models.ForeignKey(
-        'Product',
-        on_delete=models.CASCADE,
-        related_name='cart_items',
-        help_text="장바구니에 담긴 제품"
-    )
-    
-    # 수량
-    quantity = models.IntegerField(
-        default=1,
-        help_text="제품 수량"
-    )
-    
-    # 추가 정보 (JSON)
-    extra_data = models.JSONField(
+    # 추천 카테고리와 점수 (JSON 객체)
+    # 구조: {"TV": 85.0, "냉장고": 70.0, "에어컨": 65.0}
+    # Oracle DB 컬럼명: CATEGORY_SCORES (30자 제한으로 인해)
+    recommended_categories_with_scores = models.JSONField(
         default=dict,
         blank=True,
-        help_text="추가 정보 (가격, 할인 정보 등)"
+        help_text="카테고리별 점수 매핑 (0~100점)"
     )
     
-    # 타임스탬프
+    # 추천 제품 모델 (카테고리별 상위 3개씩, JSON)
+    # 구조: {"TV": [product_id1, product_id2, product_id3], "냉장고": [...]}
+    recommended_products = models.JSONField(
+        default=dict,
+        help_text="카테고리별 추천 제품 ID 매핑"
+    )
+    
+    # 메타 정보
+    is_active = models.BooleanField(default=True, help_text="활성화 여부")
+    auto_generated = models.BooleanField(default=False, help_text="자동 생성 여부")
+    last_simulation_date = models.DateTimeField(null=True, blank=True, help_text="마지막 시뮬레이션 실행일")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        verbose_name = '장바구니'
-        verbose_name_plural = '장바구니'
-        ordering = ['-created_at']
-        unique_together = [['user_id', 'product']]  # 사용자별 제품 중복 방지
-        indexes = [
-            models.Index(fields=['user_id']),
-            models.Index(fields=['product']),
-        ]
+        verbose_name = 'Taste 설정'
+        verbose_name_plural = 'Taste 설정'
+        ordering = ['taste_id']
     
     def __str__(self):
-        return f"{self.user_id} - {self.product.name} (수량: {self.quantity})"
+        return f"Taste {self.taste_id}: {', '.join(self.recommended_categories[:3]) if self.recommended_categories else 'N/A'}..."

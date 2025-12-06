@@ -95,6 +95,13 @@ class TasteClassifier:
         taste_hash = int(hashlib.md5(taste_key.encode('utf-8')).hexdigest(), 16)
         taste_id = (taste_hash % TasteClassifier.TASTE_COUNT) + 1
         
+        # 6. 검증: 1~120 범위의 정수로 보장
+        taste_id = int(taste_id)
+        if taste_id < 1:
+            taste_id = 1
+        elif taste_id > TasteClassifier.TASTE_COUNT:
+            taste_id = TasteClassifier.TASTE_COUNT
+        
         return taste_id
     
     @staticmethod

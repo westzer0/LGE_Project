@@ -200,6 +200,14 @@ class OnboardingFlow {
             const data = await response.json();
             
             if (data.success) {
+                // 포트폴리오 ID 저장 (새로운 백엔드 로직에서 반환)
+                if (data.portfolio_id) {
+                    sessionStorage.setItem('portfolio_id', data.portfolio_id);
+                }
+                if (data.internal_key) {
+                    sessionStorage.setItem('portfolio_internal_key', data.internal_key);
+                }
+                
                 // 결과 화면 표시
                 this.showResults(data.recommendations);
             } else {

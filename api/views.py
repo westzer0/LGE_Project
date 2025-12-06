@@ -10,6 +10,7 @@ from .services.recommendation_engine import recommendation_engine
 from .services.chatgpt_service import chatgpt_service
 from .services.onboarding_db_service import onboarding_db_service
 from .services.taste_calculation_service import taste_calculation_service
+from .services.portfolio_service import portfolio_service
 
 
 def index_view(request):
@@ -774,6 +775,7 @@ def onboarding_complete_view(request):
         
         # 3. 추천 엔진 호출
         # taste_id 계산
+        member_id = data.get('member_id')
         taste_id = None
         if member_id:
             try:
@@ -799,7 +801,19 @@ def onboarding_complete_view(request):
             
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")
             
-            # 5. Taste 계산 및 MEMBER 테이블에 저장 (member_id가 있는 경우)
+            # 5. 포트폴리오 자동 생성 (PRD: 온보딩 완료 시 포트폴리오 생성)
+            user_id = data.get('user_id', f"session_{session_id}")
+            portfolio_result = portfolio_service.create_portfolio_from_onboarding(
+                session_id=session_id,
+                user_id=user_id
+            )
+            
+            portfolio_id = None
+            if portfolio_result.get('success'):
+                portfolio_id = portfolio_result.get('portfolio_id')
+                print(f"[Portfolio 생성 완료] Portfolio ID: {portfolio_id}")
+            
+            # 6. Taste 계산 및 MEMBER 테이블에 저장 (member_id가 있는 경우)
             member_id = data.get('member_id')
             if member_id:
                 try:
@@ -831,11 +845,20 @@ def onboarding_complete_view(request):
                     print(f"[Taste 계산 실패] {str(taste_error)}")
                     # Taste 계산 실패해도 추천 결과는 반환
             
-            return JsonResponse({
+            # 응답에 포트폴리오 정보 포함
+            response_data = {
                 'success': True,
                 'session_id': session_id,
                 'recommendations': result['recommendations'],
-            }, json_dumps_params={'ensure_ascii': False})
+            }
+            
+            if portfolio_id:
+                response_data['portfolio_id'] = portfolio_id
+                response_data['style_analysis'] = portfolio_result.get('style_analysis')
+                response_data['total_price'] = portfolio_result.get('total_price')
+                response_data['total_discount_price'] = portfolio_result.get('total_discount_price')
+            
+            return JsonResponse(response_data, json_dumps_params={'ensure_ascii': False})
         else:
             print(f"[Error] {result.get('error', '알 수 없는 오류')}")
             
@@ -918,10 +941,11 @@ def onboarding_session_view(request, session_id):
 @require_http_methods(["POST"])
 def portfolio_save_view(request):
     """
-    포트폴리오 저장 API
+    포트폴리오 저장 API (PRD 기반)
     
     POST /api/portfolio/save/
     {
+        "session_id": "abc12345",  # 온보딩 세션 ID (필수)
         "user_id": "kakao_12345" 또는 "session_xxx",
         "style_type": "modern",
         "style_title": "모던 & 미니멀 라이프를 위한 오브제 스타일",
@@ -934,8 +958,36 @@ def portfolio_save_view(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         
+        session_id = data.get('session_id')
         user_id = data.get('user_id', f"guest_{timezone.now().strftime('%Y%m%d%H%M%S')}")
         
+        # session_id가 있으면 포트폴리오 서비스 사용 (PRD 로직)
+        if session_id:
+            result = portfolio_service.create_portfolio_from_onboarding(
+                session_id=session_id,
+                user_id=user_id
+            )
+            
+            if result.get('success'):
+                return JsonResponse({
+                    'success': True,
+                    'portfolio_id': result.get('portfolio_id'),
+                    'internal_key': result.get('internal_key'),
+                    'style_analysis': result.get('style_analysis'),
+                    'recommendations': result.get('recommendations'),
+                    'total_price': result.get('total_price'),
+                    'total_discount_price': result.get('total_discount_price'),
+                    'match_score': result.get('match_score'),
+                    'message': '포트폴리오가 생성되었습니다.',
+                    'share_url': f'/portfolio/{result.get("portfolio_id")}/'
+                }, json_dumps_params={'ensure_ascii': False})
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': result.get('error', '포트폴리오 생성 실패')
+                }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        # 기존 방식 (하위 호환성)
         # 포트폴리오 생성
         portfolio = Portfolio.objects.create(
             user_id=user_id,
@@ -1082,6 +1134,210 @@ def portfolio_share_view(request, portfolio_id):
             'success': False,
             'error': '포트폴리오를 찾을 수 없습니다.'
         }, json_dumps_params={'ensure_ascii': False}, status=404)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def portfolio_refresh_view(request, portfolio_id):
+    """
+    포트폴리오 다시 추천받기 (PRD: 2-4)
+    
+    POST /api/portfolio/<portfolio_id>/refresh/
+    {
+        "exclude_product_ids": [1, 2, 3]  # 제외할 제품 ID (선택)
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8')) if request.body else {}
+        exclude_product_ids = data.get('exclude_product_ids', [])
+        
+        result = portfolio_service.refresh_portfolio(
+            portfolio_id=portfolio_id,
+            exclude_product_ids=exclude_product_ids
+        )
+        
+        if result.get('success'):
+            return JsonResponse({
+                'success': True,
+                'portfolio_id': result.get('portfolio_id'),
+                'style_analysis': result.get('style_analysis'),
+                'recommendations': result.get('recommendations'),
+                'total_price': result.get('total_price'),
+                'total_discount_price': result.get('total_discount_price'),
+                'message': '새로운 추천 결과를 받았습니다.'
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '다시 추천받기 실패')
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@require_http_methods(["GET"])
+def portfolio_alternatives_view(request, portfolio_id):
+    """
+    다른 추천 후보 확인 (PRD: 2-6)
+    
+    GET /api/portfolio/<portfolio_id>/alternatives/?category=TV
+    """
+    try:
+        category = request.GET.get('category', None)
+        
+        result = portfolio_service.get_alternative_recommendations(
+            portfolio_id=portfolio_id,
+            category=category
+        )
+        
+        if result.get('success'):
+            return JsonResponse({
+                'success': True,
+                'alternatives': result.get('alternatives', [])
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '추천 후보 조회 실패')
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def portfolio_add_to_cart_view(request, portfolio_id):
+    """
+    포트폴리오 전체 장바구니 담기 (PRD: 2-3)
+    
+    POST /api/portfolio/<portfolio_id>/add-to-cart/
+    {
+        "user_id": "kakao_12345"
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        user_id = data.get('user_id')
+        
+        if not user_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'user_id 필수'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        result = portfolio_service.add_products_to_cart(
+            portfolio_id=portfolio_id,
+            user_id=user_id
+        )
+        
+        if result.get('success'):
+            return JsonResponse({
+                'success': True,
+                'added_count': result.get('added_count', 0),
+                'cart_items': result.get('cart_items', []),
+                'message': f"{result.get('added_count', 0)}개 제품이 장바구니에 추가되었습니다."
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '장바구니 추가 실패')
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def bestshop_consultation_view(request):
+    """
+    베스트샵 상담 예약 (PRD: 2-5)
+    
+    POST /api/bestshop/consultation/
+    {
+        "portfolio_id": "PF-XXXXXX",
+        "user_id": "kakao_12345",
+        "consultation_purpose": "이사",
+        "preferred_date": "2025-12-15",
+        "preferred_time": "14:00",
+        "store_location": "서울 강남점"
+    }
+    
+    Note: 실제 베스트샵 API 연동은 외부 시스템이므로 여기서는 포트폴리오 정보를 준비만 함
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        portfolio_id = data.get('portfolio_id')
+        user_id = data.get('user_id')
+        consultation_purpose = data.get('consultation_purpose', '이사')
+        preferred_date = data.get('preferred_date')
+        preferred_time = data.get('preferred_time')
+        store_location = data.get('store_location')
+        
+        if not portfolio_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'portfolio_id 필수'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        # 포트폴리오 정보 조회
+        try:
+            portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+        except Portfolio.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': '포트폴리오를 찾을 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=404)
+        
+        # 베스트샵 상담 예약 정보 준비
+        consultation_data = {
+            'portfolio_id': portfolio.portfolio_id,
+            'internal_key': portfolio.internal_key,
+            'user_id': user_id,
+            'consultation_purpose': consultation_purpose,
+            'preferred_date': preferred_date,
+            'preferred_time': preferred_time,
+            'store_location': store_location,
+            'products': portfolio.products,
+            'total_price': float(portfolio.total_original_price),
+            'total_discount_price': float(portfolio.total_discount_price),
+            'style_analysis': {
+                'title': portfolio.style_title,
+                'subtitle': portfolio.style_subtitle,
+                'style_type': portfolio.style_type
+            },
+            'onboarding_data': portfolio.onboarding_data
+        }
+        
+        # 실제 베스트샵 API 연동은 여기서 구현
+        # 현재는 데이터만 반환 (외부 시스템 연동 필요)
+        bestshop_url = "https://bestshop.lge.co.kr/counselReserve/main/MC11420001?inflow=lgekor"
+        
+        return JsonResponse({
+            'success': True,
+            'message': '상담 예약 정보가 준비되었습니다.',
+            'consultation_data': consultation_data,
+            'bestshop_url': bestshop_url,
+            'note': '실제 베스트샵 예약은 외부 시스템과 연동 필요'
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
 
 
 # ============================================================

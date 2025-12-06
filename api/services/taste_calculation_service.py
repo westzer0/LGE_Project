@@ -32,7 +32,14 @@ class TasteCalculationService:
         # 2. taste 계산
         taste_id = taste_classifier.calculate_taste_from_onboarding(onboarding_data)
         
-        # 3. MEMBER 테이블에 taste 저장
+        # 3. 검증: 1~120 범위의 정수로 보장
+        taste_id = int(taste_id)
+        if taste_id < 1:
+            taste_id = 1
+        elif taste_id > 120:
+            taste_id = 120
+        
+        # 4. MEMBER 테이블에 taste 저장 (NUMBER 타입으로 저장)
         with get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("""
@@ -139,7 +146,7 @@ class TasteCalculationService:
             member_id: 회원 ID
         
         Returns:
-            taste_id 또는 None
+            taste_id (1~120 정수) 또는 None
         """
         from api.db.oracle_client import fetch_one
         
@@ -147,7 +154,16 @@ class TasteCalculationService:
             SELECT TASTE FROM MEMBER WHERE MEMBER_ID = :member_id
         """, {'member_id': member_id})
         
-        return result[0] if result and result[0] else None
+        if result and result[0] is not None:
+            taste_id = int(result[0])
+            # 검증: 1~120 범위로 보장
+            if taste_id < 1:
+                return 1
+            elif taste_id > 120:
+                return 120
+            return taste_id
+        
+        return None
 
 
 # 싱글톤 인스턴스

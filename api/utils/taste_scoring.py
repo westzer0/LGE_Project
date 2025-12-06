@@ -45,6 +45,9 @@ def get_logic_for_taste_id(taste_id: int, onboarding_data: Dict = None) -> Optio
     """
     taste_id에 해당하는 Scoring Logic 반환
     
+    새로운 TasteScoringLogicService를 사용하여 taste별 독립적인 logic을 제공합니다.
+    각 taste별로 완전히 독립적인 scoring 로직을 적용할 수 있습니다.
+    
     Args:
         taste_id: 취향 ID
         onboarding_data: 온보딩 데이터 (동적 logic 생성 시 사용)
@@ -52,23 +55,12 @@ def get_logic_for_taste_id(taste_id: int, onboarding_data: Dict = None) -> Optio
     Returns:
         Scoring Logic 딕셔너리
     """
-    # 온보딩 데이터가 있으면 동적 logic 생성 우선
-    if onboarding_data:
-        from .dynamic_taste_scoring import get_dynamic_scoring_logic_for_taste
-        return get_dynamic_scoring_logic_for_taste(taste_id, onboarding_data)
+    # 새로운 서비스 사용 (taste별 독립적인 logic 제공)
+    from ..services.taste_scoring_logic_service import taste_scoring_logic_service
     
-    # 기존 JSON 파일 기반 logic 사용
-    global _taste_id_to_logic
+    logic = taste_scoring_logic_service.get_logic_for_taste(taste_id, onboarding_data)
     
-    if _taste_id_to_logic is None:
-        _taste_id_to_logic = {}
-        logics = load_taste_scoring_logics()
-        
-        for logic in logics:
-            for tid in logic.get('applies_to_taste_ids', []):
-                _taste_id_to_logic[tid] = logic
-    
-    return _taste_id_to_logic.get(taste_id)
+    return logic
 
 
 def calculate_product_score_with_taste_logic(
@@ -111,90 +103,69 @@ def _apply_scoring_logic(product: Product, profile: UserProfile, logic: Dict) ->
     from .scoring import parse_spec_json
     spec = parse_spec_json(product)
     
-    # 카테고리 결정
-    category = product.category or "default"
-    if category not in ["TV", "KITCHEN", "LIVING"]:
-        category = "default"
+    # MAIN_CATEGORY 결정 (product.spec.spec_json에서 가져오기)
+    main_category = None
+    if spec:
+        main_category = spec.get('MAIN_CATEGORY', '').strip() if isinstance(spec.get('MAIN_CATEGORY'), str) else None
     
-    # Logic의 가중치 가져오기
-    weights = logic.get('weights', {}).get(category, {})
+    # MAIN_CATEGORY가 없으면 Django category를 MAIN_CATEGORY로 매핑
+    if not main_category:
+        from .category_mapping import map_main_category_to_django_category, DJANGO_CATEGORY_TO_MAIN_CATEGORIES
+        django_category = product.category or "LIVING"
+        
+        # Django category에 해당하는 첫 번째 MAIN_CATEGORY 사용 (fallback)
+        possible_main_categories = DJANGO_CATEGORY_TO_MAIN_CATEGORIES.get(django_category, [])
+        if possible_main_categories:
+            main_category = possible_main_categories[0]  # 첫 번째를 기본값으로
+        else:
+            main_category = "TV"  # 최종 fallback
+    
+    # Logic의 가중치 가져오기 (MAIN_CATEGORY 직접 사용)
+    weights = logic.get('weights', {}).get(main_category, {})
+    
+    # MAIN_CATEGORY에 대한 가중치가 없으면 Django category로 매핑해서 시도
     if not weights:
-        # 기본 가중치 사용
-        from .scoring import CATEGORY_WEIGHTS
-        weights = CATEGORY_WEIGHTS.get(category, CATEGORY_WEIGHTS['default'])
+        from .category_mapping import map_main_category_to_django_category
+        django_category = map_main_category_to_django_category(main_category)
+        weights = logic.get('weights', {}).get(django_category, {})
     
-    # 각 속성별 점수 계산
+    # 여전히 없으면 기본 가중치 사용
+    if not weights:
+        from .scoring import CATEGORY_WEIGHTS
+        from .category_mapping import map_main_category_to_django_category
+        django_category = map_main_category_to_django_category(main_category)
+        weights = CATEGORY_WEIGHTS.get(django_category, CATEGORY_WEIGHTS.get('default', {}))
+    
+    # 각 속성별 점수 계산 (모든 카테고리에 대해 동적으로 처리)
     scores = {}
     
-    # TV 카테고리
-    if category == "TV":
-        if 'resolution' in weights:
-            scores['resolution'] = score_resolution(spec, profile)
-        if 'brightness' in weights:
-            scores['brightness'] = score_brightness(spec, profile)
-        if 'refresh_rate' in weights:
-            scores['refresh_rate'] = score_refresh_rate(spec, profile)
-        if 'panel_type' in weights:
-            scores['panel_type'] = score_panel_type(spec, profile)
-        if 'power_consumption' in weights:
-            scores['power_consumption'] = score_power_consumption(spec, profile)
-        if 'size' in weights:
-            scores['size'] = score_size(spec, profile)
-        if 'price_match' in weights:
-            scores['price_match'] = score_price_match(product, profile)
-        if 'features' in weights:
-            scores['features'] = score_features(spec, product, profile)
-    
-    # KITCHEN 카테고리
-    elif category == "KITCHEN":
-        if 'capacity' in weights:
-            scores['capacity'] = score_capacity(spec, profile, product)
-        if 'energy_efficiency' in weights:
-            scores['energy_efficiency'] = score_energy_efficiency(spec, profile)
-        if 'features' in weights:
-            scores['features'] = score_features(spec, product, profile)
-        if 'size' in weights:
-            scores['size'] = score_size(spec, profile)
-        if 'price_match' in weights:
-            scores['price_match'] = score_price_match(product, profile)
-        if 'design' in weights:
-            scores['design'] = score_design(product, profile)
-        if 'resolution' in weights:  # 일부 Logic에 포함될 수 있음
-            scores['resolution'] = score_resolution(spec, profile)
-        if 'refresh_rate' in weights:
-            scores['refresh_rate'] = score_refresh_rate(spec, profile)
-    
-    # LIVING 카테고리
-    elif category == "LIVING":
-        if 'audio_quality' in weights:
-            scores['audio_quality'] = score_audio_quality(spec, profile)
-        if 'connectivity' in weights:
-            scores['connectivity'] = score_connectivity(spec, profile)
-        if 'power_consumption' in weights:
-            scores['power_consumption'] = score_power_consumption(spec, profile)
-        if 'size' in weights:
-            scores['size'] = score_size(spec, profile)
-        if 'price_match' in weights:
-            scores['price_match'] = score_price_match(product, profile)
-        if 'features' in weights:
-            scores['features'] = score_features(spec, product, profile)
-        if 'resolution' in weights:
-            scores['resolution'] = score_resolution(spec, profile)
-        if 'refresh_rate' in weights:
-            scores['refresh_rate'] = score_refresh_rate(spec, profile)
-    
-    # 기본 카테고리
-    else:
-        if 'price_match' in weights:
-            scores['price_match'] = score_price_match(product, profile)
-        if 'features' in weights:
-            scores['features'] = score_features(spec, product, profile)
-        if 'energy_efficiency' in weights:
-            scores['energy_efficiency'] = score_energy_efficiency(spec, profile)
-        if 'size' in weights:
-            scores['size'] = score_size(spec, profile)
-        if 'design' in weights:
-            scores['design'] = score_design(product, profile)
+    # weights에 정의된 모든 속성에 대해 점수 계산
+    if 'resolution' in weights:
+        scores['resolution'] = score_resolution(spec, profile)
+    if 'brightness' in weights:
+        scores['brightness'] = score_brightness(spec, profile)
+    if 'refresh_rate' in weights:
+        scores['refresh_rate'] = score_refresh_rate(spec, profile)
+    if 'panel_type' in weights:
+        scores['panel_type'] = score_panel_type(spec, profile)
+    if 'power_consumption' in weights:
+        scores['power_consumption'] = score_power_consumption(spec, profile)
+    if 'size' in weights:
+        scores['size'] = score_size(spec, profile)
+    if 'price_match' in weights:
+        scores['price_match'] = score_price_match(product, profile)
+    if 'features' in weights:
+        scores['features'] = score_features(spec, product, profile)
+    if 'capacity' in weights:
+        scores['capacity'] = score_capacity(spec, profile, product)
+    if 'energy_efficiency' in weights:
+        scores['energy_efficiency'] = score_energy_efficiency(spec, profile)
+    if 'design' in weights:
+        scores['design'] = score_design(product, profile)
+    if 'audio_quality' in weights:
+        scores['audio_quality'] = score_audio_quality(spec, profile)
+    if 'connectivity' in weights:
+        scores['connectivity'] = score_connectivity(spec, profile)
     
     # 가중 평균 계산
     weighted_score = 0.0

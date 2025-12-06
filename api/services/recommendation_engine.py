@@ -92,21 +92,7 @@ class RecommendationEngine:
         }
         """
         try:
-            # 1. 입력 검증
-            self._validate_user_profile(user_profile)
-            
-            # 2. Hard Filtering (조건에 맞는 제품만)
-            filtered_products = self._filter_products(user_profile)
-            
-            if not filtered_products.exists():
-                return {
-                    'success': False,
-                    'message': '조건에 맞는 제품이 없습니다.',
-                    'recommendations': []
-                }
-            
-            # 3. MAIN CATEGORY별로 그룹화 및 각 카테고리에서 상위 3개씩 추천
-            # taste_id가 있으면 taste 기반 카테고리 선택, 없으면 user_profile의 categories 사용
+            # 1. Taste 기반 MAIN CATEGORY 선택 (필터링 전에 먼저 선택)
             onboarding_data = user_profile.get('onboarding_data', {})
             
             if taste_id is not None:
@@ -117,9 +103,30 @@ class RecommendationEngine:
                     onboarding_data=onboarding_data,
                     num_categories=None  # 자동 결정
                 )
+                # user_profile에 선택된 카테고리 설정 (검증 전에)
+                user_profile['categories'] = selected_main_categories
             else:
-                # 기존 categories 사용 (MAIN_CATEGORY 형식일 수도 있고 Django category 형식일 수도 있음)
-                selected_main_categories = user_profile.get('categories', ['TV', 'KITCHEN', 'LIVING'])
+                # 기존 categories 사용 (MAIN_CATEGORY 형식)
+                selected_main_categories = user_profile.get('categories', [])
+                # MAIN_CATEGORY가 없으면 기본값
+                if not selected_main_categories:
+                    selected_main_categories = ['TV', '냉장고', '에어컨']
+                    user_profile['categories'] = selected_main_categories
+            
+            # 2. 입력 검증 (카테고리 선택 후)
+            self._validate_user_profile(user_profile)
+            
+            # 3. Hard Filtering (조건에 맞는 제품만, MAIN_CATEGORY 기반)
+            filtered_products = self._filter_products(user_profile)
+            
+            if not filtered_products.exists():
+                return {
+                    'success': False,
+                    'message': '조건에 맞는 제품이 없습니다.',
+                    'recommendations': []
+                }
+            
+            # 4. MAIN CATEGORY별로 그룹화 및 각 카테고리에서 상위 3개씩 추천
             
             if not selected_main_categories:
                 return {
@@ -158,38 +165,35 @@ class RecommendationEngine:
             
             # 각 MAIN CATEGORY별로 처리
             for main_category in selected_main_categories:
-                # MAIN_CATEGORY를 Django category로 매핑
-                django_category = get_django_categories_for_main_categories([main_category])[0]
+                # MAIN_CATEGORY를 Django category로 매핑 (fallback용)
+                django_category = get_django_categories_for_main_categories([main_category])[0] if main_category else 'LIVING'
                 
-                # 카테고리별 제품 필터링 (Django category 기준)
-                category_products = filtered_products.filter(category=django_category)
-                
-                # 추가 검증: product_type이 MAIN_CATEGORY와 매칭되는지 확인
-                # (spec_json에서 product_type 추출하여 검증)
+                # MAIN_CATEGORY 기반으로 제품 필터링 (spec_json에서 MAIN_CATEGORY 확인)
+                import json
                 valid_products = []
-                for product in category_products:
-                    # spec_json에서 product_type 확인
-                    if hasattr(product, 'spec') and product.spec.spec_json:
-                        import json
+                for product in filtered_products:
+                    matched = False
+                    
+                    # spec_json에서 MAIN_CATEGORY 확인
+                    if hasattr(product, 'spec') and product.spec and product.spec.spec_json:
                         try:
                             spec_data = json.loads(product.spec.spec_json)
-                            product_type = spec_data.get('PRODUCT_TYPE', '').strip()
                             main_cat_from_spec = spec_data.get('MAIN_CATEGORY', '').strip()
+                            product_type = spec_data.get('PRODUCT_TYPE', '').strip()
                             
                             # MAIN_CATEGORY가 일치하는지 확인
                             if main_cat_from_spec == main_category or product_type == main_category:
                                 valid_products.append(product)
-                            elif not product_type:  # product_type이 없으면 category만으로 판단
-                                valid_products.append(product)
+                                matched = True
                         except:
-                            # JSON 파싱 실패 시 category만으로 판단
-                            valid_products.append(product)
-                    else:
-                        # spec이 없으면 category만으로 판단
+                            pass
+                    
+                    # MAIN_CATEGORY 매칭 실패 시 Django category로 fallback
+                    if not matched and product.category == django_category:
                         valid_products.append(product)
                 
                 if not valid_products:
-                    print(f"[Recommendation] 카테고리 '{main_category}' (Django: '{django_category}'): 추천 제품 없음")
+                    print(f"[Recommendation] MAIN_CATEGORY '{main_category}' (Django: '{django_category}'): 추천 제품 없음")
                     continue
                 
                 # QuerySet으로 변환
@@ -197,7 +201,7 @@ class RecommendationEngine:
                 category_products = filtered_products.filter(id__in=product_ids)
                 
                 if not category_products.exists():
-                    print(f"[Recommendation] 카테고리 '{category}': 추천 제품 없음")
+                    print(f"[Recommendation] MAIN_CATEGORY '{main_category}': 추천 제품 없음")
                     continue
                 
                 # 카테고리별 스코어링
@@ -221,12 +225,13 @@ class RecommendationEngine:
                 ]
                 
                 # category 정보 추가 (MAIN_CATEGORY와 Django category 모두)
+                django_category = get_django_categories_for_main_categories([main_category])[0] if main_category else 'LIVING'
                 for rec in category_recommendations:
-                    rec['category'] = django_category  # Django category
+                    rec['category'] = django_category  # Django category (호환성)
                     rec['main_category'] = main_category  # 원본 MAIN_CATEGORY
                 
                 all_recommendations.extend(category_recommendations)
-                print(f"[Recommendation] 카테고리 '{main_category}' (Django: '{django_category}'): {len(category_recommendations)}개 추천")
+                print(f"[Recommendation] MAIN_CATEGORY '{main_category}': {len(category_recommendations)}개 추천")
             
             recommendations = all_recommendations
             
@@ -277,7 +282,7 @@ class RecommendationEngine:
         if not isinstance(categories, list):
             raise ValueError("categories는 리스트 형식이어야 함")
     
-    def _filter_products(self, user_profile: dict) -> QuerySet:
+    def _filter_products(self, user_profile: dict, taste_id: int = None) -> QuerySet:
         """
         Step 1: Hard Filtering (엄격한 필터링)
         - 카테고리 필터
@@ -298,21 +303,17 @@ class RecommendationEngine:
             self.budget_mapping['medium']
         )
         
-        categories = user_profile.get('categories', [])
+        # user_profile의 categories 사용 (이미 MAIN_CATEGORY 형식으로 설정됨)
+        main_categories = user_profile.get('categories', [])
+        
         household_size = user_profile.get('household_size', 2)
         has_pet = user_profile.get('has_pet', False)
         
-        # MAIN_CATEGORY를 Django category로 매핑
-        from api.utils.category_mapping import get_django_categories_for_main_categories
-        django_categories = get_django_categories_for_main_categories(categories)
-        
-        # Step 1: 기본 필터 (Django ORM 쿼리)
-        # 카테고리 필터링: Django category 기준으로 필터링
+        # Step 1: 기본 필터 (가격, 활성화 여부만)
         products = (
             Product.objects
             .filter(
                 is_active=True,
-                category__in=django_categories,  # Django category 기준
                 price__gt=0,  # 가격 0원 제외
                 price__isnull=False,  # 가격 null 제외
                 price__gte=min_price,
@@ -320,15 +321,61 @@ class RecommendationEngine:
             )
         )
         
-        # 디버깅: 필터링된 제품 카테고리 확인
-        category_counts = products.values('category').annotate(count=Count('id'))
-        if category_counts:
-            print(f"[Filter Debug] 카테고리별 제품 수:")
-            for item in category_counts:
-                print(f"  {item['category']}: {item['count']}개")
-        
-        # 스펙이 있는 제품만 (ProductSpec이 연결된 제품)
+        # 스펙이 있는 제품만 (ProductSpec이 연결된 제품, MAIN_CATEGORY 확인을 위해 필요)
         products = products.filter(spec__isnull=False)
+        
+        # Step 2: MAIN_CATEGORY 기반 필터링 (spec_json에서 MAIN_CATEGORY 추출)
+        if main_categories:
+            import json
+            from api.utils.category_mapping import get_django_categories_for_main_categories
+            
+            # MAIN_CATEGORY를 Django category로 매핑 (fallback용)
+            django_categories = get_django_categories_for_main_categories(main_categories)
+            
+            valid_product_ids = []
+            for product in products:
+                matched = False
+                
+                if hasattr(product, 'spec') and product.spec and product.spec.spec_json:
+                    try:
+                        spec_data = json.loads(product.spec.spec_json)
+                        main_cat_from_spec = spec_data.get('MAIN_CATEGORY', '').strip()
+                        product_type = spec_data.get('PRODUCT_TYPE', '').strip()
+                        
+                        # MAIN_CATEGORY가 선택된 카테고리 중 하나와 일치하는지 확인
+                        if main_cat_from_spec in main_categories or product_type in main_categories:
+                            valid_product_ids.append(product.id)
+                            matched = True
+                    except:
+                        pass
+                
+                # MAIN_CATEGORY가 없거나 매칭 실패 시 Django category로 fallback
+                if not matched and product.category in django_categories:
+                    valid_product_ids.append(product.id)
+            
+            if valid_product_ids:
+                products = products.filter(id__in=valid_product_ids)
+            else:
+                # MAIN_CATEGORY 매칭 실패 시 Django category로 fallback
+                products = products.filter(category__in=django_categories)
+        
+        # 디버깅: MAIN_CATEGORY별 제품 수 확인
+        if main_categories:
+            main_cat_counts = {}
+            for product in products[:100]:  # 샘플링
+                if hasattr(product, 'spec') and product.spec and product.spec.spec_json:
+                    try:
+                        spec_data = json.loads(product.spec.spec_json)
+                        main_cat = spec_data.get('MAIN_CATEGORY', '').strip()
+                        if main_cat:
+                            main_cat_counts[main_cat] = main_cat_counts.get(main_cat, 0) + 1
+                    except:
+                        pass
+            
+            if main_cat_counts:
+                print(f"[Filter Debug] MAIN_CATEGORY별 제품 수:")
+                for main_cat, count in sorted(main_cat_counts.items(), key=lambda x: x[1], reverse=True):
+                    print(f"  {main_cat}: {count}개 이상")
         
         # 펫 관련 필터링: 반려동물이 없으면 펫 전용 제품 제외
         # has_pet 값을 다양한 형태로 받을 수 있도록 처리
@@ -347,7 +394,7 @@ class RecommendationEngine:
                 products = products.exclude(pet_filter)
                 print(f"[Filter] 펫 관련 제품 제외 (반려동물 없음)")
         
-        print(f"[Filter Step 1] 기본 필터: 카테고리={categories}, 가격={min_price}~{max_price}원, 가족={household_size}명, 반려동물={has_pet}, 결과={products.count()}개")
+        print(f"[Filter Step 1] 기본 필터: MAIN_CATEGORY={main_categories}, 가격={min_price}~{max_price}원, 가족={household_size}명, 반려동물={has_pet}, 결과={products.count()}개")
         
         # Step 2: 추가 필터링 (Python 레벨에서 처리)
         # QuerySet을 리스트로 변환하여 상세 필터링 적용

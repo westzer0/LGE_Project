@@ -110,12 +110,49 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# ============================================================
+# Oracle 11g XE 데이터베이스 설정 (Thick 모드)
+# ============================================================
+# 데이터베이스 설정
+# USE_ORACLE 환경변수가 'true'이면 Oracle, 아니면 SQLite 사용
+USE_ORACLE = os.environ.get('USE_ORACLE', 'false').lower() == 'true'
+
+if USE_ORACLE:
+    # Oracle Instant Client 경로 설정
+    ORACLE_INSTANT_CLIENT_PATH = os.environ.get(
+        'ORACLE_INSTANT_CLIENT_PATH',
+        r'C:\oracle\instantclient-basic-windows.x64-21.19.0.0.0dbru\instantclient_21_19'
+    )
+    
+    # Oracle Thick 모드 초기화 (Oracle 11g XE는 Thick 모드 필수)
+    import oracledb
+    try:
+        oracledb.init_oracle_client(lib_dir=ORACLE_INSTANT_CLIENT_PATH)
+    except oracledb.ProgrammingError:
+        # 이미 초기화된 경우 무시
+        pass
+    except Exception as e:
+        print(f"⚠️ Oracle Instant Client 초기화 실패: {e}")
+        print(f"   경로 확인: {ORACLE_INSTANT_CLIENT_PATH}")
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.oracle',
+            'NAME': os.environ.get('ORACLE_SID', 'xe'),  # Oracle SID
+            'USER': os.environ.get('ORACLE_USER', 'system'),
+            'PASSWORD': os.environ.get('ORACLE_PASSWORD', ''),
+            'HOST': os.environ.get('ORACLE_HOST', 'localhost'),
+            'PORT': os.environ.get('ORACLE_PORT', '1521'),
+        }
     }
-}
+else:
+    # 개발용 SQLite (Oracle 없이 테스트 시 사용)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
