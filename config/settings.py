@@ -37,14 +37,13 @@ except Exception as e:
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-8zb-1$0d6^f=&c@v8-l2-9b*9ydnp7k3m0-s_y8gljjkvtiyt8')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# 환경 변수로 제어: DJANGO_DEBUG=true/false (기본값: True)
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'testserver',  # Django 테스트 클라이언트용
-    '*',  # 개발 환경에서 모든 호스트 허용 (프로덕션에서는 제거 필요)
-]
+# ALLOWED_HOSTS: 환경 변수로 제어 (쉼표로 구분, 기본값: localhost,127.0.0.1)
+# 프로덕션에서는 환경 변수에 도메인을 설정: ALLOWED_HOSTS=your-app.railway.app,yourdomain.com
+allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver')
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.strip()]
 
 # ============================================================
 # 외부 API 키 설정
@@ -79,6 +78,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 정적 파일 서빙 (프로덕션)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -194,6 +194,12 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'assets',
 ]
+
+# 프로덕션 환경에서 정적 파일 수집 디렉토리
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise 설정 (프로덕션 환경에서 정적 파일 서빙)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
