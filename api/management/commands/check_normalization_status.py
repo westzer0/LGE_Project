@@ -205,10 +205,10 @@ class Command(BaseCommand):
                     self.stdout.write(f'  기본 테이블 (ONBOARDING_SESSION): {total_sessions}개 세션')
                     self.stdout.write('')
                     self.stdout.write('  정규화 테이블:')
-                    self.stdout.write(f'    ONBOARDING_SESSION_MAIN_SPACES: {main_spaces_count}개 레코드 ({sessions_with_main_space}개 세션)')
-                    self.stdout.write(f'    ONBOARDING_SESSION_PRIORITIES: {priorities_count}개 레코드 ({sessions_with_priority}개 세션)')
-                    self.stdout.write(f'    ONBOARDING_SESSION_CATEGORIES: {categories_count}개 레코드 ({sessions_with_category}개 세션)')
-                    self.stdout.write(f'    ONBOARDING_SESSION_RECOMMENDED_PRODUCTS: {recommended_products_count}개 레코드')
+                    self.stdout.write(f'    ONBOARD_SESS_MAIN_SPACES: {main_spaces_count}개 레코드 ({sessions_with_main_space}개 세션)')
+                    self.stdout.write(f'    ONBOARD_SESS_PRIORITIES: {priorities_count}개 레코드 ({sessions_with_priority}개 세션)')
+                    self.stdout.write(f'    ONBOARD_SESS_CATEGORIES: {categories_count}개 레코드 ({sessions_with_category}개 세션)')
+                    self.stdout.write(f'    ONBOARD_SESS_REC_PRODUCTS: {recommended_products_count}개 레코드')
                     self.stdout.write('')
                     
                     # 진행률 계산
@@ -312,9 +312,9 @@ class Command(BaseCommand):
                     self.stdout.write(f'  기본 테이블 (PRODUCT_DEMOGRAPHICS): {total_demographics}개 제품')
                     self.stdout.write('')
                     self.stdout.write('  정규화 테이블:')
-                    self.stdout.write(f'    PRODUCT_DEMOGRAPHICS_FAMILY_TYPES: {family_types_count}개 레코드 ({products_with_family}개 제품)')
-                    self.stdout.write(f'    PRODUCT_DEMOGRAPHICS_HOUSE_SIZES: {house_sizes_count}개 레코드 ({products_with_size}개 제품)')
-                    self.stdout.write(f'    PRODUCT_DEMOGRAPHICS_HOUSE_TYPES: {house_types_count}개 레코드 ({products_with_type}개 제품)')
+                    self.stdout.write(f'    PROD_DEMO_FAMILY_TYPES: {family_types_count}개 레코드 ({products_with_family}개 제품)')
+                    self.stdout.write(f'    PROD_DEMO_HOUSE_SIZES: {house_sizes_count}개 레코드 ({products_with_size}개 제품)')
+                    self.stdout.write(f'    PROD_DEMO_HOUSE_TYPES: {house_types_count}개 레코드 ({products_with_type}개 제품)')
                     self.stdout.write('')
                     
                     # 진행률 계산

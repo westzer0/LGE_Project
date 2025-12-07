@@ -30,32 +30,53 @@ class OnboardingDBService:
                 exists = cur.fetchone()
                 
                 # JSON 필드 처리
-                selected_categories = json.dumps(kwargs.get('selected_categories', []), ensure_ascii=False)
-                recommended_products = json.dumps(kwargs.get('recommended_products', []), ensure_ascii=False)
+                selected_categories = kwargs.get('selected_categories', [])
+                recommended_products = kwargs.get('recommended_products', [])
                 recommendation_result = json.dumps(kwargs.get('recommendation_result', {}), ensure_ascii=False)
+                
+                # 정규화 테이블용 데이터 준비
+                main_spaces = kwargs.get('main_space', [])
+                if isinstance(main_spaces, str):
+                    try:
+                        main_spaces = json.loads(main_spaces)
+                    except:
+                        main_spaces = [main_spaces] if main_spaces else []
+                elif not isinstance(main_spaces, list):
+                    main_spaces = []
+                
+                priority_list = kwargs.get('priority_list', [])
+                if isinstance(priority_list, str):
+                    try:
+                        priority_list = json.loads(priority_list)
+                    except:
+                        priority_list = [priority_list] if priority_list else []
+                elif not isinstance(priority_list, list):
+                    priority_list = []
                 
                 if exists:
                     # 업데이트
                     # recommendation_result에서 추가 필드 추출
                     has_pet = None
-                    main_space = None
                     cooking = None
                     laundry = None
                     media = None
-                    priority_list = None
                     
                     if recommendation_result:
                         try:
                             result_dict = json.loads(recommendation_result) if isinstance(recommendation_result, str) else recommendation_result
                             has_pet = 'Y' if result_dict.get('has_pet') or result_dict.get('pet') == 'yes' else 'N'
-                            main_space = json.dumps(result_dict.get('main_space', []), ensure_ascii=False) if result_dict.get('main_space') else None
                             cooking = result_dict.get('cooking')
                             laundry = result_dict.get('laundry')
                             media = result_dict.get('media')
-                            priority_list = json.dumps(result_dict.get('priority', []), ensure_ascii=False) if result_dict.get('priority') else None
+                            # main_space와 priority는 kwargs에서 가져옴
+                            if not main_spaces and result_dict.get('main_space'):
+                                main_spaces = result_dict.get('main_space', [])
+                            if not priority_list and result_dict.get('priority'):
+                                priority_list = result_dict.get('priority', [])
                         except:
                             pass
                     
+                    # 기본 테이블 업데이트 (CLOB 컬럼은 NULL로 유지 - 정규화 테이블 사용)
                     cur.execute("""
                         UPDATE ONBOARDING_SESSION SET
                             USER_ID = :user_id,
@@ -66,15 +87,11 @@ class OnboardingDBService:
                             HAS_PET = :has_pet,
                             HOUSING_TYPE = :housing_type,
                             PYUNG = :pyung,
-                            MAIN_SPACE = :main_space,
                             COOKING = :cooking,
                             LAUNDRY = :laundry,
                             MEDIA = :media,
                             PRIORITY = :priority,
-                            PRIORITY_LIST = :priority_list,
                             BUDGET_LEVEL = :budget_level,
-                            SELECTED_CATEGORIES = :selected_categories,
-                            RECOMMENDED_PRODUCTS = :recommended_products,
                             RECOMMENDATION_RESULT = :recommendation_result,
                             UPDATED_AT = SYSDATE,
                             COMPLETED_AT = CASE WHEN :status = 'COMPLETED' THEN SYSDATE ELSE COMPLETED_AT END
@@ -89,53 +106,83 @@ class OnboardingDBService:
                         'has_pet': has_pet,
                         'housing_type': kwargs.get('housing_type'),
                         'pyung': kwargs.get('pyung'),
-                        'main_space': main_space,
                         'cooking': cooking,
                         'laundry': laundry,
                         'media': media,
                         'priority': kwargs.get('priority'),
-                        'priority_list': priority_list,
                         'budget_level': kwargs.get('budget_level'),
-                        'selected_categories': selected_categories,
-                        'recommended_products': recommended_products,
                         'recommendation_result': recommendation_result,
                     })
+                    
+                    # 정규화 테이블 업데이트
+                    # MAIN_SPACE
+                    cur.execute("DELETE FROM ONBOARD_SESS_MAIN_SPACES WHERE SESSION_ID = :session_id", {'session_id': session_id})
+                    for space in main_spaces:
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_MAIN_SPACES (SESSION_ID, MAIN_SPACE)
+                            VALUES (:session_id, :main_space)
+                        """, {'session_id': session_id, 'main_space': str(space)})
+                    
+                    # PRIORITY_LIST
+                    cur.execute("DELETE FROM ONBOARD_SESS_PRIORITIES WHERE SESSION_ID = :session_id", {'session_id': session_id})
+                    for idx, priority in enumerate(priority_list, start=1):
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_PRIORITIES (SESSION_ID, PRIORITY, PRIORITY_ORDER)
+                            VALUES (:session_id, :priority, :priority_order)
+                        """, {'session_id': session_id, 'priority': str(priority), 'priority_order': idx})
+                    
+                    # SELECTED_CATEGORIES
+                    cur.execute("DELETE FROM ONBOARD_SESS_CATEGORIES WHERE SESSION_ID = :session_id", {'session_id': session_id})
+                    for category in selected_categories:
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_CATEGORIES (SESSION_ID, CATEGORY_NAME)
+                            VALUES (:session_id, :category_name)
+                        """, {'session_id': session_id, 'category_name': str(category)})
+                    
+                    # RECOMMENDED_PRODUCTS
+                    cur.execute("DELETE FROM ONBOARD_SESS_REC_PRODUCTS WHERE SESSION_ID = :session_id", {'session_id': session_id})
+                    for idx, product_id in enumerate(recommended_products, start=1):
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_REC_PRODUCTS (SESSION_ID, PRODUCT_ID, RANK_ORDER)
+                            VALUES (:session_id, :product_id, :rank_order)
+                        """, {'session_id': session_id, 'product_id': int(product_id), 'rank_order': idx})
                 else:
                     # recommendation_result에서 추가 필드 추출
                     has_pet = None
-                    main_space = None
                     cooking = None
                     laundry = None
                     media = None
-                    priority_list = None
                     
                     if recommendation_result:
                         try:
                             result_dict = json.loads(recommendation_result) if isinstance(recommendation_result, str) else recommendation_result
                             has_pet = 'Y' if result_dict.get('has_pet') or result_dict.get('pet') == 'yes' else 'N'
-                            main_space = json.dumps(result_dict.get('main_space', []), ensure_ascii=False) if result_dict.get('main_space') else None
                             cooking = result_dict.get('cooking')
                             laundry = result_dict.get('laundry')
                             media = result_dict.get('media')
-                            priority_list = json.dumps(result_dict.get('priority', []), ensure_ascii=False) if result_dict.get('priority') else None
+                            # main_space와 priority는 kwargs에서 가져옴
+                            if not main_spaces and result_dict.get('main_space'):
+                                main_spaces = result_dict.get('main_space', [])
+                            if not priority_list and result_dict.get('priority'):
+                                priority_list = result_dict.get('priority', [])
                         except:
                             pass
                     
-                    # 생성
+                    # 기본 테이블 생성 (CLOB 컬럼은 NULL - 정규화 테이블 사용)
                     cur.execute("""
                         INSERT INTO ONBOARDING_SESSION (
                             SESSION_ID, USER_ID, CURRENT_STEP, STATUS,
-                            VIBE, HOUSEHOLD_SIZE, HAS_PET, HOUSING_TYPE, PYUNG, MAIN_SPACE,
+                            VIBE, HOUSEHOLD_SIZE, HAS_PET, HOUSING_TYPE, PYUNG,
                             COOKING, LAUNDRY, MEDIA,
-                            PRIORITY, PRIORITY_LIST, BUDGET_LEVEL,
-                            SELECTED_CATEGORIES, RECOMMENDED_PRODUCTS, RECOMMENDATION_RESULT,
+                            PRIORITY, BUDGET_LEVEL,
+                            RECOMMENDATION_RESULT,
                             CREATED_AT, UPDATED_AT, COMPLETED_AT
                         ) VALUES (
                             :session_id, :user_id, :current_step, :status,
-                            :vibe, :household_size, :has_pet, :housing_type, :pyung, :main_space,
+                            :vibe, :household_size, :has_pet, :housing_type, :pyung,
                             :cooking, :laundry, :media,
-                            :priority, :priority_list, :budget_level,
-                            :selected_categories, :recommended_products, :recommendation_result,
+                            :priority, :budget_level,
+                            :recommendation_result,
                             SYSDATE, SYSDATE,
                             CASE WHEN :status = 'COMPLETED' THEN SYSDATE ELSE NULL END
                         )
@@ -149,17 +196,42 @@ class OnboardingDBService:
                         'has_pet': has_pet,
                         'housing_type': kwargs.get('housing_type'),
                         'pyung': kwargs.get('pyung'),
-                        'main_space': main_space,
                         'cooking': cooking,
                         'laundry': laundry,
                         'media': media,
                         'priority': kwargs.get('priority'),
-                        'priority_list': priority_list,
                         'budget_level': kwargs.get('budget_level'),
-                        'selected_categories': selected_categories,
-                        'recommended_products': recommended_products,
                         'recommendation_result': recommendation_result,
                     })
+                    
+                    # 정규화 테이블에 데이터 저장
+                    # MAIN_SPACE
+                    for space in main_spaces:
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_MAIN_SPACES (SESSION_ID, MAIN_SPACE)
+                            VALUES (:session_id, :main_space)
+                        """, {'session_id': session_id, 'main_space': str(space)})
+                    
+                    # PRIORITY_LIST
+                    for idx, priority in enumerate(priority_list, start=1):
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_PRIORITIES (SESSION_ID, PRIORITY, PRIORITY_ORDER)
+                            VALUES (:session_id, :priority, :priority_order)
+                        """, {'session_id': session_id, 'priority': str(priority), 'priority_order': idx})
+                    
+                    # SELECTED_CATEGORIES
+                    for category in selected_categories:
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_CATEGORIES (SESSION_ID, CATEGORY_NAME)
+                            VALUES (:session_id, :category_name)
+                        """, {'session_id': session_id, 'category_name': str(category)})
+                    
+                    # RECOMMENDED_PRODUCTS
+                    for idx, product_id in enumerate(recommended_products, start=1):
+                        cur.execute("""
+                            INSERT INTO ONBOARD_SESS_REC_PRODUCTS (SESSION_ID, PRODUCT_ID, RANK_ORDER)
+                            VALUES (:session_id, :product_id, :rank_order)
+                        """, {'session_id': session_id, 'product_id': int(product_id), 'rank_order': idx})
                 
                 conn.commit()
                 return True
@@ -334,7 +406,7 @@ class OnboardingDBService:
     @staticmethod
     def get_session(session_id):
         """
-        세션 정보 조회
+        세션 정보 조회 (정규화 테이블에서 데이터 읽기)
         """
         result = fetch_one("""
             SELECT * FROM ONBOARDING_SESSION WHERE SESSION_ID = :session_id
@@ -350,22 +422,50 @@ class OnboardingDBService:
                 cols = [c[0] for c in cur.description]
                 session_dict = dict(zip(cols, result))
                 
-                # JSON 필드 파싱
-                if session_dict.get('SELECTED_CATEGORIES'):
-                    try:
-                        session_dict['SELECTED_CATEGORIES'] = json.loads(session_dict['SELECTED_CATEGORIES'])
-                    except:
-                        session_dict['SELECTED_CATEGORIES'] = []
+                # 정규화 테이블에서 데이터 읽기
+                # MAIN_SPACE
+                cur.execute("""
+                    SELECT MAIN_SPACE FROM ONBOARD_SESS_MAIN_SPACES
+                    WHERE SESSION_ID = :session_id
+                    ORDER BY MAIN_SPACE
+                """, {'session_id': session_id})
+                main_spaces = [row[0] for row in cur.fetchall()]
+                session_dict['MAIN_SPACE'] = json.dumps(main_spaces, ensure_ascii=False) if main_spaces else None
                 
-                if session_dict.get('RECOMMENDED_PRODUCTS'):
-                    try:
-                        session_dict['RECOMMENDED_PRODUCTS'] = json.loads(session_dict['RECOMMENDED_PRODUCTS'])
-                    except:
-                        session_dict['RECOMMENDED_PRODUCTS'] = []
+                # PRIORITY_LIST
+                cur.execute("""
+                    SELECT PRIORITY FROM ONBOARD_SESS_PRIORITIES
+                    WHERE SESSION_ID = :session_id
+                    ORDER BY PRIORITY_ORDER
+                """, {'session_id': session_id})
+                priorities = [row[0] for row in cur.fetchall()]
+                session_dict['PRIORITY_LIST'] = json.dumps(priorities, ensure_ascii=False) if priorities else None
                 
+                # SELECTED_CATEGORIES
+                cur.execute("""
+                    SELECT CATEGORY_NAME FROM ONBOARD_SESS_CATEGORIES
+                    WHERE SESSION_ID = :session_id
+                    ORDER BY CATEGORY_NAME
+                """, {'session_id': session_id})
+                categories = [row[0] for row in cur.fetchall()]
+                session_dict['SELECTED_CATEGORIES'] = categories
+                
+                # RECOMMENDED_PRODUCTS
+                cur.execute("""
+                    SELECT PRODUCT_ID FROM ONBOARD_SESS_REC_PRODUCTS
+                    WHERE SESSION_ID = :session_id
+                    ORDER BY RANK_ORDER
+                """, {'session_id': session_id})
+                products = [row[0] for row in cur.fetchall()]
+                session_dict['RECOMMENDED_PRODUCTS'] = products
+                
+                # RECOMMENDATION_RESULT 파싱
                 if session_dict.get('RECOMMENDATION_RESULT'):
                     try:
-                        session_dict['RECOMMENDATION_RESULT'] = json.loads(session_dict['RECOMMENDATION_RESULT'])
+                        rec_result = session_dict['RECOMMENDATION_RESULT']
+                        if hasattr(rec_result, 'read'):
+                            rec_result = rec_result.read()
+                        session_dict['RECOMMENDATION_RESULT'] = json.loads(rec_result) if isinstance(rec_result, str) else rec_result
                     except:
                         session_dict['RECOMMENDATION_RESULT'] = {}
                 

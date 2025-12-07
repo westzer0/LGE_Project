@@ -1,0 +1,612 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG전자 | 장바구니</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #fff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left a {
+            display: block;
+            height: 28px;
+        }
+
+        .header-top-left img {
+            height: 100%;
+            width: auto;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 40px 60px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: #1a1a1a;
+        }
+
+        .cart-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .cart-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .cart-empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .cart-empty-description {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .cart-empty-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #FD312E;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .cart-empty-button:hover {
+            background: #B80D3D;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f5f5f5;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .cart-item-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FD312E;
+            margin-bottom: 8px;
+        }
+
+        .cart-item-original-price {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .quantity-button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .quantity-button:hover {
+            border-color: #FD312E;
+            color: #FD312E;
+        }
+
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            padding: 6px;
+            font-size: 16px;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .remove-button {
+            padding: 8px 16px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .remove-button:hover {
+            border-color: #FD312E;
+            color: #FD312E;
+        }
+
+        .cart-summary {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid #1a1a1a;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .summary-label {
+            color: #666;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .summary-total {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FD312E;
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .cart-button {
+            flex: 1;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .cart-button-secondary {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            color: #1a1a1a;
+        }
+
+        .cart-button-secondary:hover {
+            border-color: #FD312E;
+            color: #FD312E;
+        }
+
+        .cart-button-primary {
+            background: #FD312E;
+            border: 1px solid #FD312E;
+            color: #fff;
+        }
+
+        .cart-button-primary:hover {
+            background: #B80D3D;
+            border-color: #B80D3D;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .cart-item {
+                flex-direction: column;
+            }
+
+            .cart-item-image {
+                width: 100%;
+                height: 200px;
+            }
+
+            .cart-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-wrapper">
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1 class="page-title">장바구니</h1>
+        
+        <div class="cart-container" id="cartContainer">
+            <div class="cart-empty" id="cartEmpty" style="display: none;">
+                <div class="cart-empty-icon">🛒</div>
+                <div class="cart-empty-title">장바구니가 비어있습니다</div>
+                <div class="cart-empty-description">추천받은 제품을 장바구니에 담아보세요</div>
+                <a href="/onboarding/" class="cart-empty-button">추천받기</a>
+            </div>
+
+            <div id="cartItems"></div>
+
+            <div class="cart-summary" id="cartSummary" style="display: none;">
+                <div class="summary-row">
+                    <span class="summary-label">상품 금액</span>
+                    <span class="summary-value" id="subtotal">0원</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">할인 금액</span>
+                    <span class="summary-value" id="discount">0원</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>총 결제 금액</span>
+                    <span id="total">0원</span>
+                </div>
+            </div>
+
+            <div class="cart-actions" id="cartActions" style="display: none;">
+                <button class="cart-button cart-button-secondary" onclick="clearCart()">전체 삭제</button>
+                <button class="cart-button cart-button-primary" onclick="goToCheckout()">구매하기</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // CSRF 토큰 가져오기
+        // ============================================
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        let cartItems = [];
+
+        // 페이지 로드 시 장바구니 목록 가져오기
+        async function loadCart() {
+            try {
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                const user_id = sessionId ? `session_${sessionId}` : 'guest';
+
+                const response = await fetch(`/api/cart/list/?user_id=${encodeURIComponent(user_id)}`);
+                const data = await response.json();
+
+                if (data.success && data.items && data.items.length > 0) {
+                    cartItems = data.items;
+                    renderCart();
+                } else {
+                    showEmptyCart();
+                }
+            } catch (error) {
+                console.error('장바구니 조회 오류:', error);
+                showToast('장바구니를 불러오는 중 오류가 발생했습니다.');
+                showEmptyCart();
+            }
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartContainer');
+            const itemsContainer = document.getElementById('cartItems');
+            const summary = document.getElementById('cartSummary');
+            const actions = document.getElementById('cartActions');
+            const empty = document.getElementById('cartEmpty');
+
+            empty.style.display = 'none';
+            summary.style.display = 'block';
+            actions.style.display = 'flex';
+
+            itemsContainer.innerHTML = cartItems.map(item => `
+                <div class="cart-item" data-item-id="${item.id}">
+                    <img src="${item.product_image_url || 'https://via.placeholder.com/120'}" 
+                         alt="${item.product_name}" 
+                         class="cart-item-image"
+                         onerror="this.src='https://via.placeholder.com/120'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.product_name}</div>
+                        <div class="cart-item-price">
+                            ${item.discount_price ? item.discount_price.toLocaleString() : item.price.toLocaleString()}원
+                            ${item.discount_price && item.price > item.discount_price ? 
+                                `<span class="cart-item-original-price">${item.price.toLocaleString()}원</span>` : ''}
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="quantity-button" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                            <input type="number" class="quantity-input" value="${item.quantity}" min="1" 
+                                   onchange="updateQuantity(${item.id}, parseInt(this.value))">
+                            <button class="quantity-button" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <div class="cart-item-actions">
+                        <button class="remove-button" onclick="removeItem(${item.id})">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // 총액 계산
+            let subtotal = 0;
+            let totalDiscount = 0;
+            cartItems.forEach(item => {
+                const price = item.discount_price || item.price;
+                subtotal += price * item.quantity;
+                if (item.discount_price && item.price > item.discount_price) {
+                    totalDiscount += (item.price - item.discount_price) * item.quantity;
+                }
+            });
+
+            document.getElementById('subtotal').textContent = subtotal.toLocaleString() + '원';
+            document.getElementById('discount').textContent = totalDiscount > 0 ? '-' + totalDiscount.toLocaleString() + '원' : '0원';
+            document.getElementById('total').textContent = (subtotal - totalDiscount).toLocaleString() + '원';
+        }
+
+        function showEmptyCart() {
+            const container = document.getElementById('cartContainer');
+            const itemsContainer = document.getElementById('cartItems');
+            const summary = document.getElementById('cartSummary');
+            const actions = document.getElementById('cartActions');
+            const empty = document.getElementById('cartEmpty');
+
+            itemsContainer.innerHTML = '';
+            summary.style.display = 'none';
+            actions.style.display = 'none';
+            empty.style.display = 'block';
+        }
+
+        async function removeItem(itemId) {
+            if (!confirm('정말 이 제품을 장바구니에서 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                const user_id = sessionId ? `session_${sessionId}` : 'guest';
+
+                const response = await fetch('/api/cart/remove/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') || ''
+                    },
+                    body: JSON.stringify({
+                        user_id: user_id,
+                        cart_item_id: itemId,
+                    }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast('제품이 삭제되었습니다.');
+                    loadCart();
+                } else {
+                    throw new Error(data.error || '삭제 실패');
+                }
+            } catch (error) {
+                console.error('장바구니 삭제 오류:', error);
+                showToast('제품 삭제 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        async function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1) {
+                removeItem(itemId);
+                return;
+            }
+
+            // 수량 업데이트는 현재 API에 없으므로 삭제 후 재추가
+            const item = cartItems.find(i => i.id === itemId);
+            if (!item) return;
+
+            try {
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                const user_id = sessionId ? `session_${sessionId}` : 'guest';
+
+                // 기존 항목 삭제
+                await fetch('/api/cart/remove/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') || ''
+                    },
+                    body: JSON.stringify({
+                        user_id: user_id,
+                        cart_item_id: itemId,
+                    }),
+                });
+
+                // 새 수량으로 추가
+                await fetch('/api/cart/add/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') || ''
+                    },
+                    body: JSON.stringify({
+                        user_id: user_id,
+                        product_id: item.product_id,
+                        quantity: newQuantity,
+                        extra_data: item.extra_data,
+                    }),
+                });
+
+                loadCart();
+            } catch (error) {
+                console.error('수량 업데이트 오류:', error);
+                showToast('수량 업데이트 중 오류가 발생했습니다.');
+            }
+        }
+
+        async function clearCart() {
+            if (!confirm('장바구니의 모든 제품을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                for (const item of cartItems) {
+                    await removeItem(item.id);
+                }
+                showToast('장바구니가 비워졌습니다.');
+            } catch (error) {
+                console.error('장바구니 비우기 오류:', error);
+                showToast('장바구니 비우기 중 오류가 발생했습니다.');
+            }
+        }
+
+        function goToCheckout() {
+            showToast('구매 페이지로 이동합니다.');
+            // 실제 구매 페이지로 이동 (구현 필요)
+            // window.location.href = '/checkout/';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 페이지 로드 시 실행
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadCart);
+        } else {
+            loadCart();
+        }
+    </script>
+</body>
+</html>
+

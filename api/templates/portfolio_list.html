@@ -1,0 +1,346 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG전자 | 내 포트폴리오</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left a {
+            display: block;
+            height: 28px;
+        }
+
+        .header-top-left img {
+            height: 100%;
+            width: auto;
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 40px 60px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .new-portfolio-button {
+            padding: 12px 24px;
+            background: #FD312E;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .new-portfolio-button:hover {
+            background: #B80D3D;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .portfolio-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .portfolio-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .portfolio-card-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #fff;
+        }
+
+        .portfolio-card-content {
+            padding: 20px;
+        }
+
+        .portfolio-card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .portfolio-card-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .portfolio-card-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .portfolio-card-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #FD312E;
+        }
+
+        .portfolio-card-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .portfolio-empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .portfolio-empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .portfolio-empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+
+        .portfolio-empty-description {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-wrapper">
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">내 포트폴리오</h1>
+            <a href="/onboarding/" class="new-portfolio-button">새 포트폴리오 만들기</a>
+        </div>
+
+        <div id="portfolioContainer">
+            <div class="portfolio-empty" id="portfolioEmpty" style="display: none;">
+                <div class="portfolio-empty-icon">📦</div>
+                <div class="portfolio-empty-title">저장된 포트폴리오가 없습니다</div>
+                <div class="portfolio-empty-description">새로운 가전 패키지 추천을 받아보세요</div>
+                <a href="/onboarding/" class="new-portfolio-button">추천받기</a>
+            </div>
+
+            <div class="portfolio-grid" id="portfolioGrid"></div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 페이지 로드 시 포트폴리오 목록 가져오기
+        async function loadPortfolios() {
+            try {
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                const user_id = sessionId ? `session_${sessionId}` : 'guest';
+
+                const response = await fetch(`/api/portfolio/list/?user_id=${encodeURIComponent(user_id)}`);
+                const data = await response.json();
+
+                if (data.success && data.portfolios && data.portfolios.length > 0) {
+                    renderPortfolios(data.portfolios);
+                } else {
+                    showEmptyPortfolios();
+                }
+            } catch (error) {
+                console.error('포트폴리오 목록 조회 오류:', error);
+                showToast('포트폴리오 목록을 불러오는 중 오류가 발생했습니다.');
+                showEmptyPortfolios();
+            }
+        }
+
+        function renderPortfolios(portfolios) {
+            const grid = document.getElementById('portfolioGrid');
+            const empty = document.getElementById('portfolioEmpty');
+
+            empty.style.display = 'none';
+
+            grid.innerHTML = portfolios.map(portfolio => {
+                const createdDate = new Date(portfolio.created_at).toLocaleDateString('ko-KR');
+                return `
+                    <a href="/portfolio/${portfolio.portfolio_id}/" class="portfolio-card">
+                        <div class="portfolio-card-image">📺</div>
+                        <div class="portfolio-card-content">
+                            <div class="portfolio-card-title">${portfolio.style_title || '가전 패키지 추천'}</div>
+                            <div class="portfolio-card-subtitle">${portfolio.product_count || 0}개의 제품이 포함되어 있습니다</div>
+                            <div class="portfolio-card-info">
+                                <div class="portfolio-card-price">${portfolio.total_discount_price.toLocaleString()}원</div>
+                                <div class="portfolio-card-meta">
+                                    <span>${portfolio.match_score || 0}% 일치</span>
+                                    <span>${createdDate}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function showEmptyPortfolios() {
+            const grid = document.getElementById('portfolioGrid');
+            const empty = document.getElementById('portfolioEmpty');
+
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 페이지 로드 시 실행
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadPortfolios);
+        } else {
+            loadPortfolios();
+        }
+    </script>
+</body>
+</html>
+

@@ -649,7 +649,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                        <a href="/my-page/" style="display: flex; align-items: center;">
+                        <a href="/my-page/" id="user-icon-link" style="display: flex; align-items: center;">
                             <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -934,6 +934,34 @@
             </svg>
         </button>
     </div>
+
+    <script>
+        // 카카오 로그인 기능
+        document.addEventListener('DOMContentLoaded', function() {
+            const userIconLink = document.getElementById('user-icon-link');
+            
+            if (userIconLink) {
+                userIconLink.addEventListener('click', function(e) {
+                    // 로그인 상태 확인
+                    fetch('/api/auth/kakao/user/')
+                        .then(response => {
+                            if (response.status === 401) {
+                                // 로그인 안 되어 있으면 카카오 로그인으로 리다이렉트
+                                e.preventDefault();
+                                window.location.href = '/api/auth/kakao/login/';
+                            }
+                            // 로그인 되어 있으면 기본 동작 (마이페이지로 이동)
+                        })
+                        .catch(error => {
+                            console.error('로그인 상태 확인 오류:', error);
+                            // 오류 발생 시 카카오 로그인으로 리다이렉트
+                            e.preventDefault();
+                            window.location.href = '/api/auth/kakao/login/';
+                        });
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

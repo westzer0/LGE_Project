@@ -40,10 +40,17 @@ Write-Host ""
 
 # 3. 인증 토큰 입력
 Write-Host "[3/4] ngrok 인증 토큰 설정" -ForegroundColor Yellow
-Write-Host "  → https://dashboard.ngrok.com/get-started/your-authtoken" -ForegroundColor Cyan
-Write-Host "  → 위 링크에서 토큰을 복사하세요" -ForegroundColor Cyan
-Write-Host ""
-$authToken = Read-Host "ngrok 인증 토큰을 입력하세요"
+
+# 명령줄 인자로 토큰 전달 가능
+if ($args.Count -gt 0) {
+    $authToken = $args[0]
+    Write-Host "  → 토큰을 인자로 받았습니다" -ForegroundColor Green
+} else {
+    Write-Host "  → https://dashboard.ngrok.com/get-started/your-authtoken" -ForegroundColor Cyan
+    Write-Host "  → 위 링크에서 토큰을 복사하세요" -ForegroundColor Cyan
+    Write-Host ""
+    $authToken = Read-Host "ngrok 인증 토큰을 입력하세요"
+}
 
 if ([string]::IsNullOrWhiteSpace($authToken)) {
     Write-Host "  ✗ 토큰이 입력되지 않았습니다" -ForegroundColor Red

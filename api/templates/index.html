@@ -207,6 +207,24 @@
 
     <script src="{% static 'script.js' %}"></script>
     <script>
+        // ============================================
+        // CSRF 토큰 가져오기
+        // ============================================
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         // 추천 폼 처리
         document.addEventListener('DOMContentLoaded', function() {
             const recommendForm = document.getElementById('recommend-form');
@@ -234,11 +252,12 @@
                     resultDiv.innerHTML = '';
                     
                     try {
-                        // API 호출
+                        // API 호출 (CSRF 토큰 포함)
                         const response = await fetch('/api/recommend/', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken') || ''
                             },
                             body: JSON.stringify(apiData)
                         });

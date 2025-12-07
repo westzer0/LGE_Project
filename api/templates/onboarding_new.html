@@ -1102,9 +1102,44 @@
     </div>
 
     <script>
+        // ============================================
+        // CSRF 토큰 가져오기
+        // ============================================
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // ============================================
         // State
+        // ============================================
         let currentStep = 1;
         const totalSteps = 4;
+        let sessionId = null; // 온보딩 세션 ID
+        
+        // 세션 ID 생성 또는 가져오기
+        function getOrCreateSessionId() {
+            if (!sessionId) {
+                sessionId = sessionStorage.getItem('onboarding_session_id');
+                if (!sessionId) {
+                    // 새 세션 ID 생성
+                    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    sessionStorage.setItem('onboarding_session_id', sessionId);
+                }
+            }
+            return sessionId;
+        }
+        
         const formData = {
             housing_type: null,
             family_size: 2,
@@ -1234,8 +1269,11 @@
         }
 
         // Navigate to next step
-        function nextStep() {
+        async function nextStep() {
             if (!isStepValid()) return;
+
+            // 현재 단계 데이터 저장
+            await saveCurrentStep();
 
             if (currentStep < totalSteps) {
                 currentStep++;
@@ -1243,6 +1281,70 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 submitOnboarding();
+            }
+        }
+        
+        // 현재 단계 데이터를 서버에 저장
+        async function saveCurrentStep() {
+            try {
+                const sessionId = getOrCreateSessionId();
+                let stepData = {};
+                
+                // 단계별 데이터 매핑
+                if (currentStep === 1) {
+                    // Step 1: housing_type (주거 형태)
+                    stepData = {
+                        housing_type: formData.housing_type,
+                        pyung: formData.space_size || 25
+                    };
+                } else if (currentStep === 2) {
+                    // Step 2: style (vibe), family_size
+                    stepData = {
+                        vibe: formData.style,
+                        household_size: formData.family_size || 2,
+                        mate: formData.family_size === 1 ? 'alone' : 
+                              formData.family_size === 2 ? 'couple' :
+                              formData.family_size <= 4 ? 'family_3_4' : 'family_5plus'
+                    };
+                } else if (currentStep === 3) {
+                    // Step 3: 생활 패턴 (cooking, laundry, media, pet)
+                    stepData = {
+                        cooking: formData.cooking,
+                        laundry: formData.laundry,
+                        media: formData.media,
+                        pet: formData.pet
+                    };
+                } else if (currentStep === 4) {
+                    // Step 4: budget, priority
+                    stepData = {
+                        budget: formData.budget,
+                        priority: [formData.priority] // 배열로 전달
+                    };
+                }
+                
+                // API 호출
+                const response = await fetch('/api/onboarding/step/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') || ''
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        step: currentStep,
+                        data: stepData
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log(`Step ${currentStep} 저장 완료:`, result);
+                } else {
+                    console.warn(`Step ${currentStep} 저장 실패:`, result.error);
+                }
+            } catch (error) {
+                console.error(`Step ${currentStep} 저장 오류:`, error);
+                // 저장 실패해도 계속 진행
             }
         }
 
@@ -1264,45 +1366,58 @@
             nextBtn.innerHTML = '분석 중... ⏳';
 
             try {
-                // Map formData to API format
+                const sessionId = getOrCreateSessionId();
+                
+                // 마지막 단계 데이터 저장
+                await saveCurrentStep();
+                
+                // Map formData to API format (온보딩 완료 API 형식)
                 const apiData = {
+                    session_id: sessionId,
                     vibe: formData.style || 'modern',
                     household_size: formData.family_size || 2,
                     housing_type: formData.housing_type || 'apartment',
                     pyung: formData.space_size || 25,
                     priority: formData.priority || 'value',
                     budget_level: formData.budget || 'standard',
-                    categories: formData.selected_categories || ['TV', 'KITCHEN', 'LIVING'], // Default categories if not selected
-                    has_pet: formData.pet === 'yes',
+                    selected_categories: formData.selected_categories || ['TV', 'KITCHEN', 'LIVING'],
+                    pet: formData.pet || 'no',
                     cooking: formData.cooking || 'sometimes',
                     laundry: formData.laundry || 'weekly',
                     media: formData.media || 'balanced',
                 };
 
-                console.log('API Request:', apiData);
+                console.log('온보딩 완료 API Request:', apiData);
 
-                // Call recommendation API
-                const response = await fetch('/api/recommend/', {
+                // Call onboarding complete API (온보딩 세션 저장 + 추천 실행)
+                const response = await fetch('/api/onboarding/complete/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') || ''
                     },
                     body: JSON.stringify(apiData)
                 });
 
                 const result = await response.json();
-                console.log('API Response:', result);
+                console.log('온보딩 완료 API Response:', result);
 
                 if (result.success && result.recommendations && result.recommendations.length > 0) {
-                    // Store recommendations in sessionStorage for result page
+                    // Store data in sessionStorage for result page
                     sessionStorage.setItem('onboardingData', JSON.stringify(formData));
                     sessionStorage.setItem('recommendations', JSON.stringify(result.recommendations));
+                    
+                    // 포트폴리오 ID가 있으면 저장
+                    if (result.portfolio_id) {
+                        sessionStorage.setItem('portfolio_id', result.portfolio_id);
+                    }
 
-                    // Redirect to results page
-                    window.location.href = '/result/?data=' + encodeURIComponent(JSON.stringify({
-                        ...formData,
-                        recommendations: result.recommendations
-                    }));
+                    // Redirect to results page with portfolio_id or session_id
+                    const redirectUrl = result.portfolio_id 
+                        ? `/result/?portfolio_id=${result.portfolio_id}`
+                        : `/result/?session_id=${sessionId}`;
+                    
+                    window.location.href = redirectUrl;
                 } else {
                     throw new Error(result.error || '추천 결과가 없습니다.');
                 }

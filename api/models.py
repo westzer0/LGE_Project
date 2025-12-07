@@ -62,17 +62,26 @@ class ProductSpec(models.Model):
 
 
 class ProductDemographics(models.Model):
-    """제품 인구통계 (1:1) - 어떤 사람들이 구매했는지"""
+    """제품 인구통계 (1:1) - 어떤 사람들이 구매했는지
+    
+    정규화된 테이블 사용:
+    - PROD_DEMO_FAMILY_TYPES
+    - PROD_DEMO_HOUSE_SIZES
+    - PROD_DEMO_HOUSE_TYPES
+    """
     product = models.OneToOneField(
         "Product",
         on_delete=models.CASCADE,
         related_name="demographics",
     )
     # 가족 구성 (예: ['신혼', '부모님', '1인가구'])
+    # 정규화 테이블에서 읽어옴 (하위 호환성을 위해 JSONField 유지)
     family_types = models.JSONField(default=list, blank=True)
     # 집 크기 (예: ['20평', '30평대'])
+    # 정규화 테이블에서 읽어옴
     house_sizes = models.JSONField(default=list, blank=True)
     # 주거 형태 (예: ['아파트', '원룸'])
+    # 정규화 테이블에서 읽어옴
     house_types = models.JSONField(default=list, blank=True)
     
     source = models.CharField(max_length=200, blank=True, default="")
@@ -85,6 +94,91 @@ class ProductDemographics(models.Model):
 
     def __str__(self):
         return f"Demographics<{self.product_id}>"
+    
+    def get_family_types_from_normalized(self):
+        """정규화 테이블에서 family_types 읽기"""
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT FAMILY_TYPE FROM PROD_DEMO_FAMILY_TYPES
+                        WHERE PRODUCT_ID = :product_id
+                        ORDER BY FAMILY_TYPE
+                    """, {'product_id': self.product_id})
+                    return [row[0] for row in cur.fetchall()]
+        except:
+            # 정규화 테이블이 없거나 오류 시 기존 JSONField 반환
+            return self.family_types if isinstance(self.family_types, list) else []
+    
+    def get_house_sizes_from_normalized(self):
+        """정규화 테이블에서 house_sizes 읽기"""
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT HOUSE_SIZE FROM PROD_DEMO_HOUSE_SIZES
+                        WHERE PRODUCT_ID = :product_id
+                        ORDER BY HOUSE_SIZE
+                    """, {'product_id': self.product_id})
+                    return [row[0] for row in cur.fetchall()]
+        except:
+            return self.house_sizes if isinstance(self.house_sizes, list) else []
+    
+    def get_house_types_from_normalized(self):
+        """정규화 테이블에서 house_types 읽기"""
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT HOUSE_TYPE FROM PROD_DEMO_HOUSE_TYPES
+                        WHERE PRODUCT_ID = :product_id
+                        ORDER BY HOUSE_TYPE
+                    """, {'product_id': self.product_id})
+                    return [row[0] for row in cur.fetchall()]
+        except:
+            return self.house_types if isinstance(self.house_types, list) else []
+    
+    def save_to_normalized(self):
+        """정규화 테이블에 데이터 저장"""
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    # 기존 데이터 삭제
+                    cur.execute("DELETE FROM PROD_DEMO_FAMILY_TYPES WHERE PRODUCT_ID = :product_id", {'product_id': self.product_id})
+                    cur.execute("DELETE FROM PROD_DEMO_HOUSE_SIZES WHERE PRODUCT_ID = :product_id", {'product_id': self.product_id})
+                    cur.execute("DELETE FROM PROD_DEMO_HOUSE_TYPES WHERE PRODUCT_ID = :product_id", {'product_id': self.product_id})
+                    
+                    # 새 데이터 저장
+                    family_types = self.family_types if isinstance(self.family_types, list) else []
+                    for ft in family_types:
+                        cur.execute("""
+                            INSERT INTO PROD_DEMO_FAMILY_TYPES (PRODUCT_ID, FAMILY_TYPE)
+                            VALUES (:product_id, :family_type)
+                        """, {'product_id': self.product_id, 'family_type': str(ft)})
+                    
+                    house_sizes = self.house_sizes if isinstance(self.house_sizes, list) else []
+                    for hs in house_sizes:
+                        cur.execute("""
+                            INSERT INTO PROD_DEMO_HOUSE_SIZES (PRODUCT_ID, HOUSE_SIZE)
+                            VALUES (:product_id, :house_size)
+                        """, {'product_id': self.product_id, 'house_size': str(hs)})
+                    
+                    house_types = self.house_types if isinstance(self.house_types, list) else []
+                    for ht in house_types:
+                        cur.execute("""
+                            INSERT INTO PROD_DEMO_HOUSE_TYPES (PRODUCT_ID, HOUSE_TYPE)
+                            VALUES (:product_id, :house_type)
+                        """, {'product_id': self.product_id, 'house_type': str(ht)})
+                    
+                    conn.commit()
+                    return True
+        except Exception as e:
+            # 오류 발생 시에도 계속 진행 (하위 호환성)
+            return False
 
 
 class ProductReview(models.Model):
@@ -361,6 +455,15 @@ class Portfolio(models.Model):
         help_text="포트폴리오 내부 키 (예: PF-001, PF-002)"
     )
     
+    # 내부 키 (LGDX-3) - portfolio_id와 동일하거나 별도 키
+    internal_key = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text="포트폴리오 내부 키 (portfolio_id와 동일 또는 별도 키)"
+    )
+    
     # 사용자 식별 (추후 카카오 로그인 연동 시 활용)
     user_id = models.CharField(
         max_length=100,
@@ -467,6 +570,7 @@ class Portfolio(models.Model):
         indexes = [
             models.Index(fields=['user_id']),
             models.Index(fields=['portfolio_id']),
+            models.Index(fields=['internal_key']),
             models.Index(fields=['status']),
         ]
     
@@ -481,6 +585,11 @@ class Portfolio(models.Model):
             import string
             random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
             self.portfolio_id = f"PF-{random_str}"
+        
+        # internal_key가 없으면 portfolio_id와 동일하게 설정
+        if not self.internal_key:
+            self.internal_key = self.portfolio_id
+        
         super().save(*args, **kwargs)
     
     def calculate_totals(self):
@@ -509,6 +618,22 @@ class Cart(models.Model):
 
     def __str__(self):
         return f"Cart({self.user_id}, {self.product.name})"
+
+
+class Wishlist(models.Model):
+    """찜하기 모델"""
+    user_id = models.CharField(max_length=100, db_index=True, help_text="사용자 ID")
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='wishlist_items')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = '찜하기'
+        verbose_name_plural = '찜하기'
+        unique_together = ['user_id', 'product']
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Wishlist({self.user_id}, {self.product.name})"
 
 
 class TasteConfig(models.Model):

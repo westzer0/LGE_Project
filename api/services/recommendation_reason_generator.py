@@ -445,16 +445,48 @@ class RecommendationReasonGenerator:
         """템플릿을 사용자 프로필과 제품 정보로 개인화"""
         household_size = user_profile.get('household_size', 2)
         category = product.category if hasattr(product, 'category') else ''
+        product_name = product.name if hasattr(product, 'name') else ''
         
         # 가족 구성원 수로 치환
         template = template.replace('{household_size}', str(household_size))
         
-        # 카테고리별 특화 문구 추가
+        # 제품 이름에서 카테고리 파악 (category 필드가 없거나 부정확한 경우 대비)
+        if '냉장고' in product_name or '디오스' in product_name:
+            category = 'KITCHEN'
+            product_type = '냉장고'
+        elif '오븐' in product_name or '광파' in product_name:
+            category = 'KITCHEN'
+            product_type = '오븐'
+        elif '식기세척기' in product_name or '세척기' in product_name:
+            category = 'KITCHEN'
+            product_type = '식기세척기'
+        elif 'TV' in product_name or '티비' in product_name:
+            category = 'TV'
+            product_type = 'TV'
+        else:
+            product_type = '제품'
+        
+        # 카테고리별 특화 문구로 템플릿 수정
         if category == 'TV':
+            template = template.replace('제품', 'TV').replace('용량', '화질').replace('넉넉한', '선명한')
             template += " 선명한 화질로 몰입감 있는 시청이 가능해요."
         elif category == 'KITCHEN':
-            template += " 주방 공간을 효율적으로 활용할 수 있어요."
+            # 제품 타입별로 다른 문구
+            if product_type == '냉장고':
+                template = template.replace('제품', '냉장고')
+                if '용량' not in template:
+                    template = template.replace('넉넉한', '넉넉한 용량의')
+                template += " 넉넉한 수납 공간으로 가족의 식재료를 충분히 보관할 수 있어요."
+            elif product_type == '오븐':
+                template = template.replace('제품', '오븐').replace('냉장고', '오븐')
+                template += " 다양한 요리를 쉽고 빠르게 만들 수 있어요."
+            elif product_type == '식기세척기':
+                template = template.replace('제품', '식기세척기').replace('냉장고', '식기세척기')
+                template += " 설거지 없이 깨끗하게 식기를 세척해줘요."
+            else:
+                template += " 주방 공간을 효율적으로 활용할 수 있어요."
         elif category == 'LIVING':
+            template = template.replace('제품', '생활가전')
             template += " 생활을 더욱 편리하게 만들어줘요."
         
         return template

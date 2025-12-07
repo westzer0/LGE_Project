@@ -4,13 +4,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
-from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart
+from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 from .services.chatgpt_service import chatgpt_service
 from .services.onboarding_db_service import onboarding_db_service
 from .services.taste_calculation_service import taste_calculation_service
 from .services.portfolio_service import portfolio_service
+from .services.kakao_auth_service import kakao_auth_service
+from .services.kakao_message_service import kakao_message_service
+from .services.ai_recommendation_service import ai_recommendation_service
+from .services.product_comparison_service import product_comparison_service
 
 
 def index_view(request):
@@ -79,6 +83,21 @@ def result_page(request):
     return render(request, "result.html", {
         'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', '')
     })
+
+
+def other_recommendations_page(request):
+    """다른 추천 포트폴리오 페이지"""
+    return render(request, "other_recommendations.html")
+
+
+def mypage(request):
+    """마이페이지"""
+    return render(request, "mypage.html")
+
+
+def reservation_status_page(request):
+    """예약 조회/변경 페이지"""
+    return render(request, "reservation_status.html")
 
 
 @csrf_exempt
@@ -202,13 +221,51 @@ def recommend_view(request):
 
 @require_http_methods(["GET"])
 def products(request):
-    """GET /api/products/ - 제품 리스트 조회 (category 쿼리 파라미터 지원)"""
+    """GET /api/products/ - 제품 리스트 조회 (category, search, id 쿼리 파라미터 지원)"""
+    from django.db.models import Q
+    
     category = request.GET.get('category', None)
+    search_query = request.GET.get('search', None)
+    product_id = request.GET.get('id', None)
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 20))
     
     queryset = Product.objects.filter(is_active=True)
     
+    # 제품 ID 필터 (단일 제품 조회)
+    if product_id:
+        try:
+            product_id_int = int(product_id)
+            queryset = queryset.filter(id=product_id_int)
+        except ValueError:
+            return JsonResponse({
+                'count': 0,
+                'total_count': 0,
+                'page': 1,
+                'page_size': page_size,
+                'total_pages': 0,
+                'results': []
+            }, json_dumps_params={'ensure_ascii': False})
+    
+    # 카테고리 필터
     if category:
         queryset = queryset.filter(category=category)
+    
+    # 검색 필터 (제품명, 모델명, 설명에서 검색)
+    if search_query:
+        queryset = queryset.filter(
+            Q(name__icontains=search_query) |
+            Q(model_number__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+    
+    # 총 개수
+    total_count = queryset.count()
+    
+    # 페이지네이션
+    start = (page - 1) * page_size
+    end = start + page_size
+    queryset = queryset.order_by('-created_at')[start:end]
     
     products_list = []
     for product in queryset:
@@ -227,6 +284,10 @@ def products(request):
     
     return JsonResponse({
         'count': len(products_list),
+        'total_count': total_count,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': (total_count + page_size - 1) // page_size,
         'results': products_list
     }, json_dumps_params={'ensure_ascii': False})
 
@@ -305,33 +366,148 @@ def product_reviews_view(request, product_id):
 
 
 @require_http_methods(["GET"])
-def product_image_by_name_view(request):
-    """GET /api/products/image-by-name/?name=제품명 - 제품명으로 이미지 URL 조회"""
-    from .utils import get_image_url_from_csv
+def product_recommend_reason_view(request, product_id):
+    """GET /api/products/<product_id>/recommend-reason/ - 제품 추천 이유 조회"""
+    try:
+        product = Product.objects.get(id=product_id)
+        
+        # ProductRecommendReason이 있으면 반환
+        if hasattr(product, 'recommend_reason') and product.recommend_reason.reason_text:
+            return JsonResponse({
+                'success': True,
+                'product_id': product.id,
+                'product_name': product.name,
+                'reason_text': product.recommend_reason.reason_text,
+                'source': product.recommend_reason.source,
+                'created_at': product.recommend_reason.created_at.isoformat() if product.recommend_reason.created_at else None,
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': True,
+                'product_id': product.id,
+                'product_name': product.name,
+                'reason_text': '',
+                'message': '추천 이유가 아직 생성되지 않았습니다.'
+            }, json_dumps_params={'ensure_ascii': False})
     
-    product_name = request.GET.get('name', '').strip()
-    category_hint = request.GET.get('category', None)  # 선택적 카테고리 힌트
-    
-    if not product_name:
+    except Product.DoesNotExist:
         return JsonResponse({
             'success': False,
-            'error': '제품명이 필요합니다.'
+            'error': '제품을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@require_http_methods(["GET"])
+def product_demographics_view(request, product_id):
+    """GET /api/products/<product_id>/demographics/ - 제품 인구통계 조회"""
+    try:
+        product = Product.objects.get(id=product_id)
+        
+        # ProductDemographics가 있으면 반환
+        if hasattr(product, 'demographics'):
+            demographics = product.demographics
+            
+            # 정규화 테이블에서 데이터 가져오기 시도
+            family_types = demographics.get_family_types_from_normalized()
+            house_sizes = demographics.get_house_sizes_from_normalized()
+            house_types = demographics.get_house_types_from_normalized()
+            
+            # 정규화 테이블에 데이터가 없으면 JSONField에서 가져오기
+            if not family_types:
+                family_types = demographics.family_types if isinstance(demographics.family_types, list) else []
+            if not house_sizes:
+                house_sizes = demographics.house_sizes if isinstance(demographics.house_sizes, list) else []
+            if not house_types:
+                house_types = demographics.house_types if isinstance(demographics.house_types, list) else []
+            
+            return JsonResponse({
+                'success': True,
+                'product_id': product.id,
+                'product_name': product.name,
+                'family_types': family_types,
+                'house_sizes': house_sizes,
+                'house_types': house_types,
+                'source': demographics.source,
+                'updated_at': demographics.updated_at.isoformat() if demographics.updated_at else None,
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': True,
+                'product_id': product.id,
+                'product_name': product.name,
+                'family_types': [],
+                'house_sizes': [],
+                'house_types': [],
+                'message': '인구통계 정보가 아직 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False})
+    
+    except Product.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': '제품을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@require_http_methods(["GET"])
+def product_image_by_name_view(request):
+    """
+    GET /api/products/image-by-name/?name=제품명 - 제품명으로 이미지 URL 조회
+    Oracle DB의 PRODUCT_IMAGE 테이블에서 이미지 가져오기
+    """
+    from .utils.product_image_loader import get_image_url_from_product_image_table
+    from .utils import get_image_url_from_csv  # fallback용
+    
+    product_name = request.GET.get('name', '').strip()
+    product_id = request.GET.get('product_id', None)  # 선택적 product_id
+    category_hint = request.GET.get('category', None)  # 선택적 카테고리 힌트
+    
+    if not product_name and not product_id:
+        return JsonResponse({
+            'success': False,
+            'error': '제품명 또는 product_id가 필요합니다.'
         }, json_dumps_params={'ensure_ascii': False}, status=400)
     
     try:
-        # 유틸리티 함수를 사용하여 이미지 URL 가져오기
-        image_url = get_image_url_from_csv(product_name, category_hint=category_hint)
+        # 1. Oracle DB의 PRODUCT_IMAGE 테이블에서 이미지 가져오기 (우선)
+        image_url = ''
         
+        # product_id가 있으면 직접 조회
+        if product_id:
+            try:
+                image_url = get_image_url_from_product_image_table(product_id=int(product_id))
+            except (ValueError, TypeError):
+                pass
+        
+        # product_id로 못 찾았거나 없으면 제품명으로 조회
+        if not image_url and product_name:
+            image_url = get_image_url_from_product_image_table(product_name=product_name)
+        
+        # 2. PRODUCT_IMAGE 테이블에 없으면 CSV에서 가져오기 (fallback)
+        if not image_url and product_name:
+            image_url = get_image_url_from_csv(product_name, category_hint=category_hint)
+        
+        # 3. 여전히 없으면 placeholder
         if not image_url or image_url.startswith('https://via.placeholder.com'):
             return JsonResponse({
                 'success': False,
-                'error': f'제품을 찾을 수 없습니다: {product_name}',
-                'image_url': image_url  # placeholder URL 반환
+                'error': f'제품 이미지를 찾을 수 없습니다: {product_name or product_id}',
+                'image_url': image_url if image_url else 'https://via.placeholder.com/800x600?text=Image+Not+Found'
             }, json_dumps_params={'ensure_ascii': False}, status=404)
         
         return JsonResponse({
             'success': True,
             'product_name': product_name,
+            'product_id': product_id,
             'image_url': image_url
         }, json_dumps_params={'ensure_ascii': False})
     
@@ -773,19 +949,56 @@ def onboarding_complete_view(request):
         print(f"\n[Onboarding Complete] Session: {session_id}")
         print(f"[Profile] {user_profile}")
         
-        # 3. 추천 엔진 호출
-        # taste_id 계산
+        # 3. Taste 계산 (추천 전에 먼저 수행) - PRD 플로우
         member_id = data.get('member_id')
         taste_id = None
+        
+        # 온보딩 데이터 준비 (Taste 계산용)
+        onboarding_data_for_taste = {
+            'vibe': session.vibe,
+            'household_size': session.household_size,
+            'housing_type': session.housing_type,
+            'pyung': session.pyung,
+            'budget_level': session.budget_level,
+            'priority': session.priority if isinstance(session.priority, list) else [session.priority] if session.priority else ['value'],
+            'has_pet': onboarding_data.get('pet') == 'yes',
+            'main_space': data.get('main_space', []),
+            'cooking': onboarding_data.get('cooking', 'sometimes'),
+            'laundry': onboarding_data.get('laundry', 'weekly'),
+            'media': onboarding_data.get('media', 'balanced'),
+        }
+        
+        # Taste 계산 (member_id가 있으면 저장, 없으면 계산만)
         if member_id:
             try:
-                taste_id = taste_calculation_service.get_taste_for_member(member_id)
-            except:
-                pass
+                taste_id = taste_calculation_service.calculate_and_save_taste(
+                    member_id=member_id,
+                    onboarding_data=onboarding_data_for_taste
+                )
+                print(f"[Taste 계산 완료] Member: {member_id}, Taste ID: {taste_id}")
+            except Exception as taste_error:
+                print(f"[Taste 계산 실패] {str(taste_error)}")
+                # 계산 실패 시 온보딩 데이터로 직접 계산
+                try:
+                    from api.utils.taste_classifier import taste_classifier
+                    taste_id = taste_classifier.calculate_taste_from_onboarding(onboarding_data_for_taste)
+                    print(f"[Taste 계산 (fallback)] Taste ID: {taste_id}")
+                except:
+                    pass
+        else:
+            # member_id가 없어도 taste 계산 (세션 기반)
+            try:
+                from api.utils.taste_classifier import taste_classifier
+                taste_id = taste_classifier.calculate_taste_from_onboarding(onboarding_data_for_taste)
+                print(f"[Taste 계산 (세션 기반)] Taste ID: {taste_id}")
+            except Exception as taste_error:
+                print(f"[Taste 계산 실패] {str(taste_error)}")
         
+        # 4. 추천 엔진 호출 (taste_id 기반으로 category 선택 및 제품 추천)
         result = recommendation_engine.get_recommendations(
             user_profile=user_profile,
-            taste_id=taste_id
+            taste_id=taste_id,
+            taste_info=onboarding_data_for_taste  # category 점수 산출에 사용
         )
         
         # 4. 추천 결과 저장 (온보딩 데이터 포함)
@@ -813,37 +1026,9 @@ def onboarding_complete_view(request):
                 portfolio_id = portfolio_result.get('portfolio_id')
                 print(f"[Portfolio 생성 완료] Portfolio ID: {portfolio_id}")
             
-            # 6. Taste 계산 및 MEMBER 테이블에 저장 (member_id가 있는 경우)
-            member_id = data.get('member_id')
-            if member_id:
-                try:
-                    # 온보딩 데이터 준비
-                    onboarding_data_for_taste = {
-                        'vibe': session.vibe,
-                        'household_size': session.household_size,
-                        'housing_type': session.housing_type,
-                        'pyung': session.pyung,
-                        'budget_level': session.budget_level,
-                        'priority': session.priority if isinstance(session.priority, list) else [session.priority] if session.priority else ['value'],
-                        'has_pet': onboarding_data.get('pet') == 'yes',
-                        'main_space': data.get('main_space', []),
-                        'cooking': onboarding_data.get('cooking', 'sometimes'),
-                        'laundry': onboarding_data.get('laundry', 'weekly'),
-                        'media': onboarding_data.get('media', 'balanced'),
-                    }
-                    
-                    # Taste 계산 및 저장
-                    taste_id = taste_calculation_service.calculate_and_save_taste(
-                        member_id=member_id,
-                        onboarding_data=onboarding_data_for_taste
-                    )
-                    print(f"[Taste 계산 완료] Member: {member_id}, Taste ID: {taste_id}")
-                    
-                    # 응답에 taste_id 포함
-                    result_with_data['taste_id'] = taste_id
-                except Exception as taste_error:
-                    print(f"[Taste 계산 실패] {str(taste_error)}")
-                    # Taste 계산 실패해도 추천 결과는 반환
+            # Taste 정보를 응답에 포함 (이미 위에서 계산됨)
+            if taste_id:
+                result_with_data['taste_id'] = taste_id
             
             # 응답에 포트폴리오 정보 포함
             response_data = {
@@ -1645,6 +1830,311 @@ def ai_status_view(request):
 
 
 # ============================================================
+# 카카오 로그인 API
+# ============================================================
+
+@require_http_methods(["GET"])
+def kakao_login_view(request):
+    """
+    카카오 로그인 시작
+    
+    GET /api/auth/kakao/login/
+    """
+    from django.shortcuts import redirect
+    from django.conf import settings
+    
+    if not settings.KAKAO_REST_API_KEY:
+        return JsonResponse({
+            'success': False,
+            'error': '카카오 API 키가 설정되지 않았습니다.'
+        }, status=500)
+    
+    redirect_uri = request.build_absolute_uri('/api/auth/kakao/callback/')
+    auth_url = kakao_auth_service.get_authorization_url(redirect_uri)
+    
+    return redirect(auth_url)
+
+
+@require_http_methods(["GET"])
+def kakao_callback_view(request):
+    """
+    카카오 로그인 콜백
+    
+    GET /api/auth/kakao/callback/?code=xxx
+    """
+    from django.shortcuts import redirect
+    from django.contrib.auth import login
+    from django.conf import settings
+    
+    code = request.GET.get('code')
+    error = request.GET.get('error')
+    
+    if error:
+        return redirect(f'/?error={error}')
+    
+    if not code:
+        return redirect('/?error=no_code')
+    
+    try:
+        redirect_uri = request.build_absolute_uri('/api/auth/kakao/callback/')
+        
+        # 액세스 토큰 발급
+        token_response = kakao_auth_service.get_access_token(code, redirect_uri)
+        access_token = token_response.get('access_token')
+        
+        if not access_token:
+            return redirect('/?error=no_token')
+        
+        # 사용자 정보 조회
+        user_info = kakao_auth_service.get_user_info(access_token)
+        
+        # Django User 생성/조회
+        user, created = kakao_auth_service.get_or_create_user(user_info)
+        
+        # 로그인 처리
+        login(request, user)
+        
+        # 세션에 카카오 정보 저장
+        request.session['kakao_access_token'] = access_token
+        request.session['kakao_user_id'] = str(user_info.get('id'))
+        
+        # 리다이렉트 (마이페이지 또는 메인)
+        return redirect('/my-page/?login=success')
+    
+    except Exception as e:
+        return redirect(f'/?error={str(e)}')
+
+
+@require_http_methods(["GET"])
+def kakao_logout_view(request):
+    """
+    카카오 로그아웃
+    
+    GET /api/auth/kakao/logout/
+    """
+    from django.contrib.auth import logout
+    from django.shortcuts import redirect
+    
+    logout(request)
+    request.session.flush()
+    
+    return redirect('/?logout=success')
+
+
+@require_http_methods(["GET"])
+def kakao_user_info_view(request):
+    """
+    현재 로그인한 카카오 사용자 정보 조회
+    
+    GET /api/auth/kakao/user/
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': '로그인이 필요합니다.'
+        }, status=401)
+    
+    return JsonResponse({
+        'success': True,
+        'user': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'first_name': request.user.first_name,
+            'is_kakao_user': request.user.username.startswith('kakao_')
+        }
+    }, json_dumps_params={'ensure_ascii': False})
+
+
+# ============================================================
+# 고급 AI 추천 API (자연어 대화 기반)
+# ============================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ai_natural_recommend_view(request):
+    """
+    자연어 대화 기반 AI 추천
+    
+    POST /api/ai/natural-recommend/
+    {
+        "message": "2인 가구, 작은 주방, 예산 200만원",
+        "conversation_history": [...]  # 선택
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        user_message = data.get('message', '')
+        conversation_history = data.get('conversation_history', [])
+        
+        if not user_message:
+            return JsonResponse({
+                'success': False,
+                'error': '메시지를 입력해주세요.'
+            }, status=400)
+        
+        result = ai_recommendation_service.recommend_from_conversation(
+            user_message=user_message,
+            conversation_history=conversation_history
+        )
+        
+        return JsonResponse(result, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ai_chat_recommend_view(request):
+    """
+    대화형 AI 추천 (일반 대화 + 추천)
+    
+    POST /api/ai/chat-recommend/
+    {
+        "message": "냉장고 추천해줘",
+        "conversation_history": [...]  # 선택
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        user_message = data.get('message', '')
+        conversation_history = data.get('conversation_history', [])
+        
+        if not user_message:
+            return JsonResponse({
+                'success': False,
+                'error': '메시지를 입력해주세요.'
+            }, status=400)
+        
+        result = ai_recommendation_service.chat_recommendation(
+            user_message=user_message,
+            conversation_history=conversation_history
+        )
+        
+        return JsonResponse(result, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+# ============================================================
+# 제품 비교 AI 분석 API
+# ============================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ai_product_compare_view(request):
+    """
+    제품 비교 AI 분석
+    
+    POST /api/ai/product-compare/
+    {
+        "product_ids": [1, 2, 3],
+        "user_context": {  # 선택
+            "household_size": 2,
+            "budget": 300,
+            "priority": "value"
+        }
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        product_ids = data.get('product_ids', [])
+        user_context = data.get('user_context', {})
+        
+        if not product_ids or len(product_ids) < 2:
+            return JsonResponse({
+                'success': False,
+                'error': '최소 2개 이상의 제품을 선택해주세요.'
+            }, status=400)
+        
+        result = product_comparison_service.compare_products(
+            product_ids=product_ids,
+            user_context=user_context
+        )
+        
+        return JsonResponse(result, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+# ============================================================
+# 카카오톡 메시지 전송 API
+# ============================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def kakao_send_message_view(request):
+    """
+    카카오톡 메시지 전송 (상담 예약 알림 등)
+    
+    POST /api/kakao/send-message/
+    {
+        "portfolio_title": "나의 홈스타일링",
+        "consultation_date": "2025-12-15 14:00",
+        "store_location": "서울 강남점"
+    }
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': '로그인이 필요합니다.'
+        }, status=401)
+    
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        access_token = request.session.get('kakao_access_token')
+        if not access_token:
+            return JsonResponse({
+                'success': False,
+                'error': '카카오 로그인이 필요합니다.'
+            }, status=401)
+        
+        portfolio_title = data.get('portfolio_title', '포트폴리오')
+        consultation_date = data.get('consultation_date', '')
+        store_location = data.get('store_location', '')
+        
+        result = kakao_message_service.send_consultation_notification(
+            user_access_token=access_token,
+            portfolio_title=portfolio_title,
+            consultation_date=consultation_date,
+            store_location=store_location
+        )
+        
+        if result:
+            return JsonResponse({
+                'success': True,
+                'message': '메시지가 전송되었습니다.'
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': '메시지 전송에 실패했습니다.'
+            }, status=500)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+# ============================================================
 # 장바구니 API - LGDX-12
 # ============================================================
 
@@ -1824,4 +2314,356 @@ def cart_list_view(request):
         'count': len(cart_list),
         'total_price': total_price,
         'items': cart_list
+    }, json_dumps_params={'ensure_ascii': False})
+
+
+# ============================================================
+# 제품 상세 페이지
+# ============================================================
+
+@require_http_methods(["GET"])
+def product_detail_page(request, product_id):
+    """
+    제품 상세 페이지 렌더링
+    
+    GET /products/<product_id>/
+    """
+    try:
+        product = Product.objects.get(id=product_id, is_active=True)
+        
+        # 제품 스펙 가져오기
+        spec_data = {}
+        if hasattr(product, 'spec') and product.spec.spec_json:
+            try:
+                spec_data = json.loads(product.spec.spec_json)
+            except:
+                spec_data = {}
+        
+        # 제품 리뷰 가져오기 (최대 10개)
+        reviews = ProductReview.objects.filter(product=product).order_by('-created_at')[:10]
+        
+        # 관련 제품 추천 (같은 카테고리에서 최대 4개)
+        related_products = Product.objects.filter(
+            category=product.category,
+            is_active=True
+        ).exclude(id=product_id)[:4]
+        
+        return render(request, "product_detail.html", {
+            'product': product,
+            'spec_data': spec_data,
+            'reviews': reviews,
+            'related_products': related_products,
+        })
+    
+    except Product.DoesNotExist:
+        from django.http import Http404
+        raise Http404("제품을 찾을 수 없습니다.")
+
+
+# ============================================================
+# 검색 기능
+# ============================================================
+
+@require_http_methods(["GET"])
+def search_view(request):
+    """
+    제품 검색 API
+    
+    GET /api/search/?q=검색어&category=TV&page=1&page_size=20
+    """
+    from django.db.models import Q
+    
+    query = request.GET.get('q', '').strip()
+    category = request.GET.get('category', None)
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 20))
+    
+    if not query:
+        return JsonResponse({
+            'success': False,
+            'error': '검색어가 필요합니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    # 기본 쿼리셋
+    queryset = Product.objects.filter(is_active=True)
+    
+    # 검색 필터 (제품명, 모델명, 설명에서 검색)
+    queryset = queryset.filter(
+        Q(name__icontains=query) |
+        Q(model_number__icontains=query) |
+        Q(description__icontains=query)
+    )
+    
+    # 카테고리 필터
+    if category:
+        queryset = queryset.filter(category=category)
+    
+    # 총 개수
+    total_count = queryset.count()
+    
+    # 페이지네이션
+    start = (page - 1) * page_size
+    end = start + page_size
+    queryset = queryset.order_by('-created_at')[start:end]
+    
+    results = []
+    for product in queryset:
+        results.append({
+            'id': product.id,
+            'name': product.name,
+            'model_number': product.model_number,
+            'category': product.category,
+            'category_display': product.get_category_display(),
+            'description': product.description,
+            'price': float(product.price),
+            'discount_price': float(product.discount_price) if product.discount_price else None,
+            'image_url': product.image_url,
+            'created_at': product.created_at.isoformat(),
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'query': query,
+        'count': len(results),
+        'total_count': total_count,
+        'page': page,
+        'page_size': page_size,
+        'total_pages': (total_count + page_size - 1) // page_size,
+        'results': results
+    }, json_dumps_params={'ensure_ascii': False})
+
+
+# ============================================================
+# 제품 비교 기능
+# ============================================================
+
+@require_http_methods(["GET", "POST"])
+def product_compare_view(request):
+    """
+    제품 비교 API
+    
+    GET /api/products/compare/?ids=1,2,3 - 비교할 제품 목록 조회
+    POST /api/products/compare/ - 제품 비교 (body: {"product_ids": [1, 2, 3]})
+    """
+    if request.method == 'GET':
+        product_ids_str = request.GET.get('ids', '')
+        if not product_ids_str:
+            return JsonResponse({
+                'success': False,
+                'error': '제품 ID가 필요합니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        try:
+            product_ids = [int(id.strip()) for id in product_ids_str.split(',')]
+        except ValueError:
+            return JsonResponse({
+                'success': False,
+                'error': '잘못된 제품 ID 형식입니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    else:  # POST
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            product_ids = data.get('product_ids', [])
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid JSON'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    # 최대 4개까지만 비교 가능
+    if len(product_ids) > 4:
+        return JsonResponse({
+            'success': False,
+            'error': '최대 4개까지만 비교할 수 있습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    if len(product_ids) < 2:
+        return JsonResponse({
+            'success': False,
+            'error': '최소 2개 이상의 제품을 선택해야 합니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    # 제품 조회
+    products = Product.objects.filter(id__in=product_ids, is_active=True)
+    
+    if products.count() != len(product_ids):
+        return JsonResponse({
+            'success': False,
+            'error': '일부 제품을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    
+    # 제품 정보 및 스펙 수집
+    compare_data = []
+    all_spec_keys = set()
+    
+    for product in products:
+        product_data = {
+            'id': product.id,
+            'name': product.name,
+            'model_number': product.model_number,
+            'category': product.category,
+            'category_display': product.get_category_display(),
+            'description': product.description,
+            'price': float(product.price),
+            'discount_price': float(product.discount_price) if product.discount_price else None,
+            'image_url': product.image_url,
+            'specs': {}
+        }
+        
+        # 스펙 정보 가져오기
+        if hasattr(product, 'spec') and product.spec.spec_json:
+            try:
+                spec_data = json.loads(product.spec.spec_json)
+                product_data['specs'] = spec_data
+                all_spec_keys.update(spec_data.keys())
+            except:
+                pass
+        
+        compare_data.append(product_data)
+    
+    return JsonResponse({
+        'success': True,
+        'count': len(compare_data),
+        'products': compare_data,
+        'all_spec_keys': sorted(list(all_spec_keys))
+    }, json_dumps_params={'ensure_ascii': False})
+
+
+# ============================================================
+# 찜하기/위시리스트 기능
+# ============================================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def wishlist_add_view(request):
+    """
+    찜하기 추가 API
+    
+    POST /api/wishlist/add/
+    {
+        "user_id": "kakao_12345",
+        "product_id": 123
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        user_id = data.get('user_id')
+        product_id = data.get('product_id')
+        
+        if not user_id or not product_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'user_id와 product_id가 필요합니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        try:
+            product = Product.objects.get(id=product_id, is_active=True)
+        except Product.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': '제품을 찾을 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=404)
+        
+        # 찜하기 추가 (이미 있으면 무시)
+        wishlist_item, created = Wishlist.objects.get_or_create(
+            user_id=user_id,
+            product=product
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': '찜하기에 추가되었습니다.' if created else '이미 찜하기에 있습니다.',
+            'wishlist_item': {
+                'id': wishlist_item.id,
+                'product_id': wishlist_item.product.id,
+                'product_name': wishlist_item.product.name,
+            }
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def wishlist_remove_view(request):
+    """
+    찜하기 삭제 API
+    
+    POST /api/wishlist/remove/
+    {
+        "user_id": "kakao_12345",
+        "product_id": 123
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        user_id = data.get('user_id')
+        product_id = data.get('product_id')
+        
+        if not user_id or not product_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'user_id와 product_id가 필요합니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        try:
+            wishlist_item = Wishlist.objects.get(user_id=user_id, product_id=product_id)
+            wishlist_item.delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': '찜하기에서 삭제되었습니다.'
+            }, json_dumps_params={'ensure_ascii': False})
+        except Wishlist.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': '찜하기 항목을 찾을 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=404)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@require_http_methods(["GET"])
+def wishlist_list_view(request):
+    """
+    찜하기 목록 조회 API
+    
+    GET /api/wishlist/list/?user_id=xxx
+    """
+    user_id = request.GET.get('user_id')
+    
+    if not user_id:
+        return JsonResponse({
+            'success': False,
+            'error': 'user_id 필수'
+        }, status=400)
+    
+    wishlist_items = Wishlist.objects.filter(user_id=user_id).select_related('product')
+    
+    wishlist_list = []
+    for item in wishlist_items:
+        wishlist_list.append({
+            'id': item.id,
+            'product_id': item.product.id,
+            'product_name': item.product.name,
+            'product_image_url': item.product.image_url,
+            'product_price': float(item.product.price),
+            'product_discount_price': float(item.product.discount_price) if item.product.discount_price else None,
+            'product_category': item.product.category,
+            'product_category_display': item.product.get_category_display(),
+            'created_at': item.created_at.isoformat(),
+        })
+    
+    return JsonResponse({
+        'success': True,
+        'count': len(wishlist_list),
+        'items': wishlist_list
     }, json_dumps_params={'ensure_ascii': False})

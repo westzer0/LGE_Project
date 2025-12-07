@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (
     index_view, recommend, products, recommend_view, product_spec_view, product_image_by_name_view, product_reviews_view,
+    product_recommend_reason_view, product_demographics_view,
     onboarding_page, onboarding_step2_page, onboarding_step3_page, onboarding_step4_page, onboarding_step5_page, onboarding_step6_page, onboarding_step7_page, main_page, onboarding_new_page, result_page,
     fake_lg_main_page,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
@@ -12,8 +13,13 @@ from api.views import (
     portfolio_edit_view, portfolio_estimate_view,
     bestshop_consultation_view,
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
-    ai_chat_view, ai_status_view,
+    ai_chat_view, ai_status_view, ai_natural_recommend_view, ai_chat_recommend_view, ai_product_compare_view,
     cart_add_view, cart_remove_view, cart_list_view,
+    product_detail_page,
+    search_view, product_compare_view,
+    wishlist_add_view, wishlist_remove_view, wishlist_list_view,
+    other_recommendations_page, mypage, reservation_status_page,
+    kakao_login_view, kakao_callback_view, kakao_logout_view, kakao_user_info_view, kakao_send_message_view,
 )
 from api.views_drf import convert_figma_to_code
 
@@ -45,6 +51,14 @@ urlpatterns = [
     path('result/', result_page, name='result'),
     path('portfolio/<str:portfolio_id>/', result_page, name='portfolio_detail_page'),
     
+    # 프론트엔드 페이지
+    path('other-recommendations/', other_recommendations_page, name='other_recommendations'),
+    path('my-page/', mypage, name='mypage'),
+    path('reservation-status/', reservation_status_page, name='reservation_status'),
+    
+    # 제품 상세 페이지
+    path('products/<int:product_id>/', product_detail_page, name='product_detail'),
+    
     # Admin
     path('admin/', admin.site.urls),
     
@@ -53,6 +67,8 @@ urlpatterns = [
     path('api/products/', products, name='products'),
     path('api/products/<int:product_id>/spec/', product_spec_view, name='product_spec'),
     path('api/products/<int:product_id>/reviews/', product_reviews_view, name='product_reviews'),  # LGDX-40
+    path('api/products/<int:product_id>/recommend-reason/', product_recommend_reason_view, name='product_recommend_reason'),
+    path('api/products/<int:product_id>/demographics/', product_demographics_view, name='product_demographics'),
     path('api/products/image-by-name/', product_image_by_name_view, name='product_image_by_name'),
     path('api/onboarding/step/', onboarding_step_view, name='onboarding_step'),
     path('api/onboarding/complete/', onboarding_complete_view, name='onboarding_complete'),
@@ -77,6 +93,17 @@ urlpatterns = [
     path('api/cart/remove/', cart_remove_view, name='cart_remove'),
     path('api/cart/list/', cart_list_view, name='cart_list'),
     
+    # 검색 API
+    path('api/search/', search_view, name='search'),
+    
+    # 제품 비교 API
+    path('api/products/compare/', product_compare_view, name='product_compare'),
+    
+    # 찜하기/위시리스트 API
+    path('api/wishlist/add/', wishlist_add_view, name='wishlist_add'),
+    path('api/wishlist/remove/', wishlist_remove_view, name='wishlist_remove'),
+    path('api/wishlist/list/', wishlist_list_view, name='wishlist_list'),
+    
     # DRF API 엔드포인트 (새로운 방식)
     # path('api/drf/recommend/', RecommendAPIView.as_view(), name='drf_recommend'),
     # path('api/drf/', include(router.urls)),  # /api/drf/portfolios/, /api/drf/onboarding-sessions/
@@ -87,6 +114,18 @@ urlpatterns = [
     path('api/ai/style-message/', ai_style_message_view, name='ai_style_message'),
     path('api/ai/review-summary/', ai_review_summary_view, name='ai_review_summary'),
     path('api/ai/chat/', ai_chat_view, name='ai_chat'),
+    path('api/ai/natural-recommend/', ai_natural_recommend_view, name='ai_natural_recommend'),
+    path('api/ai/chat-recommend/', ai_chat_recommend_view, name='ai_chat_recommend'),
+    path('api/ai/product-compare/', ai_product_compare_view, name='ai_product_compare'),
+    
+    # 카카오 인증 API
+    path('api/auth/kakao/login/', kakao_login_view, name='kakao_login'),
+    path('api/auth/kakao/callback/', kakao_callback_view, name='kakao_callback'),
+    path('api/auth/kakao/logout/', kakao_logout_view, name='kakao_logout'),
+    path('api/auth/kakao/user/', kakao_user_info_view, name='kakao_user_info'),
+    
+    # 카카오 메시지 API
+    path('api/kakao/send-message/', kakao_send_message_view, name='kakao_send_message'),
     
     # Figma 이미지 → 코드 변환 API
     path('api/figma-to-code/', convert_figma_to_code, name='figma_to_code'),

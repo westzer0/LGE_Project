@@ -235,8 +235,19 @@ class RecommendationEngine:
             
             recommendations = all_recommendations
             
-            # taste_id가 있으면 RECOMMENDED_PRODUCT_SCORES 추가
+            # Category별로 그룹화 (프론트엔드 표시용) - PRD 요구사항
+            recommendations_by_category = {}
+            for rec in recommendations:
+                main_cat = rec.get('main_category', '기타')
+                if main_cat not in recommendations_by_category:
+                    recommendations_by_category[main_cat] = []
+                recommendations_by_category[main_cat].append(rec)
+            
+            # taste_id가 있으면 RECOMMENDED_PRODUCT_SCORES 추가 및 메시지 생성
             recommended_product_scores = None
+            taste_title = None
+            taste_description = None
+            
             if taste_id is not None:
                 from .taste_based_product_scorer import taste_based_product_scorer
                 taste_config = taste_based_product_scorer._get_taste_config(taste_id)
@@ -267,12 +278,26 @@ class RecommendationEngine:
                                         score_index = category_recs.index(rec)
                                         if score_index < len(category_scores):
                                             rec['taste_score'] = category_scores[score_index]
+                    
+                    # taste별 메시지 생성
+                    representative_taste = taste_config.get('representative_taste', {})
+                    if representative_taste:
+                        taste_title, taste_description = self._generate_taste_messages(
+                            representative_taste, 
+                            user_profile,
+                            recommendations
+                        )
             
             return {
                 'success': True,
                 'count': len(recommendations),
-                'recommendations': recommendations,
+                'recommendations': recommendations,  # 전체 리스트 (하위 호환성)
+                'recommendations_by_category': recommendations_by_category,  # Category별 그룹화 (PRD 요구사항)
+                'selected_categories': selected_main_categories,  # 선택된 카테고리 목록
+                'taste_id': taste_id,  # 사용된 taste_id
                 'recommended_product_scores': recommended_product_scores,  # 전체 점수 정보도 포함
+                'taste_title': taste_title,  # taste별 제목
+                'taste_description': taste_description,  # taste별 설명
             }
         
         except ValueError as e:
@@ -587,13 +612,66 @@ class RecommendationEngine:
         product = item['product']
         score = item['score']
         
-        # 추천 이유 생성 (새로운 로직 사용)
+        # 추천 이유 생성 (새로운 로직 사용, 제품 카테고리 포함)
         reason = reason_generator.generate_reason(
             product=product,
             user_profile=user_profile,
             taste_info=taste_info,
             score=score
         )
+        
+        # 제품 카테고리 확인 및 이유 검증
+        product_name = product.name if hasattr(product, 'name') else ''
+        product_category = product.category if hasattr(product, 'category') else ''
+        
+        # 제품 이름으로 카테고리 파악
+        detected_category = None
+        if '냉장고' in product_name or ('디오스' in product_name and '냉장고' in product_name):
+            detected_category = '냉장고'
+        elif '오븐' in product_name or '광파' in product_name:
+            detected_category = '오븐'
+        elif '식기세척기' in product_name or '세척기' in product_name:
+            detected_category = '식기세척기'
+        elif 'TV' in product_name or '티비' in product_name:
+            detected_category = 'TV'
+        
+        # 추천 이유에 잘못된 카테고리가 포함되어 있으면 수정
+        if detected_category and detected_category != '냉장고':
+            # 냉장고가 아닌데 추천 이유에 '냉장고'가 포함되어 있으면 수정
+            if '냉장고' in reason and detected_category in reason:
+                # 이미 올바른 카테고리가 포함되어 있으면 그대로 사용
+                pass
+            elif '냉장고' in reason and detected_category not in reason:
+                # 냉장고가 잘못 포함되어 있으면 수정
+                reason = reason.replace('냉장고', detected_category)
+                # 가족 수 정보 유지하면서 카테고리만 변경
+                household_size = user_profile.get('household_size', 2)
+                if f"{household_size}인 가구" in reason or "가족" in reason:
+                    # 가족 정보는 유지하고 카테고리만 수정
+                    pass
+        elif detected_category == '냉장고':
+            # 냉장고인데 다른 카테고리가 포함되어 있으면 수정
+            if '오븐' in reason or '식기세척기' in reason:
+                reason = reason.replace('오븐', '냉장고').replace('식기세척기', '냉장고')
+        
+        # Oracle DB의 PRODUCT_IMAGE 테이블에서 이미지 URL 가져오기 (우선)
+        image_url = product.image_url or ''
+        
+        # PRODUCT_IMAGE 테이블에서 이미지 가져오기 시도
+        # 모델명 또는 제품명으로 Oracle DB의 PRODUCT_ID 찾아서 이미지 가져오기
+        if not image_url:
+            try:
+                from api.utils.product_image_loader import get_image_url_from_product_image_table
+                # 모델명 또는 제품명으로 Oracle DB에서 이미지 가져오기
+                oracle_image_url = get_image_url_from_product_image_table(
+                    product_name=product.name,
+                    model_number=product.model_number
+                )
+                if oracle_image_url:
+                    image_url = oracle_image_url
+            except Exception as e:
+                # Oracle DB 조회 실패해도 계속 진행
+                pass
         
         return {
             'product_id': product.id,
@@ -604,10 +682,165 @@ class RecommendationEngine:
             'category_display': product.get_category_display(),
             'price': float(product.price) if product.price else 0,
             'discount_price': float(product.discount_price) if product.discount_price else None,
-            'image_url': product.image_url or '',
+            'image_url': image_url,
             'score': round(score, 2),
             'reason': reason,
         }
+    
+    def _generate_taste_messages(
+        self,
+        representative_taste: dict,
+        user_profile: dict,
+        recommendations: List[dict]
+    ) -> tuple:
+        """
+        taste 정보를 기반으로 제목과 설명 메시지 생성
+        
+        Args:
+            representative_taste: taste_scoring_logics.json의 representative_taste 정보
+            user_profile: 사용자 프로필 정보
+            recommendations: 추천 제품 리스트
+        
+        Returns:
+            (title, description) 튜플
+        """
+        vibe = representative_taste.get('vibe', '')
+        mate = representative_taste.get('mate', '')
+        priority = representative_taste.get('priority', '')
+        budget = representative_taste.get('budget', '')
+        lineup = representative_taste.get('lineup', '')
+        
+        # vibe에 따른 스타일 키워드 추출
+        vibe_keywords = {
+            '유니크 & 팝': ('유니크하고 컬러풀한', '개성 있는'),
+            '유니크 & 팝 (Unique & Pop)': ('유니크하고 컬러풀한', '개성 있는'),
+            '모던/심플': ('모던하고 심플한', '세련된'),
+            '따뜻한 톤': ('따뜻한', '코지한'),
+            '럭셔리/고급': ('럭셔리한', '프리미엄'),
+        }
+        
+        # priority에 따른 키워드 추출
+        priority_keywords = {
+            '삶을 편하게 해주는 AI/스마트 기능': 'AI/스마트 기능',
+            '인테리어를 완성하는 디자인': '디자인',
+            '에너지 효율과 친환경': '에너지 효율',
+            '가성비와 실용성': '가성비',
+        }
+        
+        # vibe 키워드 찾기
+        style_keyword = '개성 있는'
+        for key, (desc, title) in vibe_keywords.items():
+            if key in vibe:
+                style_keyword = title
+                break
+        
+        # 추천 제품 카테고리 확인
+        categories = set()
+        product_names = []
+        for rec in recommendations[:3]:  # 최대 3개
+            cat = rec.get('main_category', '')
+            if cat:
+                categories.add(cat)
+            name = rec.get('name', '')
+            if name:
+                product_names.append(name)
+        
+        # 카테고리별 제품명 추출
+        category_product_map = {
+            '냉장고': [],
+            '오븐': [],
+            '식기세척기': [],
+        }
+        
+        for name in product_names:
+            if '냉장고' in name or '디오스' in name:
+                category_product_map['냉장고'].append(name)
+            elif '오븐' in name or '광파' in name:
+                category_product_map['오븐'].append(name)
+            elif '식기세척기' in name or '세척기' in name:
+                category_product_map['식기세척기'].append(name)
+        
+        # 제품 구성 설명
+        product_composition = []
+        if category_product_map['냉장고']:
+            product_composition.append('냉장고')
+        if category_product_map['오븐']:
+            product_composition.append('광파오븐')
+        if category_product_map['식기세척기']:
+            product_composition.append('식기세척기')
+        
+        product_str = ', '.join(product_composition) if product_composition else '가전제품'
+        
+        # 컬러 정보 (vibe에 따라)
+        color_map = {
+            '유니크 & 팝': '다양한 컬러',
+            '모던/심플': 'Essence White',
+            '따뜻한 톤': 'Nature Beige',
+            '럭셔리/고급': '프리미엄',
+        }
+        color = 'Essence White'
+        for key, val in color_map.items():
+            if key in vibe:
+                color = val
+                break
+        
+        # 제목 생성
+        title_parts = []
+        if mate:
+            if '1인' in mate:
+                title_parts.append('1인 가구')
+            elif '신혼' in mate:
+                title_parts.append('신혼부부')
+            elif '가족' in mate:
+                title_parts.append('가족')
+        
+        if vibe:
+            vibe_clean = vibe.replace(' (Unique & Pop)', '').replace('/', '')
+            if title_parts:
+                title = f"{title_parts[0]}을 위한 {style_keyword} {vibe_clean} 스타일"
+            else:
+                title = f"{style_keyword} {vibe_clean} 스타일"
+        else:
+            title = "당신만의 스타일"
+        
+        # 설명 생성
+        description_parts = []
+        
+        # 첫 번째 문장: 사용자 특성 반영
+        if mate and priority:
+            description_parts.append(
+                f"당신의 {mate} 구성과 {priority}를 반영해"
+            )
+        elif mate:
+            description_parts.append(f"당신의 {mate} 구성에 맞춰")
+        elif priority:
+            description_parts.append(f"당신의 {priority}을 고려해")
+        else:
+            description_parts.append("당신의 라이프스타일을 반영해")
+        
+        # 컬러 및 제품 구성
+        if color and product_composition:
+            description_parts.append(f"{color} 컬러의 오브제컬렉션 {product_str}로 구성했어요.")
+        elif product_composition:
+            description_parts.append(f"오브제컬렉션 {product_str}로 구성했어요.")
+        else:
+            description_parts.append("오브제컬렉션으로 구성했어요.")
+        
+        # 두 번째 문장: 예산/특징
+        if budget:
+            if '고급형' in budget or '프리미엄' in budget:
+                description_parts.append("완성도와 기능성을 모두 갖춘 프리미엄 추천이에요.")
+            elif '표준형' in budget:
+                description_parts.append("완성도와 기능성을 모두 갖춘 표준 예산 범위 내의 추천이에요.")
+            else:
+                description_parts.append("완성도와 기능성을 모두 갖춘 추천이에요.")
+        else:
+            description_parts.append("완성도와 기능성을 모두 갖춘 추천이에요.")
+        
+        description = ' '.join(description_parts)
+        description = description.replace('. ', '.<br>').replace(' ', ' ')
+        
+        return title, description
     
     # _build_recommendation_reason 메서드는 제거됨
     # 추천 이유 생성은 recommendation_reason_generator.py의 RecommendationReasonGenerator를 사용

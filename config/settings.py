@@ -42,7 +42,9 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
 
 # ALLOWED_HOSTS: 환경 변수로 제어 (쉼표로 구분, 기본값: localhost,127.0.0.1)
 # 프로덕션에서는 환경 변수에 도메인을 설정: ALLOWED_HOSTS=your-app.railway.app,yourdomain.com
-allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver')
+# ngrok 도메인도 기본값에 포함
+default_hosts = 'localhost,127.0.0.1,testserver,braeden-unaromatic-zola.ngrok-free.dev'
+allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', default_hosts)
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.strip()]
 
 # ============================================================
