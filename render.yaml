@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: lge-project
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DJANGO_DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: your-app.onrender.com
+      - key: USE_ORACLE
+        value: "true"
+      - key: ORACLE_HOST
+        value: project-db-campus.smhrd.com
+      - key: ORACLE_PORT
+        value: "1524"
+      - key: ORACLE_USER
+        value: campus_24K_LG3_DX7_p3_4
+      - key: ORACLE_SID
+        value: xe
+      - key: ORACLE_PASSWORD
+        sync: false
+      - key: KAKAO_REST_API_KEY
+        sync: false
+      - key: KAKAO_JS_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
