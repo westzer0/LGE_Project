@@ -1,0 +1,89 @@
+-- ============================================================
+-- PRODUCT_DEMOGRAPHICS 정규화 마이그레이션 스크립트
+-- ============================================================
+-- 이 스크립트는 PRODUCT_DEMOGRAPHICS 테이블의 JSON 컬럼들을
+-- 정규화된 테이블로 분리합니다.
+-- ============================================================
+
+-- ============================================================
+-- Step 1: 새 테이블 생성
+-- ============================================================
+
+-- 1.1 PRODUCT_DEMOGRAPHICS_FAMILY_TYPES 테이블 생성
+CREATE TABLE PRODUCT_DEMOGRAPHICS_FAMILY_TYPES (
+    PRODUCT_ID NUMBER NOT NULL,
+    FAMILY_TYPE VARCHAR2(50) NOT NULL,
+    CREATED_AT DATE DEFAULT SYSDATE,
+    PRIMARY KEY (PRODUCT_ID, FAMILY_TYPE),
+    FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT(PRODUCT_ID) ON DELETE CASCADE
+);
+
+CREATE INDEX IDX_PROD_DEMO_FAMILY_PRODUCT ON PRODUCT_DEMOGRAPHICS_FAMILY_TYPES(PRODUCT_ID);
+CREATE INDEX IDX_PROD_DEMO_FAMILY_TYPE ON PRODUCT_DEMOGRAPHICS_FAMILY_TYPES(FAMILY_TYPE);
+
+COMMENT ON TABLE PRODUCT_DEMOGRAPHICS_FAMILY_TYPES IS '제품별 가족 구성 정보 (정규화)';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_FAMILY_TYPES.PRODUCT_ID IS '제품 ID (FK)';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_FAMILY_TYPES.FAMILY_TYPE IS '가족 구성 (예: "신혼", "부모님", "1인가구")';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_FAMILY_TYPES.CREATED_AT IS '생성 일시';
+
+-- 1.2 PRODUCT_DEMOGRAPHICS_HOUSE_SIZES 테이블 생성
+CREATE TABLE PRODUCT_DEMOGRAPHICS_HOUSE_SIZES (
+    PRODUCT_ID NUMBER NOT NULL,
+    HOUSE_SIZE VARCHAR2(50) NOT NULL,
+    CREATED_AT DATE DEFAULT SYSDATE,
+    PRIMARY KEY (PRODUCT_ID, HOUSE_SIZE),
+    FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT(PRODUCT_ID) ON DELETE CASCADE
+);
+
+CREATE INDEX IDX_PROD_DEMO_SIZE_PRODUCT ON PRODUCT_DEMOGRAPHICS_HOUSE_SIZES(PRODUCT_ID);
+CREATE INDEX IDX_PROD_DEMO_SIZE_SIZE ON PRODUCT_DEMOGRAPHICS_HOUSE_SIZES(HOUSE_SIZE);
+
+COMMENT ON TABLE PRODUCT_DEMOGRAPHICS_HOUSE_SIZES IS '제품별 집 크기 정보 (정규화)';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_HOUSE_SIZES.PRODUCT_ID IS '제품 ID (FK)';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_HOUSE_SIZES.HOUSE_SIZE IS '집 크기 (예: "20평", "30평대")';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_HOUSE_SIZES.CREATED_AT IS '생성 일시';
+
+-- 1.3 PRODUCT_DEMOGRAPHICS_HOUSE_TYPES 테이블 생성
+CREATE TABLE PRODUCT_DEMOGRAPHICS_HOUSE_TYPES (
+    PRODUCT_ID NUMBER NOT NULL,
+    HOUSE_TYPE VARCHAR2(50) NOT NULL,
+    CREATED_AT DATE DEFAULT SYSDATE,
+    PRIMARY KEY (PRODUCT_ID, HOUSE_TYPE),
+    FOREIGN KEY (PRODUCT_ID) REFERENCES PRODUCT(PRODUCT_ID) ON DELETE CASCADE
+);
+
+CREATE INDEX IDX_PROD_DEMO_TYPE_PRODUCT ON PRODUCT_DEMOGRAPHICS_HOUSE_TYPES(PRODUCT_ID);
+CREATE INDEX IDX_PROD_DEMO_TYPE_TYPE ON PRODUCT_DEMOGRAPHICS_HOUSE_TYPES(HOUSE_TYPE);
+
+COMMENT ON TABLE PRODUCT_DEMOGRAPHICS_HOUSE_TYPES IS '제품별 주거 형태 정보 (정규화)';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_HOUSE_TYPES.PRODUCT_ID IS '제품 ID (FK)';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_HOUSE_TYPES.HOUSE_TYPE IS '주거 형태 (예: "아파트", "원룸")';
+COMMENT ON COLUMN PRODUCT_DEMOGRAPHICS_HOUSE_TYPES.CREATED_AT IS '생성 일시';
+
+-- ============================================================
+-- Step 2: 데이터 마이그레이션
+-- ============================================================
+-- 주의: Django ORM을 사용하는 경우 Python 스크립트로 마이그레이션
+-- ============================================================
+
+-- 데이터 마이그레이션은 Python 스크립트로 수행
+-- api/management/commands/migrate_product_demographics_to_normalized.py 참고
+
+-- ============================================================
+-- Step 3: 기존 컬럼 제거 (선택사항, 마이그레이션 완료 후)
+-- ============================================================
+-- 주의: 모든 코드가 새 구조를 사용하는지 확인 후 실행
+-- ============================================================
+
+-- Django ORM을 사용하는 경우, models.py에서 JSONField를 제거하고
+-- 관계 필드로 변경해야 합니다.
+
+-- ============================================================
+-- 롤백 스크립트 (필요시)
+-- ============================================================
+
+-- DROP TABLE PRODUCT_DEMOGRAPHICS_HOUSE_TYPES;
+-- DROP TABLE PRODUCT_DEMOGRAPHICS_HOUSE_SIZES;
+-- DROP TABLE PRODUCT_DEMOGRAPHICS_FAMILY_TYPES;
+
+

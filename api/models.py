@@ -545,6 +545,14 @@ class TasteConfig(models.Model):
         help_text="카테고리별 점수 매핑 (0~100점)"
     )
     
+    # Ill-suited 카테고리 리스트 (JSON 배열)
+    # 온보딩 답변에 완전히 부적합한 카테고리들 (0점)
+    ill_suited_categories = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Ill-suited 카테고리 리스트 (온보딩 답변과 완전히 부적합한 카테고리)"
+    )
+    
     # 추천 제품 모델 (카테고리별 상위 3개씩, JSON)
     # 구조: {"TV": [product_id1, product_id2, product_id3], "냉장고": [...]}
     recommended_products = models.JSONField(

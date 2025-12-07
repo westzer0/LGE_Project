@@ -206,5 +206,171 @@
     </footer>
 
     <script src="{% static 'script.js' %}"></script>
+    <script>
+        // 추천 폼 처리
+        document.addEventListener('DOMContentLoaded', function() {
+            const recommendForm = document.getElementById('recommend-form');
+            const loadingDiv = document.getElementById('loading');
+            const resultDiv = document.getElementById('recommend-result');
+            
+            if (recommendForm) {
+                recommendForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // 폼 데이터 수집
+                    const formData = new FormData(recommendForm);
+                    const apiData = {
+                        vibe: formData.get('vibe') || 'modern',
+                        household_size: parseInt(formData.get('household_size')) || 2,
+                        housing_type: formData.get('housing_type') || 'apartment',
+                        pyung: 25, // 기본값 (필요시 폼에 추가 가능)
+                        priority: formData.get('priority') || 'value',
+                        budget_level: formData.get('budget_level') || 'standard',
+                        categories: [] // 모든 카테고리 추천 (필요시 폼에 추가 가능)
+                    };
+                    
+                    // 로딩 상태 표시
+                    loadingDiv.style.display = 'block';
+                    resultDiv.innerHTML = '';
+                    
+                    try {
+                        // API 호출
+                        const response = await fetch('/api/recommend/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(apiData)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        // 로딩 숨기기
+                        loadingDiv.style.display = 'none';
+                        
+                        if (result.success && result.recommendations && result.recommendations.length > 0) {
+                            // 결과 표시
+                            displayRecommendations(result.recommendations);
+                        } else {
+                            resultDiv.innerHTML = `
+                                <div style="padding: 20px; text-align: center; color: #666;">
+                                    <p>추천 결과가 없습니다.</p>
+                                    <p style="font-size: 14px; margin-top: 10px;">${result.error || '다른 조건으로 시도해보세요.'}</p>
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        loadingDiv.style.display = 'none';
+                        resultDiv.innerHTML = `
+                            <div style="padding: 20px; text-align: center; color: #d32f2f;">
+                                <p>오류가 발생했습니다.</p>
+                                <p style="font-size: 14px; margin-top: 10px;">${error.message}</p>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            // 추천 결과 표시 함수
+            function displayRecommendations(recommendations) {
+                let html = '<div style="display: grid; gap: 20px;">';
+                
+                recommendations.forEach((rec, index) => {
+                    const price = rec.discount_price || rec.price || 0;
+                    const originalPrice = rec.discount_price && rec.price && rec.discount_price < rec.price ? rec.price : null;
+                    const score = Math.round((rec.score || 0) * 100);
+                    
+                    html += `
+                        <div style="
+                            border: 1px solid #e5e5e5;
+                            border-radius: 12px;
+                            padding: 20px;
+                            background: #fff;
+                            transition: box-shadow 0.2s;
+                        " onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'" 
+                           onmouseout="this.style.boxShadow='none'">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                <div>
+                                    <div style="
+                                        font-size: 12px;
+                                        color: #666;
+                                        margin-bottom: 4px;
+                                        text-transform: uppercase;
+                                    ">${escapeHtml(rec.category_display || rec.category || '')}</div>
+                                    <h4 style="
+                                        font-size: 18px;
+                                        font-weight: 600;
+                                        color: #1a1a1a;
+                                        margin: 0 0 8px 0;
+                                    ">${escapeHtml(rec.model || rec.name || '')}</h4>
+                                    ${rec.model_number ? `
+                                        <div style="font-size: 13px; color: #999; margin-bottom: 8px;">
+                                            ${escapeHtml(rec.model_number)}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                ${rec.image_url ? `
+                                    <img src="${escapeHtml(rec.image_url)}" 
+                                         alt="${escapeHtml(rec.model || rec.name || '')}"
+                                         style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; background: #f5f5f5;">
+                                ` : ''}
+                            </div>
+                            
+                            <div style="
+                                display: inline-block;
+                                background: #A50034;
+                                color: #fff;
+                                padding: 4px 12px;
+                                border-radius: 20px;
+                                font-size: 12px;
+                                font-weight: 600;
+                                margin-bottom: 12px;
+                            ">${score}% 일치</div>
+                            
+                            <div style="margin-bottom: 12px;">
+                                <div style="
+                                    font-size: 20px;
+                                    font-weight: 700;
+                                    color: #1a1a1a;
+                                ">₩${price.toLocaleString()}</div>
+                                ${originalPrice ? `
+                                    <div style="
+                                        font-size: 14px;
+                                        color: #999;
+                                        text-decoration: line-through;
+                                        margin-top: 4px;
+                                    ">₩${originalPrice.toLocaleString()}</div>
+                                ` : ''}
+                            </div>
+                            
+                            ${rec.reason ? `
+                                <div style="
+                                    font-size: 14px;
+                                    color: #666;
+                                    line-height: 1.6;
+                                    padding: 12px;
+                                    background: #f9f9f9;
+                                    border-radius: 8px;
+                                    margin-top: 12px;
+                                ">${escapeHtml(rec.reason)}</div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                resultDiv.innerHTML = html;
+            }
+            
+            // XSS 방지를 위한 HTML 이스케이프
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        });
+    </script>
 </body>
 </html>

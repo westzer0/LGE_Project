@@ -235,10 +235,44 @@ class RecommendationEngine:
             
             recommendations = all_recommendations
             
+            # taste_id가 있으면 RECOMMENDED_PRODUCT_SCORES 추가
+            recommended_product_scores = None
+            if taste_id is not None:
+                from .taste_based_product_scorer import taste_based_product_scorer
+                taste_config = taste_based_product_scorer._get_taste_config(taste_id)
+                
+                if taste_config:
+                    recommended_products = taste_config.get('recommended_products', {})
+                    recommended_product_scores = taste_config.get('recommended_product_scores', {})
+                    
+                    # 각 추천 제품에 점수 매핑 (product_id 기반)
+                    if recommended_products and recommended_product_scores:
+                        for rec in recommendations:
+                            main_cat = rec.get('main_category')
+                            product_id = rec.get('product_id')
+                            
+                            if main_cat and product_id and main_cat in recommended_products:
+                                category_product_ids = recommended_products[main_cat]
+                                category_scores = recommended_product_scores.get(main_cat, [])
+                                
+                                # product_id로 정확히 매핑
+                                if product_id in category_product_ids:
+                                    score_index = category_product_ids.index(product_id)
+                                    if score_index < len(category_scores):
+                                        rec['taste_score'] = category_scores[score_index]  # 백엔드에서 계산한 점수
+                                # product_id 매핑 실패 시 순서 기반 fallback
+                                elif category_scores and len(category_scores) > 0:
+                                    category_recs = [r for r in recommendations if r.get('main_category') == main_cat]
+                                    if rec in category_recs:
+                                        score_index = category_recs.index(rec)
+                                        if score_index < len(category_scores):
+                                            rec['taste_score'] = category_scores[score_index]
+            
             return {
                 'success': True,
                 'count': len(recommendations),
                 'recommendations': recommendations,
+                'recommended_product_scores': recommended_product_scores,  # 전체 점수 정보도 포함
             }
         
         except ValueError as e:

@@ -1259,6 +1259,110 @@ def portfolio_add_to_cart_view(request, portfolio_id):
 
 
 @csrf_exempt
+@require_http_methods(["POST", "PUT"])
+def portfolio_edit_view(request, portfolio_id):
+    """
+    포트폴리오 편집 (제품 추가/삭제/교체/업그레이드)
+    
+    POST /api/portfolio/<portfolio_id>/edit/
+    {
+        "action": "add",  # "add", "remove", "replace", "upgrade"
+        "product_id": 123,  # remove, replace, upgrade 시 필수
+        "new_product_id": 456,  # add, replace 시 필수
+        "category": "TV"  # add 시 특정 카테고리에서 선택
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        action = data.get('action')
+        product_id = data.get('product_id')
+        new_product_id = data.get('new_product_id')
+        category = data.get('category')
+        
+        if not action:
+            return JsonResponse({
+                'success': False,
+                'error': 'action 필수 (add, remove, replace, upgrade)'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        result = portfolio_service.update_portfolio_products(
+            portfolio_id=portfolio_id,
+            action=action,
+            product_id=product_id,
+            new_product_id=new_product_id,
+            category=category
+        )
+        
+        if result.get('success'):
+            return JsonResponse({
+                'success': True,
+                'portfolio_id': result.get('portfolio_id'),
+                'products': result.get('products', []),
+                'total_price': result.get('total_price', 0),
+                'total_discount_price': result.get('total_discount_price', 0),
+                'message': f'포트폴리오가 업데이트되었습니다.'
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '포트폴리오 편집 실패')
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def portfolio_estimate_view(request, portfolio_id):
+    """
+    실시간 견적 계산 (옵션별 가격 계산)
+    
+    POST /api/portfolio/<portfolio_id>/estimate/
+    {
+        "options": {
+            "123": {
+                "installation": true,
+                "warranty": "extended",
+                "accessories": ["stand", "wall_mount"]
+            }
+        }
+    }
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        options = data.get('options', {})
+        
+        result = portfolio_service.calculate_estimated_price(
+            portfolio_id=portfolio_id,
+            options=options
+        )
+        
+        if result.get('success'):
+            return JsonResponse({
+                'success': True,
+                'base_price': result.get('base_price', 0),
+                'options_price': result.get('options_price', 0),
+                'total_price': result.get('total_price', 0),
+                'breakdown': result.get('breakdown', [])
+            }, json_dumps_params={'ensure_ascii': False})
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': result.get('error', '견적 계산 실패')
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def bestshop_consultation_view(request):
     """
@@ -1321,16 +1425,41 @@ def bestshop_consultation_view(request):
             'onboarding_data': portfolio.onboarding_data
         }
         
-        # 실제 베스트샵 API 연동은 여기서 구현
-        # 현재는 데이터만 반환 (외부 시스템 연동 필요)
-        bestshop_url = "https://bestshop.lge.co.kr/counselReserve/main/MC11420001?inflow=lgekor"
+        # 베스트샵 URL 생성 (포트폴리오 정보 포함)
+        from urllib.parse import urlencode
+        bestshop_base_url = "https://bestshop.lge.co.kr/counselReserve/main/MC11420001"
+        bestshop_params = {
+            'inflow': 'lgekor',
+            'portfolio_id': portfolio.portfolio_id,
+        }
+        
+        # 제품 정보 추가
+        if portfolio.products:
+            product_names = [p.get('name', '') for p in portfolio.products[:5] if p.get('name')]
+            if product_names:
+                bestshop_params['products'] = ','.join(product_names)
+        
+        # 예약 정보 추가
+        if preferred_date:
+            bestshop_params['date'] = preferred_date
+        if preferred_time:
+            bestshop_params['time'] = preferred_time
+        if store_location:
+            bestshop_params['store'] = store_location
+        
+        # URL 생성
+        bestshop_url = f"{bestshop_base_url}?{urlencode(bestshop_params)}"
+        
+        # 예약 ID 생성 (모의)
+        reservation_id = f"BS-{portfolio.portfolio_id}-{int(timezone.now().timestamp())}"
         
         return JsonResponse({
             'success': True,
             'message': '상담 예약 정보가 준비되었습니다.',
             'consultation_data': consultation_data,
             'bestshop_url': bestshop_url,
-            'note': '실제 베스트샵 예약은 외부 시스템과 연동 필요'
+            'reservation_id': reservation_id,
+            'note': '베스트샵 예약 페이지로 이동합니다. 실제 예약은 베스트샵 시스템에서 완료됩니다.'
         }, json_dumps_params={'ensure_ascii': False})
     
     except Exception as e:

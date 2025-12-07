@@ -1094,6 +1094,117 @@
         }
 
         /* ============================================
+           추천 후보 모달
+           ============================================ */
+        .alternatives-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10003;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .alternatives-modal.active {
+            display: flex;
+        }
+
+        .alternatives-modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .alternatives-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #1a1a1a;
+            padding: 0;
+        }
+
+        .alternatives-modal-close:hover {
+            color: #666;
+        }
+
+        .alternatives-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        .alternatives-category {
+            margin-bottom: 32px;
+        }
+
+        .alternatives-category-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e5e5;
+        }
+
+        .alternatives-products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .alternatives-product {
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 16px;
+            transition: box-shadow 0.2s;
+        }
+
+        .alternatives-product:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .alternatives-product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .alternatives-product-price {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .alternatives-product-discount {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e60012;
+        }
+
+        /* ============================================
            구매상담예약 모달
            ============================================ */
         .consultation-modal {
@@ -2685,8 +2796,17 @@
 
             // 취향 일치도 업데이트 및 색상 설정
             const matchBadge = document.querySelector(`#product-${productId} .match-badge`);
-            if (matchBadge && product.score !== undefined) {
-                const matchPercent = Math.round(product.score * 100);
+            if (matchBadge) {
+                // taste_score가 있으면 우선 사용 (백엔드에서 계산한 점수)
+                let matchPercent;
+                if (product.taste_score !== undefined && product.taste_score !== null) {
+                    matchPercent = Math.round(product.taste_score);
+                } else if (product.score !== undefined) {
+                    matchPercent = Math.round(product.score * 100);
+                } else {
+                    matchPercent = 0;
+                }
+                
                 matchBadge.innerHTML = `취향 <span class="match-percent">${matchPercent}%</span> 일치`;
 
                 // 60% 이상이면 빨간색, 미만이면 회색
@@ -3962,7 +4082,8 @@
                     // 추천 후보 데이터를 콘솔에 출력 (디버깅용)
                     console.log('추천 후보:', data.alternatives);
                     
-                    // TODO: 추천 후보를 화면에 표시하는 로직 추가 (UI는 건들지 않고 데이터만 표시)
+                    // 추천 후보를 모달에 표시
+                    showAlternativesModal(data.alternatives);
                 } else {
                     throw new Error(data.error || '추천 후보 조회 실패');
                 }
@@ -4097,6 +4218,66 @@
                 showToast('링크 복사 실패');
             });
         }
+
+        // ============================================
+        // 추천 후보 모달 표시
+        // ============================================
+        function showAlternativesModal(alternatives) {
+            const modal = document.getElementById('alternativesModal');
+            const content = document.getElementById('alternativesContent');
+            
+            if (!alternatives || alternatives.length === 0) {
+                content.innerHTML = '<p>추천 후보가 없습니다.</p>';
+                modal.classList.add('active');
+                return;
+            }
+            
+            let html = '';
+            alternatives.forEach(categoryData => {
+                const category = categoryData.category || '기타';
+                const products = categoryData.products || [];
+                
+                if (products.length === 0) return;
+                
+                html += `<div class="alternatives-category">`;
+                html += `<h3 class="alternatives-category-title">${category}</h3>`;
+                html += `<div class="alternatives-products">`;
+                
+                products.forEach(product => {
+                    const price = product.price || 0;
+                    const discountPrice = product.discount_price || price;
+                    const formattedPrice = new Intl.NumberFormat('ko-KR').format(price);
+                    const formattedDiscount = new Intl.NumberFormat('ko-KR').format(discountPrice);
+                    
+                    html += `<div class="alternatives-product">`;
+                    html += `<div class="alternatives-product-name">${product.name || '제품명 없음'}</div>`;
+                    if (discountPrice < price) {
+                        html += `<div class="alternatives-product-price"><s>${formattedPrice}원</s></div>`;
+                        html += `<div class="alternatives-product-discount">${formattedDiscount}원</div>`;
+                    } else {
+                        html += `<div class="alternatives-product-discount">${formattedPrice}원</div>`;
+                    }
+                    html += `</div>`;
+                });
+                
+                html += `</div></div>`;
+            });
+            
+            content.innerHTML = html || '<p>추천 후보가 없습니다.</p>';
+            modal.classList.add('active');
+        }
+
+        function closeAlternativesModal() {
+            const modal = document.getElementById('alternativesModal');
+            modal.classList.remove('active');
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('alternativesModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAlternativesModal();
+            }
+        });
 
         // ============================================
         // 카카오톡 공유하기 - LGDX-25

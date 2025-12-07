@@ -215,12 +215,80 @@ class TasteCategorySelector:
         return selected
     
     @staticmethod
+    def _normalize_category_name(category: str) -> str:
+        """
+        Oracle DB의 실제 카테고리명을 점수 계산 로직에서 사용하는 카테고리명으로 정규화
+        
+        Args:
+            category: Oracle DB의 MAIN_CATEGORY명
+        
+        Returns:
+            정규화된 카테고리명
+        """
+        if not category:
+            return category
+        
+        # 카테고리명 매핑 (Oracle DB → 로직) - 강화된 매핑
+        category_mapping = {
+            # 세탁 관련
+            '세탁': '세탁기',  # Oracle DB '세탁' → 로직 '세탁기'
+            
+            # 전자레인지/오븐 관련
+            '광파오븐전자레인지': '전자레인지',  # Oracle DB → 로직
+            '광파오븐': '오븐',  # Oracle DB → 로직
+            '전기레인지': '전자레인지',  # Oracle DB → 로직
+            
+            # 청소 관련
+            '로봇청소기': '청소기',  # Oracle DB → 로직 (통합)
+            
+            # 오디오/사운드 관련
+            '사운드바': '오디오',  # Oracle DB → 로직
+            
+            # 건조 관련
+            '의류건조기': '건조기',  # Oracle DB → 로직
+            '건조기': '건조기',  # 명시적 매핑
+            
+            # 워시타워 관련
+            '워시콤보': '워시타워',  # Oracle DB → 로직
+            '워시타워': '워시타워',  # 명시적 매핑
+        }
+        
+        # 매핑 적용
+        normalized = category_mapping.get(category, category)
+        
+        # 부분 매칭 (카테고리명에 포함된 경우) - 더 정확한 매칭
+        if normalized == category:  # 매핑되지 않은 경우
+            category_lower = category.lower()
+            
+            # 세탁 관련
+            if '세탁' in category and '세탁기' not in category:
+                normalized = '세탁기'
+            # 전자레인지/오븐 관련
+            elif '전자레인지' in category or '레인지' in category:
+                normalized = '전자레인지'
+            elif '오븐' in category and '전자레인지' not in category:
+                normalized = '오븐'
+            # 청소 관련
+            elif '청소' in category:
+                normalized = '청소기'
+            # 오디오/사운드 관련
+            elif '오디오' in category or '사운드' in category:
+                normalized = '오디오'
+            # 건조 관련
+            elif '건조' in category:
+                normalized = '건조기'
+            # 워시타워 관련
+            elif '워시' in category and ('타워' in category or '콤보' in category):
+                normalized = '워시타워'
+        
+        return normalized
+    
     def _calculate_category_score(category: str, onboarding_data: Dict) -> float:
         """
         카테고리에 대해 점수 계산 (0~100점)
         
         Args:
-            category: MAIN_CATEGORY
+            category: MAIN_CATEGORY (Oracle DB 실제 카테고리명)
             onboarding_data: 온보딩 데이터
         
         Returns:
@@ -228,6 +296,34 @@ class TasteCategorySelector:
         """
         score = 0.0
         max_score = 100.0
+        
+        # 카테고리명 정규화 (Oracle DB → 로직)
+        normalized_category = TasteCategorySelector._normalize_category_name(category)
+        
+        # OBJET, SIGNATURE는 브랜드 라인이므로 기본 점수만 부여
+        # 하지만 Zero Score 문제를 해결하기 위해 점수 범위 확대
+        if category in ['OBJET', 'SIGNATURE']:
+            # 브랜드 라인은 기본 점수만 부여 (15-30점 범위로 확대)
+            budget_level = onboarding_data.get('budget_level', 'medium')
+            priority = onboarding_data.get('priority', 'value')
+            priority_list = priority if isinstance(priority, list) else [priority]
+            priority_lower = [p.lower() for p in priority_list]
+            
+            # 디자인 우선순위면 더 높은 점수
+            if 'design' in priority_lower:
+                if budget_level in ['high', 'premium', 'luxury']:
+                    return 30.0
+                elif budget_level == 'medium':
+                    return 25.0
+                else:
+                    return 20.0
+            else:
+                if budget_level in ['high', 'premium', 'luxury']:
+                    return 25.0
+                elif budget_level == 'medium':
+                    return 20.0
+                else:
+                    return 15.0
         
         vibe = onboarding_data.get('vibe', 'modern')
         household_size = onboarding_data.get('household_size', 2)
@@ -241,45 +337,87 @@ class TasteCategorySelector:
         pyung = onboarding_data.get('pyung', 25)
         
         # 1. main_space 기반 점수 (최대 30점)
+        # Oracle DB 실제 카테고리명과 정규화된 카테고리명 모두 포함
+        # main_space='living'일 때 세탁 관련 카테고리 점수 상향 (Zero Score 문제 해결)
         space_scores = {
-            'living': {'TV': 30, '에어컨': 25, '공기청정기': 20, '청소기': 15, '냉장고': 10, '세탁기': 5, '식기세척기': 3},
-            'kitchen': {'냉장고': 30, '식기세척기': 25, '전자레인지': 20, '오븐': 15, 'TV': 5, '에어컨': 3, '공기청정기': 3},
-            'dressing': {'세탁기': 30, '건조기': 25, '워시타워': 20, '의류관리기': 15, '에어컨': 5, '공기청정기': 3},
-            'bedroom': {'에어컨': 30, 'TV': 20, '공기청정기': 15, '청소기': 10, '냉장고': 3},
-            'study': {'TV': 25, '에어컨': 20, '공기청정기': 15, '청소기': 5, '냉장고': 3},
+            'living': {
+                'TV': 30, '에어컨': 25, '공기청정기': 20, 
+                '청소기': 18, '세탁기': 20, '세탁': 20,  # 세탁기 점수 상향 (18 → 20)
+                '냉장고': 10, '식기세척기': 3,
+                '의류관리기': 18, '오디오': 8, '사운드바': 8,  # 의류관리기 점수 상향 (15 → 18)
+                '건조기': 15, '의류건조기': 15,  # 건조기 추가
+                '워시타워': 15, '워시콤보': 15,  # 워시타워 추가
+            },
+            'kitchen': {
+                '냉장고': 30, '식기세척기': 25, 
+                '전자레인지': 20, '광파오븐전자레인지': 20,  # Oracle DB 실제명 추가
+                '오븐': 15, '광파오븐': 15,  # Oracle DB 실제명 추가
+                'TV': 5, '에어컨': 3, '공기청정기': 3,
+            },
+            'dressing': {
+                '세탁기': 30, '세탁': 30,  # Oracle DB '세탁' 추가
+                '건조기': 25, '의류건조기': 25,  # Oracle DB 실제명 추가
+                '워시타워': 20, '워시콤보': 20,  # Oracle DB 실제명 추가
+                '의류관리기': 20,  # 점수 상향
+                '에어컨': 5, '공기청정기': 3,
+            },
+            'bedroom': {
+                '에어컨': 30, 'TV': 20, '공기청정기': 15, 
+                '청소기': 10, '로봇청소기': 10,  # Oracle DB 실제명 추가
+                '냉장고': 3, '오디오': 5, '사운드바': 5,  # 추가
+            },
+            'study': {
+                'TV': 25, '에어컨': 20, '공기청정기': 15, 
+                '청소기': 5, '로봇청소기': 5,  # Oracle DB 실제명 추가
+                '냉장고': 3, '오디오': 8, '사운드바': 8,  # 추가
+            },
         }
-        score += space_scores.get(main_space, {}).get(category, 0)
+        
+        # 정규화된 카테고리명과 원본 카테고리명 모두 체크
+        score += space_scores.get(main_space, {}).get(category, 0)  # 원본 먼저
+        if score == 0:
+            score += space_scores.get(main_space, {}).get(normalized_category, 0)  # 정규화된 이름
+        
+        # main_space='living'일 때 세탁 관련 카테고리 추가 점수 부여 (Zero Score 문제 해결)
+        if main_space == 'living' and score == 0:
+            # 세탁 관련 카테고리 체크 (원본 및 정규화된 이름 모두)
+            laundry_categories = ['세탁기', '세탁', '건조기', '의류건조기', '워시타워', '워시콤보', '의류관리기']
+            if category in laundry_categories or normalized_category in laundry_categories:
+                score += 12  # living일 때도 세탁 관련 카테고리에 기본 점수 부여
         
         # main_space와 무관한 카테고리도 기본 점수 부여 (다양성 확보)
-        if category not in space_scores.get(main_space, {}):
-            score += 1  # 기본 점수 1점
+        if score == 0:
+            score += 2  # 기본 점수 2점으로 상향
         
         # 2. household_size 기반 점수 (최대 20점)
+        # 정규화된 카테고리명과 원본 모두 체크
+        category_check_list = [category, normalized_category]
+        
         if household_size == 1:
-            if category in ['TV', '냉장고', '청소기', '에어컨']:
+            if any(c in ['TV', '냉장고', '청소기', '로봇청소기', '에어컨'] for c in category_check_list):
                 score += 20
-            elif category in ['공기청정기', '전자레인지']:
+            elif any(c in ['공기청정기', '전자레인지', '광파오븐전자레인지'] for c in category_check_list):
                 score += 15
             else:
                 score += 2  # 다른 카테고리도 기본 점수
         elif household_size == 2:
-            if category in ['TV', '냉장고', '세탁기', '에어컨']:
+            if any(c in ['TV', '냉장고', '세탁기', '세탁', '에어컨'] for c in category_check_list):
                 score += 20
-            elif category in ['공기청정기', '청소기', '식기세척기']:
+            elif any(c in ['공기청정기', '청소기', '로봇청소기', '식기세척기'] for c in category_check_list):
                 score += 15
             else:
                 score += 2
         elif 3 <= household_size <= 4:
-            if category in ['냉장고', '세탁기', 'TV', '에어컨']:
+            if any(c in ['냉장고', '세탁기', '세탁', 'TV', '에어컨'] for c in category_check_list):
                 score += 20
-            elif category in ['공기청정기', '청소기', '식기세척기', '김치냉장고']:
+            elif any(c in ['공기청정기', '청소기', '로봇청소기', '식기세척기', '김치냉장고'] for c in category_check_list):
                 score += 15
             else:
                 score += 2
         elif household_size >= 5:
-            if category in ['냉장고', '김치냉장고', '세탁기', '워시타워', '에어컨']:
+            if any(c in ['냉장고', '김치냉장고', '세탁기', '세탁', '워시타워', '워시콤보', '에어컨'] for c in category_check_list):
                 score += 20
-            elif category in ['TV', '공기청정기', '청소기', '식기세척기']:
+            elif any(c in ['TV', '공기청정기', '청소기', '로봇청소기', '식기세척기'] for c in category_check_list):
                 score += 15
             else:
                 score += 2
@@ -298,74 +436,105 @@ class TasteCategorySelector:
         
         # 4. budget_level 기반 점수 (최대 15점)
         if budget_level in ['high', 'premium', 'luxury']:
-            if category in ['TV', '냉장고', '에어컨', '세탁기', '공기청정기', '청소기']:
+            if any(c in ['TV', '냉장고', '에어컨', '세탁기', '세탁', '공기청정기', '청소기', '로봇청소기'] for c in category_check_list):
                 score += 15
-            elif category in ['와인셀러', '정수기', '제습기', '건조기', '식기세척기']:
+            elif any(c in ['와인셀러', '정수기', '제습기', '건조기', '의류건조기', '식기세척기', '의류관리기'] for c in category_check_list):
                 score += 12
+            elif any(c in ['오디오', '사운드바', '프로젝터'] for c in category_check_list):
+                score += 10
             else:
                 score += 3  # 다른 카테고리도 기본 점수
         elif budget_level == 'medium':
-            if category in ['TV', '냉장고', '에어컨', '세탁기']:
+            if any(c in ['TV', '냉장고', '에어컨', '세탁기', '세탁'] for c in category_check_list):
                 score += 15
-            elif category in ['공기청정기', '청소기', '식기세척기']:
+            elif any(c in ['공기청정기', '청소기', '로봇청소기', '식기세척기'] for c in category_check_list):
                 score += 10
+            elif any(c in ['오디오', '사운드바', '의류관리기'] for c in category_check_list):
+                score += 8
             else:
                 score += 2
         else:  # low
-            if category in ['냉장고', '세탁기', 'TV']:
+            if any(c in ['냉장고', '세탁기', '세탁', 'TV'] for c in category_check_list):
                 score += 15
-            elif category in ['에어컨', '청소기']:
+            elif any(c in ['에어컨', '청소기', '로봇청소기'] for c in category_check_list):
                 score += 10
             else:
                 score += 1
         
         # 5. priority 기반 점수 (최대 10점)
         if priority == 'design':
-            if category in ['TV', '냉장고', '에어컨']:
+            if any(c in ['TV', '냉장고', '에어컨'] for c in category_check_list):
                 score += 10
+            elif any(c in ['의류관리기', '오디오', '사운드바'] for c in category_check_list):
+                score += 5
             else:
                 score += 1
         elif priority == 'tech':
-            if category in ['TV', '냉장고', '에어컨', '세탁기', '공기청정기']:
+            if any(c in ['TV', '냉장고', '에어컨', '세탁기', '세탁', '공기청정기', '청소기', '로봇청소기'] for c in category_check_list):
                 score += 10
+            elif any(c in ['의류관리기', '오디오', '사운드바'] for c in category_check_list):
+                score += 5
             else:
                 score += 1
         elif priority == 'eco':
-            if category in ['에어컨', '냉장고', '세탁기', '공기청정기']:
+            if any(c in ['에어컨', '냉장고', '세탁기', '세탁', '공기청정기'] for c in category_check_list):
                 score += 10
+            elif any(c in ['청소기', '로봇청소기', '제습기'] for c in category_check_list):
+                score += 8
             else:
                 score += 1
         else:  # value
-            if category in ['냉장고', '세탁기', 'TV']:
+            if any(c in ['냉장고', '세탁기', '세탁', 'TV'] for c in category_check_list):
                 score += 10
             else:
                 score += 1
         
         # 6. cooking 기반 점수 (최대 5점)
         if cooking == 'daily':
-            if category in ['냉장고', '전자레인지', '식기세척기', '오븐']:
+            if any(c in ['냉장고', '전자레인지', '광파오븐전자레인지', '식기세척기', '오븐', '광파오븐'] for c in category_check_list):
                 score += 5
         elif cooking == 'sometimes':
-            if category in ['냉장고', '전자레인지']:
+            if any(c in ['냉장고', '전자레인지', '광파오븐전자레인지'] for c in category_check_list):
                 score += 5
         
-        # 7. laundry 기반 점수 (최대 5점)
+        # 7. laundry 기반 점수 (최대 10점) - 세탁 빈도에 따라 점수 차등
+        # main_space='living'일 때도 세탁 관련 카테고리에 점수 부여 (Zero Score 문제 해결)
         if laundry == 'daily':
-            if category in ['세탁기', '건조기', '워시타워']:
-                score += 5
+            if any(c in ['세탁기', '세탁', '건조기', '의류건조기', '워시타워', '워시콤보'] for c in category_check_list):
+                score += 10
+            elif any(c in ['의류관리기'] for c in category_check_list):
+                score += 8
         elif laundry == 'weekly':
-            if category in ['세탁기']:
+            if any(c in ['세탁기', '세탁'] for c in category_check_list):
+                score += 8
+            elif any(c in ['건조기', '의류건조기', '워시타워', '워시콤보'] for c in category_check_list):
                 score += 5
+            elif any(c in ['의류관리기'] for c in category_check_list):
+                score += 6  # 의류관리기 점수 상향 (5 → 6)
+        elif laundry in ['sometimes', 'monthly']:
+            if any(c in ['세탁기', '세탁'] for c in category_check_list):
+                score += 5
+            elif any(c in ['의류관리기'] for c in category_check_list):
+                score += 4  # 의류관리기 점수 상향 (3 → 4)
+        
+        # main_space='living'이고 laundry가 weekly 이상일 때 세탁 관련 카테고리 추가 점수
+        if main_space == 'living' and laundry in ['weekly', 'daily']:
+            if any(c in ['세탁기', '세탁', '의류관리기'] for c in category_check_list):
+                score += 3  # living일 때 세탁 관련 카테고리 추가 점수
         
         # 8. media 기반 점수 (최대 5점)
         if media in ['high', 'gaming', 'ott']:
-            if category == 'TV':
+            if any(c in ['TV', '프로젝터'] for c in category_check_list):
                 score += 5
+            elif any(c in ['오디오', '사운드바'] for c in category_check_list):
+                score += 3
         
         # 9. pyung 기반 점수 (최대 5점)
         if pyung >= 40:
-            if category in ['에어컨', '공기청정기', '청소기']:
+            if any(c in ['에어컨', '공기청정기', '청소기', '로봇청소기'] for c in category_check_list):
                 score += 5
+            elif any(c in ['의류관리기'] for c in category_check_list):
+                score += 3
         
         # 점수는 최대 100점으로 제한
         return min(score, max_score)

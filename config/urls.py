@@ -9,6 +9,7 @@ from api.views import (
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
     portfolio_refresh_view, portfolio_alternatives_view, portfolio_add_to_cart_view,
+    portfolio_edit_view, portfolio_estimate_view,
     bestshop_consultation_view,
     ai_recommendation_reason_view, ai_style_message_view, ai_review_summary_view,
     ai_chat_view, ai_status_view,
@@ -65,6 +66,8 @@ urlpatterns = [
     path('api/portfolio/<str:portfolio_id>/refresh/', portfolio_refresh_view, name='portfolio_refresh'),  # PRD: 2-4
     path('api/portfolio/<str:portfolio_id>/alternatives/', portfolio_alternatives_view, name='portfolio_alternatives'),  # PRD: 2-6
     path('api/portfolio/<str:portfolio_id>/add-to-cart/', portfolio_add_to_cart_view, name='portfolio_add_to_cart'),  # PRD: 2-3
+    path('api/portfolio/<str:portfolio_id>/edit/', portfolio_edit_view, name='portfolio_edit'),  # 포트폴리오 편집
+    path('api/portfolio/<str:portfolio_id>/estimate/', portfolio_estimate_view, name='portfolio_estimate'),  # 실시간 견적 계산
     
     # 베스트샵 상담 예약 API
     path('api/bestshop/consultation/', bestshop_consultation_view, name='bestshop_consultation'),  # PRD: 2-5
