@@ -700,3 +700,140 @@ class TasteConfig(models.Model):
     
     def __str__(self):
         return f"Taste {self.taste_id}: {', '.join(self.recommended_categories[:3]) if self.recommended_categories else 'N/A'}..."
+
+
+class Reservation(models.Model):
+    """
+    베스트샵 상담 예약 모델
+    PRD: 예약 조회/변경 기능
+    """
+    
+    STATUS_CHOICES = [
+        ('pending', '대기중'),
+        ('confirmed', '확정됨'),
+        ('completed', '완료됨'),
+        ('cancelled', '취소됨'),
+    ]
+    
+    # 예약 ID
+    reservation_id = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="예약 ID (예: BS-PF-XXXXXX-TIMESTAMP)"
+    )
+    
+    # 사용자 정보
+    user_id = models.CharField(
+        max_length=100,
+        db_index=True,
+        help_text="사용자 ID (카카오 ID 또는 세션 ID)"
+    )
+    
+    # 포트폴리오 연결
+    portfolio = models.ForeignKey(
+        'Portfolio',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reservations',
+        help_text="연결된 포트폴리오"
+    )
+    
+    # 예약 정보
+    consultation_purpose = models.CharField(
+        max_length=100,
+        default='이사',
+        help_text="상담 목적 (이사, 신혼, 리모델링 등)"
+    )
+    
+    preferred_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="희망 날짜"
+    )
+    
+    preferred_time = models.TimeField(
+        null=True,
+        blank=True,
+        help_text="희망 시간"
+    )
+    
+    store_location = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="매장 위치 (예: 서울 강남점)"
+    )
+    
+    # 상태
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        help_text="예약 상태"
+    )
+    
+    # 추가 정보
+    contact_name = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="연락처 이름"
+    )
+    
+    contact_phone = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="연락처 전화번호"
+    )
+    
+    contact_email = models.EmailField(
+        blank=True,
+        help_text="연락처 이메일"
+    )
+    
+    memo = models.TextField(
+        blank=True,
+        help_text="추가 메모"
+    )
+    
+    # 외부 시스템 연동 정보
+    external_reservation_id = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="베스트샵 시스템 예약 ID (외부 시스템 연동 시)"
+    )
+    
+    external_system_url = models.URLField(
+        blank=True,
+        help_text="외부 시스템 URL"
+    )
+    
+    # 타임스탬프
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        verbose_name = '상담 예약'
+        verbose_name_plural = '상담 예약'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user_id']),
+            models.Index(fields=['reservation_id']),
+            models.Index(fields=['status']),
+            models.Index(fields=['preferred_date']),
+        ]
+    
+    def __str__(self):
+        return f"{self.reservation_id} - {self.get_status_display()} ({self.store_location or '미정'})"
+    
+    def save(self, *args, **kwargs):
+        """예약 ID 자동 생성"""
+        if not self.reservation_id:
+            import random
+            import string
+            timestamp = int(timezone.now().timestamp())
+            random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            portfolio_prefix = f"PF-{self.portfolio.portfolio_id.split('-')[-1]}" if self.portfolio else "BS"
+            self.reservation_id = f"{portfolio_prefix}-{random_str}-{timestamp}"
+        super().save(*args, **kwargs)

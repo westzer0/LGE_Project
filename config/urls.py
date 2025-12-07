@@ -18,6 +18,7 @@ from api.views import (
     product_detail_page,
     search_view, product_compare_view,
     wishlist_add_view, wishlist_remove_view, wishlist_list_view,
+    reservation_list_view, reservation_detail_view, reservation_update_view, reservation_cancel_view,
     other_recommendations_page, mypage, reservation_status_page,
     kakao_login_view, kakao_callback_view, kakao_logout_view, kakao_user_info_view, kakao_send_message_view,
 )
@@ -87,6 +88,12 @@ urlpatterns = [
     
     # 베스트샵 상담 예약 API
     path('api/bestshop/consultation/', bestshop_consultation_view, name='bestshop_consultation'),  # PRD: 2-5
+    
+    # 예약 조회/변경 API - PRD 요구사항
+    path('api/reservation/list/', reservation_list_view, name='reservation_list'),
+    path('api/reservation/<str:reservation_id>/', reservation_detail_view, name='reservation_detail'),
+    path('api/reservation/<str:reservation_id>/update/', reservation_update_view, name='reservation_update'),
+    path('api/reservation/<str:reservation_id>/cancel/', reservation_cancel_view, name='reservation_cancel'),
     
     # 장바구니 API - LGDX-12
     path('api/cart/add/', cart_add_view, name='cart_add'),

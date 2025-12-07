@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
-from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics
+from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics, Reservation
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 from .services.chatgpt_service import chatgpt_service
@@ -1635,15 +1635,36 @@ def bestshop_consultation_view(request):
         # URL 생성
         bestshop_url = f"{bestshop_base_url}?{urlencode(bestshop_params)}"
         
-        # 예약 ID 생성 (모의)
-        reservation_id = f"BS-{portfolio.portfolio_id}-{int(timezone.now().timestamp())}"
+        # 예약 정보 DB 저장
+        reservation = Reservation.objects.create(
+            user_id=user_id or f"guest_{timezone.now().strftime('%Y%m%d%H%M%S')}",
+            portfolio=portfolio,
+            consultation_purpose=consultation_purpose,
+            preferred_date=preferred_date if preferred_date else None,
+            preferred_time=preferred_time if preferred_time else None,
+            store_location=store_location,
+            contact_name=data.get('contact_name', ''),
+            contact_phone=data.get('contact_phone', ''),
+            contact_email=data.get('contact_email', ''),
+            memo=data.get('memo', ''),
+            external_system_url=bestshop_url,
+            status='pending'
+        )
         
         return JsonResponse({
             'success': True,
-            'message': '상담 예약 정보가 준비되었습니다.',
+            'message': '상담 예약이 생성되었습니다.',
             'consultation_data': consultation_data,
             'bestshop_url': bestshop_url,
-            'reservation_id': reservation_id,
+            'reservation_id': reservation.reservation_id,
+            'reservation': {
+                'id': reservation.reservation_id,
+                'status': reservation.status,
+                'preferred_date': reservation.preferred_date.isoformat() if reservation.preferred_date else None,
+                'preferred_time': reservation.preferred_time.isoformat() if reservation.preferred_time else None,
+                'store_location': reservation.store_location,
+                'created_at': reservation.created_at.isoformat(),
+            },
             'note': '베스트샵 예약 페이지로 이동합니다. 실제 예약은 베스트샵 시스템에서 완료됩니다.'
         }, json_dumps_params={'ensure_ascii': False})
     
@@ -2667,3 +2688,297 @@ def wishlist_list_view(request):
         'count': len(wishlist_list),
         'items': wishlist_list
     }, json_dumps_params={'ensure_ascii': False})
+
+
+# ============================================================
+# 예약 조회/변경 API - PRD 요구사항
+# ============================================================
+
+@require_http_methods(["GET"])
+def reservation_list_view(request):
+    """
+    예약 목록 조회 API
+    
+    GET /api/reservation/list/?user_id=xxx&status=pending
+    """
+    user_id = request.GET.get('user_id')
+    status_filter = request.GET.get('status', None)
+    
+    if not user_id:
+        return JsonResponse({
+            'success': False,
+            'error': 'user_id 필수'
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    reservations = Reservation.objects.filter(user_id=user_id)
+    
+    # 상태 필터
+    if status_filter:
+        reservations = reservations.filter(status=status_filter)
+    
+    reservations = reservations.select_related('portfolio').order_by('-created_at')
+    
+    reservation_list = []
+    for reservation in reservations:
+        reservation_data = {
+            'reservation_id': reservation.reservation_id,
+            'status': reservation.status,
+            'status_display': reservation.get_status_display(),
+            'consultation_purpose': reservation.consultation_purpose,
+            'preferred_date': reservation.preferred_date.isoformat() if reservation.preferred_date else None,
+            'preferred_time': reservation.preferred_time.isoformat() if reservation.preferred_time else None,
+            'store_location': reservation.store_location,
+            'contact_name': reservation.contact_name,
+            'contact_phone': reservation.contact_phone,
+            'portfolio_id': reservation.portfolio.portfolio_id if reservation.portfolio else None,
+            'external_system_url': reservation.external_system_url,
+            'created_at': reservation.created_at.isoformat(),
+            'confirmed_at': reservation.confirmed_at.isoformat() if reservation.confirmed_at else None,
+        }
+        reservation_list.append(reservation_data)
+    
+    return JsonResponse({
+        'success': True,
+        'count': len(reservation_list),
+        'reservations': reservation_list
+    }, json_dumps_params={'ensure_ascii': False})
+
+
+@require_http_methods(["GET"])
+def reservation_detail_view(request, reservation_id):
+    """
+    예약 상세 조회 API
+    
+    GET /api/reservation/<reservation_id>/
+    """
+    try:
+        reservation = Reservation.objects.select_related('portfolio').get(reservation_id=reservation_id)
+        
+        # 포트폴리오 정보
+        portfolio_data = None
+        if reservation.portfolio:
+            portfolio_data = {
+                'portfolio_id': reservation.portfolio.portfolio_id,
+                'style_type': reservation.portfolio.style_type,
+                'style_title': reservation.portfolio.style_title,
+                'total_price': float(reservation.portfolio.total_discount_price),
+                'product_count': len(reservation.portfolio.products),
+            }
+        
+        return JsonResponse({
+            'success': True,
+            'reservation': {
+                'reservation_id': reservation.reservation_id,
+                'status': reservation.status,
+                'status_display': reservation.get_status_display(),
+                'user_id': reservation.user_id,
+                'consultation_purpose': reservation.consultation_purpose,
+                'preferred_date': reservation.preferred_date.isoformat() if reservation.preferred_date else None,
+                'preferred_time': reservation.preferred_time.isoformat() if reservation.preferred_time else None,
+                'store_location': reservation.store_location,
+                'contact_name': reservation.contact_name,
+                'contact_phone': reservation.contact_phone,
+                'contact_email': reservation.contact_email,
+                'memo': reservation.memo,
+                'external_reservation_id': reservation.external_reservation_id,
+                'external_system_url': reservation.external_system_url,
+                'portfolio': portfolio_data,
+                'created_at': reservation.created_at.isoformat(),
+                'updated_at': reservation.updated_at.isoformat(),
+                'confirmed_at': reservation.confirmed_at.isoformat() if reservation.confirmed_at else None,
+                'cancelled_at': reservation.cancelled_at.isoformat() if reservation.cancelled_at else None,
+            }
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Reservation.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': '예약을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["PUT", "POST"])
+def reservation_update_view(request, reservation_id):
+    """
+    예약 변경 API
+    
+    PUT /api/reservation/<reservation_id>/update/
+    POST /api/reservation/<reservation_id>/update/
+    {
+        "preferred_date": "2025-12-20",
+        "preferred_time": "15:00",
+        "store_location": "서울 강남점",
+        "contact_name": "홍길동",
+        "contact_phone": "010-1234-5678",
+        "contact_email": "test@example.com",
+        "memo": "변경 사유..."
+    }
+    """
+    try:
+        reservation = Reservation.objects.get(reservation_id=reservation_id)
+        
+        # 취소된 예약은 변경 불가
+        if reservation.status == 'cancelled':
+            return JsonResponse({
+                'success': False,
+                'error': '취소된 예약은 변경할 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        # 완료된 예약은 변경 불가
+        if reservation.status == 'completed':
+            return JsonResponse({
+                'success': False,
+                'error': '완료된 예약은 변경할 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        # 요청 데이터 파싱
+        if hasattr(request, 'data'):
+            data = request.data
+        else:
+            data = json.loads(request.body.decode('utf-8'))
+        
+        # 예약 정보 업데이트
+        if 'preferred_date' in data:
+            from datetime import datetime
+            try:
+                reservation.preferred_date = datetime.strptime(data['preferred_date'], '%Y-%m-%d').date()
+            except ValueError:
+                return JsonResponse({
+                    'success': False,
+                    'error': '날짜 형식이 올바르지 않습니다. (YYYY-MM-DD 형식)'
+                }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        if 'preferred_time' in data:
+            from datetime import datetime
+            try:
+                reservation.preferred_time = datetime.strptime(data['preferred_time'], '%H:%M').time()
+            except ValueError:
+                return JsonResponse({
+                    'success': False,
+                    'error': '시간 형식이 올바르지 않습니다. (HH:MM 형식)'
+                }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        if 'store_location' in data:
+            reservation.store_location = data['store_location']
+        
+        if 'contact_name' in data:
+            reservation.contact_name = data['contact_name']
+        
+        if 'contact_phone' in data:
+            reservation.contact_phone = data['contact_phone']
+        
+        if 'contact_email' in data:
+            reservation.contact_email = data['contact_email']
+        
+        if 'memo' in data:
+            reservation.memo = data['memo']
+        
+        if 'consultation_purpose' in data:
+            reservation.consultation_purpose = data['consultation_purpose']
+        
+        # 상태 변경 시 확인 시간 업데이트
+        if 'status' in data and data['status'] == 'confirmed' and reservation.status != 'confirmed':
+            reservation.confirmed_at = timezone.now()
+        
+        reservation.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '예약이 변경되었습니다.',
+            'reservation': {
+                'reservation_id': reservation.reservation_id,
+                'status': reservation.status,
+                'preferred_date': reservation.preferred_date.isoformat() if reservation.preferred_date else None,
+                'preferred_time': reservation.preferred_time.isoformat() if reservation.preferred_time else None,
+                'store_location': reservation.store_location,
+                'updated_at': reservation.updated_at.isoformat(),
+            }
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Reservation.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': '예약을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON'
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def reservation_cancel_view(request, reservation_id):
+    """
+    예약 취소 API
+    
+    POST /api/reservation/<reservation_id>/cancel/
+    {
+        "cancel_reason": "일정 변경으로 인한 취소"  # 선택
+    }
+    """
+    try:
+        reservation = Reservation.objects.get(reservation_id=reservation_id)
+        
+        # 이미 취소된 예약
+        if reservation.status == 'cancelled':
+            return JsonResponse({
+                'success': False,
+                'error': '이미 취소된 예약입니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        # 완료된 예약은 취소 불가
+        if reservation.status == 'completed':
+            return JsonResponse({
+                'success': False,
+                'error': '완료된 예약은 취소할 수 없습니다.'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        
+        # 취소 사유
+        cancel_reason = ''
+        if request.body:
+            try:
+                data = json.loads(request.body.decode('utf-8'))
+                cancel_reason = data.get('cancel_reason', '')
+            except:
+                pass
+        
+        # 예약 취소
+        reservation.status = 'cancelled'
+        reservation.cancelled_at = timezone.now()
+        if cancel_reason:
+            reservation.memo = f"[취소 사유] {cancel_reason}\n\n{reservation.memo}".strip()
+        reservation.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': '예약이 취소되었습니다.',
+            'reservation': {
+                'reservation_id': reservation.reservation_id,
+                'status': reservation.status,
+                'cancelled_at': reservation.cancelled_at.isoformat(),
+            }
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Reservation.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': '예약을 찾을 수 없습니다.'
+        }, json_dumps_params={'ensure_ascii': False}, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=400)

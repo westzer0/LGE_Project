@@ -47,6 +47,23 @@ default_hosts = 'localhost,127.0.0.1,testserver,braeden-unaromatic-zola.ngrok-fr
 allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', default_hosts)
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.strip()]
 
+# CSRF 설정 (React 앱에서 API 호출 허용)
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+# 환경 변수로 추가 도메인 설정 가능
+csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+if csrf_origins_str:
+    CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()])
+
+# CORS 설정 (개발 환경)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
+
 # ============================================================
 # 외부 API 키 설정
 # ============================================================
@@ -88,6 +105,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS 미들웨어 (개발 환경용 - django-cors-headers 없이도 작동하도록)
+# 프로덕션에서는 django-cors-headers 설치 권장: pip install django-cors-headers
+try:
+    import corsheaders
+    MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
+    INSTALLED_APPS.append('corsheaders')
+except ImportError:
+    # django-cors-headers가 없으면 수동 CORS 헤더 추가 (개발 환경용)
+    pass
 
 ROOT_URLCONF = 'config.urls'
 
