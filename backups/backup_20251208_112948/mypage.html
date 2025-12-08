@@ -127,7 +127,7 @@
         .gnb {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 24px;
             flex-shrink: 0;
         }
 
@@ -150,13 +150,13 @@
             width: 1px;
             height: 14px;
             background: #e5e5e5;
-            margin: 0px 0px;
+            margin: 0 12px;
         }
 
         .gnb-item.home-style {
-            background: transparent;
+            background: #FD312E;
             color: #fff;
-            padding: 5px 0px;
+            padding: 5px 10px;
             border-radius: 4px;
             font-weight: 700;
             font-size: 13px;
@@ -168,21 +168,19 @@
         }
 
         .home-style-icon {
-            width: 58px;
-            height: 36px;
+            width: 14px;
+            height: 14px;
             flex-shrink: 0;
-            display: flex;
-            align-items: center;
         }
 
-        .home-style-icon img {
+        .home-style-icon svg {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            fill: currentColor;
         }
 
         .gnb-item.home-style:hover {
-            background: transparent;
+            background: #B80D3D;
             color: #fff;
         }
 
@@ -519,10 +517,9 @@
 
         .bestshop-cards {
             display: grid;
-            grid-template-columns: 442.67px 324.67px 324.67px;
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 80px;
-            justify-content: start;
         }
 
         .bestshop-card {
@@ -538,7 +535,6 @@
             width: 442.67px;
             height: 144px;
             padding: 58px 40px;
-            position: relative;
         }
 
         .bestshop-card:first-child .bestshop-card-text {
@@ -580,15 +576,10 @@
         }
 
         .bestshop-card-image-large {
-            display: inline-block;
-            position: absolute;
-            right: 0;
-            bottom: -9px;
-            width: 42%;
-            height: auto;
-            max-height: 69%;
-            margin-right: 40px;
+            width: 185.92px;
+            height: 99.36px;
             object-fit: contain;
+            margin: 0px 40px 0px 0px;
         }
 
         .bestshop-card-text {
@@ -772,131 +763,6 @@
             color: #666;
             white-space: nowrap;
         }
-
-        /* ============================================
-           반응형 디자인 - 노트북 화면 (1366px ~ 1919px)
-           ============================================ */
-        @media screen and (max-width: 1919px) and (min-width: 1366px) {
-            .main-content {
-                padding: 0px 150px 40px 100px;
-            }
-
-            .page-title-section {
-                padding: 0 150px 20px 100px;
-            }
-
-            .user-status-container {
-                width: 100%;
-                max-width: 1146px;
-            }
-
-            .bestshop-cards {
-                grid-template-columns: 380px 278px 278px;
-                gap: 12px;
-            }
-
-            .bestshop-card:first-child {
-                width: 380px;
-            }
-
-            .bestshop-card:nth-child(2),
-            .bestshop-card:nth-child(3) {
-                width: 278px;
-            }
-
-            .bestshop-card-image-large {
-                width: 45%;
-                height: auto;
-                max-height: 75%;
-                margin-right: 30px;
-                object-fit: contain;
-            }
-        }
-
-        /* ============================================
-           반응형 디자인 - 작은 노트북/태블릿 (1024px ~ 1365px)
-           ============================================ */
-        @media screen and (max-width: 1365px) and (min-width: 1024px) {
-            .main-content {
-                padding: 0px 80px 40px 60px;
-            }
-
-            .page-title-section {
-                padding: 0 80px 20px 60px;
-            }
-
-            .user-status-container {
-                width: 100%;
-                max-width: 100%;
-            }
-
-            .bestshop-cards {
-                grid-template-columns: 320px 234px 234px;
-                gap: 10px;
-            }
-
-            .bestshop-card:first-child {
-                width: 320px;
-            }
-
-            .bestshop-card:nth-child(2),
-            .bestshop-card:nth-child(3) {
-                width: 234px;
-            }
-
-            .mypage-container {
-                gap: 20px;
-            }
-
-            .sidebar {
-                width: 200px;
-            }
-
-            .bestshop-card-image-large {
-                width: 50%;
-                height: auto;
-                max-height: 80%;
-                margin-right: 20px;
-                bottom: -5px;
-                object-fit: contain;
-            }
-        }
-
-        /* ============================================
-           반응형 디자인 - 태블릿 (768px ~ 1023px)
-           ============================================ */
-        @media screen and (max-width: 1023px) and (min-width: 768px) {
-            .main-content {
-                padding: 0px 40px 40px 40px;
-            }
-
-            .page-title-section {
-                padding: 0 40px 20px 40px;
-            }
-
-            .user-status-container {
-                width: 100%;
-            }
-
-            .bestshop-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .bestshop-card:first-child,
-            .bestshop-card:nth-child(2),
-            .bestshop-card:nth-child(3) {
-                width: 100%;
-            }
-
-            .mypage-container {
-                flex-direction: column;
-                gap: 30px;
-            }
-
-            .sidebar {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 
@@ -946,8 +812,11 @@
                     <span class="gnb-separator"></span>
                     <a href="/" class="gnb-item home-style">
                         <span class="home-style-icon">
-                            <img src="https://www.lge.co.kr/lg5-common/images/header/logo-living.svg" alt="홈스타일">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
                         </span>
+                        홈스타일
                     </a>
                     <div class="gnb-brand">
                         <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
@@ -1137,7 +1006,7 @@
                         </a>
                     </div>
                     <div class="recommendation-banner">
-                        <a href="/result/" class="recommendation-banner-content">
+                        <a href="#" class="recommendation-banner-content">
                             <span class="recommendation-banner-title">가전 패키지 추천</span>
                             <span class="recommendation-banner-text">내역이 있습니다.&nbsp;&nbsp;&nbsp;</span>
                             <span class="recommendation-banner-link-text">나에게 맞는 패키지 조합을 확인해 보세요</span>

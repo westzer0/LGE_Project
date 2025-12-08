@@ -127,7 +127,7 @@
         .gnb {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 24px;
             flex-shrink: 0;
         }
 
@@ -150,13 +150,13 @@
             width: 1px;
             height: 14px;
             background: #e5e5e5;
-            margin: 0px 0px;
+            margin: 0 12px;
         }
 
         .gnb-item.home-style {
-            background: transparent;
+            background: #FD312E;
             color: #fff;
-            padding: 5px 0px;
+            padding: 5px 10px;
             border-radius: 4px;
             font-weight: 700;
             font-size: 13px;
@@ -168,21 +168,19 @@
         }
 
         .home-style-icon {
-            width: 58px;
-            height: 36px;
+            width: 14px;
+            height: 14px;
             flex-shrink: 0;
-            display: flex;
-            align-items: center;
         }
 
-        .home-style-icon img {
+        .home-style-icon svg {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            fill: currentColor;
         }
 
         .gnb-item.home-style:hover {
-            background: transparent;
+            background: #B80D3D;
             color: #fff;
         }
 
@@ -2195,12 +2193,10 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            pointer-events: none;
         }
 
         .toast.show {
             opacity: 0.56;
-            pointer-events: auto;
         }
 
         .toast-message {
@@ -3097,8 +3093,11 @@
                     <span class="gnb-separator"></span>
                     <a href="/lge/#" class="gnb-item home-style">
                         <span class="home-style-icon">
-                            <img src="https://www.lge.co.kr/lg5-common/images/header/logo-living.svg" alt="홈스타일">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
                         </span>
+                        홈스타일
                     </a>
                     <div class="gnb-brand">
                         <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
@@ -4224,7 +4223,7 @@
                     name: 'LG 스탠바이미 2',
                     subtitle: '',
                     model: '27LX6TPGA',
-                    image: 'https://www.lge.co.kr/kr/images/stan-by-me/md10519833/gallery/large14.jpg',
+                    image: '/static/images/가전 카테고리/TV.png',
                     discount: 3,
                     price: 1290000
                 },

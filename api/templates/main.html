@@ -135,7 +135,7 @@
         .gnb {
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 15px;
             flex-shrink: 0;
         }
 
@@ -158,13 +158,13 @@
             width: 1px;
             height: 14px;
             background: #e5e5e5;
-            margin: 0 12px;
+            margin: 0px 0px;
         }
 
         .gnb-item.home-style {
-            background: #FD312E;
+            background: transparent;
             color: #fff;
-            padding: 5px 10px;
+            padding: 5px 0px;
             border-radius: 4px;
             font-weight: 700;
             font-size: 13px;
@@ -176,19 +176,21 @@
         }
 
         .home-style-icon {
-            width: 14px;
-            height: 14px;
+            width: 58px;
+            height: 36px;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
 
-        .home-style-icon svg {
+        .home-style-icon img {
             width: 100%;
             height: 100%;
-            fill: currentColor;
+            object-fit: contain;
         }
 
         .gnb-item.home-style:hover {
-            background: #B80D3D;
+            background: transparent;
             color: #fff;
         }
 
@@ -432,45 +434,250 @@
 
         /* Footer */
         .footer {
-            padding: 60px 40px;
-            background: #1a1a1a;
-            color: #9e9e9e;
+            background: #fff;
+            color: #333;
             margin-bottom: 0;
+            padding: 0;
+            border-top: 1px solid #e5e5e5;
         }
 
         body {
             background: #000;
         }
 
-        .footer-container {
-            max-width: 1200px;
+        .foot-cont {
+            max-width: 1920px;
             margin: 0 auto;
-            text-align: center;
+            padding: 40px 250px;
         }
 
-        .footer-logo {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 20px;
-        }
-
-        .footer-links {
+        .footer-top-links {
             display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 0;
+            padding-bottom: 20px;
+            margin-bottom: 7px;
         }
 
-        .footer-links a {
-            color: #9e9e9e;
+        .footer-top-links a {
+            color: #333;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
+            padding: 0px 11px 0px 12px;
+            border-right: 1px solid #ccc;
             transition: color 0.2s;
         }
 
-        .footer-links a:hover {
-            color: #fff;
+        .footer-top-links a:first-child {
+            padding-left: 0;
+        }
+
+        .footer-top-links a:last-child {
+            border-right: none;
+        }
+
+        .footer-top-links a:hover {
+            color: #EA1917;
+        }
+
+        .footer-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .footer-left {
+            flex: 1;
+            max-width: 60%;
+        }
+
+        .footer-logo-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo-section img {
+            height: 22px;
+            width: auto;
+        }
+
+        .footer-contact {
+            font-size: 13px;
+            line-height: 2;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .footer-contact-item {
+            margin-bottom: 4px;
+        }
+
+        .footer-contact-item strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .footer-contact-item a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .footer-contact-item a:hover {
+            color: #EA1917;
+            text-decoration: underline;
+        }
+
+        .footer-company-info {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        .footer-company-info-item {
+            margin-bottom: 4px;
+        }
+
+        .footer-company-info-item a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .footer-company-info-item a:hover {
+            color: #EA1917;
+            text-decoration: underline;
+        }
+
+        .footer-disclaimer {
+            font-size: 12px;
+            line-height: 1.8;
+            color: #666;
+        }
+
+        .footer-disclaimer div {
+            margin-bottom: 8px;
+        }
+
+        .footer-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 500px;
+        }
+
+        .footer-service-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-service-link {
+            padding: 8px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .footer-service-link:hover {
+            border-color: #EA1917;
+            color: #EA1917;
+        }
+
+        .footer-language-select {
+            position: relative;
+        }
+
+        .footer-language-btn {
+            padding: 8px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-sns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .footer-sns a {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: color 0.2s;
+            border-radius: 50%;
+        }
+
+        .footer-sns a:hover {
+            color: #EA1917;
+            background: #f5f5f5;
+        }
+
+        .footer-sns svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .footer-bottom {
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer-badges {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .footer-badge {
+            font-size: 11px;
+            color: #666;
+            padding: 4px 8px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .footer-main {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .footer-left {
+                max-width: 100%;
+            }
+
+            .footer-right {
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
 
         /* Scroll to Top Button */
@@ -608,10 +815,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
-                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                        <a href="/my-page/" style="display: flex; align-items: center;">
+                            <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </a>
                         <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
@@ -635,11 +844,8 @@
                     <span class="gnb-separator"></span>
                     <a href="/lge/#" class="gnb-item home-style">
                         <span class="home-style-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                            </svg>
+                            <img src="https://www.lge.co.kr/lg5-common/images/header/logo-living.svg" alt="홈스타일">
                         </span>
-                        홈스타일
                     </a>
                     <div class="gnb-brand">
                         <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
@@ -677,13 +883,87 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-logo">LG전자</div>
-            <div class="footer-links">
+    <footer id="footer" class="footer">
+        <div class="foot-cont">
+            <!-- 상단 링크들 -->
+            <div class="footer-top-links">
+                <a href="#">사이트맵</a>
                 <a href="#">이용약관</a>
+                <a href="#">이메일 무단수집거부</a>
                 <a href="#">개인정보처리방침</a>
-                <a href="#">고객센터</a>
+                <a href="#">이벤트개인정보처리방침</a>
+                <a href="#">영상정보처리기기운영관리방침</a>
+                <a href="#">LG전자 임직원 등록</a>
+                <a href="#">LG계열사 임직원 등록</a>
+                <a href="#">복지몰 제휴사 임직원 등록</a>
+                <a href="#">LG전자 사업자몰 인증</a>
+                <a href="#">정도 경영 사이버 신문고</a>
+                <a href="#">홈스타일 입점 신청</a>
+            </div>
+
+            <!-- 메인 콘텐츠 -->
+            <div class="footer-main">
+                <div class="footer-left">
+                    <!-- LG 로고 -->
+                    <div class="footer-logo-section">
+                        <img src="https://www.lge.co.kr/kr/common/footer/lge-logo.svg" alt="LG전자">
+                    </div>
+
+                    <!-- 연락처 정보 -->
+                    <div class="footer-contact">
+                        <div class="footer-contact-item">
+                            <strong>LG전자 대표번호</strong> : 02-3777-1114 | <strong>1:1 문의</strong>
+                        </div>
+                        <div class="footer-contact-item">
+                            <strong>LGE.COM 구매/서비스 문의</strong> : (가전/소모품/구독) 1544-7777
+                        </div>
+                        <div class="footer-contact-item">
+                            <strong>홈스타일 문의</strong> (가구/조명/패브릭 등) : 1544-7599
+                        </div>
+                        <div class="footer-contact-item">
+                            <strong>LG전자/LG계열사 임직원 구매문의</strong> : (가전)1544-9665, (소모품/구독)1544-7777 <strong>복지몰 제휴사 구매 문의</strong> : (가전)1544-8777, (구독)1544-7777 <strong>사업자몰 구매 문의</strong> : (가전)1544-8777, (구독)1544-7777
+                        </div>
+                        <div class="footer-contact-item">
+                            전화상담 시간은 평일 09:00 ~ 18:00 (주말, 공휴일 휴무)입니다. (통화요금 : 발신자 부담)
+                        </div>
+                        <div class="footer-contact-item">
+                            제품 및 서비스 문의는 긴급 문의 건에 한해 24시간(주말, 공휴일 포함) 운영합니다.
+                        </div>
+                    </div>
+
+                    <!-- 회사 정보 -->
+                    <div class="footer-company-info">
+                        <div class="footer-company-info-item">
+                            <strong>대표이사</strong> : 조주완
+                        </div>
+                        <div class="footer-company-info-item">
+                            <strong>사업자등록번호</strong> : 107-86-14075
+                        </div>
+                        <div class="footer-company-info-item">
+                            <strong>사업자정보확인</strong> <a href="#">(링크)</a>
+                        </div>
+                        <div class="footer-company-info-item">
+                            <strong>통신판매업신고번호</strong> : 2024-서울영등포-0150
+                        </div>
+                        <div class="footer-company-info-item">
+                            <strong>주소</strong> : 서울시 영등포구 여의대로 128 LG트윈타워
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-right">
+                </div>
+            </div>
+
+            <!-- 하단 -->
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    Copyright © 2025 LG Electronics. All Rights Reserved.
+                </div>
+                <div class="footer-badges">
+                    <span class="footer-badge">소비자중심</span>
+                    <span class="footer-badge">공정거래위원회</span>
+                </div>
             </div>
         </div>
     </footer>
