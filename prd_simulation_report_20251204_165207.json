@@ -1,0 +1,22 @@
+{
+  "total_sessions": 1000,
+  "onboarding_completed": 1000,
+  "recommendation_success": 1000,
+  "recommendation_failed": 0,
+  "total_recommendations": 4068,
+  "category_distribution": {
+    "TV": 3000,
+    "LIVING": 1068
+  },
+  "budget_distribution": {
+    "medium": 514,
+    "low": 238,
+    "high": 248
+  },
+  "household_distribution": {
+    "2": 322,
+    "1": 350,
+    "3": 328
+  },
+  "errors": []
+}
