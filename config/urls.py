@@ -1,4 +1,4 @@
-﻿from django.contrib import admin
+from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
@@ -6,7 +6,7 @@ from api.views import (
     index_view, recommend, products, recommend_view, product_spec_view, product_image_by_name_view, product_reviews_view,
     product_recommend_reason_view, product_demographics_view,
     onboarding_page, onboarding_step2_page, onboarding_step3_page, onboarding_step4_page, onboarding_step5_page, onboarding_step6_page, onboarding_step7_page, main_page, onboarding_new_page, result_page,
-    fake_lg_main_page, react_app_view, health_check_view,
+    fake_lg_main_page, react_app_view, health_check_view, oracle_test_view,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
     portfolio_refresh_view, portfolio_alternatives_view, portfolio_add_to_cart_view,
@@ -32,11 +32,15 @@ from api.views_drf import convert_figma_to_code
 # router.register(r'onboarding-sessions', OnboardingSessionViewSet, basename='onboarding-session')
 
 urlpatterns = [
-    # React 앱 (프로덕션)
-    path('app/', react_app_view, name='react_app'),
-    
-    # 메인 페이지
+    # 메인 페이지 (루트 경로)
     path('', main_page, name='main'),
+    
+    # React 앱 (백업용)
+    path('app/', react_app_view, name='react_app'),
+    path('react/', react_app_view, name='react_app_alt'),
+    
+    # 기존 메인 페이지 (별칭)
+    path('main/', main_page, name='main_alt'),
     path('home/', main_page, name='home'),
     path('lge/', fake_lg_main_page, name='fake_lg_main'),  # LG전자 메인페이지 복제
     path('old/', index_view, name='index'),  # 기존 페이지 (백업)
@@ -68,6 +72,9 @@ urlpatterns = [
     
     # 헬스체크 엔드포인트
     path('api/health/', health_check_view, name='health_check'),
+    
+    # Oracle DB 테스트 엔드포인트
+    path('api/oracle/test/', oracle_test_view, name='oracle_test'),
     
     # API 엔드포인트
     path('api/recommend/', recommend_view, name='recommend'),

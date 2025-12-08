@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Git pre-commit hook: 프론트엔드 스타일 검증
+#
+# 이 hook은 커밋 전에 프론트엔드 스타일이 올바른지 검증합니다.
+# 스타일 검증에 실패하면 커밋이 거부됩니다.
+
+echo "🔍 프론트엔드 스타일 검증 중..."
+
+# Python 스크립트 실행
+python validate_frontend_style.py
+
+# 스크립트의 종료 코드 확인
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ 커밋이 거부되었습니다."
+    echo "프론트엔드 스타일 검증에 실패했습니다."
+    echo "FRONTEND_STYLE_GUIDE.md를 참고하여 수정하세요."
+    exit 1
+fi
+
+echo "✅ 프론트엔드 스타일 검증 통과!"
+exit 0

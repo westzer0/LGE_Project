@@ -293,15 +293,28 @@ class TasteBasedRecommendationEngine:
         # Oracle DB 데이터 우선 사용
         product_id = product_dict.get('PRODUCT_ID')
         product_name = product_dict.get('PRODUCT_NAME', '')
-        price = product_dict.get('PRICE', 0) or 0
+        oracle_price = product_dict.get('PRICE')
         model_code = product_dict.get('MODEL_CODE', '')
+        
+        # 가격 처리: Oracle DB에서 가져온 값이 0이거나 None이면 Django Product 모델에서 가져오기
+        price = 0
+        if oracle_price and oracle_price > 0:
+            price = int(oracle_price)
+        elif django_product and django_product.price and django_product.price > 0:
+            price = int(django_product.price)
+            # Oracle DB에 가격이 없거나 0인 경우 경고 로그
+            print(f"[가격 경고] 제품 {product_id} ({product_name}): Oracle PRICE가 {oracle_price}입니다. Django Product 가격({price})을 사용합니다.")
+        else:
+            # 둘 다 가격이 없는 경우
+            price = 0
+            print(f"[가격 경고] 제품 {product_id} ({product_name}): 가격 정보가 없습니다 (Oracle PRICE={oracle_price}, Django price={django_product.price if django_product else None})")
         
         # Django Product가 있으면 추가 정보 사용
         if django_product:
-            discount_price = int(django_product.discount_price) if django_product.discount_price else int(price)
+            discount_price = int(django_product.discount_price) if django_product.discount_price and django_product.discount_price > 0 else price
             image_url = django_product.image_url or ''
         else:
-            discount_price = int(price)
+            discount_price = price
             image_url = product_dict.get('URL', '')
         
         return {
@@ -309,7 +322,7 @@ class TasteBasedRecommendationEngine:
             'category': rec['category'],
             'model': model_code or product_name,
             'name': product_name,
-            'price': int(price),
+            'price': price,
             'discount_price': discount_price,
             'image_url': image_url,
             'score': rec['score'],

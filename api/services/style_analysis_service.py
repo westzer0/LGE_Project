@@ -264,14 +264,26 @@ JSON 형식으로 응답:
             'luxury': "프리미엄 감성의 럭셔리 & 아티스틱 스타일"
         }
         
-        # 고객 타입 기반 타이틀
+        # PRD 패턴: 고객 타입 기반 타이틀 우선 적용
         if household_size == 1:
-            title = "1인 라이프에 꼭 맞춘 컴팩트 & 스타일 패키지"
+            if housing_type == 'studio':
+                title = "1인 라이프에 꼭 맞춘 컴팩트 & 스타일 패키지"
+            else:
+                title = "1인 라이프에 꼭 맞춘 컴팩트 & 스타일 패키지"
         elif household_size == 2:
-            title = "둘만의 신혼 무드를 완성하는 오브제 스타일"
+            # PRD: "둘만의 신혼 무드를 완성하는 오브제 스타일"
+            if vibe == 'modern':
+                title = "둘만의 신혼 무드를 완성하는 오브제 스타일"
+            elif vibe == 'cozy' or vibe == 'natural':
+                title = "따뜻한 신혼 무드를 위한 코지 스타일"
+            else:
+                title = "둘만의 신혼 무드를 완성하는 스타일"
+        elif household_size >= 5:
+            title = "하이엔드 하우스를 위한 시그니처 스타일"
         elif household_size >= 4:
             title = "패밀리 라이프를 위한 실속+대용량 프리미엄 스타일"
         else:
+            # PRD: 디자인 취향 기반 타이틀
             title = vibe_titles.get(vibe, "나에게 딱 맞는 스타일")
         
         # 서브타이틀 생성
@@ -287,16 +299,54 @@ JSON 형식으로 응답:
         if line:
             subtitle_parts.append(f"{line[0]} 중심으로")
         
-        # 주요 공간 및 라이프스타일 반영
-        if main_space == 'kitchen' and cooking in ['high', 'often']:
-            subtitle_parts.append("요리 중심 라이프스타일을 반영해")
-            subtitle_parts.append("냉장고·전기레인지·식기세척기 조합을 구성했어요.")
-        elif main_space == 'dress_room' or laundry in ['daily', 'few_times']:
-            subtitle_parts.append("세탁 패턴에 맞춘")
-            subtitle_parts.append("세탁기·건조기 중심 구성이에요.")
+        # PRD 패턴: 주요 공간 및 라이프스타일 반영
+        # PRD 예시: "당신의 공간 분위기와 요리 중심 라이프스타일을 반영해 Essence White 컬러의 오브제컬렉션 냉장고·전기레인지·식기세척기 중심으로 구성했어요."
+        
+        # 주방 중심 + 자주 요리
+        if (isinstance(main_space, list) and 'kitchen' in main_space) or main_space == 'kitchen':
+            if cooking in ['high', 'often']:
+                color_mention = f"{color_group[0]} 컬러의" if color_group else ""
+                line_mention = f"{line[0]} " if line else ""
+                subtitle_parts.append(f"당신의 공간 분위기와 요리 중심 라이프스타일을 반영해")
+                subtitle_parts.append(f"{color_mention} {line_mention}냉장고·전기레인지·식기세척기 중심으로 구성했어요.")
+            else:
+                subtitle_parts.append("주방 공간에 최적화된")
+                subtitle_parts.append("기본형 냉장고·전기레인지 조합이에요.")
+        # 드레스룸 중심 + 세탁 빈번
+        elif (isinstance(main_space, list) and 'dressing' in main_space) or main_space == 'dressing':
+            if laundry in ['daily', 'few_times']:
+                subtitle_parts.append("세탁 패턴에 맞춘")
+                subtitle_parts.append("세탁기·건조기 중심 구성이에요.")
+            else:
+                subtitle_parts.append("드레스룸 공간에 맞춘")
+                subtitle_parts.append("표준형 세탁기·건조기 조합이에요.")
+        # 패밀리 (4인 이상)
         elif household_size >= 4:
-            subtitle_parts.append("패밀리 구성에 최적화된")
-            subtitle_parts.append("대용량 냉장고·세탁기·TV 조합이에요.")
+            color_mention = f"{color_group[0]} 톤과" if color_group else ""
+            subtitle_parts.append(f"{color_mention} 패밀리 구성에 최적화된")
+            subtitle_parts.append("대용량 냉장고·표준형 세탁기·에너지 효율 1등급 TV 조합이에요.")
+        # 반려동물 있음
+        elif has_pet:
+            subtitle_parts.append("댕냥이와 함께하는 라이프를 위해")
+            subtitle_parts.append("Pet Care 기능을 강화한 조합이에요.")
+        # 원룸
+        elif housing_type == 'studio':
+            subtitle_parts.append("원룸을 위한 컴팩트·슬림형 중심의")
+            subtitle_parts.append("공간 최적화 추천이에요.")
+        # 우선순위 기반
+        elif priority == 'design':
+            subtitle_parts.append("디자인을 중시하는 당신을 위해")
+            subtitle_parts.append("오브제컬렉션 중심의 스타일 편성이에요.")
+        elif priority == 'tech':
+            subtitle_parts.append("스마트 기능을 중시한 결과,")
+            subtitle_parts.append("AI 기반 프리미엄 모델 중심 구성이에요.")
+        elif priority == 'eco':
+            subtitle_parts.append("전기요금 절감을 위한")
+            subtitle_parts.append("에너지 효율 1등급 중심 패키지로 구성했습니다.")
+        elif priority == 'value':
+            subtitle_parts.append("가성비를 중요하게 생각하는 패턴을 반영해")
+            subtitle_parts.append("합리적 라인업으로 구성했어요.")
+        # 기본
         else:
             subtitle_parts.append("균형 잡힌 표준형 예산 안에서")
             subtitle_parts.append("디자인 완성도와 기능성을 모두 담은 베스트 패키지입니다.")

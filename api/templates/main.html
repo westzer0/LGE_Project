@@ -245,6 +245,7 @@
             gap: 8px;
             font-size: 14px;
             color: #666;
+            padding: 7px 0px 0px;
         }
 
         .breadcrumb-nav a {
@@ -473,6 +474,205 @@
             color: #fff;
         }
 
+        /* AI 상담사 플로팅 버튼 */
+        .ai-chatbot-float {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #A50034;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(165, 0, 52, 0.4);
+            z-index: 9998;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .ai-chatbot-float:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(165, 0, 52, 0.5);
+            background: #8B0029;
+        }
+
+        .ai-chatbot-float svg {
+            width: 28px;
+            height: 28px;
+            color: #fff;
+        }
+
+        /* AI 상담사 팝업 */
+        .ai-chatbot-popup {
+            position: fixed;
+            bottom: 180px;
+            right: 30px;
+            width: 380px;
+            max-height: 600px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ai-chatbot-popup.open {
+            display: flex;
+        }
+
+        .ai-chatbot-popup-header {
+            background: #A50034;
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .ai-chatbot-popup-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .ai-chatbot-popup-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .ai-chatbot-popup-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .ai-chatbot-popup-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+            min-height: 300px;
+            max-height: 400px;
+        }
+
+        .ai-chatbot-message {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-chatbot-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .ai-chatbot-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .ai-chatbot-message.user .ai-chatbot-message-avatar {
+            background: #A50034;
+        }
+
+        .ai-chatbot-message.bot .ai-chatbot-message-avatar {
+            background: #e3f2fd;
+        }
+
+        .ai-chatbot-message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .ai-chatbot-message.user .ai-chatbot-message-content {
+            background: #A50034;
+            color: #fff;
+        }
+
+        .ai-chatbot-message.bot .ai-chatbot-message-content {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid #e5e5e5;
+        }
+
+        .ai-chatbot-popup-input-area {
+            padding: 16px;
+            background: #fff;
+            border-top: 1px solid #e5e5e5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .ai-chatbot-popup-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e5e5e5;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .ai-chatbot-popup-input:focus {
+            border-color: #A50034;
+        }
+
+        .ai-chatbot-popup-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #A50034;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .ai-chatbot-popup-send:hover {
+            background: #8B0029;
+        }
+
+        .ai-chatbot-popup-send:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
         /* Scroll to Top Button */
         .scroll-to-top {
             position: fixed;
@@ -565,6 +765,20 @@
                 font-size: 14px;
             }
 
+            .ai-chatbot-float {
+                bottom: 90px;
+                right: 20px;
+                width: 55px;
+                height: 55px;
+            }
+
+            .ai-chatbot-popup {
+                bottom: 160px;
+                right: 20px;
+                width: calc(100vw - 40px);
+                max-width: 380px;
+            }
+
             .scroll-to-top {
                 bottom: 20px;
                 right: 20px;
@@ -604,7 +818,8 @@
                 </div>
                 <div class="header-top-right">
                     <div class="header-top-icons">
-                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" onclick="openSearchModal()" style="cursor: pointer;">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            onclick="openSearchModal()" style="cursor: pointer;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -619,14 +834,18 @@
                         </svg>
                     </div>
                     <div id="auth-buttons" style="display: flex; align-items: center; gap: 12px;">
-                        <a href="/api/auth/kakao/login/" class="kakao-login-btn" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #FEE500; color: #000; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 600;">
+                        <a href="/api/auth/kakao/login/" class="kakao-login-btn"
+                            style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #FEE500; color: #000; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 600;">
                             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                <path d="M9 0C4.03 0 0 3.27 0 7.31c0 2.58 1.64 4.86 4.14 6.17L3.5 18l4.86-2.55c.65.09 1.32.14 1.64.14 4.97 0 9-3.27 9-7.31S13.97 0 9 0z" fill="#000"/>
+                                <path
+                                    d="M9 0C4.03 0 0 3.27 0 7.31c0 2.58 1.64 4.86 4.14 6.17L3.5 18l4.86-2.55c.65.09 1.32.14 1.64.14 4.97 0 9-3.27 9-7.31S13.97 0 9 0z"
+                                    fill="#000" />
                             </svg>
                             카카오 로그인
                         </a>
                         <a href="/my-page/" class="header-top-link" id="mypage-link" style="display: none;">마이페이지</a>
-                        <a href="/api/auth/kakao/logout/" class="header-top-link" id="logout-link" style="display: none;">로그아웃</a>
+                        <a href="/api/auth/kakao/logout/" class="header-top-link" id="logout-link"
+                            style="display: none;">로그아웃</a>
                     </div>
                     <a href="#" class="header-top-link">회사소개</a>
                     <a href="#" class="header-top-link">사업자몰</a>
@@ -675,34 +894,6 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- AI 추천 섹션 -->
-        <section class="ai-recommend-section" id="ai-recommend" style="padding: 80px 60px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-            <div style="max-width: 1200px; margin: 0 auto;">
-                <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 16px; text-align: center;">AI와 대화하며 추천받기</h2>
-                <p style="font-size: 16px; color: #666; text-align: center; margin-bottom: 40px;">자연어로 말씀해주시면 맞춤 제품을 추천해드립니다</p>
-                
-                <div class="ai-chat-container" style="background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto;">
-                    <div id="ai-chat-messages" style="min-height: 300px; max-height: 400px; overflow-y: auto; margin-bottom: 20px; padding: 16px; background: #f9fafb; border-radius: 8px;">
-                        <div class="ai-message" style="padding: 12px; margin-bottom: 12px; background: #e3f2fd; border-radius: 8px;">
-                            <strong>AI:</strong> 안녕하세요! 어떤 가전 제품이 필요하신가요? 예를 들어 "2인 가구, 작은 주방, 예산 200만원"처럼 말씀해주세요.
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 12px;">
-                        <input type="text" id="ai-chat-input" placeholder="예: 2인 가구, 작은 주방, 예산 200만원" 
-                               style="flex: 1; padding: 12px 16px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px;"
-                               onkeypress="if(event.key === 'Enter') sendAIMessage()">
-                        <button onclick="sendAIMessage()" style="padding: 12px 24px; background: #A50034; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">전송</button>
-                    </div>
-                    
-                    <div id="ai-recommend-results" style="margin-top: 24px; display: none;">
-                        <h3 style="font-size: 20px; margin-bottom: 16px;">추천 제품</h3>
-                        <div id="ai-recommend-products" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Group11 Image -->
         <section class="image-section" id="group11">
             <img src="{% static 'images/Group11.png' %}" alt="Group 11">
@@ -733,6 +924,40 @@
                 <img src="{% static 'images/Vector.png' %}" alt="선물 상자" class="floating-cta-btn-icon">
                 가전 패키지 추천받기
             </a>
+        </div>
+    </div>
+
+    <!-- AI 상담사 플로팅 버튼 -->
+    <button class="ai-chatbot-float" id="aiChatbotFloat" aria-label="AI 상담사 열기">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+            </path>
+        </svg>
+    </button>
+
+    <!-- AI 상담사 팝업 -->
+    <div class="ai-chatbot-popup" id="aiChatbotPopup">
+        <div class="ai-chatbot-popup-header">
+            <h3>AI 상담사</h3>
+            <button class="ai-chatbot-popup-close" id="aiChatbotClose" aria-label="닫기">×</button>
+        </div>
+        <div class="ai-chatbot-popup-messages" id="aiChatbotMessages">
+            <div class="ai-chatbot-message bot">
+                <div class="ai-chatbot-message-avatar">🤖</div>
+                <div class="ai-chatbot-message-content">
+                    안녕하세요! 어떤 가전 제품이 필요하신가요? 예를 들어 "2인 가구, 작은 주방, 예산 200만원"처럼 말씀해주세요.
+                </div>
+            </div>
+        </div>
+        <div class="ai-chatbot-popup-input-area">
+            <input type="text" class="ai-chatbot-popup-input" id="aiChatbotInput" placeholder="메시지를 입력하세요..." />
+            <button class="ai-chatbot-popup-send" id="aiChatbotSend" aria-label="전송">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -982,7 +1207,7 @@
             try {
                 const response = await fetch('/api/auth/kakao/user/');
                 const data = await response.json();
-                
+
                 if (data.success && data.user) {
                     // 로그인 상태
                     document.querySelector('.kakao-login-btn').style.display = 'none';
@@ -1000,23 +1225,53 @@
         }
 
         // ============================================================
-        // AI 추천 기능
+        // AI 상담사 팝업 기능
         // ============================================================
         let conversationHistory = [];
+        let aiChatbotOpen = false;
 
-        async function sendAIMessage() {
-            const input = document.getElementById('ai-chat-input');
-            const message = input.value.trim();
-            
+        // 팝업 열기/닫기
+        const aiChatbotFloat = document.getElementById('aiChatbotFloat');
+        const aiChatbotPopup = document.getElementById('aiChatbotPopup');
+        const aiChatbotClose = document.getElementById('aiChatbotClose');
+        const aiChatbotInput = document.getElementById('aiChatbotInput');
+        const aiChatbotSend = document.getElementById('aiChatbotSend');
+        const aiChatbotMessages = document.getElementById('aiChatbotMessages');
+
+        if (aiChatbotFloat) {
+            aiChatbotFloat.addEventListener('click', () => {
+                aiChatbotOpen = !aiChatbotOpen;
+                if (aiChatbotOpen) {
+                    aiChatbotPopup.classList.add('open');
+                    aiChatbotInput.focus();
+                } else {
+                    aiChatbotPopup.classList.remove('open');
+                }
+            });
+        }
+
+        if (aiChatbotClose) {
+            aiChatbotClose.addEventListener('click', () => {
+                aiChatbotOpen = false;
+                aiChatbotPopup.classList.remove('open');
+            });
+        }
+
+        // 메시지 전송
+        async function sendAIChatbotMessage() {
+            const message = aiChatbotInput.value.trim();
+
             if (!message) return;
-            
+
             // 사용자 메시지 표시
-            addChatMessage('user', message);
-            input.value = '';
-            
+            addAIChatbotMessage('user', message);
+            aiChatbotInput.value = '';
+            aiChatbotInput.disabled = true;
+            aiChatbotSend.disabled = true;
+
             // 로딩 표시
-            const loadingId = addChatMessage('ai', '추천을 생성하고 있습니다...', true);
-            
+            const loadingId = addAIChatbotMessage('bot', '추천을 생성하고 있습니다...', true);
+
             try {
                 const response = await fetch('/api/ai/chat-recommend/', {
                     method: 'POST',
@@ -1029,73 +1284,96 @@
                         conversation_history: conversationHistory
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 // 로딩 메시지 제거
-                document.getElementById(loadingId)?.remove();
-                
-                if (data.type === 'recommendation' && data.recommendations && data.recommendations.length > 0) {
+                const loadingMsg = document.getElementById(loadingId);
+                if (loadingMsg) loadingMsg.remove();
+
+                if (data.success === false || !data.message) {
+                    addAIChatbotMessage('bot', data.error || '죄송해요, 일시적인 오류가 발생했어요. 다시 시도해주세요.');
+                } else if (data.type === 'recommendation' && data.recommendations && data.recommendations.length > 0) {
                     // 추천 결과 표시
-                    addChatMessage('ai', data.message);
-                    displayRecommendations(data.recommendations);
+                    addAIChatbotMessage('bot', data.message);
+                    // 추천 제품을 메시지에 포함
+                    data.recommendations.slice(0, 3).forEach((product, idx) => {
+                        const productInfo = `${idx + 1}. ${product.name || product.model || '제품'} - ${(product.price || product.discount_price || 0).toLocaleString()}원`;
+                        addAIChatbotMessage('bot', productInfo);
+                    });
                 } else {
                     // 일반 대화
-                    addChatMessage('ai', data.message);
+                    addAIChatbotMessage('bot', data.message);
                 }
-                
+
                 // 대화 기록 업데이트
                 conversationHistory.push({
                     user: message,
-                    assistant: data.message
+                    assistant: data.message || data.error || '응답 없음'
                 });
-                
+
+                // 최근 10개 대화만 유지
+                if (conversationHistory.length > 20) {
+                    conversationHistory = conversationHistory.slice(-20);
+                }
+
             } catch (error) {
-                document.getElementById(loadingId)?.remove();
-                addChatMessage('ai', '죄송해요, 오류가 발생했어요. 다시 시도해주세요.');
+                const loadingMsg = document.getElementById(loadingId);
+                if (loadingMsg) loadingMsg.remove();
+                addAIChatbotMessage('bot', '죄송해요, 네트워크 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
                 console.error('AI 추천 오류:', error);
+            } finally {
+                aiChatbotInput.disabled = false;
+                aiChatbotSend.disabled = false;
+                aiChatbotInput.focus();
             }
         }
 
-        function addChatMessage(role, message, isLoading = false) {
-            const messagesDiv = document.getElementById('ai-chat-messages');
-            const messageId = 'msg-' + Date.now();
+        function addAIChatbotMessage(role, message, isLoading = false) {
             const messageDiv = document.createElement('div');
-            messageDiv.id = messageId;
-            messageDiv.className = role + '-message';
-            messageDiv.style.cssText = role === 'user' 
-                ? 'padding: 12px; margin-bottom: 12px; background: #A50034; color: #fff; border-radius: 8px; text-align: right;'
-                : 'padding: 12px; margin-bottom: 12px; background: #e3f2fd; border-radius: 8px;';
-            messageDiv.innerHTML = `<strong>${role === 'user' ? '나' : 'AI'}:</strong> ${message}`;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            return messageId;
+            messageDiv.className = `ai-chatbot-message ${role}`;
+
+            if (isLoading) {
+                messageDiv.id = 'loading-' + Date.now();
+                messageDiv.innerHTML = `
+                    <div class="ai-chatbot-message-avatar">🤖</div>
+                    <div class="ai-chatbot-message-content">
+                        ${escapeHtml(message)}
+                        <span style="display: inline-block; animation: pulse 1.5s infinite;">...</span>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="ai-chatbot-message-avatar">${role === 'user' ? '👤' : '🤖'}</div>
+                    <div class="ai-chatbot-message-content">${escapeHtml(message).replace(/\n/g, '<br>')}</div>
+                `;
+            }
+
+            aiChatbotMessages.appendChild(messageDiv);
+            aiChatbotMessages.scrollTop = aiChatbotMessages.scrollHeight;
+
+            return messageDiv.id || null;
         }
 
-        function displayRecommendations(recommendations) {
-            const resultsDiv = document.getElementById('ai-recommend-results');
-            const productsDiv = document.getElementById('ai-recommend-products');
-            
-            productsDiv.innerHTML = '';
-            
-            recommendations.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.style.cssText = 'background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; cursor: pointer; transition: transform 0.2s;';
-                productCard.onmouseover = () => productCard.style.transform = 'translateY(-4px)';
-                productCard.onmouseout = () => productCard.style.transform = 'translateY(0)';
-                productCard.onclick = () => window.location.href = `/products/${product.product_id}/`;
-                
-                productCard.innerHTML = `
-                    <div style="font-weight: 600; margin-bottom: 8px;">${product.name || product.model || '제품'}</div>
-                    <div style="font-size: 14px; color: #666; margin-bottom: 8px;">${product.category || ''}</div>
-                    <div style="font-size: 18px; font-weight: 700; color: #A50034;">${(product.price || product.discount_price || 0).toLocaleString()}원</div>
-                    ${product.reason ? `<div style="font-size: 12px; color: #999; margin-top: 8px;">${product.reason}</div>` : ''}
-                `;
-                
-                productsDiv.appendChild(productCard);
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 전송 버튼 클릭
+        if (aiChatbotSend) {
+            aiChatbotSend.addEventListener('click', sendAIChatbotMessage);
+        }
+
+        // 엔터 키로 전송
+        if (aiChatbotInput) {
+            aiChatbotInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAIChatbotMessage();
+                }
             });
-            
-            resultsDiv.style.display = 'block';
         }
 
         function getCookie(name) {
@@ -1141,7 +1419,7 @@
             try {
                 const response = await fetch(`/api/search/?q=${encodeURIComponent(query)}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     displaySearchResults(data.results);
                 } else {
@@ -1177,10 +1455,10 @@
         }
 
         // Enter 키로 검색
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
+                searchInput.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         performSearch();
                     }
@@ -1191,13 +1469,18 @@
     </script>
 
     <!-- 검색 모달 -->
-    <div id="searchModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: flex-start; justify-content: center; padding-top: 100px;">
-        <div style="background: #fff; border-radius: 12px; width: 90%; max-width: 800px; max-height: 80vh; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-            <div style="padding: 24px; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 12px;">
-                <input type="text" id="searchInput" placeholder="제품명, 모델명으로 검색..." 
-                       style="flex: 1; padding: 12px 16px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 16px;">
-                <button onclick="performSearch()" style="padding: 12px 24px; background: #A50034; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">검색</button>
-                <button onclick="closeSearchModal()" style="padding: 12px; background: transparent; border: none; cursor: pointer; font-size: 24px; color: #666;">&times;</button>
+    <div id="searchModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: flex-start; justify-content: center; padding-top: 100px;">
+        <div
+            style="background: #fff; border-radius: 12px; width: 90%; max-width: 800px; max-height: 80vh; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+            <div
+                style="padding: 24px; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 12px;">
+                <input type="text" id="searchInput" placeholder="제품명, 모델명으로 검색..."
+                    style="flex: 1; padding: 12px 16px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 16px;">
+                <button onclick="performSearch()"
+                    style="padding: 12px 24px; background: #A50034; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">검색</button>
+                <button onclick="closeSearchModal()"
+                    style="padding: 12px; background: transparent; border: none; cursor: pointer; font-size: 24px; color: #666;">&times;</button>
             </div>
             <div id="searchResults" style="max-height: calc(80vh - 100px); overflow-y: auto; padding: 0;">
                 <p style="text-align: center; color: #666; padding: 40px;">검색어를 입력하고 검색 버튼을 눌러주세요.</p>

@@ -30,7 +30,12 @@ if times:
     output_lines.append("=" * 70)
 
 result = "\n".join(output_lines)
-print(result)
 
+# 파일로 저장 (먼저)
 with open('md_times_output.txt', 'w', encoding='utf-8') as f:
     f.write(result)
+
+# 콘솔 출력 (나중에)
+import sys
+sys.stdout.buffer.write(result.encode('utf-8'))
+sys.stdout.flush()

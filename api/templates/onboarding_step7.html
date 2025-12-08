@@ -9,7 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -238,6 +239,7 @@
             gap: 8px;
             font-size: 14px;
             color: #666;
+            padding: 7px 0px 0px;
         }
 
         .breadcrumb-nav a {
@@ -266,7 +268,8 @@
         .main-content {
             margin-top: 160px;
             min-height: calc(100vh - 160px);
-            padding: 60px 0 240px; /* 하단 버튼 공간 확보 */
+            padding: 60px 0 240px;
+            /* 하단 버튼 공간 확보 */
         }
 
         .onboarding-container {
@@ -512,8 +515,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading-text {
@@ -848,7 +856,7 @@
         // ============================================
         function updateButton() {
             const nextBtn = document.getElementById('nextBtn');
-            
+
             // 제품 라인업이 선택되었는지 확인
             if (selectedLineup) {
                 // 버튼 활성화 (블랙 색상)
@@ -968,10 +976,10 @@
                         console.log('✅ 7단계 데이터 저장 성공!');
                         console.log('저장된 세션 ID:', data.session_id);
                         console.log('현재 단계:', data.current_step);
-                        
+
                         // 7단계 선택 값 저장
                         sessionStorage.setItem('step7_lineup', selectedLineup);
-                        
+
                         // 로딩 화면을 짧게 유지한 후 결과 페이지로 이동 (1.5초 딜레이)
                         setTimeout(() => {
                             console.log('온보딩 완료, 결과 페이지로 이동합니다.');
@@ -1070,7 +1078,7 @@
         history.pushState(null, null, location.href);
 
         // 정상적인 네비게이션 시 플래그 설정
-        document.getElementById('nextBtn').addEventListener('click', function() {
+        document.getElementById('nextBtn').addEventListener('click', function () {
             isNavigating = true;
         });
 
@@ -1089,7 +1097,7 @@
         });
 
         // 모달 외부 클릭 시 닫기
-        document.getElementById('exitModal').addEventListener('click', function(e) {
+        document.getElementById('exitModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 hideExitModal();
             }
@@ -1106,7 +1114,7 @@
         // ============================================
         // 페이지 로드 시 버튼 상태 초기화 및 이전 선택값 복원
         // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // sessionStorage에서 이전에 선택한 값 복원
             const savedLineup = sessionStorage.getItem('step7_lineup');
             if (savedLineup) {
@@ -1116,7 +1124,7 @@
                     lineupCard.classList.add('selected');
                 }
             }
-            
+
             // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
@@ -1129,7 +1137,7 @@
         // ============================================
         // 뒤로가기 감지 시 현재 단계 데이터 저장
         // ============================================
-        window.addEventListener('pageshow', function(event) {
+        window.addEventListener('pageshow', function (event) {
             // 뒤로가기로 돌아왔을 때 (bfcache에서 복원된 경우)
             if (event.persisted) {
                 console.log('뒤로가기로 페이지 복원됨');
@@ -1146,4 +1154,3 @@
 </body>
 
 </html>
-

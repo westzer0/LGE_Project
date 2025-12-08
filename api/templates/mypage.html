@@ -233,6 +233,7 @@
             gap: 8px;
             font-size: 14px;
             color: #666;
+            padding: 7px 0px 0px;
         }
 
         .breadcrumb-nav a {
@@ -799,7 +800,8 @@
                         <div class="user-name">
                             김엘지님
                             <svg class="user-name-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </div>
                         <div class="user-name-actions">
@@ -825,13 +827,15 @@
                             <div class="user-status-icon">S</div>
                             <span class="user-status-text">실버</span>
                             <svg class="user-status-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </div>
                         <div class="user-status-right">
                             0 P
                             <svg class="user-status-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </div>
                     </div>
@@ -895,7 +899,8 @@
                         <a href="#" class="section-header-link">
                             더보기
                             <svg class="section-header-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </a>
                     </div>
@@ -909,7 +914,8 @@
                         <a href="#" class="section-header-link">
                             더보기
                             <svg class="section-header-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </a>
                     </div>
@@ -930,18 +936,19 @@
         </button>
         <button class="floating-btn scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="맨 위로">
             <svg class="floating-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18">
+                </path>
             </svg>
         </button>
     </div>
 
     <script>
         // 카카오 로그인 기능
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const userIconLink = document.getElementById('user-icon-link');
-            
+
             if (userIconLink) {
-                userIconLink.addEventListener('click', function(e) {
+                userIconLink.addEventListener('click', function (e) {
                     // 로그인 상태 확인
                     fetch('/api/auth/kakao/user/')
                         .then(response => {

@@ -9,7 +9,8 @@
     <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         * {
             margin: 0;
@@ -238,6 +239,7 @@
             gap: 8px;
             font-size: 14px;
             color: #666;
+            padding: 7px 0px 0px;
         }
 
         .breadcrumb-nav a {
@@ -266,7 +268,8 @@
         .main-content {
             margin-top: 160px;
             min-height: calc(100vh - 160px);
-            padding: 60px 0 180px; /* 하단 버튼 공간 확보 */
+            padding: 60px 0 180px;
+            /* 하단 버튼 공간 확보 */
         }
 
         .onboarding-container {
@@ -304,8 +307,8 @@
             height: 100%;
             background: #1a1a1a;
             transition: width 0.3s ease;
-            width: 83.33%;
-            /* 5단계 / 6단계 = 83.33% */
+            width: 71.43%;
+            /* 5단계 / 7단계 = 71.43% */
         }
 
         .progress-text {
@@ -705,7 +708,7 @@
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
-                    <span class="progress-text" id="progressText">5단계 / 6단계</span>
+                    <span class="progress-text" id="progressText">5단계 / 7단계</span>
                 </div>
             </div>
 
@@ -781,18 +784,18 @@
                     this.classList.remove('selected');
                     priorityOrder = priorityOrder.filter(v => v !== value);
                     delete priorityMap[value];
-                    
+
                     // 나머지 우선순위 재정렬
                     reorderPriorities();
                 } else {
                     // 선택되지 않은 카드를 클릭하면 우선순위 추가
                     this.classList.add('selected');
                     priorityOrder.push(value);
-                    
+
                     // 우선순위 번호 할당 (현재 선택된 개수)
                     const newPriority = priorityOrder.length;
                     priorityMap[value] = newPriority;
-                    
+
                     // 우선순위 번호 업데이트
                     updatePriorityNumbers();
                 }
@@ -839,7 +842,7 @@
         // ============================================
         function updateButton() {
             const nextBtn = document.getElementById('nextBtn');
-            
+
             // 4개 모두 선택되어야 버튼 활성화
             if (priorityOrder.length === 4) {
                 // 버튼 활성화 (블랙 색상)
@@ -936,11 +939,11 @@
                         console.log('저장된 세션 ID:', data.session_id);
                         console.log('현재 단계:', data.current_step);
                         console.log('다음 단계:', data.next_step);
-                        
+
                         // 5단계 선택 값 저장
                         sessionStorage.setItem('step5_priority', JSON.stringify(priorityOrder));
                         sessionStorage.setItem('step5_priority_map', JSON.stringify(priorityMap));
-                        
+
                         // 다음 단계로 이동 (6단계로 이동)
                         console.log('5단계 데이터 저장 완료, 다음 단계로 이동합니다.');
                         window.location.href = '/onboarding/step6/';
@@ -1033,7 +1036,7 @@
         history.pushState(null, null, location.href);
 
         // 정상적인 네비게이션 시 플래그 설정
-        document.getElementById('nextBtn').addEventListener('click', function() {
+        document.getElementById('nextBtn').addEventListener('click', function () {
             isNavigating = true;
         });
 
@@ -1052,7 +1055,7 @@
         });
 
         // 모달 외부 클릭 시 닫기
-        document.getElementById('exitModal').addEventListener('click', function(e) {
+        document.getElementById('exitModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 hideExitModal();
             }
@@ -1069,7 +1072,7 @@
         // ============================================
         // 페이지 로드 시 버튼 상태 초기화 및 이전 선택값 복원
         // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // sessionStorage에서 이전에 선택한 값 복원
             const savedPriority = sessionStorage.getItem('step5_priority');
             if (savedPriority) {
@@ -1091,7 +1094,7 @@
                     console.error('우선순위 복원 실패:', e);
                 }
             }
-            
+
             // 버튼 상태 초기화 (뒤로가기로 돌아왔을 때를 대비)
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
@@ -1104,7 +1107,7 @@
         // ============================================
         // 뒤로가기 감지 시 현재 단계 데이터 저장
         // ============================================
-        window.addEventListener('pageshow', function(event) {
+        window.addEventListener('pageshow', function (event) {
             // 뒤로가기로 돌아왔을 때 (bfcache에서 복원된 경우)
             if (event.persisted) {
                 console.log('뒤로가기로 페이지 복원됨');
@@ -1121,4 +1124,3 @@
 </body>
 
 </html>
-

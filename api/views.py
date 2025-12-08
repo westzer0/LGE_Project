@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
-from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics, Reservation
+from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics, Reservation, ProductSpec
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 from .services.chatgpt_service import chatgpt_service
@@ -15,6 +15,82 @@ from .services.kakao_auth_service import kakao_auth_service
 from .services.kakao_message_service import kakao_message_service
 from .services.ai_recommendation_service import ai_recommendation_service
 from .services.product_comparison_service import product_comparison_service
+from .db.oracle_client import DatabaseDisabledError
+
+
+def _generate_installation_notes(product_data: dict, onboarding_data: dict) -> list:
+    """
+    PRD: 도면 기반 설치 유의사항 자동 출력
+    제품 치수 + 유저가 입력한 공간 데이터 기반으로 설치 유의사항 생성
+    
+    Args:
+        product_data: 제품 정보
+        onboarding_data: 온보딩 데이터 (공간 정보 포함)
+        
+    Returns:
+        설치 유의사항 리스트
+    """
+    notes = []
+    
+    # 온보딩 데이터에서 공간 정보 추출
+    housing_type = onboarding_data.get('housing_type', 'apartment')
+    pyung = onboarding_data.get('pyung', 25)
+    main_space = onboarding_data.get('main_space', 'living')
+    
+    # 제품 스펙 정보 확인
+    product_id = product_data.get('product_id') or product_data.get('id')
+    if product_id:
+        try:
+            product = Product.objects.get(id=product_id)
+            if hasattr(product, 'spec') and product.spec:
+                spec_json = product.spec.spec_json
+                if isinstance(spec_json, str):
+                    import json
+                    try:
+                        spec = json.loads(spec_json)
+                    except:
+                        spec = {}
+                else:
+                    spec = spec_json or {}
+                
+                # 제품 치수 정보 추출
+                width = spec.get('폭', spec.get('가로', spec.get('width', 0)))
+                depth = spec.get('깊이', spec.get('세로', spec.get('depth', 0)))
+                height = spec.get('높이', spec.get('height', 0))
+                
+                # 주거 형태별 유의사항
+                if housing_type == 'studio':
+                    if width and width > 600:
+                        notes.append("⚠️ 원룸 공간에 맞춰 600mm 이하 컴팩트 모델을 권장합니다.")
+                    notes.append("원룸은 공간 효율성을 최우선으로 고려하여 설치 위치를 확인해주세요.")
+                elif housing_type == 'officetel':
+                    notes.append("오피스텔의 경우 엘리베이터 및 복도 폭을 확인하여 대형 가전 진입 가능 여부를 사전에 확인하세요.")
+                
+                # 평수 기반 유의사항
+                if pyung and pyung < 20:
+                    if width and width > 700:
+                        notes.append("작은 공간에서는 슬림형 모델을 권장합니다.")
+                elif pyung and pyung > 40:
+                    notes.append("넓은 공간에서는 대형 모델도 설치 가능합니다.")
+                
+                # 주요 공간별 유의사항
+                if isinstance(main_space, list):
+                    if 'kitchen' in main_space:
+                        if width and width > 900:
+                            notes.append("주방 폭을 확인하여 냉장고 설치 가능 여부를 확인하세요.")
+                    if 'dressing' in main_space:
+                        notes.append("드레스룸의 경우 배수 및 전기 배선 위치를 확인하세요.")
+        
+        except Product.DoesNotExist:
+            pass
+        except Exception as e:
+            print(f"[Installation Notes] 오류: {e}")
+    
+    # 기본 안내
+    if not notes:
+        notes.append("설치 전 현장 측량을 통해 정확한 설치 가능 여부를 확인하세요.")
+    
+    return notes
 
 
 def health_check_view(request):
@@ -44,6 +120,92 @@ def health_check_view(request):
         }, json_dumps_params={'ensure_ascii': False}, status=503)
 
 
+@require_http_methods(["GET"])
+def oracle_test_view(request):
+    """
+    Oracle DB 연결 및 테이블 조회 테스트
+    GET /api/oracle/test/
+    """
+    from .db.oracle_client import get_connection, fetch_all_dict, fetch_one, DatabaseDisabledError
+    
+    result = {
+        'success': False,
+        'connection': False,
+        'tables': [],
+        'product_count': 0,
+        'member_count': 0,
+        'onboarding_count': 0,
+        'error': None
+    }
+    
+    try:
+        # 1. 연결 테스트
+        try:
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT SYSDATE FROM DUAL")
+                    db_time = cur.fetchone()[0]
+                    result['connection'] = True
+                    result['db_time'] = str(db_time)
+        except DatabaseDisabledError:
+            result['error'] = 'Oracle DB가 비활성화되어 있습니다. (DISABLE_DB=true)'
+            return JsonResponse(result, json_dumps_params={'ensure_ascii': False}, status=503)
+        except Exception as e:
+            result['error'] = f'연결 실패: {str(e)}'
+            return JsonResponse(result, json_dumps_params={'ensure_ascii': False}, status=503)
+        
+        # 2. 테이블 목록 조회
+        try:
+            sql = "SELECT table_name FROM user_tables ORDER BY table_name"
+            tables = fetch_all_dict(sql)
+            result['tables'] = [t['TABLE_NAME'] for t in tables[:20]]  # 최대 20개
+            result['table_count'] = len(tables)
+        except Exception as e:
+            result['table_error'] = str(e)
+        
+        # 3. PRODUCT 테이블 조회
+        try:
+            sql = "SELECT COUNT(*) as cnt FROM PRODUCT"
+            count_result = fetch_one(sql)
+            if count_result:
+                result['product_count'] = count_result[0]
+                
+                # 샘플 데이터
+                sql_sample = "SELECT PRODUCT_ID, PRODUCT_NAME FROM PRODUCT WHERE ROWNUM <= 3"
+                samples = fetch_all_dict(sql_sample)
+                result['product_samples'] = [
+                    {'id': s.get('PRODUCT_ID'), 'name': s.get('PRODUCT_NAME', 'N/A')[:50]}
+                    for s in samples
+                ]
+        except Exception as e:
+            result['product_error'] = str(e)
+        
+        # 4. MEMBER 테이블 조회
+        try:
+            sql = "SELECT COUNT(*) as cnt FROM MEMBER"
+            count_result = fetch_one(sql)
+            if count_result:
+                result['member_count'] = count_result[0]
+        except Exception as e:
+            result['member_error'] = str(e)
+        
+        # 5. ONBOARDING 테이블 조회
+        try:
+            sql = "SELECT COUNT(*) as cnt FROM ONBOARDING"
+            count_result = fetch_one(sql)
+            if count_result:
+                result['onboarding_count'] = count_result[0]
+        except Exception as e:
+            result['onboarding_error'] = str(e)
+        
+        result['success'] = True
+        return JsonResponse(result, json_dumps_params={'ensure_ascii': False})
+        
+    except Exception as e:
+        result['error'] = str(e)
+        return JsonResponse(result, json_dumps_params={'ensure_ascii': False}, status=500)
+
+
 def index_view(request):
     """
     루트 페이지: 온보딩 설문 + 추천 결과를 보여주는 기본 화면.
@@ -60,16 +222,14 @@ def react_app_view(request):
     from pathlib import Path
     import os
     
-    # React 빌드된 index.html 경로
+    # 1순위: React 빌드된 index.html 경로 (프로덕션)
     react_index_path = Path(settings.BASE_DIR) / 'staticfiles' / 'react' / 'index.html'
-    
-    # 빌드 파일이 있으면 서빙, 없으면 기본 템플릿 사용
     if react_index_path.exists():
         with open(react_index_path, 'r', encoding='utf-8') as f:
             return HttpResponse(f.read(), content_type='text/html')
-    else:
-        # 개발 환경 또는 빌드 전: 기본 index.html 사용
-        return render(request, "index.html")
+    
+    # 2순위: 기본 템플릿 사용
+    return render(request, "index.html")
 
 
 def main_page(request):
@@ -260,6 +420,12 @@ def recommend_view(request):
             'success': False,
             'error': 'Invalid JSON',
         }, status=400)
+    except DatabaseDisabledError as e:
+        return JsonResponse({
+            'success': False,
+            'error': '데이터베이스 연결이 비활성화되었습니다. (DISABLE_DB=true)',
+            'message': 'DB 없이 서버가 실행 중입니다. 일부 기능은 작동하지 않을 수 있습니다.',
+        }, json_dumps_params={'ensure_ascii': False}, status=503)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -924,6 +1090,12 @@ def onboarding_step_view(request):
             'saved_data': step_data,  # 저장된 데이터 확인용
         }, json_dumps_params={'ensure_ascii': False})
     
+    except DatabaseDisabledError as e:
+        return JsonResponse({
+            'success': False,
+            'error': '데이터베이스 연결이 비활성화되었습니다. (DISABLE_DB=true)',
+            'message': 'DB 없이 서버가 실행 중입니다. 온보딩 데이터는 Django DB에만 저장됩니다.',
+        }, json_dumps_params={'ensure_ascii': False}, status=503)
     except Exception as e:
         return JsonResponse({
             'success': False,
@@ -1001,17 +1173,61 @@ def onboarding_complete_view(request):
             if isinstance(pyung, str):
                 pyung = int(pyung.replace('평', '').strip()) if pyung.strip() else 25
             
+            # Step 2: has_pet 처리
+            has_pet = data.get('has_pet')
+            if has_pet is None:
+                # 기존 호환성: pet 필드 확인
+                pet_value = data.get('pet', 'no')
+                has_pet = pet_value in ['yes', 'Y', True, 'true', 'True']
+            
+            # Step 3: main_space 처리
+            main_space = data.get('main_space', [])
+            if isinstance(main_space, str):
+                try:
+                    import json
+                    main_space = json.loads(main_space)
+                except:
+                    main_space = [main_space] if main_space else ['living']
+            if not isinstance(main_space, list):
+                main_space = ['living']
+            
+            # Step 5: priority_list 처리
+            priority_list = data.get('priority_list', [])
+            if isinstance(priority_list, str):
+                try:
+                    import json
+                    priority_list = json.loads(priority_list)
+                except:
+                    priority_list = [priority_list] if priority_list else []
+            if not isinstance(priority_list, list):
+                priority_list = [data.get('priority', 'value')]
+            if len(priority_list) == 0:
+                priority_list = [data.get('priority', 'value')]
+            
             session, _ = OnboardingSession.objects.update_or_create(
                 session_id=session_id,
                 defaults={
+                    # Step 1
                     'vibe': data.get('vibe', 'modern'),
+                    # Step 2
                     'household_size': int(household_size),
+                    'has_pet': has_pet,
+                    # Step 3
                     'housing_type': data.get('housing_type', 'apartment'),
+                    'main_space': main_space,
                     'pyung': int(pyung),
+                    # Step 4
+                    'cooking': data.get('cooking', 'sometimes'),
+                    'laundry': data.get('laundry', 'weekly'),
+                    'media': data.get('media', 'balanced'),
+                    # Step 5
                     'priority': data.get('priority', 'value'),
+                    'priority_list': priority_list,
+                    # Step 6
                     'budget_level': data.get('budget_level', 'medium'),
+                    # 카테고리
                     'selected_categories': data.get('selected_categories', []),
-                    'current_step': 5,
+                    'current_step': 6,
                     'status': 'completed',
                     'completed_at': timezone.now(),
                 }
@@ -1029,10 +1245,12 @@ def onboarding_complete_view(request):
         # 2. user_profile 생성 (온보딩 데이터 포함)
         # 온보딩 데이터에서 추가 정보 추출
         onboarding_data = {
-            'pet': data.get('pet'),
-            'cooking': data.get('cooking'),
-            'laundry': data.get('laundry'),
-            'media': data.get('media'),
+            'has_pet': session.has_pet if session.has_pet is not None else (data.get('has_pet') or data.get('pet') == 'yes'),
+            'cooking': session.cooking or data.get('cooking', 'sometimes'),
+            'laundry': session.laundry or data.get('laundry', 'weekly'),
+            'media': session.media or data.get('media', 'balanced'),
+            'main_space': session.main_space if isinstance(session.main_space, list) else (data.get('main_space', ['living'])),
+            'priority_list': session.priority_list if isinstance(session.priority_list, list) else (data.get('priority_list', [])),
             'family_size': data.get('family_size', data.get('household_size')),
         }
         
@@ -1366,6 +1584,41 @@ def portfolio_detail_view(request, portfolio_id):
         
         print(f"[Portfolio Detail] 제품 수: {len(products)}")
         
+        # PRD: 구매 리뷰 분석 표시 (모델별 최대 3개)
+        products_with_reviews = []
+        for product_data in products:
+            product_id = product_data.get('product_id') or product_data.get('id')
+            if product_id:
+                try:
+                    # 제품 리뷰 조회 (최대 3개)
+                    reviews = ProductReview.objects.filter(product_id=product_id).order_by('-created_at')[:3]
+                    review_list = [
+                        {
+                            'star': review.star or '',
+                            'review_text': review.review_text[:200] if review.review_text else '',  # 200자 제한
+                            'created_at': review.created_at.isoformat() if review.created_at else None
+                        }
+                        for review in reviews
+                    ]
+                    product_data['reviews'] = review_list
+                    product_data['review_count'] = len(review_list)
+                except Exception as e:
+                    print(f"[Portfolio Detail] 제품 {product_id} 리뷰 조회 실패: {e}")
+                    product_data['reviews'] = []
+                    product_data['review_count'] = 0
+            else:
+                product_data['reviews'] = []
+                product_data['review_count'] = 0
+            
+            # PRD: 도면 기반 설치 유의사항 자동 출력
+            installation_notes = _generate_installation_notes(
+                product_data=product_data,
+                onboarding_data=portfolio.onboarding_data or {}
+            )
+            product_data['installation_notes'] = installation_notes
+            
+            products_with_reviews.append(product_data)
+        
         return JsonResponse({
             'success': True,
             'portfolio': {
@@ -1376,7 +1629,7 @@ def portfolio_detail_view(request, portfolio_id):
                 'style_title': portfolio.style_title,
                 'style_subtitle': portfolio.style_subtitle,
                 'onboarding_data': portfolio.onboarding_data or {},
-                'products': products,
+                'products': products_with_reviews,  # 리뷰 및 설치 유의사항 포함
                 'total_original_price': float(portfolio.total_original_price) if portfolio.total_original_price else 0,
                 'total_discount_price': float(portfolio.total_discount_price) if portfolio.total_discount_price else 0,
                 'match_score': portfolio.match_score or 0,
@@ -1451,15 +1704,34 @@ def portfolio_share_view(request, portfolio_id):
         portfolio.share_url = f"https://homestyling.lge.co.kr/portfolio/{portfolio_id}/"
         portfolio.save()
         
+        # PRD: 카카오톡 공유용 메타데이터 생성
+        # 대표 이미지: 첫 번째 제품 이미지 또는 기본 이미지
+        representative_image = ''
+        if portfolio.products and len(portfolio.products) > 0:
+            first_product = portfolio.products[0]
+            representative_image = first_product.get('image_url', '')
+        
+        # 기본 이미지가 없으면 프로젝트 기본 이미지 사용
+        if not representative_image:
+            base_url = request.build_absolute_uri('/').rstrip('/')
+            representative_image = f"{base_url}/static/icon.png"
+        
+        # 카카오 공유용 메타데이터
+        share_title = f"LG 홈스타일링 - {portfolio.style_title}" if portfolio.style_title else "LG 홈스타일링 가전 패키지 추천"
+        share_description = (
+            portfolio.style_subtitle[:150] if portfolio.style_subtitle 
+            else f"나에게 딱 맞는 {len(portfolio.products)}개 가전 제품을 추천받았어요!"
+        )
+        
         return JsonResponse({
             'success': True,
             'share_url': portfolio.share_url,
             'share_count': portfolio.share_count,
-            # 카카오톡 공유용 메타 데이터
+            # 카카오톡 공유용 메타 데이터 (OG 태그용)
             'kakao_share_data': {
-                'title': f"LG 홈스타일링 - {portfolio.style_title}",
-                'description': portfolio.style_subtitle[:100] if portfolio.style_subtitle else '나에게 딱 맞는 LG 가전 패키지를 추천받았어요!',
-                'image_url': 'https://www.lge.co.kr/kr/images/brand/objet-collection/2024/visual/kv_visual_bg_w.webp',
+                'title': share_title,
+                'description': share_description,
+                'image_url': representative_image,
                 'link': portfolio.share_url,
             }
         }, json_dumps_params={'ensure_ascii': False})
@@ -1801,12 +2073,32 @@ def bestshop_consultation_view(request):
             status='pending'
         )
         
+        # PRD: 베스트샵 상담 예약 시 카카오톡 알림 자동 전송 (선택적)
+        # 카카오 로그인 사용자이고 액세스 토큰이 있으면 알림 전송
+        if request.user.is_authenticated:
+            access_token = request.session.get('kakao_access_token')
+            if access_token:
+                try:
+                    consultation_date_str = f"{preferred_date} {preferred_time}" if preferred_date and preferred_time else (preferred_date or '미정')
+                    portfolio_title = portfolio.style_title if portfolio and portfolio.style_title else portfolio_id
+                    kakao_message_service.send_consultation_notification(
+                        user_access_token=access_token,
+                        portfolio_title=portfolio_title,
+                        consultation_date=consultation_date_str,
+                        store_location=store_location or '매장 미정'
+                    )
+                except Exception as msg_error:
+                    # 메시지 전송 실패는 치명적이지 않으므로 로깅만
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"[Bestshop Consultation] 카카오 알림 전송 실패 (무시): {msg_error}")
+        
         return JsonResponse({
             'success': True,
             'message': '상담 예약이 생성되었습니다.',
+            'reservation_id': reservation.reservation_id,
             'consultation_data': consultation_data,
             'bestshop_url': bestshop_url,
-            'reservation_id': reservation.reservation_id,
             'reservation': {
                 'id': reservation.reservation_id,
                 'status': reservation.status,
@@ -2052,6 +2344,7 @@ def kakao_callback_view(request):
         # 액세스 토큰 발급
         token_response = kakao_auth_service.get_access_token(code, redirect_uri)
         access_token = token_response.get('access_token')
+        refresh_token = token_response.get('refresh_token')  # 리프레시 토큰도 저장
         
         if not access_token:
             return redirect('/?error=no_token')
@@ -2065,15 +2358,24 @@ def kakao_callback_view(request):
         # 로그인 처리
         login(request, user)
         
-        # 세션에 카카오 정보 저장
+        # 세션에 카카오 정보 저장 (리프레시 토큰 포함)
         request.session['kakao_access_token'] = access_token
+        if refresh_token:
+            request.session['kakao_refresh_token'] = refresh_token
         request.session['kakao_user_id'] = str(user_info.get('id'))
+        # 토큰 만료 시간 저장 (기본 6시간)
+        request.session['kakao_token_expires_at'] = token_response.get('expires_in', 21600)
         
         # 리다이렉트 (마이페이지 또는 메인)
         return redirect('/my-page/?login=success')
     
     except Exception as e:
-        return redirect(f'/?error={str(e)}')
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"[Kakao Callback] 오류: {e}")
+        # 에러 메시지를 URL 인코딩하여 전달
+        error_message = str(e)[:100]  # 너무 긴 메시지 방지
+        return redirect(f'/?error={error_message}')
 
 
 @require_http_methods(["GET"])
@@ -2180,21 +2482,44 @@ def ai_chat_recommend_view(request):
         if not user_message:
             return JsonResponse({
                 'success': False,
+                'type': 'error',
+                'message': '메시지를 입력해주세요.',
                 'error': '메시지를 입력해주세요.'
-            }, status=400)
+            }, status=400, json_dumps_params={'ensure_ascii': False})
+        
+        print(f"[AI 추천] 사용자 메시지: {user_message}")
         
         result = ai_recommendation_service.chat_recommendation(
             user_message=user_message,
             conversation_history=conversation_history
         )
         
+        # 결과에 success 필드가 없으면 추가
+        if 'success' not in result:
+            result['success'] = result.get('type') != 'error'
+        
+        print(f"[AI 추천] 결과 타입: {result.get('type')}, 성공: {result.get('success')}")
+        
         return JsonResponse(result, json_dumps_params={'ensure_ascii': False})
     
-    except Exception as e:
+    except json.JSONDecodeError as e:
+        print(f"[AI 추천] JSON 파싱 오류: {e}")
         return JsonResponse({
             'success': False,
+            'type': 'error',
+            'message': '요청 형식이 올바르지 않아요. 다시 시도해주세요.',
+            'error': f'JSON 파싱 오류: {str(e)}'
+        }, status=400, json_dumps_params={'ensure_ascii': False})
+    except Exception as e:
+        print(f"[AI 추천] 예외 발생: {e}")
+        import traceback
+        print(f"[AI 추천] 트레이스백: {traceback.format_exc()}")
+        return JsonResponse({
+            'success': False,
+            'type': 'error',
+            'message': '죄송해요, 일시적인 오류가 발생했어요. 다시 시도해주세요.',
             'error': str(e)
-        }, json_dumps_params={'ensure_ascii': False}, status=400)
+        }, status=500, json_dumps_params={'ensure_ascii': False})
 
 
 # ============================================================
@@ -2269,34 +2594,92 @@ def kakao_send_message_view(request):
     try:
         data = json.loads(request.body.decode('utf-8'))
         
+        # 액세스 토큰 가져오기 (만료 시 리프레시 토큰으로 갱신 시도)
         access_token = request.session.get('kakao_access_token')
+        refresh_token = request.session.get('kakao_refresh_token')
+        
         if not access_token:
             return JsonResponse({
                 'success': False,
                 'error': '카카오 로그인이 필요합니다.'
             }, status=401)
         
+        # 토큰 만료 시 리프레시 토큰으로 갱신 시도
+        if refresh_token:
+            try:
+                # 토큰 유효성 간단 체크 (실제로는 API 호출로 확인)
+                # 여기서는 세션의 만료 시간 확인
+                token_expires_at = request.session.get('kakao_token_expires_at', 0)
+                import time
+                if token_expires_at and time.time() > token_expires_at:
+                    # 토큰 갱신 시도
+                    try:
+                        new_token_data = kakao_auth_service.refresh_access_token(refresh_token)
+                        access_token = new_token_data.get('access_token')
+                        if access_token:
+                            request.session['kakao_access_token'] = access_token
+                            if new_token_data.get('refresh_token'):
+                                request.session['kakao_refresh_token'] = new_token_data.get('refresh_token')
+                            request.session['kakao_token_expires_at'] = time.time() + new_token_data.get('expires_in', 21600)
+                    except Exception as refresh_error:
+                        # 리프레시 실패 시 재로그인 필요
+                        import logging
+                        logger = logging.getLogger(__name__)
+                        logger.warning(f"[Kakao Message] 토큰 갱신 실패: {refresh_error}")
+                        return JsonResponse({
+                            'success': False,
+                            'error': '카카오 로그인이 만료되었습니다. 다시 로그인해주세요.'
+                        }, status=401)
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"[Kakao Message] 토큰 확인 중 오류: {e}")
+        
+        # 포트폴리오 정보 가져오기
+        portfolio_id = data.get('portfolio_id')
         portfolio_title = data.get('portfolio_title', '포트폴리오')
         consultation_date = data.get('consultation_date', '')
         store_location = data.get('store_location', '')
         
-        result = kakao_message_service.send_consultation_notification(
-            user_access_token=access_token,
-            portfolio_title=portfolio_title,
-            consultation_date=consultation_date,
-            store_location=store_location
-        )
+        # 포트폴리오 ID가 있으면 포트폴리오에서 정보 가져오기
+        if portfolio_id:
+            try:
+                portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+                if not portfolio_title or portfolio_title == '포트폴리오':
+                    portfolio_title = portfolio.style_title or '나의 가전 패키지'
+            except Portfolio.DoesNotExist:
+                pass
         
-        if result:
+        try:
+            result = kakao_message_service.send_consultation_notification(
+                user_access_token=access_token,
+                portfolio_title=portfolio_title,
+                consultation_date=consultation_date,
+                store_location=store_location
+            )
+            
+            if result:
+                return JsonResponse({
+                    'success': True,
+                    'message': '메시지가 전송되었습니다.'
+                }, json_dumps_params={'ensure_ascii': False})
+            else:
+                # 메시지 전송 실패해도 사용자에게는 성공으로 표시 (비동기 처리 고려)
+                return JsonResponse({
+                    'success': True,
+                    'message': '메시지 전송이 요청되었습니다.',
+                    'note': '메시지 전송에 일시적인 문제가 있을 수 있습니다.'
+                }, json_dumps_params={'ensure_ascii': False})
+        except Exception as msg_error:
+            # 메시지 전송 실패는 치명적이지 않으므로 경고만
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"[Kakao Message] 전송 실패 (무시): {msg_error}")
             return JsonResponse({
                 'success': True,
-                'message': '메시지가 전송되었습니다.'
+                'message': '상담 예약이 완료되었습니다.',
+                'note': '카카오톡 알림 전송에 실패했지만 예약은 정상적으로 처리되었습니다.'
             }, json_dumps_params={'ensure_ascii': False})
-        else:
-            return JsonResponse({
-                'success': False,
-                'error': '메시지 전송에 실패했습니다.'
-            }, status=500)
     
     except Exception as e:
         return JsonResponse({

@@ -351,6 +351,17 @@ class PlaybookRecommendationEngine:
         # 제품 타입 추출
         product_type = extract_product_type(product) or '기타'
         
+        # 가격 처리: price가 0이거나 None인 경우 경고
+        price = float(product.price) if product.price and product.price > 0 else 0
+        if price == 0:
+            print(f"[가격 경고] 제품 {product.id} ({product.name}): 가격이 0원입니다. (DB price={product.price})")
+        
+        discount_price = None
+        if product.discount_price and product.discount_price > 0:
+            discount_price = float(product.discount_price)
+        elif price > 0:
+            discount_price = price  # discount_price가 없으면 정가를 할인가로 사용
+        
         # 기본 정보
         recommendation = {
             'product_id': product.id,
@@ -360,8 +371,8 @@ class PlaybookRecommendationEngine:
             'category': product.category,
             'category_display': product.get_category_display(),
             'product_type': product_type,  # 제품 타입 추가
-            'price': float(product.price) if product.price else 0,
-            'discount_price': float(product.discount_price) if product.discount_price else None,
+            'price': price,
+            'discount_price': discount_price,
             'image_url': product.image_url or '',
             'total_score': round(score_breakdown.total_score, 1),
             'score_breakdown': score_breakdown.to_dict(),

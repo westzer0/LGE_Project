@@ -290,6 +290,12 @@ class OnboardingSession(models.Model):
         help_text="Step 2: 가구 인원수"
     )
     
+    has_pet = models.BooleanField(
+        null=True,
+        blank=True,
+        help_text="Step 2: 반려동물 여부"
+    )
+    
     housing_type = models.CharField(
         max_length=20,
         choices=[
@@ -310,6 +316,50 @@ class OnboardingSession(models.Model):
         help_text="Step 3: 주거 평수"
     )
     
+    main_space = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Step 3: 주요 공간 (JSON 배열, 예: ['living', 'kitchen'])"
+    )
+    
+    # Step 4: 라이프스타일
+    cooking = models.CharField(
+        max_length=20,
+        choices=[
+            ('rarely', '거의 하지 않아요'),
+            ('sometimes', '가끔 해요'),
+            ('often', '자주 해요'),
+        ],
+        null=True,
+        blank=True,
+        help_text="Step 4: 요리 빈도"
+    )
+    
+    laundry = models.CharField(
+        max_length=20,
+        choices=[
+            ('weekly', '일주일 1번 정도'),
+            ('few_times', '일주일 2~3번 정도'),
+            ('daily', '매일 조금씩'),
+        ],
+        null=True,
+        blank=True,
+        help_text="Step 4: 세탁 빈도"
+    )
+    
+    media = models.CharField(
+        max_length=20,
+        choices=[
+            ('ott', 'OTT를 즐기는 편'),
+            ('gaming', '게임이 취미'),
+            ('tv', '일반 프로그램 시청'),
+            ('none', 'TV/영상을 즐기지 않음'),
+        ],
+        null=True,
+        blank=True,
+        help_text="Step 4: 미디어 사용 패턴"
+    )
+    
     priority = models.CharField(
         max_length=20,
         choices=[
@@ -319,7 +369,13 @@ class OnboardingSession(models.Model):
             ('value', '가성비'),
         ],
         default='value',
-        help_text="Step 4: 구매 우선순위"
+        help_text="Step 5: 첫 번째 구매 우선순위"
+    )
+    
+    priority_list = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Step 5: 우선순위 목록 (JSON 배열, 순서 중요, 예: ['design', 'tech', 'eco'])"
     )
     
     budget_level = models.CharField(
@@ -335,7 +391,7 @@ class OnboardingSession(models.Model):
             ('luxury', '2000만원 이상'),
         ],
         default='medium',
-        help_text="Step 5: 예산 범위"
+        help_text="Step 6: 예산 범위"
     )
     
     # 선택한 카테고리
@@ -412,6 +468,13 @@ class OnboardingSession(models.Model):
         if isinstance(self.recommendation_result, dict):
             extra_data = self.recommendation_result.get('onboarding_data', {})
         
+        # main_space 처리 (JSONField 또는 extra_data에서)
+        main_space_value = self.main_space if isinstance(self.main_space, list) and len(self.main_space) > 0 else (
+            extra_data.get('main_space', ['living']) if isinstance(extra_data, dict) else ['living']
+        )
+        if isinstance(main_space_value, str):
+            main_space_value = [main_space_value]
+        
         return {
             'vibe': self.vibe or 'modern',
             'household_size': self.household_size or 2,
@@ -420,12 +483,14 @@ class OnboardingSession(models.Model):
             'priority': self.priority or 'value',
             'budget_level': self.budget_level or 'medium',
             'categories': self.selected_categories or [],
-            'main_space': 'living',
+            'main_space': main_space_value[0] if main_space_value else 'living',
             'space_size': 'medium',
-            'has_pet': extra_data.get('pet') == 'yes' if isinstance(extra_data, dict) else False,
-            'cooking': extra_data.get('cooking', 'sometimes') if isinstance(extra_data, dict) else 'sometimes',
-            'laundry': extra_data.get('laundry', 'weekly') if isinstance(extra_data, dict) else 'weekly',
-            'media': extra_data.get('media', 'balanced') if isinstance(extra_data, dict) else 'balanced',
+            'has_pet': self.has_pet if self.has_pet is not None else (
+                extra_data.get('pet') == 'yes' or extra_data.get('has_pet') == True if isinstance(extra_data, dict) else False
+            ),
+            'cooking': self.cooking or extra_data.get('cooking', 'sometimes') if isinstance(extra_data, dict) else 'sometimes',
+            'laundry': self.laundry or extra_data.get('laundry', 'weekly') if isinstance(extra_data, dict) else 'weekly',
+            'media': self.media or extra_data.get('media', 'balanced') if isinstance(extra_data, dict) else 'balanced',
         }
     
     def save(self, *args, **kwargs):
@@ -437,7 +502,7 @@ class OnboardingSession(models.Model):
     def mark_completed(self):
         """온보딩 완료 표시"""
         self.status = 'completed'
-        self.current_step = 5
+        self.current_step = 6
         self.completed_at = timezone.now()
         self.save()
 

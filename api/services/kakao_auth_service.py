@@ -2,12 +2,14 @@
 카카오 로그인 서비스
 """
 import requests
+import logging
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 import json
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class KakaoAuthService:
@@ -63,11 +65,23 @@ class KakaoAuthService:
             "code": code
         }
         
-        response = requests.post(url, data=data)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"토큰 발급 실패: {response.text}")
+        try:
+            response = requests.post(url, data=data, timeout=10)
+            response.raise_for_status()
+            token_data = response.json()
+            
+            # 리프레시 토큰도 함께 저장 (세션에 저장 가능)
+            logger.info(f"[Kakao Auth] 토큰 발급 성공: access_token 존재={bool(token_data.get('access_token'))}")
+            return token_data
+        except requests.exceptions.Timeout:
+            logger.error("[Kakao Auth] 토큰 발급 타임아웃")
+            raise Exception("카카오 서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[Kakao Auth] 토큰 발급 실패: {e}")
+            raise Exception(f"토큰 발급 실패: {str(e)}")
+        except Exception as e:
+            logger.error(f"[Kakao Auth] 토큰 발급 예외: {e}")
+            raise
     
     @classmethod
     def get_user_info(cls, access_token):
@@ -85,11 +99,27 @@ class KakaoAuthService:
             "Authorization": f"Bearer {access_token}"
         }
         
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"사용자 정보 조회 실패: {response.text}")
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            # 토큰 만료 처리
+            if response.status_code == 401:
+                logger.warning("[Kakao Auth] 액세스 토큰 만료 또는 유효하지 않음")
+                raise Exception("카카오 로그인이 만료되었습니다. 다시 로그인해주세요.")
+            
+            response.raise_for_status()
+            user_info = response.json()
+            logger.info(f"[Kakao Auth] 사용자 정보 조회 성공: id={user_info.get('id')}")
+            return user_info
+        except requests.exceptions.Timeout:
+            logger.error("[Kakao Auth] 사용자 정보 조회 타임아웃")
+            raise Exception("카카오 서버 응답 시간이 초과되었습니다.")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[Kakao Auth] 사용자 정보 조회 실패: {e}")
+            raise Exception(f"사용자 정보 조회 실패: {str(e)}")
+        except Exception as e:
+            logger.error(f"[Kakao Auth] 사용자 정보 조회 예외: {e}")
+            raise
     
     @classmethod
     def get_or_create_user(cls, kakao_user_info):
@@ -128,6 +158,43 @@ class KakaoAuthService:
         # user.profile.kakao_id = kakao_id  # 커스텀 프로필 모델이 있다면
         
         return user, created
+    
+    @classmethod
+    def refresh_access_token(cls, refresh_token):
+        """
+        리프레시 토큰으로 액세스 토큰 갱신
+        
+        Args:
+            refresh_token: 카카오 리프레시 토큰
+            
+        Returns:
+            새로운 토큰 정보 (access_token, refresh_token 등)
+        """
+        if not cls.REST_API_KEY:
+            raise ValueError("KAKAO_REST_API_KEY가 설정되지 않았습니다.")
+        
+        url = "https://kauth.kakao.com/oauth/token"
+        data = {
+            "grant_type": "refresh_token",
+            "client_id": cls.REST_API_KEY,
+            "refresh_token": refresh_token
+        }
+        
+        try:
+            response = requests.post(url, data=data, timeout=10)
+            response.raise_for_status()
+            token_data = response.json()
+            logger.info(f"[Kakao Auth] 토큰 갱신 성공")
+            return token_data
+        except requests.exceptions.Timeout:
+            logger.error("[Kakao Auth] 토큰 갱신 타임아웃")
+            raise Exception("카카오 서버 응답 시간이 초과되었습니다.")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[Kakao Auth] 토큰 갱신 실패: {e}")
+            raise Exception(f"토큰 갱신 실패: {str(e)}")
+        except Exception as e:
+            logger.error(f"[Kakao Auth] 토큰 갱신 예외: {e}")
+            raise
 
 
 # 싱글톤 인스턴스
