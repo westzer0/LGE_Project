@@ -315,7 +315,7 @@
         }
 
         .progress-title {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 24px;
@@ -345,7 +345,7 @@
 
         .progress-line {
             position: absolute;
-            top: 20px;
+            top: 12px;
             left: 50%;
             right: -50%;
             height: 2px;
@@ -362,8 +362,8 @@
         }
 
         .progress-dot {
-            width: 40px;
-            height: 40px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
             background: #e5e5e5;
             display: flex;
@@ -403,9 +403,10 @@
 
         .progress-description {
             font-size: 13px;
-            color: #999;
-            text-align: center;
+            color: #1a1a1a;
+            text-align: left;
             margin-bottom: 24px;
+            font-weight: 700;
         }
 
         /* ============================================
@@ -415,11 +416,14 @@
             background: #f9f9f9;
             border: 1px solid #e5e5e5;
             border-radius: 8px;
-            padding: 24px;
+            padding: 50px;
             margin-bottom: 24px;
+            margin-left: 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 1000px;
+            height: 110px;
         }
 
         .confirmation-message {
@@ -451,6 +455,7 @@
         .details-section {
             background: #fff;
             padding: 40px;
+            padding-top: 100px;
             border-radius: 8px;
         }
 
@@ -459,6 +464,8 @@
             font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 32px;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 16px;
         }
 
         .details-list {
@@ -728,7 +735,7 @@
             <!-- 진행 단계 -->
             <div class="progress-section">
                 <h2 class="progress-title">진행단계</h2>
-                <p class="progress-description">접수 > 상담 예정 > 처리 완료 순으로 진행됩니다.</p>
+                <p class="progress-description"><span style="color: #1a1a1a;">접수</span> > <span style="color: #EA1917;">상담 예정</span> > <span style="color: #1a1a1a;">처리 완료 순으로 진행됩니다.</span></p>
                 <div class="progress-bar-container">
                     <div class="progress-bar">
                         <div class="progress-step">
@@ -752,7 +759,7 @@
 
             <!-- 확인 메시지 -->
             <div class="confirmation-box">
-                <p class="confirmation-message">전화 상담 예약을 진행할 예정이에요.</p>
+                <p class="confirmation-message"><strong>전화 상담 예약</strong>을 진행할 예정이에요.</p>
                 <button class="cancel-button" onclick="cancelReservation()">예약 취소</button>
             </div>
 
