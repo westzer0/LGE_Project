@@ -1,0 +1,698 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG전자 | 전화 상담 예약 조회</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #f5f5f5;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================
+           Header - result.html과 동일한 스타일
+           ============================================ */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            display: block;
+            height: 28px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-top-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-top-icon {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: #1a1a1a;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-top-icon:hover {
+            color: #A50034;
+        }
+
+        .header-top-link {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            padding: 0 12px;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .header-top-link:hover {
+            color: #A50034;
+        }
+
+        .header-bottom-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 0;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .sub-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            width: 100%;
+        }
+
+        .sub-nav-item {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+            position: relative;
+            text-align: center;
+        }
+
+        .sub-nav-item.active {
+            color: #1a1a1a;
+            font-weight: 700;
+        }
+
+        .sub-nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #EA1917;
+        }
+
+        /* ============================================
+           Main Content
+           ============================================ */
+        .main-content {
+            margin-top: 120px;
+            min-height: calc(100vh - 120px);
+            padding: 40px 0;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        /* ============================================
+           Page Title
+           ============================================ */
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+        }
+
+        /* ============================================
+           Progress Steps
+           ============================================ */
+        .progress-section {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            padding: 0 40px;
+        }
+
+        .progress-step {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: #e5e5e5;
+            z-index: 1;
+        }
+
+        .progress-step:last-child .progress-line {
+            display: none;
+        }
+
+        .progress-line.active {
+            background: #EA1917;
+        }
+
+        .progress-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e5e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 12px;
+        }
+
+        .progress-dot.active {
+            background: #EA1917;
+        }
+
+        .progress-dot::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .progress-dot.active::after {
+            background: #EA1917;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .progress-label.active {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .progress-description {
+            font-size: 13px;
+            color: #999;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* ============================================
+           Confirmation Message
+           ============================================ */
+        .confirmation-box {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .confirmation-message {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .cancel-button {
+            padding: 10px 24px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cancel-button:hover {
+            background: #f5f5f5;
+            border-color: #d0d0d0;
+        }
+
+        /* ============================================
+           Reservation Details
+           ============================================ */
+        .details-section {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+        }
+
+        .details-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 32px;
+        }
+
+        .details-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .detail-item {
+            display: flex;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #1a1a1a;
+            flex: 1;
+        }
+
+        /* ============================================
+           Responsive
+           ============================================ */
+        @media (max-width: 768px) {
+            .header-wrapper {
+                padding: 0 20px;
+            }
+
+            .header-top-row {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 0;
+            }
+
+            .header-top-left {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .logo {
+                height: 24px;
+            }
+
+            .header-top-right {
+                gap: 16px;
+            }
+
+            .header-top-link {
+                display: none;
+            }
+
+            .header-top-icons {
+                gap: 16px;
+            }
+
+            .header-top-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .header-bottom-row {
+                padding: 12px 0;
+                justify-content: center;
+            }
+
+            .sub-nav {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                gap: 20px;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .sub-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+            .sub-nav-item {
+                font-size: 16px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .main-content {
+                margin-top: 100px;
+                padding: 20px 0;
+            }
+
+            .content-wrapper {
+                padding: 0 20px;
+            }
+
+            .page-title {
+                font-size: 24px;
+                margin-bottom: 24px;
+            }
+
+            .progress-section,
+            .details-section {
+                padding: 24px 20px;
+            }
+
+            .progress-bar {
+                padding: 0 20px;
+            }
+
+            .progress-dot {
+                width: 32px;
+                height: 32px;
+            }
+
+            .progress-dot::after {
+                width: 10px;
+                height: 10px;
+            }
+
+            .progress-label {
+                font-size: 12px;
+            }
+
+            .progress-description {
+                font-size: 11px;
+            }
+
+            .confirmation-box {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 20px;
+            }
+
+            .cancel-button {
+                width: 100%;
+            }
+
+            .details-title {
+                font-size: 18px;
+                margin-bottom: 24px;
+            }
+
+            .detail-item {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .detail-label {
+                min-width: auto;
+                font-size: 14px;
+            }
+
+            .detail-value {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ============================================
+         Header
+         ============================================ -->
+    <header class="header">
+        <div class="header-wrapper">
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/" class="logo">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+                <div class="header-top-right">
+                    <div class="header-top-icons">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <a href="#" class="header-top-link">회사소개</a>
+                    <a href="#" class="header-top-link">사업자몰</a>
+                </div>
+            </div>
+            <div class="header-bottom-row">
+                <nav class="sub-nav">
+                    <a href="#" class="sub-nav-item active">예약 조회/변경</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================
+         Main Content
+         ============================================ -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <h1 class="page-title">전화 상담 예약</h1>
+
+            <!-- 진행 단계 -->
+            <div class="progress-section">
+                <h2 class="progress-title">진행단계</h2>
+                <div class="progress-bar-container">
+                    <div class="progress-bar">
+                        <div class="progress-step">
+                            <div class="progress-line active"></div>
+                            <div class="progress-dot active"></div>
+                            <div class="progress-label active">접수</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="progress-line"></div>
+                            <div class="progress-dot active"></div>
+                            <div class="progress-label active">상담 예정</div>
+                        </div>
+                        <div class="progress-step">
+                            <div class="progress-line"></div>
+                            <div class="progress-dot"></div>
+                            <div class="progress-label">처리 완료</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="progress-description">접수 > 상담 예정 > 처리 완료 순으로 진행됩니다.</p>
+            </div>
+
+            <!-- 확인 메시지 -->
+            <div class="confirmation-box">
+                <p class="confirmation-message">전화 상담 예약을 진행할 예정이에요.</p>
+                <button class="cancel-button" onclick="cancelReservation()">예약 취소</button>
+            </div>
+
+            <!-- 예약 상세 정보 -->
+            <div class="details-section">
+                <h2 class="details-title">예약하신 내용을 확인해 드릴게요</h2>
+                <div class="details-list" id="reservationDetails">
+                    <!-- 예약 정보가 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // URL에서 예약 정보 가져오기
+        function getReservationData() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // 기본값 설정
+            const now = new Date();
+            const formatDateTime = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}.${month}.${day} ${hours}:${minutes}`;
+            };
+
+            let reservationData = {
+                receiptDate: urlParams.get('receiptDate') || formatDateTime(now),
+                status: urlParams.get('status') || '상담예정',
+                scheduledDate: urlParams.get('scheduledDate') || '',
+                scheduledTime: urlParams.get('scheduledTime') || '',
+                purpose: urlParams.get('purpose') || '',
+                purchasePeriod: urlParams.get('purchasePeriod') || '선택 안함',
+                name: urlParams.get('name') || '',
+                phone: urlParams.get('phone') || '',
+                notes: urlParams.get('notes') || '',
+                products: urlParams.get('products') ? JSON.parse(decodeURIComponent(urlParams.get('products'))) : []
+            };
+
+            // 세션 스토리지에서도 확인 (우선순위 높음)
+            const sessionData = sessionStorage.getItem('reservation_data');
+            if (sessionData) {
+                try {
+                    const parsed = JSON.parse(sessionData);
+                    reservationData = { ...reservationData, ...parsed };
+                } catch (e) {
+                    console.error('세션 데이터 파싱 오류:', e);
+                }
+            }
+
+            return reservationData;
+        }
+
+        // 예약 상세 정보 표시
+        function displayReservationDetails() {
+            const data = getReservationData();
+            const detailsContainer = document.getElementById('reservationDetails');
+
+            // 예정 일시 포맷팅
+            let scheduledDateTime = '미정';
+            if (data.scheduledDate) {
+                if (data.scheduledTime) {
+                    scheduledDateTime = `${data.scheduledDate} ${data.scheduledTime}`;
+                } else {
+                    scheduledDateTime = data.scheduledDate;
+                }
+            }
+
+            const details = [
+                { label: '접수 일시', value: data.receiptDate || '-' },
+                { label: '진행 상태', value: data.status || '-' },
+                { label: '예정 일시', value: scheduledDateTime },
+                { label: '상담목적', value: getPurposeLabel(data.purpose) },
+                { label: '신청자 이름', value: data.name || '-' },
+                { label: '신청자 전화번호', value: data.phone || '-' },
+                { label: '선택 제품', value: data.products && data.products.length > 0 ? data.products.map(p => (p.name || p.model || '')).filter(Boolean).join(', ') : '-' },
+                { label: '추가 전달 사항', value: data.notes || '-' }
+            ];
+
+            detailsContainer.innerHTML = details.map(detail => `
+                <div class="detail-item">
+                    <div class="detail-label">${detail.label}</div>
+                    <div class="detail-value">${detail.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // 상담목적 라벨 변환
+        function getPurposeLabel(purpose) {
+            const labels = {
+                'single': '단품 구매',
+                'multiple': '다품목 구매',
+                'wedding': '혼수',
+                'moving': '이사'
+            };
+            return labels[purpose] || purpose || '-';
+        }
+
+        // 예약 취소
+        function cancelReservation() {
+            if (confirm('예약을 취소하시겠습니까?')) {
+                // 예약 취소 처리
+                sessionStorage.removeItem('reservation_data');
+                alert('예약이 취소되었습니다.');
+                window.location.href = '/result/';
+            }
+        }
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function () {
+            displayReservationDetails();
+        });
+    </script>
+</body>
+
+</html>

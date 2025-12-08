@@ -6,7 +6,7 @@ from api.views import (
     index_view, recommend, products, recommend_view, product_spec_view, product_image_by_name_view, product_reviews_view,
     product_recommend_reason_view, product_demographics_view,
     onboarding_page, onboarding_step2_page, onboarding_step3_page, onboarding_step4_page, onboarding_step5_page, onboarding_step6_page, onboarding_step7_page, main_page, onboarding_new_page, result_page,
-    fake_lg_main_page, react_app_view, health_check_view, oracle_test_view,
+    fake_lg_main_page, react_app_view, health_check_view, oracle_test_view,reservation_status_page, other_recommendations_page, mypage,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
     portfolio_refresh_view, portfolio_alternatives_view, portfolio_add_to_cart_view,

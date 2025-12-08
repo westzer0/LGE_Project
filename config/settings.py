@@ -11,14 +11,33 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-8zb-1$0d6^f=&c@v8-l2-9b*9ydnp7k3m0-s_y8gljjkvtiyt8'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'surer-tabatha-gullibly.ngrok-free.dev',  # ngrok 주소 추가
+]
+
 # ============================================================
-# 환경 변수 로드 (.env 파일)
+# 외부 API 키 설정
 # ============================================================
+import os
+from pathlib import Path
+
+# .env 파일 로드 (python-dotenv 사용)
 try:
     from dotenv import dotenv_values
     # 프로젝트 루트 디렉토리의 .env 파일 로드
@@ -52,6 +71,7 @@ except ImportError:
 except Exception as e:
     print(f"[WARNING] .env 파일 로드 실패: {e}")
 
+<<<<<<< HEAD
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -118,6 +138,8 @@ if not DEBUG:
 # 외부 API 키 설정
 # ============================================================
 
+=======
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
 # 카카오 API (https://developers.kakao.com)
 KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY', '')
 KAKAO_JS_KEY = os.environ.get('KAKAO_JS_KEY', '')
@@ -184,7 +206,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-    }
+        },
     },
 ]
 
@@ -194,6 +216,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+<<<<<<< HEAD
 # ============================================================
 # Oracle 11g XE 데이터베이스 설정 (Thick 모드)
 # ============================================================
@@ -255,6 +278,12 @@ else:
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
+=======
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
     }
 
 
@@ -294,6 +323,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+<<<<<<< HEAD
 STATICFILES_DIRS = [
     BASE_DIR / 'assets',
 ]
@@ -311,6 +341,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # WhiteNoise 추가 설정
 WHITENOISE_ROOT = BASE_DIR / 'staticfiles' / 'react'
 
+=======
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -383,6 +415,7 @@ REST_FRAMEWORK = {
 }
 
 # ============================================================
+<<<<<<< HEAD
 # 보안 설정 (프로덕션)
 # ============================================================
 if not DEBUG:
@@ -393,3 +426,10 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
+=======
+# CSRF 설정 (ngrok 사용 시 필수)
+# ============================================================
+CSRF_TRUSTED_ORIGINS = [
+    'https://surer-tabatha-gullibly.ngrok-free.dev',
+]
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7

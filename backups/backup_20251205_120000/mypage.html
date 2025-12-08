@@ -1,0 +1,939 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 | LG전자</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #fff;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ============================================
+           Header - other_recommendations.html과 동일한 스타일
+           ============================================ */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            display: block;
+            height: 28px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-top-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-top-icon {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: #1a1a1a;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-top-icon:hover {
+            color: #A50034;
+        }
+
+        .header-top-link {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            padding: 0 12px;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .header-top-link:hover {
+            color: #A50034;
+        }
+
+        .header-top-link:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 12px;
+            background: #e5e5e5;
+        }
+
+        .header-bottom-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .gnb {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .gnb-item {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .gnb-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-separator {
+            width: 1px;
+            height: 14px;
+            background: #e5e5e5;
+            margin: 0 12px;
+        }
+
+        .gnb-item.home-style {
+            background: #FD312E;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.2;
+        }
+
+        .home-style-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .home-style-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .gnb-item.home-style:hover {
+            background: #B80D3D;
+            color: #fff;
+        }
+
+        .gnb-brand {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-shrink: 0;
+            background: #F4F6F8;
+            border-radius: 9999px;
+            padding: 6px 20px;
+            margin-left: 0;
+        }
+
+        .gnb-brand-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .gnb-brand-item:hover {
+            color: #A50034;
+        }
+
+        /* ============================================
+           Breadcrumb - other_recommendations.html과 동일한 구조
+           ============================================ */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: none;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           Page Title Section
+           ============================================ */
+        .page-title-section {
+            margin-top: 160px;
+            padding: 0 60px 20px;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .header-action-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 16px;
+            color: #1a1a1a;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .header-action-item:hover {
+            color: #A50034;
+        }
+
+        .header-action-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* ============================================
+           Main Content
+           ============================================ */
+        .main-content {
+            margin-top: 0;
+            min-height: calc(100vh - 160px);
+            padding: 40px 60px;
+            background: #fff;
+        }
+
+        .mypage-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 60px;
+        }
+
+        /* ============================================
+           Sidebar Navigation
+           ============================================ */
+        .sidebar {
+            width: 240px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+
+        .sidebar-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-menu-link {
+            display: block;
+            padding: 8px 0;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .sidebar-menu-link:hover {
+            color: #A50034;
+        }
+
+        .sidebar-menu-link.active {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        /* ============================================
+           Main Content Area
+           ============================================ */
+        .content-area {
+            flex: 1;
+        }
+
+        .user-profile-section {
+            margin-bottom: 32px;
+        }
+
+        .user-name-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .user-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-name-actions {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .user-name-arrow {
+            width: 20px;
+            height: 20px;
+            color: #666;
+        }
+
+        .user-status-box {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .user-status-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .user-status-text {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .user-status-right {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        .user-status-arrow {
+            width: 16px;
+            height: 16px;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 0;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 16px 0;
+        }
+
+        .user-stat-item {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+
+        .user-stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 16px;
+            background: #e5e5e5;
+        }
+
+        .user-stat-value {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        /* ============================================
+           My Best Shop Section
+           ============================================ */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+        }
+
+        .bestshop-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .bestshop-card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bestshop-card:hover {
+            border-color: #A50034;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bestshop-card-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bestshop-card-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+
+        .bestshop-card-text {
+            flex: 1;
+            font-size: 14px;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        .bestshop-card-logo {
+            width: 60px;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           Wishlist & Recently Viewed Sections
+           ============================================ */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .section-header-link {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .section-header-link:hover {
+            color: #A50034;
+        }
+
+        .section-header-arrow {
+            width: 16px;
+            height: 16px;
+        }
+
+        .section-content {
+            min-height: 200px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* ============================================
+           Floating Action Buttons
+           ============================================ */
+        .floating-actions {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .floating-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s;
+        }
+
+        .floating-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .floating-btn.ai-chat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .floating-btn.scroll-top {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            color: #666;
+        }
+
+        .floating-btn-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .floating-btn-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-wrapper">
+            <!-- 상단 줄 (Top Row) - 첫 번째 줄 -->
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/" class="logo">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+                <div class="header-top-right">
+                    <div class="header-top-icons">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <a href="/my-page/" style="display: flex; align-items: center;">
+                            <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </a>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <a href="#" class="header-top-link">회사소개</a>
+                    <a href="#" class="header-top-link">사업자몰</a>
+                </div>
+            </div>
+            <!-- 하단 줄 (Bottom Row) - 두 번째 줄 -->
+            <div class="header-bottom-row">
+                <nav class="gnb">
+                    <a href="#" class="gnb-item">제품/소모품</a>
+                    <a href="#" class="gnb-item">고객지원</a>
+                    <a href="#" class="gnb-item">가전 구독</a>
+                    <a href="#" class="gnb-item">혜택/이벤트</a>
+                    <a href="#" class="gnb-item">스토리</a>
+                    <a href="#" class="gnb-item">베스트샵</a>
+                    <a href="#" class="gnb-item">LG AI</a>
+                    <span class="gnb-separator"></span>
+                    <a href="/" class="gnb-item home-style">
+                        <span class="home-style-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
+                        </span>
+                        홈스타일
+                    </a>
+                    <div class="gnb-brand">
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
+                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">마이페이지</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Title Section -->
+    <div class="page-title-section">
+        <h1 class="page-title">마이페이지</h1>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="mypage-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">마이페이지 홈</div>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">쇼핑 관리</div>
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">주문/배송/구독 조회</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">배송지 관리</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">LGE.COM 쿠폰</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">사은품 신청 조회</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">구독 관리</div>
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">계약 관리</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">납부내역 조회</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">납부방법 변경</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">방문/정기배송 일정</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">마이 베스트샵</div>
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link active">선호매장 등록/수정</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">베스트샵 쿠폰 확인</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">상담 예약 조회</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">보유제품/리뷰</div>
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">보유제품 관리</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">상품 리뷰</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">LG 베스트 케어 관리</div>
+                    <ul class="sidebar-menu">
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">가전세척 예약 조회</a>
+                        </li>
+                        <li class="sidebar-menu-item">
+                            <a href="#" class="sidebar-menu-link">이전설치 예약 조회</a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- User Profile Section -->
+                <div class="user-profile-section">
+                    <div class="user-name-row">
+                        <div class="user-name">
+                            김엘지님
+                            <svg class="user-name-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                        <div class="user-name-actions">
+                            <a href="#" class="header-action-item">
+                                <svg class="header-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                    </path>
+                                </svg>
+                                위시리스트
+                            </a>
+                            <a href="#" class="header-action-item">
+                                <svg class="header-action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                최근본
+                            </a>
+                        </div>
+                    </div>
+                    <div class="user-status-box">
+                        <div class="user-status-left">
+                            <div class="user-status-icon">S</div>
+                            <span class="user-status-text">실버</span>
+                            <svg class="user-status-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                        <div class="user-status-right">
+                            0 P
+                            <svg class="user-status-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="user-stat-item">
+                            쿠폰 <span class="user-stat-value">0장</span>
+                        </div>
+                        <div class="user-stat-item">
+                            구독 관리 <span class="user-stat-value">0개</span>
+                        </div>
+                        <div class="user-stat-item">
+                            보유 제품 <span class="user-stat-value">0개</span>
+                        </div>
+                        <div class="user-stat-item">
+                            상품 리뷰 <span class="user-stat-value">0건</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Best Shop Section -->
+                <div class="bestshop-section">
+                    <h2 class="section-title">마이 베스트샵</h2>
+                    <div class="bestshop-cards">
+                        <div class="bestshop-card">
+                            <div class="bestshop-card-content">
+                                <svg class="bestshop-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4">
+                                    </path>
+                                </svg>
+                                <div class="bestshop-card-text">상담 예약 조회</div>
+                            </div>
+                        </div>
+                        <div class="bestshop-card">
+                            <div class="bestshop-card-content">
+                                <svg class="bestshop-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                    </path>
+                                </svg>
+                                <div class="bestshop-card-text">[선호매장]관악점</div>
+                            </div>
+                        </div>
+                        <div class="bestshop-card">
+                            <div class="bestshop-card-content">
+                                <svg class="bestshop-card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <div class="bestshop-card-text">베스트샵 쿠폰 확인</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wishlist Section -->
+                <div class="wishlist-section">
+                    <div class="section-header">
+                        <h2 class="section-header-title">위시리스트</h2>
+                        <a href="#" class="section-header-link">
+                            더보기
+                            <svg class="section-header-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="section-content">위시리스트가 비어있습니다.</div>
+                </div>
+
+                <!-- Recently Viewed Section -->
+                <div class="recently-viewed-section" style="margin-top: 40px;">
+                    <div class="section-header">
+                        <h2 class="section-header-title">최근 본 제품(10)</h2>
+                        <a href="#" class="section-header-link">
+                            더보기
+                            <svg class="section-header-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="section-content">최근 본 제품이 없습니다.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-actions">
+        <button class="floating-btn ai-chat" title="AI Chat">
+            <svg class="floating-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                </path>
+            </svg>
+        </button>
+        <button class="floating-btn scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="맨 위로">
+            <svg class="floating-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+        </button>
+    </div>
+</body>
+
+</html>

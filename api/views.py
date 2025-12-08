@@ -294,17 +294,29 @@ def result_page(request):
 
 
 def other_recommendations_page(request):
+<<<<<<< HEAD
     """다른 추천 포트폴리오 페이지"""
+=======
+    """다른 추천 후보 확인 페이지 렌더링"""
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
     return render(request, "other_recommendations.html")
 
 
 def mypage(request):
+<<<<<<< HEAD
     """마이페이지"""
+=======
+    """마이페이지 렌더링"""
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
     return render(request, "mypage.html")
 
 
 def reservation_status_page(request):
+<<<<<<< HEAD
     """예약 조회/변경 페이지"""
+=======
+    """예약 조회/변경 페이지 렌더링"""
+>>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
     return render(request, "reservation_status.html")
 
 

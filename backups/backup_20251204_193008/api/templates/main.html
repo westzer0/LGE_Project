@@ -1,0 +1,942 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LG전자 | 가전 패키지 추천</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #000;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .main-content {
+            background-color: #fff;
+        }
+
+        /* Header - 2단 구조 (fake_lg_main.html 스타일 유지) */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 1000;
+        }
+
+        .header-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        /* 상단 줄 (Top Row) */
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .header-top-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            display: block;
+            height: 28px;
+        }
+
+        .logo img {
+            height: 100%;
+            width: auto;
+        }
+
+        .header-top-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-top-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-top-icon {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: #1a1a1a;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .header-top-icon:hover {
+            color: #A50034;
+        }
+
+        .header-top-link {
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            padding: 0 12px;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .header-top-link:hover {
+            color: #A50034;
+        }
+
+        .header-top-link:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 12px;
+            background: #e5e5e5;
+        }
+
+        /* 하단 줄 (Bottom Row) */
+        .header-bottom-row {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .gnb {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .gnb-item {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 8px 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .gnb-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-separator {
+            width: 1px;
+            height: 14px;
+            background: #e5e5e5;
+            margin: 0 12px;
+        }
+
+        .gnb-item.home-style {
+            background: #FD312E;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.2;
+        }
+
+        .home-style-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .home-style-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
+        }
+
+        .gnb-item.home-style:hover {
+            background: #B80D3D;
+            color: #fff;
+        }
+
+        .gnb-brand {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-shrink: 0;
+            background: #F4F6F8;
+            border-radius: 9999px;
+            padding: 6px 20px;
+            margin-left: 0;
+        }
+
+        .gnb-brand-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            padding: 0;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .gnb-brand-item:hover {
+            color: #A50034;
+        }
+
+        .gnb-brand-item strong {
+            font-weight: 700;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 160px;
+        }
+
+        /* Image Sections - Full Width */
+        .image-section {
+            width: 100%;
+            display: block;
+            padding: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        .image-section img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Navigation Buttons between Group1 and Group2 */
+        .nav-buttons-section {
+            background: #fff;
+            padding: 0;
+            border: none;
+            position: sticky;
+            top: 160px;
+            /* Header height (120px) + Breadcrumb height (40px) */
+            z-index: 998;
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .nav-buttons-container {
+            max-width: 1380px;
+            margin: 0 auto;
+            padding: 12px 20px 0 20px;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 0;
+        }
+
+        .nav-button {
+            flex: 1;
+            padding: 6px 0 0 0;
+            font-size: 18px;
+            font-weight: 500;
+            color: #1a1a1a;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-align: center;
+            box-sizing: border-box;
+            width: 33.33%;
+        }
+
+        .nav-button>* {
+            margin: 0 auto;
+        }
+
+        .nav-button:hover {
+            color: #1a1a1a;
+        }
+
+        .nav-button.active {
+            font-weight: 700;
+            color: #1a1a1a;
+            border-bottom: 3px solid #FD312E;
+        }
+
+        /* 맞춤 추천과 견적 및 구매 버튼의 밑줄 길이 9% 증가 (원래보다) */
+        .nav-button.active[href="#group2"]::after,
+        .nav-button.active[href="#group4"]::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 109%;
+            height: 3px;
+            background: #FD312E;
+            z-index: 1;
+        }
+
+        .nav-button.active[href="#group2"],
+        .nav-button.active[href="#group4"] {
+            border-bottom: none;
+        }
+
+        /* Scroll target sections */
+        .scroll-target {
+            scroll-margin-top: 180px;
+        }
+
+        /* Floating CTA Button */
+        .floating-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            padding: 20px 40px;
+            z-index: 998;
+            box-shadow: none;
+        }
+
+        .floating-cta-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .floating-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: none;
+            background: #2B2226;
+            color: #fff;
+            padding: 0;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(43, 34, 38, 0.3);
+            width: 420px;
+            height: 60px;
+            white-space: nowrap;
+        }
+
+        .floating-cta-btn-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+        }
+
+        .floating-cta-btn:hover {
+            transform: translateY(-2px);
+            background: #1a1518;
+            box-shadow: 0 6px 16px rgba(43, 34, 38, 0.4);
+        }
+
+        .floating-cta-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 60px 40px;
+            background: #1a1a1a;
+            color: #9e9e9e;
+            margin-bottom: 0;
+        }
+
+        body {
+            background: #000;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: #9e9e9e;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            pointer-events: none;
+        }
+
+        .scroll-to-top.visible {
+            pointer-events: auto;
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .scroll-to-top svg {
+            width: 24px;
+            height: 24px;
+            color: #1a1a1a;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+
+            .header-wrapper,
+            .breadcrumb-wrapper {
+                padding: 0 40px;
+            }
+
+            .nav-buttons-section {
+                top: 140px;
+            }
+
+            .nav-buttons-container {
+                padding: 10px 20px 0 20px;
+            }
+
+            .nav-button {
+                padding: 6px 0 0 0;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .header-wrapper,
+            .breadcrumb-wrapper {
+                padding: 0 20px;
+            }
+
+            .main-content {
+                margin-top: 140px;
+            }
+
+            .breadcrumb {
+                top: 100px;
+            }
+
+            .nav-buttons-section {
+                top: 120px;
+            }
+
+            .nav-buttons-container {
+                padding: 8px 20px 0 20px;
+            }
+
+            .nav-button {
+                padding: 5px 0 0 0;
+                font-size: 14px;
+            }
+
+            .scroll-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+
+            .scroll-to-top svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .floating-cta {
+                padding: 16px 20px;
+            }
+
+            .floating-cta-btn {
+                min-width: 240px;
+                padding: 14px 40px;
+                font-size: 16px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-wrapper">
+            <!-- 상단 줄 (Top Row) - 첫 번째 줄 -->
+            <div class="header-top-row">
+                <div class="header-top-left">
+                    <a href="/" class="logo">
+                        <img src="https://www.lge.co.kr/kr/images/nextjs/lg_logo_213x56.png" alt="LG전자">
+                    </a>
+                </div>
+                <div class="header-top-right">
+                    <div class="header-top-icons">
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <a href="#" class="header-top-link">회사소개</a>
+                    <a href="#" class="header-top-link">사업자몰</a>
+                </div>
+            </div>
+            <!-- 하단 줄 (Bottom Row) - 두 번째 줄 -->
+            <div class="header-bottom-row">
+                <nav class="gnb">
+                    <a href="#" class="gnb-item">제품/소모품</a>
+                    <a href="#" class="gnb-item">고객지원</a>
+                    <a href="#" class="gnb-item">가전 구독</a>
+                    <a href="#" class="gnb-item">혜택/이벤트</a>
+                    <a href="#" class="gnb-item">스토리</a>
+                    <a href="#" class="gnb-item">베스트샵</a>
+                    <a href="#" class="gnb-item">LG AI</a>
+                    <span class="gnb-separator"></span>
+                    <a href="/lge/#" class="gnb-item home-style">
+                        <span class="home-style-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                            </svg>
+                        </span>
+                        홈스타일
+                    </a>
+                    <div class="gnb-brand">
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
+                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/lge/#">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">가전패키지추천</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Group11 Image -->
+        <section class="image-section" id="group11">
+            <img src="{% static 'images/Group11.png' %}" alt="Group 11">
+        </section>
+
+        <!-- Group14 Image -->
+        <section class="image-section" id="group14">
+            <img src="{% static 'images/Group 14.png' %}" alt="Group 14">
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo">LG전자</div>
+            <div class="footer-links">
+                <a href="#">이용약관</a>
+                <a href="#">개인정보처리방침</a>
+                <a href="#">고객센터</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating CTA Button -->
+    <div class="floating-cta">
+        <div class="floating-cta-container">
+            <a href="/onboarding/" class="floating-cta-btn">
+                <img src="{% static 'images/Vector.png' %}" alt="선물 상자" class="floating-cta-btn-icon">
+                가전 패키지 추천받기
+            </a>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="맨 위로 가기">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
+    <script>
+        // Remove active class from all buttons
+        function removeActiveClass() {
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        // Set active class to specific button
+        function setActiveButton(button) {
+            removeActiveClass();
+            if (button) {
+                button.classList.add('active');
+            }
+        }
+
+        // Smooth scroll with offset for fixed header and breadcrumb
+        document.querySelectorAll('.nav-button').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    // Update active state immediately on click
+                    setActiveButton(this);
+
+                    const headerHeight = 120; // Header height
+                    const breadcrumbHeight = 40; // Breadcrumb height
+                    const navButtonsHeight = 60; // Navigation buttons height
+                    const totalOffset = headerHeight + breadcrumbHeight + navButtonsHeight + 20; // Additional padding
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - totalOffset;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // ScrollSpy using IntersectionObserver
+        function initScrollSpy() {
+            const sections = [
+                { id: 'group2', button: document.querySelector('a[href="#group2"]') },
+                { id: 'group3', button: document.querySelector('a[href="#group3"]') },
+                { id: 'group4', button: document.querySelector('a[href="#group4"]') }
+            ];
+
+            // Track which sections are currently visible
+            const visibleSections = new Map();
+
+            // Options for IntersectionObserver - detect sections near viewport center
+            const observerOptions = {
+                root: null,
+                rootMargin: '-200px 0px -50% 0px', // Top offset for header/breadcrumb/nav, bottom to detect center
+                threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+            };
+
+            // Callback for IntersectionObserver
+            const observerCallback = (entries) => {
+                entries.forEach(entry => {
+                    const sectionId = entry.target.id;
+
+                    if (entry.isIntersecting) {
+                        // Store intersection ratio for this section
+                        visibleSections.set(sectionId, entry.intersectionRatio);
+                    } else {
+                        // Remove from visible sections
+                        visibleSections.delete(sectionId);
+                    }
+                });
+
+                // Find the section with the highest intersection ratio (most visible)
+                if (visibleSections.size > 0) {
+                    let maxRatio = 0;
+                    let activeSectionId = null;
+
+                    visibleSections.forEach((ratio, sectionId) => {
+                        if (ratio > maxRatio) {
+                            maxRatio = ratio;
+                            activeSectionId = sectionId;
+                        }
+                    });
+
+                    // Set active button for the most visible section
+                    if (activeSectionId) {
+                        const section = sections.find(s => s.id === activeSectionId);
+                        if (section && section.button) {
+                            setActiveButton(section.button);
+                        }
+                    }
+                } else {
+                    // Fallback: check which section is closest to viewport center
+                    const viewportCenter = window.innerHeight / 2 + window.scrollY;
+                    let closestSection = null;
+                    let minDistance = Infinity;
+
+                    sections.forEach(({ id }) => {
+                        const section = document.getElementById(id);
+                        if (section) {
+                            const sectionTop = section.offsetTop;
+                            const sectionCenter = sectionTop + section.offsetHeight / 2;
+                            const distance = Math.abs(viewportCenter - sectionCenter);
+
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closestSection = sections.find(s => s.id === id);
+                            }
+                        }
+                    });
+
+                    if (closestSection && closestSection.button) {
+                        setActiveButton(closestSection.button);
+                    }
+                }
+            };
+
+            // Create IntersectionObserver
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+            // Observe all target sections
+            sections.forEach(({ id }) => {
+                const section = document.getElementById(id);
+                if (section) {
+                    observer.observe(section);
+                }
+            });
+
+            // Set initial active state based on scroll position
+            function setInitialActiveState() {
+                const viewportCenter = window.innerHeight / 2 + window.scrollY;
+                let closestSection = null;
+                let minDistance = Infinity;
+
+                sections.forEach(({ id }) => {
+                    const section = document.getElementById(id);
+                    if (section) {
+                        const sectionTop = section.offsetTop;
+                        const sectionCenter = sectionTop + section.offsetHeight / 2;
+                        const distance = Math.abs(viewportCenter - sectionCenter);
+
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestSection = sections.find(s => s.id === id);
+                        }
+                    }
+                });
+
+                if (closestSection && closestSection.button) {
+                    setActiveButton(closestSection.button);
+                } else if (sections.length > 0 && sections[0].button) {
+                    // Fallback to first section
+                    setActiveButton(sections[0].button);
+                }
+            }
+
+            // Set initial state
+            setInitialActiveState();
+
+            // Update on scroll for better responsiveness
+            let scrollTimeout;
+            window.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    // Observer will handle the update, but we can add additional logic here if needed
+                }, 100);
+            });
+        }
+
+        // Initialize ScrollSpy when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScrollSpy);
+        } else {
+            initScrollSpy();
+        }
+
+        // Scroll to Top Button
+        function initScrollToTop() {
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+
+            if (!scrollToTopBtn) {
+                console.error('Scroll to Top button not found');
+                return;
+            }
+
+            // Show/hide button based on scroll position
+            function toggleScrollToTop() {
+                if (window.scrollY > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            }
+
+            // Scroll to top on button click
+            scrollToTopBtn.onclick = function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                return false;
+            };
+
+            // Also add event listener as backup
+            scrollToTopBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }, false);
+
+            // Check scroll position on scroll
+            window.addEventListener('scroll', toggleScrollToTop, { passive: true });
+
+            // Initial check
+            toggleScrollToTop();
+        }
+
+        // Initialize Scroll to Top when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScrollToTop);
+        } else {
+            // Use setTimeout to ensure DOM is fully ready
+            setTimeout(initScrollToTop, 100);
+        }
+    </script>
+</body>
+
+</html>
