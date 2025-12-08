@@ -20,7 +20,7 @@
 
         body {
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
-            background-color: #f5f5f5;
+            background-color: #fff;
             color: #1a1a1a;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
@@ -106,24 +106,33 @@
             color: #A50034;
         }
 
+        .header-top-link:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 12px;
+            background: #e5e5e5;
+        }
+
         .header-bottom-row {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             padding: 16px 0;
-            border-top: 1px solid #f0f0f0;
         }
 
-        .sub-nav {
+        .gnb {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 24px;
-            width: 100%;
+            gap: 15px;
+            flex-shrink: 0;
         }
 
-        .sub-nav-item {
-            font-size: 18px;
+        .gnb-item {
+            font-size: 14px;
             font-weight: 700;
             color: #1a1a1a;
             text-decoration: none;
@@ -131,31 +140,152 @@
             transition: color 0.2s;
             white-space: nowrap;
             position: relative;
-            text-align: center;
         }
 
-        .sub-nav-item.active {
-            color: #1a1a1a;
+        .gnb-item:hover {
+            color: #EA1917;
+        }
+
+        .gnb-separator {
+            width: 1px;
+            height: 14px;
+            background: #e5e5e5;
+            margin: 0px 0px;
+        }
+
+        .gnb-item.home-style {
+            background: transparent;
+            color: #fff;
+            padding: 5px 0px;
+            border-radius: 4px;
             font-weight: 700;
+            font-size: 13px;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            line-height: 1.2;
         }
 
-        .sub-nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
+        .home-style-icon {
+            width: 58px;
+            height: 36px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .home-style-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .gnb-item.home-style:hover {
+            background: transparent;
+            color: #fff;
+        }
+
+        .gnb-brand {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-shrink: 0;
+            background: #F4F6F8;
+            border-radius: 9999px;
+            padding: 6px 20px;
+            margin-left: 0;
+        }
+
+        .gnb-brand-item {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .gnb-brand-item:hover {
+            color: #EA1917;
+        }
+
+        /* ============================================
+           Breadcrumb
+           ============================================ */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
             left: 0;
             right: 0;
-            height: 2px;
-            background: #EA1917;
+            background: #fff;
+            border-bottom: none;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+            padding: 7px 0px 0px;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #EA1917;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           Page Title Section
+           ============================================ */
+        .page-title-section {
+            margin-top: 200px;
+            padding: 0 300px 20px 170px;
+            text-align: center;
+            background: #fff;
+        }
+
+        .page-title-section h1.page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
         }
 
         /* ============================================
            Main Content
            ============================================ */
         .main-content {
-            margin-top: 120px;
+            margin-top: 0;
             min-height: calc(100vh - 120px);
-            padding: 40px 0;
+            padding-top: 20px;
+            padding-right: 20px;
+            padding-left: 20px;
+            padding-bottom: 40px;
+            background: #fff;
         }
 
         .content-wrapper {
@@ -186,9 +316,11 @@
 
         .progress-title {
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             color: #1a1a1a;
             margin-bottom: 24px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1a1a1a;
         }
 
         .progress-bar-container {
@@ -273,7 +405,7 @@
             font-size: 13px;
             color: #999;
             text-align: center;
-            margin-top: 8px;
+            margin-bottom: 24px;
         }
 
         /* ============================================
@@ -405,31 +537,40 @@
 
             .header-bottom-row {
                 padding: 12px 0;
-                justify-content: center;
-            }
-
-            .sub-nav {
+                justify-content: flex-start;
                 overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
-                -ms-overflow-style: none;
-                gap: 20px;
-                justify-content: center;
-                width: 100%;
             }
 
-            .sub-nav::-webkit-scrollbar {
-                display: none;
+            .gnb {
+                gap: 12px;
+                min-width: max-content;
             }
 
-            .sub-nav-item {
-                font-size: 16px;
+            .gnb-item {
+                font-size: 13px;
                 white-space: nowrap;
-                flex-shrink: 0;
+            }
+
+            .gnb-brand {
+                gap: 16px;
+                padding: 4px 12px;
+            }
+
+            .gnb-brand-item {
+                font-size: 12px;
+            }
+
+            .breadcrumb {
+                top: 100px;
+            }
+
+            .page-title-section {
+                margin-top: 180px;
+                padding: 0 20px 20px 20px;
             }
 
             .main-content {
-                margin-top: 100px;
+                margin-top: 0;
                 padding: 20px 0;
             }
 
@@ -536,24 +677,58 @@
                     <a href="#" class="header-top-link">사업자몰</a>
                 </div>
             </div>
+            <!-- 하단 줄 (Bottom Row) - 두 번째 줄 -->
             <div class="header-bottom-row">
-                <nav class="sub-nav">
-                    <a href="#" class="sub-nav-item active">예약 조회/변경</a>
+                <nav class="gnb">
+                    <a href="#" class="gnb-item">제품/소모품</a>
+                    <a href="#" class="gnb-item">고객지원</a>
+                    <a href="#" class="gnb-item">가전 구독</a>
+                    <a href="#" class="gnb-item">혜택/이벤트</a>
+                    <a href="#" class="gnb-item">스토리</a>
+                    <a href="#" class="gnb-item">베스트샵</a>
+                    <a href="#" class="gnb-item">LG AI</a>
+                    <span class="gnb-separator"></span>
+                    <a href="/" class="gnb-item home-style">
+                        <span class="home-style-icon">
+                            <img src="https://www.lge.co.kr/lg5-common/images/header/logo-living.svg" alt="홈스타일">
+                        </span>
+                    </a>
+                    <div class="gnb-brand">
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> <strong>Objet</strong> Collection</a>
+                        <a href="#" class="gnb-brand-item"><strong>LG</strong> ThinQ</a>
+                        <a href="#" class="gnb-brand-item"><strong>Let's</strong> gram</a>
+                    </div>
                 </nav>
             </div>
         </div>
     </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">예약 조회/변경</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Title Section -->
+    <div class="page-title-section">
+        <h1 class="page-title">예약 조회/변경</h1>
+    </div>
 
     <!-- ============================================
          Main Content
          ============================================ -->
     <main class="main-content">
         <div class="content-wrapper">
-            <h1 class="page-title">전화 상담 예약</h1>
-
             <!-- 진행 단계 -->
             <div class="progress-section">
                 <h2 class="progress-title">진행단계</h2>
+                <p class="progress-description">접수 > 상담 예정 > 처리 완료 순으로 진행됩니다.</p>
                 <div class="progress-bar-container">
                     <div class="progress-bar">
                         <div class="progress-step">
@@ -562,7 +737,7 @@
                             <div class="progress-label active">접수</div>
                         </div>
                         <div class="progress-step">
-                            <div class="progress-line"></div>
+                            <div class="progress-line active"></div>
                             <div class="progress-dot active"></div>
                             <div class="progress-label active">상담 예정</div>
                         </div>
@@ -573,7 +748,6 @@
                         </div>
                     </div>
                 </div>
-                <p class="progress-description">접수 > 상담 예정 > 처리 완료 순으로 진행됩니다.</p>
             </div>
 
             <!-- 확인 메시지 -->

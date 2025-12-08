@@ -235,6 +235,7 @@
             gap: 8px;
             font-size: 14px;
             color: #666;
+            padding: 7px 0px 0px;
         }
 
         .breadcrumb-nav a {
@@ -910,8 +911,8 @@
 
         .spec-modal-content {
             background: #fff;
-            border-radius: 12px;
-            padding: 32px;
+            border-radius: 8px;
+            padding: 24px;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
@@ -924,17 +925,18 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             border: none;
             background: transparent;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             color: #1a1a1a;
             padding: 0;
+            line-height: 1;
         }
 
         .spec-modal-close:hover {
@@ -942,10 +944,11 @@
         }
 
         .spec-modal-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #1a1a1a;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            margin-top: 0;
         }
 
         .spec-list {
@@ -958,7 +961,7 @@
             font-size: 14px;
             color: #1a1a1a;
             line-height: 1.8;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             padding-left: 0;
         }
 
@@ -3844,36 +3847,95 @@
         function openSpecModal(productId) {
             const modal = document.getElementById('specModal');
             const specList = document.getElementById('specList');
+            
+            // 모달 먼저 열기
+            modal.classList.add('active');
+            
+            // 로딩 메시지 표시
+            specList.innerHTML = '<li class="spec-item">스펙 정보를 불러오는 중...</li>';
 
-            // 제품 스펙 데이터 가져오기
-            const sessionId = sessionStorage.getItem('onboarding_session_id');
-            if (!sessionId) {
-                alert('세션 정보를 찾을 수 없습니다.');
-                return;
+            // 1. 전역 변수에서 제품 정보 확인
+            if (globalRecommendations && globalRecommendations.length > 0) {
+                const productIds = ['refrigerator', 'microwave', 'dishwasher'];
+                const index = productIds.indexOf(productId);
+                
+                if (index >= 0 && index < globalRecommendations.length) {
+                    const product = globalRecommendations[index];
+                    displaySpecModal(product);
+                    return;
+                }
             }
 
-            // 세션에서 제품 정보 가져오기
-            fetch(`/api/onboarding/session/${sessionId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.session && data.session.recommendation_result) {
-                        const recommendations = data.session.recommendation_result.recommendations || [];
-                        const productIds = ['refrigerator', 'microwave', 'dishwasher'];
-                        const index = productIds.indexOf(productId);
-
-                        if (index >= 0 && index < recommendations.length) {
-                            const product = recommendations[index];
-                            displaySpecModal(product);
+            // 2. 세션에서 제품 정보 가져오기 시도
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            if (sessionId) {
+                fetch(`/api/onboarding/session/${sessionId}/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('세션 조회 실패');
                         }
-                    }
-                })
-                .catch(error => {
-                    console.error('스펙 정보 로드 오류:', error);
-                    // 기본 스펙 정보 표시
-                    displaySpecModal(null, productId);
-                });
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success && data.session && data.session.recommendation_result) {
+                            let recommendationResult = data.session.recommendation_result;
+                            if (typeof recommendationResult === 'string') {
+                                try {
+                                    recommendationResult = JSON.parse(recommendationResult);
+                                } catch (e) {
+                                    console.error('추천 결과 파싱 오류:', e);
+                                }
+                            }
+                            
+                            const recommendations = recommendationResult.recommendations || [];
+                            const productIds = ['refrigerator', 'microwave', 'dishwasher'];
+                            const index = productIds.indexOf(productId);
 
-            modal.classList.add('active');
+                            if (index >= 0 && index < recommendations.length) {
+                                const product = recommendations[index];
+                                // 전역 변수에 저장
+                                globalRecommendations = recommendations;
+                                displaySpecModal(product);
+                            } else {
+                                // 기본 제품 ID로 시도
+                                useDefaultProductId(productId);
+                            }
+                        } else {
+                            // 기본 제품 ID로 시도
+                            useDefaultProductId(productId);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('스펙 정보 로드 오류:', error);
+                        // 기본 제품 ID로 시도
+                        useDefaultProductId(productId);
+                    });
+            } else {
+                // 세션이 없으면 기본 제품 ID로 시도
+                useDefaultProductId(productId);
+            }
+        }
+
+        // 기본 제품 ID를 사용하여 스펙 정보 가져오기
+        function useDefaultProductId(productId) {
+            // 제품 ID 매핑 (기본 제품 ID)
+            const defaultProductIds = {
+                'refrigerator': 'md10625884',
+                'microwave': 'md10200826',
+                'dishwasher': 'md10539834'
+            };
+
+            const defaultProductId = defaultProductIds[productId];
+            if (defaultProductId) {
+                // 기본 제품 정보 객체 생성
+                const product = {
+                    product_id: defaultProductId
+                };
+                displaySpecModal(product);
+            } else {
+                const specList = document.getElementById('specList');
+                specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
+            }
         }
 
         // 스펙 모달 닫기
