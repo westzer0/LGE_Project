@@ -3,7 +3,20 @@
 
 echo "🚀 Railway 배포 준비 중..."
 
-# 1. 환경 변수 확인
+# 1. Node.js 및 npm 확인
+if ! command -v node &> /dev/null; then
+    echo "⚠️ Node.js가 설치되지 않았습니다. React 빌드를 건너뜁니다."
+else
+    echo "📦 React 앱 빌드 중..."
+    npm install
+    npm run build
+fi
+
+# 2. Python 의존성 설치
+echo "📦 Python 의존성 설치 중..."
+pip install -r requirements.txt
+
+# 3. 환경 변수 확인
 echo "📋 필수 환경 변수 확인:"
 echo "   - DJANGO_SECRET_KEY"
 echo "   - DJANGO_DEBUG=False"
@@ -14,13 +27,13 @@ echo "   - OPENAI_API_KEY"
 echo "   - USE_ORACLE=true"
 echo "   - ORACLE_HOST, ORACLE_USER, ORACLE_PASSWORD 등"
 
-# 2. 정적 파일 수집
+# 4. 데이터베이스 마이그레이션
+echo "🗄️ 데이터베이스 마이그레이션 실행..."
+python manage.py migrate --noinput
+
+# 5. 정적 파일 수집
 echo "📦 정적 파일 수집 중..."
 python manage.py collectstatic --noinput
-
-# 3. 마이그레이션 확인
-echo "🗄️ 데이터베이스 마이그레이션 확인..."
-python manage.py migrate --check
 
 echo "✅ 배포 준비 완료!"
 echo ""

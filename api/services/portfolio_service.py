@@ -39,11 +39,15 @@ class PortfolioService:
             }
         """
         try:
+            print(f"[Portfolio Service] 포트폴리오 생성 시작: session_id={session_id}, user_id={user_id}")
+            
             # 온보딩 세션 조회
             session = OnboardingSession.objects.get(session_id=session_id)
+            print(f"[Portfolio Service] 온보딩 세션 조회 성공: {session_id}")
             
             # 사용자 프로필 생성
             user_profile = session.to_user_profile()
+            print(f"[Portfolio Service] 사용자 프로필 생성 완료: {user_profile}")
             
             # 온보딩 데이터 추출
             onboarding_data = {}
@@ -121,19 +125,29 @@ class PortfolioService:
             )
             
             # 포트폴리오 생성
-            portfolio = Portfolio.objects.create(
-                user_id=user_id,
-                onboarding_session=session,
-                style_type=style_analysis.get('style_type', 'modern'),
-                style_title=style_analysis.get('title', '나에게 딱 맞는 스타일'),
-                style_subtitle=style_analysis.get('subtitle', '당신의 라이프스타일에 맞춰 구성했어요.'),
-                onboarding_data=onboarding_data,
-                products=final_recommendations,
-                total_original_price=total_price,
-                total_discount_price=total_discount_price,
-                match_score=85,  # 기본 매칭 점수
-                status='draft'
-            )
+            print(f"[Portfolio Service] 포트폴리오 생성 중: {len(final_recommendations)}개 제품, 총 가격={total_price}")
+            try:
+                portfolio = Portfolio.objects.create(
+                    user_id=user_id,
+                    onboarding_session=session,
+                    style_type=style_analysis.get('style_type', 'modern'),
+                    style_title=style_analysis.get('title', '나에게 딱 맞는 스타일'),
+                    style_subtitle=style_analysis.get('subtitle', '당신의 라이프스타일에 맞춰 구성했어요.'),
+                    onboarding_data=onboarding_data,
+                    products=final_recommendations,
+                    total_original_price=total_price,
+                    total_discount_price=total_discount_price,
+                    match_score=85,  # 기본 매칭 점수
+                    status='draft'
+                )
+                print(f"[Portfolio Service] 포트폴리오 DB 저장 성공: portfolio_id={portfolio.portfolio_id}")
+            except Exception as create_error:
+                print(f"[Portfolio Service] 포트폴리오 DB 저장 실패: {create_error}")
+                import traceback
+                traceback.print_exc()
+                raise
+            
+            print(f"[Portfolio Service] 포트폴리오 생성 완료: portfolio_id={portfolio.portfolio_id}, internal_key={portfolio.internal_key}")
             
             return {
                 'success': True,
@@ -147,6 +161,7 @@ class PortfolioService:
             }
         
         except OnboardingSession.DoesNotExist:
+            print(f"[Portfolio Service] 온보딩 세션을 찾을 수 없음: {session_id}")
             return {
                 'success': False,
                 'error': '온보딩 세션을 찾을 수 없습니다.'
@@ -154,10 +169,10 @@ class PortfolioService:
         except Exception as e:
             print(f"[Portfolio Service Error] {e}")
             import traceback
-            traceback.print_exc()
+            print(f"[Portfolio Service Error] Traceback:\n{traceback.format_exc()}")
             return {
                 'success': False,
-                'error': str(e)
+                'error': f'포트폴리오 생성 실패: {str(e)}'
             }
     
     @staticmethod

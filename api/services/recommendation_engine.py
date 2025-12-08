@@ -369,8 +369,10 @@ class RecommendationEngine:
         has_pet = user_profile.get('has_pet', False)
         
         # Step 1: 기본 필터 (가격, 활성화 여부만)
+        # 성능 최적화: select_related로 관련 객체 미리 로드
         products = (
             Product.objects
+            .select_related('spec')  # ProductSpec 미리 로드
             .filter(
                 is_active=True,
                 price__gt=0,  # 가격 0원 제외

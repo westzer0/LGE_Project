@@ -6,7 +6,7 @@ from api.views import (
     index_view, recommend, products, recommend_view, product_spec_view, product_image_by_name_view, product_reviews_view,
     product_recommend_reason_view, product_demographics_view,
     onboarding_page, onboarding_step2_page, onboarding_step3_page, onboarding_step4_page, onboarding_step5_page, onboarding_step6_page, onboarding_step7_page, main_page, onboarding_new_page, result_page,
-    fake_lg_main_page,
+    fake_lg_main_page, react_app_view, health_check_view,
     onboarding_step_view, onboarding_complete_view, onboarding_session_view,
     portfolio_save_view, portfolio_detail_view, portfolio_list_view, portfolio_share_view,
     portfolio_refresh_view, portfolio_alternatives_view, portfolio_add_to_cart_view,
@@ -32,6 +32,9 @@ from api.views_drf import convert_figma_to_code
 # router.register(r'onboarding-sessions', OnboardingSessionViewSet, basename='onboarding-session')
 
 urlpatterns = [
+    # React 앱 (프로덕션)
+    path('app/', react_app_view, name='react_app'),
+    
     # 메인 페이지
     path('', main_page, name='main'),
     path('home/', main_page, name='home'),
@@ -62,6 +65,9 @@ urlpatterns = [
     
     # Admin
     path('admin/', admin.site.urls),
+    
+    # 헬스체크 엔드포인트
+    path('api/health/', health_check_view, name='health_check'),
     
     # API 엔드포인트
     path('api/recommend/', recommend_view, name='recommend'),

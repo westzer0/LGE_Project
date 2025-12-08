@@ -30,35 +30,123 @@
 ```
 LGE_Project-main/
 ├── api/                    # Django 앱 (메인 비즈니스 로직)
-│   ├── models.py          # 데이터 모델 (Product, OnboardingSession, Portfolio 등)
+│   ├── models.py          # 데이터 모델
+│   │   ├── Product (제품 정보)
+│   │   ├── ProductSpec (제품 스펙 JSON)
+│   │   ├── ProductDemographics (제품 인구통계)
+│   │   ├── ProductReview (제품 리뷰)
+│   │   ├── ProductRecommendReason (추천 이유)
+│   │   ├── OnboardingSession (온보딩 세션)
+│   │   ├── Portfolio (포트폴리오 추천 결과)
+│   │   └── UserSample (사용자 샘플 데이터)
 │   ├── views.py           # 뷰 로직
-│   ├── services/          # 비즈니스 서비스 레이어
+│   ├── views_drf.py       # DRF API 뷰
+│   ├── services/          # 비즈니스 서비스 레이어 (22개 서비스)
 │   │   ├── recommendation_engine.py
+│   │   ├── ai_recommendation_service.py
+│   │   ├── taste_based_recommendation_engine.py
+│   │   ├── playbook_recommendation_engine.py
+│   │   ├── column_based_recommendation_engine.py
+│   │   ├── taste_based_product_scorer.py
+│   │   ├── taste_scoring_logic_service.py
+│   │   ├── taste_calculation_service.py
+│   │   ├── playbook_scoring.py
+│   │   ├── portfolio_service.py
+│   │   ├── product_comparison_service.py
+│   │   ├── recommendation_reason_generator.py
 │   │   ├── chatgpt_service.py
 │   │   ├── kakao_auth_service.py
-│   │   ├── ai_recommendation_service.py
-│   │   └── ...
+│   │   ├── kakao_message_service.py
+│   │   ├── onboarding_db_service.py
+│   │   ├── style_analysis_service.py
+│   │   ├── playbook_explanation_generator.py
+│   │   ├── playbook_filters.py
+│   │   └── figma_to_code_service.py
 │   ├── db/                # 데이터베이스 관련 스크립트
+│   │   ├── oracle_client.py
+│   │   └── [다양한 SQL 스크립트들]
+│   ├── utils/             # 유틸리티 함수들
+│   ├── scoring_logic/     # 점수 계산 로직 (JSON)
+│   ├── migrations/        # Django 마이그레이션
+│   ├── management/commands/  # 커스텀 관리 명령어
 │   └── templates/         # HTML 템플릿
 ├── config/                # Django 설정
-│   ├── settings.py        # 프로젝트 설정
-│   └── urls.py           # URL 라우팅
+│   ├── settings.py        # 프로젝트 설정 (Oracle/SQLite 지원)
+│   ├── urls.py           # URL 라우팅
+│   ├── wsgi.py
+│   └── asgi.py
 ├── src/                   # React 프론트엔드
 │   ├── App.jsx
+│   ├── main.jsx
+│   ├── index.css
 │   ├── components/
-│   └── pages/
-├── data/                  # 데이터 파일 (CSV, 이미지 등)
+│   │   ├── ProductCard.jsx
+│   │   └── StepIndicator.jsx
+│   ├── pages/
+│   │   ├── Onboarding.jsx
+│   │   ├── PortfolioResult.jsx
+│   │   └── Section1.jsx
+│   └── utils/
+├── data/                  # 데이터 파일
+│   ├── 제품스펙/          # 제품 스펙 CSV
+│   ├── 온보딩/            # 온보딩 데이터
+│   ├── 리뷰/              # 리뷰 데이터
+│   └── simulation/        # 시뮬레이션 데이터
 ├── ngrok/                 # ngrok 실행 파일
-└── LOCAL_ENV_PROMPT.md    # 로컬 환경 설정 가이드
+├── scripts/               # 유틸리티 스크립트
+├── backups/               # 백업 파일
+├── logs/                  # 로그 파일
+├── requirements.txt       # Python 의존성
+├── package.json           # Node.js 의존성
+├── vite.config.js         # Vite 설정
+├── tailwind.config.js     # Tailwind CSS 설정
+├── Dockerfile             # Docker 설정
+├── Procfile               # 배포 설정
+├── render.yaml            # Render 배포 설정
+├── fly.toml               # Fly.io 배포 설정
+├── railway_deploy.sh      # Railway 배포 스크립트
+├── LOCAL_ENV_PROMPT.md    # 로컬 환경 설정 가이드
+└── COMET_PROMPT.md        # Comet 프롬프트 (이 파일)
 ```
 
 ### 3. 주요 기능 모듈
-- **온보딩 시스템**: 사용자 취향 설문 및 세션 관리
-- **추천 엔진**: 규칙 기반 + AI 기반 제품 추천
-- **점수 계산**: 제품-사용자 매칭 점수 계산
-- **카카오 연동**: 카카오 로그인 및 메시지 전송
-- **제품 비교**: 제품 간 비교 기능
-- **포트폴리오 관리**: 사용자별 추천 포트폴리오 저장
+
+#### 데이터 모델
+- **Product**: 제품 기본 정보 (카테고리, 가격, 이미지 등)
+- **ProductSpec**: 제품 스펙 (JSON 형식)
+- **ProductDemographics**: 제품 인구통계 (가족 구성, 주거 형태 등)
+- **ProductReview**: 제품 리뷰 데이터
+- **ProductRecommendReason**: AI 생성 추천 이유
+- **OnboardingSession**: 사용자 온보딩 세션 (5단계 설문 응답)
+- **Portfolio**: 추천 포트폴리오 결과 저장
+- **UserSample**: 샘플 사용자 데이터
+
+#### 추천 엔진 (다중 엔진 지원)
+- **recommendation_engine.py**: 기본 추천 엔진
+- **taste_based_recommendation_engine.py**: 취향 기반 추천
+- **playbook_recommendation_engine.py**: 플레이북 기반 추천
+- **column_based_recommendation_engine.py**: 컬럼 기반 추천
+- **ai_recommendation_service.py**: AI 기반 추천
+
+#### 점수 계산 시스템
+- **taste_based_product_scorer.py**: 취향 기반 점수 계산
+- **taste_scoring_logic_service.py**: 점수 계산 로직
+- **taste_calculation_service.py**: 취향 계산 서비스
+- **playbook_scoring.py**: 플레이북 점수 계산
+- **scoring_logic/**: JSON 기반 점수 계산 규칙
+
+#### 외부 서비스 연동
+- **chatgpt_service.py**: OpenAI ChatGPT 연동
+- **kakao_auth_service.py**: 카카오 로그인
+- **kakao_message_service.py**: 카카오 메시지 전송
+- **figma_to_code_service.py**: Figma MCP 연동
+
+#### 기타 서비스
+- **portfolio_service.py**: 포트폴리오 관리
+- **product_comparison_service.py**: 제품 비교
+- **recommendation_reason_generator.py**: 추천 이유 생성
+- **onboarding_db_service.py**: 온보딩 DB 관리
+- **style_analysis_service.py**: 스타일 분석
 
 ### 4. 로컬 환경 의존성
 - Node.js v24.11.1 (로컬 바이너리 필요)
@@ -72,6 +160,11 @@ LGE_Project-main/
 - **LOCAL_ENV_PROMPT.md 파일 확인** (로컬 환경 설정 가이드)
 - **package.json 확인** (React + Vite 프로젝트)
 - **프로젝트 디렉토리 구조 분석 완료**
+- **Django 모델 구조 파악** (8개 주요 모델)
+- **서비스 레이어 분석** (22개 서비스 파일)
+- **React 컴포넌트 구조 확인** (3개 페이지, 2개 컴포넌트)
+- **데이터베이스 스키마 확인** (SQLite 기본, Oracle 지원)
+- **배포 설정 파일 확인** (Railway, Render, Fly.io 지원)
 
 ### 6. 앞으로 해야 할 일
 사용자가 추가로 요청할 작업들을 수행해야 합니다. 일반적으로 다음과 같은 작업들이 예상됩니다:
@@ -127,8 +220,42 @@ LGE_Project-main/
 - **배포 준비**: Railway, Render, Fly.io 등 여러 플랫폼 지원 스크립트 포함
 
 ### 10. 현재 열려있는 파일
-- `LOCAL_ENV_PROMPT.md` (161줄, 커서 위치: 161)
+- `COMET_PROMPT.md` (197줄, 커서 위치: 197) - 현재 파일
+- `LOCAL_ENV_PROMPT.md` (161줄)
 - `package.json` (26줄)
+
+### 11. 프로젝트 기술적 세부사항
+
+#### Django 백엔드
+- **버전**: Django 5.2.8
+- **API**: Django REST Framework 사용
+- **데이터베이스**: 
+  - SQLite (개발 환경 기본)
+  - Oracle (프로덕션, 정규화 테이블 지원)
+- **인증**: 카카오 OAuth
+- **환경 변수**: python-dotenv 사용
+
+#### React 프론트엔드
+- **버전**: React 18.2.0
+- **빌드 도구**: Vite 5.0.8
+- **라우팅**: react-router-dom 6.20.0
+- **스타일링**: Tailwind CSS 3.3.6
+- **주요 페이지**:
+  - Onboarding.jsx: 5단계 온보딩 설문
+  - PortfolioResult.jsx: 추천 결과 표시
+  - Section1.jsx: 첫 화면
+
+#### 데이터 처리
+- **CSV 데이터**: 제품 스펙, 리뷰, 인구통계 등
+- **JSON 데이터**: 제품 스펙, 점수 계산 로직
+- **이미지**: 제품 이미지 (PNG, AVIF, JPG)
+- **정규화**: Oracle DB에서 정규화된 테이블 사용
+
+#### 배포 환경
+- **Railway**: railway_deploy.sh
+- **Render**: render.yaml
+- **Fly.io**: fly.toml
+- **Docker**: Dockerfile 포함
 
 ---
 

@@ -24,7 +24,6 @@ const Onboarding = () => {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
-  // 컴포넌트 마운트 시 CSRF 토큰 초기화
   useEffect(() => {
     initCSRFToken()
   }, [])
@@ -49,44 +48,60 @@ const Onboarding = () => {
     try {
       const sessionId = generateSessionId()
 
+      // 데이터 검증
+      if (!formData.vibe || !formData.household_size || !formData.housing_type || 
+          !formData.priority || !formData.budget_level || formData.selected_categories.length === 0) {
+        alert('모든 항목을 선택해주세요.')
+        setLoading(false)
+        return
+      }
+
+      // household_size를 정수로 변환
+      let householdSize = formData.household_size
+      if (typeof householdSize === 'string') {
+        householdSize = parseInt(householdSize.replace('인', '').replace(' 이상', '').trim()) || 2
+      }
+
       const data = await apiRequest('/api/onboarding/complete/', {
         method: 'POST',
         body: JSON.stringify({
           session_id: sessionId,
           vibe: formData.vibe,
-          household_size: parseInt(formData.household_size),
+          household_size: householdSize,
           housing_type: formData.housing_type,
-          pyung: formData.pyung,
+          pyung: formData.pyung || 25,
           priority: formData.priority,
           budget_level: formData.budget_level,
           selected_categories: formData.selected_categories,
-          pet: formData.pet,
-          cooking: formData.cooking,
-          laundry: formData.laundry,
-          media: formData.media,
+          pet: formData.pet || 'no',
+          cooking: formData.cooking || 'sometimes',
+          laundry: formData.laundry || 'weekly',
+          media: formData.media || 'balanced',
         }),
       })
 
       if (data.success) {
-        // 포트폴리오 ID가 있으면 결과 페이지로 이동
         if (data.portfolio_id) {
           navigate(`/result?portfolio_id=${data.portfolio_id}`)
-        } else {
-          // 추천 결과를 state로 전달
+        } else if (data.recommendations && data.recommendations.length > 0) {
           navigate('/result', { 
             state: { 
               recommendations: data.recommendations,
               portfolio_id: data.portfolio_id 
             } 
           })
+        } else {
+          alert('추천 결과를 받지 못했습니다. 다시 시도해주세요.')
+          setLoading(false)
         }
       } else {
-        alert(`오류: ${data.error || '추천 실패'}`)
+        const errorMsg = data.error || '추천 실패'
+        alert(`오류: ${errorMsg}`)
         setLoading(false)
       }
     } catch (error) {
-      console.error('온보딩 제출 실패:', error)
-      alert(`오류: ${error.message}`)
+      console.error('[Onboarding] 제출 실패:', error)
+      alert(`오류: ${error.message || '서버 연결 실패'}`)
       setLoading(false)
     }
   }
@@ -111,14 +126,15 @@ const Onboarding = () => {
   const renderStep1 = () => (
     <div className="onboarding-step">
       <h2 className="question-title">어떤 스타일을 선호하시나요?</h2>
+      <p className="question-subtitle">원하시는 인테리어 스타일을 선택해주세요</p>
       <div className="options-grid grid-3">
         {[
-          { value: 'modern', label: '모던', icon: '🏠' },
-          { value: 'classic', label: '클래식', icon: '🏛️' },
-          { value: 'minimal', label: '미니멀', icon: '✨' },
-          { value: 'natural', label: '내추럴', icon: '🌿' },
-          { value: 'industrial', label: '인더스트리얼', icon: '⚙️' },
-          { value: 'scandinavian', label: '스칸디나비안', icon: '❄️' },
+          { value: 'modern', label: '모던', icon: '🏠', desc: '깔끔하고 세련된' },
+          { value: 'classic', label: '클래식', icon: '🏛️', desc: '전통적이고 우아한' },
+          { value: 'minimal', label: '미니멀', icon: '✨', desc: '심플하고 절제된' },
+          { value: 'natural', label: '내추럴', icon: '🌿', desc: '자연스럽고 편안한' },
+          { value: 'industrial', label: '인더스트리얼', icon: '⚙️', desc: '거칠고 개성있는' },
+          { value: 'scandinavian', label: '스칸디나비안', icon: '❄️', desc: '밝고 따뜻한' },
         ].map(option => (
           <div
             key={option.value}
@@ -127,6 +143,7 @@ const Onboarding = () => {
           >
             <span className="option-icon">{option.icon}</span>
             <div className="option-title">{option.label}</div>
+            <div className="option-description">{option.desc}</div>
           </div>
         ))}
       </div>
@@ -137,6 +154,7 @@ const Onboarding = () => {
   const renderStep2 = () => (
     <div className="onboarding-step">
       <h2 className="question-title">가구 정보를 알려주세요</h2>
+      <p className="question-subtitle">정확한 추천을 위해 필요합니다</p>
       
       <div className="form-group">
         <label>가구원 수</label>
@@ -144,7 +162,7 @@ const Onboarding = () => {
           {['1인', '2인', '3인', '4인', '5인 이상'].map(size => (
             <div
               key={size}
-              className={`option-card ${formData.household_size === size ? 'selected' : ''}`}
+              className={`option-card ${formData.household_size === size.replace('인', '').replace(' 이상', '') ? 'selected' : ''}`}
               onClick={() => updateFormData('household_size', size.replace('인', '').replace(' 이상', ''))}
             >
               <div className="option-title">{size}</div>
@@ -157,15 +175,16 @@ const Onboarding = () => {
         <label>주거 형태</label>
         <div className="options-grid grid-3">
           {[
-            { value: 'apartment', label: '아파트' },
-            { value: 'house', label: '단독주택' },
-            { value: 'officetel', label: '오피스텔' },
+            { value: 'apartment', label: '아파트', icon: '🏢' },
+            { value: 'house', label: '단독주택', icon: '🏡' },
+            { value: 'officetel', label: '오피스텔', icon: '🏬' },
           ].map(option => (
             <div
               key={option.value}
               className={`option-card ${formData.housing_type === option.value ? 'selected' : ''}`}
               onClick={() => updateFormData('housing_type', option.value)}
             >
+              <span className="option-icon">{option.icon}</span>
               <div className="option-title">{option.label}</div>
             </div>
           ))}
@@ -197,15 +216,16 @@ const Onboarding = () => {
   const renderStep3 = () => (
     <div className="onboarding-step">
       <h2 className="question-title">가전 선택 시 우선순위는?</h2>
+      <p className="question-subtitle">가장 중요하게 생각하는 요소를 선택해주세요</p>
       
       <div className="form-group">
         <label>우선순위</label>
         <div className="options-grid grid-2">
           {[
-            { value: 'design', label: '디자인', icon: '🎨' },
-            { value: 'tech', label: '기술', icon: '💻' },
-            { value: 'eco', label: '친환경', icon: '🌱' },
-            { value: 'value', label: '가성비', icon: '💰' },
+            { value: 'design', label: '디자인', icon: '🎨', desc: '외관과 스타일' },
+            { value: 'tech', label: '기술', icon: '💻', desc: '최신 기능과 성능' },
+            { value: 'eco', label: '친환경', icon: '🌱', desc: '에너지 효율' },
+            { value: 'value', label: '가성비', icon: '💰', desc: '합리적인 가격' },
           ].map(option => (
             <div
               key={option.value}
@@ -214,6 +234,7 @@ const Onboarding = () => {
             >
               <span className="option-icon">{option.icon}</span>
               <div className="option-title">{option.label}</div>
+              <div className="option-description">{option.desc}</div>
             </div>
           ))}
         </div>
@@ -223,10 +244,10 @@ const Onboarding = () => {
         <label>예산 수준</label>
         <div className="budget-cards">
           {[
-            { value: 'budget', label: '예산형', range: '~50만원' },
-            { value: 'standard', label: '표준형', range: '50~200만원' },
-            { value: 'premium', label: '프리미엄', range: '200~500만원' },
-            { value: 'luxury', label: '럭셔리', range: '500만원~' },
+            { value: 'budget', label: '예산형', range: '~50만원', desc: '합리적인 가격' },
+            { value: 'standard', label: '표준형', range: '50~200만원', desc: '균형잡힌 선택' },
+            { value: 'premium', label: '프리미엄', range: '200~500만원', desc: '고급 기능' },
+            { value: 'luxury', label: '럭셔리', range: '500만원~', desc: '최고급 라인' },
           ].map(option => (
             <div
               key={option.value}
@@ -237,6 +258,7 @@ const Onboarding = () => {
               <div className="budget-info">
                 <div className="budget-title">{option.label}</div>
                 <div className="budget-range">{option.range}</div>
+                <div className="budget-desc">{option.desc}</div>
               </div>
               <div className="budget-check">
                 {formData.budget_level === option.value && '✓'}
@@ -252,25 +274,36 @@ const Onboarding = () => {
   const renderStep4 = () => (
     <div className="onboarding-step">
       <h2 className="question-title">관심 있는 가전 카테고리를 선택해주세요</h2>
+      <p className="question-subtitle">복수 선택 가능합니다</p>
       
       <div className="options-grid grid-3">
         {[
-          { value: 'TV', label: 'TV' },
-          { value: 'REFRIGERATOR', label: '냉장고' },
-          { value: 'WASHER', label: '세탁기' },
-          { value: 'AIR_CONDITIONER', label: '에어컨' },
-          { value: 'KITCHEN', label: '주방가전' },
-          { value: 'LIVING', label: '거실가전' },
+          { value: 'TV', label: 'TV', icon: '📺' },
+          { value: 'REFRIGERATOR', label: '냉장고', icon: '❄️' },
+          { value: 'WASHER', label: '세탁기', icon: '🌀' },
+          { value: 'AIR_CONDITIONER', label: '에어컨', icon: '❄️' },
+          { value: 'KITCHEN', label: '주방가전', icon: '🍳' },
+          { value: 'LIVING', label: '거실가전', icon: '🛋️' },
         ].map(option => (
           <div
             key={option.value}
             className={`option-card ${formData.selected_categories.includes(option.value) ? 'selected' : ''}`}
             onClick={() => toggleCategory(option.value)}
           >
+            <span className="option-icon">{option.icon}</span>
             <div className="option-title">{option.label}</div>
+            {formData.selected_categories.includes(option.value) && (
+              <div className="option-check">✓</div>
+            )}
           </div>
         ))}
       </div>
+      
+      {formData.selected_categories.length > 0 && (
+        <div className="selected-categories">
+          <p>선택된 카테고리: {formData.selected_categories.length}개</p>
+        </div>
+      )}
     </div>
   )
 
@@ -288,7 +321,8 @@ const Onboarding = () => {
     return (
       <div className="min-h-screen bg-[#F7F4EF] flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-4">추천 중...</div>
+          <div className="loading-spinner mb-4"></div>
+          <div className="text-2xl font-bold mb-2 text-[#1A1A1A]">추천 중...</div>
           <div className="text-gray-600">잠시만 기다려주세요</div>
         </div>
       </div>
@@ -298,11 +332,20 @@ const Onboarding = () => {
   return (
     <div className="min-h-screen bg-[#F7F4EF]">
       <div className="onboarding-header">
-        <button onClick={handleBack} className="header-back" disabled={currentStep === 1}>
+        <button 
+          onClick={handleBack} 
+          className="header-back" 
+          disabled={currentStep === 1}
+          aria-label="이전"
+        >
           ←
         </button>
         <div className="header-title">온보딩 {currentStep}/4</div>
-        <button onClick={() => navigate('/')} className="header-close">
+        <button 
+          onClick={() => navigate('/')} 
+          className="header-close"
+          aria-label="닫기"
+        >
           ✕
         </button>
       </div>
@@ -328,7 +371,7 @@ const Onboarding = () => {
             disabled={!canProceed()}
             className={`nav-btn-primary ${!canProceed() ? 'disabled' : ''}`}
           >
-            {currentStep === 4 ? '완료' : '다음'}
+            {currentStep === 4 ? '완료하고 추천받기' : '다음'}
           </button>
         </div>
       </div>
@@ -337,4 +380,3 @@ const Onboarding = () => {
 }
 
 export default Onboarding
-

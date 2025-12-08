@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -17,11 +17,59 @@ from .services.ai_recommendation_service import ai_recommendation_service
 from .services.product_comparison_service import product_comparison_service
 
 
+def health_check_view(request):
+    """
+    헬스체크 엔드포인트 - 배포 플랫폼에서 서버 상태 확인용
+    GET /api/health/
+    """
+    from django.db import connection
+    from django.conf import settings
+    
+    try:
+        # 데이터베이스 연결 확인
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        
+        return JsonResponse({
+            'status': 'healthy',
+            'database': 'connected',
+            'debug': settings.DEBUG,
+            'version': '1.0.0'
+        }, json_dumps_params={'ensure_ascii': False})
+    except Exception as e:
+        return JsonResponse({
+            'status': 'unhealthy',
+            'database': 'disconnected',
+            'error': str(e)
+        }, json_dumps_params={'ensure_ascii': False}, status=503)
+
+
 def index_view(request):
     """
     루트 페이지: 온보딩 설문 + 추천 결과를 보여주는 기본 화면.
     """
     return render(request, "index.html")
+
+
+def react_app_view(request):
+    """
+    React 앱 서빙 (프로덕션)
+    React 빌드 파일을 Django에서 서빙
+    """
+    from django.conf import settings
+    from pathlib import Path
+    import os
+    
+    # React 빌드된 index.html 경로
+    react_index_path = Path(settings.BASE_DIR) / 'staticfiles' / 'react' / 'index.html'
+    
+    # 빌드 파일이 있으면 서빙, 없으면 기본 템플릿 사용
+    if react_index_path.exists():
+        with open(react_index_path, 'r', encoding='utf-8') as f:
+            return HttpResponse(f.read(), content_type='text/html')
+    else:
+        # 개발 환경 또는 빌드 전: 기본 index.html 사용
+        return render(request, "index.html")
 
 
 def main_page(request):
@@ -219,9 +267,19 @@ def recommend_view(request):
         }, json_dumps_params={'ensure_ascii': False}, status=400)
 
 
+@csrf_exempt
 @require_http_methods(["GET"])
 def products(request):
-    """GET /api/products/ - 제품 리스트 조회 (category, search, id 쿼리 파라미터 지원)"""
+    """
+    GET /api/products/ - 제품 리스트 조회 (category, search, id 쿼리 파라미터 지원)
+    
+    쿼리 파라미터:
+    - category: 제품 카테고리 필터
+    - search: 검색어
+    - id: 특정 제품 ID
+    - page: 페이지 번호 (기본값: 1)
+    - page_size: 페이지당 항목 수 (기본값: 20)
+    """
     from django.db.models import Q
     
     category = request.GET.get('category', None)
@@ -292,9 +350,19 @@ def products(request):
     }, json_dumps_params={'ensure_ascii': False})
 
 
+@csrf_exempt
 @require_http_methods(["GET"])
 def product_spec_view(request, product_id):
-    """GET /api/products/<product_id>/spec/ - 제품 스펙 조회"""
+    """
+    GET /api/products/<product_id>/spec/ - 제품 스펙 조회
+    
+    응답:
+    {
+        "success": true,
+        "product_id": 1,
+        "spec": {...}
+    }
+    """
     import json
     try:
         product = Product.objects.get(id=product_id)
@@ -864,6 +932,7 @@ def onboarding_step_view(request):
 
 
 @csrf_exempt
+@csrf_exempt
 @require_http_methods(["POST"])
 def onboarding_complete_view(request):
     """
@@ -890,35 +959,72 @@ def onboarding_complete_view(request):
     }
     """
     try:
-        if hasattr(request, 'data'):
-            data = request.data
-        else:
-            data = json.loads(request.body.decode("utf-8"))
+        # 요청 데이터 파싱
+        try:
+            if hasattr(request, 'data'):
+                data = request.data
+            else:
+                body = request.body.decode("utf-8")
+                print(f"[Onboarding Complete] 요청 본문: {body[:500]}")
+                data = json.loads(body)
+        except json.JSONDecodeError as e:
+            print(f"[Onboarding Complete] JSON 파싱 오류: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': f'잘못된 JSON 형식: {str(e)}'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
+        except Exception as e:
+            print(f"[Onboarding Complete] 요청 파싱 오류: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': f'요청 처리 실패: {str(e)}'
+            }, json_dumps_params={'ensure_ascii': False}, status=400)
         
         session_id = data.get('session_id')
         
         if not session_id:
+            print("[Onboarding Complete] session_id 누락")
             return JsonResponse({
                 'success': False,
                 'error': 'session_id 필수'
             }, json_dumps_params={'ensure_ascii': False}, status=400)
         
         # 1. OnboardingSession 저장
-        session, _ = OnboardingSession.objects.update_or_create(
-            session_id=session_id,
-            defaults={
-                'vibe': data.get('vibe'),
-                'household_size': int(data.get('household_size', 2)),
-                'housing_type': data.get('housing_type'),
-                'pyung': int(data.get('pyung', 25)),
-                'priority': data.get('priority', 'value'),
-                'budget_level': data.get('budget_level', 'medium'),
-                'selected_categories': data.get('selected_categories', []),
-                'current_step': 5,
-                'status': 'completed',
-                'completed_at': timezone.now(),
-            }
-        )
+        try:
+            # household_size 변환 (문자열 "2" -> 정수 2)
+            household_size = data.get('household_size', 2)
+            if isinstance(household_size, str):
+                household_size = int(household_size.replace('인', '').replace(' 이상', '').strip()) if household_size.strip() else 2
+            
+            # pyung 변환
+            pyung = data.get('pyung', 25)
+            if isinstance(pyung, str):
+                pyung = int(pyung.replace('평', '').strip()) if pyung.strip() else 25
+            
+            session, _ = OnboardingSession.objects.update_or_create(
+                session_id=session_id,
+                defaults={
+                    'vibe': data.get('vibe', 'modern'),
+                    'household_size': int(household_size),
+                    'housing_type': data.get('housing_type', 'apartment'),
+                    'pyung': int(pyung),
+                    'priority': data.get('priority', 'value'),
+                    'budget_level': data.get('budget_level', 'medium'),
+                    'selected_categories': data.get('selected_categories', []),
+                    'current_step': 5,
+                    'status': 'completed',
+                    'completed_at': timezone.now(),
+                }
+            )
+            print(f"[Onboarding Complete] 세션 저장 완료: {session_id}")
+        except Exception as e:
+            print(f"[Onboarding Complete] 세션 저장 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'success': False,
+                'error': f'세션 저장 실패: {str(e)}'
+            }, json_dumps_params={'ensure_ascii': False}, status=500)
         
         # 2. user_profile 생성 (온보딩 데이터 포함)
         # 온보딩 데이터에서 추가 정보 추출
@@ -995,14 +1101,25 @@ def onboarding_complete_view(request):
                 print(f"[Taste 계산 실패] {str(taste_error)}")
         
         # 4. 추천 엔진 호출 (taste_id 기반으로 category 선택 및 제품 추천)
-        result = recommendation_engine.get_recommendations(
-            user_profile=user_profile,
-            taste_id=taste_id,
-            taste_info=onboarding_data_for_taste  # category 점수 산출에 사용
-        )
+        try:
+            print(f"[Onboarding Complete] 추천 엔진 호출 시작...")
+            result = recommendation_engine.get_recommendations(
+                user_profile=user_profile,
+                taste_id=taste_id,
+                taste_info=onboarding_data_for_taste  # category 점수 산출에 사용
+            )
+            print(f"[Onboarding Complete] 추천 엔진 결과: success={result.get('success')}, count={result.get('count', 0)}")
+        except Exception as e:
+            print(f"[Onboarding Complete] 추천 엔진 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'success': False,
+                'error': f'추천 엔진 오류: {str(e)}'
+            }, json_dumps_params={'ensure_ascii': False}, status=500)
         
-        # 4. 추천 결과 저장 (온보딩 데이터 포함)
-        if result['success']:
+        # 5. 추천 결과 저장 (온보딩 데이터 포함)
+        if result.get('success'):
             session.recommended_products = [
                 r['product_id'] for r in result['recommendations']
             ]
@@ -1014,17 +1131,26 @@ def onboarding_complete_view(request):
             
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")
             
-            # 5. 포트폴리오 자동 생성 (PRD: 온보딩 완료 시 포트폴리오 생성)
-            user_id = data.get('user_id', f"session_{session_id}")
-            portfolio_result = portfolio_service.create_portfolio_from_onboarding(
-                session_id=session_id,
-                user_id=user_id
-            )
-            
+            # 6. 포트폴리오 자동 생성 (PRD: 온보딩 완료 시 포트폴리오 생성)
             portfolio_id = None
-            if portfolio_result.get('success'):
-                portfolio_id = portfolio_result.get('portfolio_id')
-                print(f"[Portfolio 생성 완료] Portfolio ID: {portfolio_id}")
+            try:
+                user_id = data.get('user_id', f"session_{session_id}")
+                print(f"[Onboarding Complete] 포트폴리오 생성 시작...")
+                portfolio_result = portfolio_service.create_portfolio_from_onboarding(
+                    session_id=session_id,
+                    user_id=user_id
+                )
+                
+                if portfolio_result.get('success'):
+                    portfolio_id = portfolio_result.get('portfolio_id')
+                    print(f"[Onboarding Complete] 포트폴리오 생성 완료: {portfolio_id}")
+                else:
+                    print(f"[Onboarding Complete] 포트폴리오 생성 실패: {portfolio_result.get('error')}")
+            except Exception as e:
+                print(f"[Onboarding Complete] 포트폴리오 생성 오류: {e}")
+                import traceback
+                traceback.print_exc()
+                # 포트폴리오 생성 실패해도 추천 결과는 반환
             
             # Taste 정보를 응답에 포함 (이미 위에서 계산됨)
             if taste_id:
@@ -1203,6 +1329,7 @@ def portfolio_save_view(request):
         }, json_dumps_params={'ensure_ascii': False}, status=400)
 
 
+@csrf_exempt
 @require_http_methods(["GET"])
 def portfolio_detail_view(request, portfolio_id):
     """
@@ -1212,12 +1339,32 @@ def portfolio_detail_view(request, portfolio_id):
     portfolio_id는 portfolio_id 또는 internal_key 모두 지원 (LGDX-3)
     """
     try:
+        print(f"[Portfolio Detail] 조회 요청: {portfolio_id}")
+        
         # portfolio_id 또는 internal_key로 조회 시도
+        portfolio = None
         try:
             portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+            print(f"[Portfolio Detail] portfolio_id로 조회 성공: {portfolio_id}")
         except Portfolio.DoesNotExist:
-            # internal_key로 조회 시도
-            portfolio = Portfolio.objects.get(internal_key=portfolio_id)
+            try:
+                # internal_key로 조회 시도
+                portfolio = Portfolio.objects.get(internal_key=portfolio_id)
+                print(f"[Portfolio Detail] internal_key로 조회 성공: {portfolio_id}")
+            except Portfolio.DoesNotExist:
+                print(f"[Portfolio Detail] 포트폴리오를 찾을 수 없음: {portfolio_id}")
+                return JsonResponse({
+                    'success': False,
+                    'error': '포트폴리오를 찾을 수 없습니다.'
+                }, json_dumps_params={'ensure_ascii': False}, status=404)
+        
+        # products 데이터 검증 및 포맷팅
+        products = portfolio.products
+        if not isinstance(products, list):
+            print(f"[Portfolio Detail] products가 리스트가 아님: {type(products)}")
+            products = []
+        
+        print(f"[Portfolio Detail] 제품 수: {len(products)}")
         
         return JsonResponse({
             'success': True,
@@ -1228,23 +1375,26 @@ def portfolio_detail_view(request, portfolio_id):
                 'style_type': portfolio.style_type,
                 'style_title': portfolio.style_title,
                 'style_subtitle': portfolio.style_subtitle,
-                'onboarding_data': portfolio.onboarding_data,
-                'products': portfolio.products,
-                'total_original_price': float(portfolio.total_original_price),
-                'total_discount_price': float(portfolio.total_discount_price),
-                'match_score': portfolio.match_score,
+                'onboarding_data': portfolio.onboarding_data or {},
+                'products': products,
+                'total_original_price': float(portfolio.total_original_price) if portfolio.total_original_price else 0,
+                'total_discount_price': float(portfolio.total_discount_price) if portfolio.total_discount_price else 0,
+                'match_score': portfolio.match_score or 0,
                 'status': portfolio.status,
-                'share_url': portfolio.share_url,
-                'share_count': portfolio.share_count,
-                'created_at': portfolio.created_at.isoformat(),
+                'share_url': portfolio.share_url or '',
+                'share_count': portfolio.share_count or 0,
+                'created_at': portfolio.created_at.isoformat() if portfolio.created_at else None,
             }
         }, json_dumps_params={'ensure_ascii': False})
     
-    except Portfolio.DoesNotExist:
+    except Exception as e:
+        print(f"[Portfolio Detail] 오류: {e}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
-            'error': '포트폴리오를 찾을 수 없습니다.'
-        }, json_dumps_params={'ensure_ascii': False}, status=404)
+            'error': f'포트폴리오 조회 실패: {str(e)}'
+        }, json_dumps_params={'ensure_ascii': False}, status=500)
 
 
 @require_http_methods(["GET"])

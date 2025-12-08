@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { apiRequest } from '../utils/api'
+import { formatPrice, parsePrice } from '../utils/validation'
 
 const PortfolioResult = () => {
   const location = useLocation()
@@ -9,21 +10,18 @@ const PortfolioResult = () => {
   const [purchaseType, setPurchaseType] = useState('가전구독')
   const [contractPeriod, setContractPeriod] = useState('6년')
   const [products, setProducts] = useState([])
-  const [benefitInfo, setBenefitInfo] = useState({
-    totalPrice: 0,
-    totalDiscount: 0,
-    totalBenefit: 0,
-    items: []
-  })
   const [loading, setLoading] = useState(true)
 
-  // 구매 유형 또는 계약 기간 변경 시 데이터 재계산
-  useEffect(() => {
-    calculateBenefits()
-  }, [purchaseType, contractPeriod, products])
-
-  const calculateBenefits = () => {
-    if (products.length === 0) return
+  // 가격 계산 최적화 (useMemo 사용)
+  const benefitInfo = useMemo(() => {
+    if (products.length === 0) {
+      return {
+        totalPrice: 0,
+        totalDiscount: 0,
+        totalBenefit: 0,
+        items: []
+      }
+    }
 
     let totalPrice = 0
     let totalDiscount = 0
@@ -63,57 +61,60 @@ const PortfolioResult = () => {
 
     const totalBenefit = totalPrice - totalDiscount
 
-    setBenefitInfo({
+    return {
       totalPrice,
       totalDiscount,
       totalBenefit,
       items
-    })
-  }
-
-  const parsePrice = (priceStr) => {
-    if (!priceStr) return 0
-    // "월 39,400원" 또는 "2,600,000원" 형식 파싱
-    const match = priceStr.match(/[\d,]+/)
-    if (match) {
-      return parseInt(match[0].replace(/,/g, ''))
     }
-    return 0
-  }
+  }, [purchaseType, products])
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('ko-KR').format(price) + '원'
-  }
+
 
   // 초기 데이터 로드
   useEffect(() => {
     // location.state에서 추천 결과 가져오기 (온보딩에서 전달된 경우)
     if (location.state?.recommendations) {
+      console.log('[PortfolioResult] location.state에서 추천 결과 로드:', location.state)
       const recommendations = location.state.recommendations
+      
+      if (!recommendations || recommendations.length === 0) {
+        console.warn('[PortfolioResult] 추천 결과가 비어있습니다.')
+        loadSampleData()
+        setLoading(false)
+        return
+      }
+      
       const formattedProducts = recommendations.map((rec) => {
         // API 응답 형식에 맞게 변환
         // rec 구조: { product_id, name, model, category, price, discount_price, image_url, reason, score, ... }
         const priceValue = rec.price || rec.discount_price || 0
         const discountValue = rec.discount_price || 0
         
+        // 월 가격 계산 (가전구독 기준)
+        const monthlyPrice = Math.floor(priceValue / 72) // 6년 기준
+        const monthlyDiscount = Math.floor(discountValue / 72)
+        
         return {
-          id: rec.product_id,
+          id: rec.product_id || rec.id,
           name: rec.name || rec.product_name || '제품명 없음',
           model: rec.model || rec.model_number || '',
           rating: rec.rating || '',
           reason: rec.reason || rec.recommend_reason || '고객님의 선호도에 맞는 제품입니다.',
-          category: rec.category || rec.main_category || '',
+          category: rec.category || rec.main_category || '기타',
           specs: rec.specs || {},
           price: {
-            original: priceValue > 0 ? `월 ${formatPrice(priceValue)}` : undefined,
-            discount: discountValue > 0 ? `월 -${formatPrice(Math.abs(discountValue))}` : undefined,
-            final: (priceValue - discountValue) > 0 ? `월 ${formatPrice(priceValue - discountValue)}` : (priceValue > 0 ? `월 ${formatPrice(priceValue)}` : undefined),
+            original: monthlyPrice > 0 ? `월 ${formatPrice(monthlyPrice)}` : undefined,
+            discount: monthlyDiscount > 0 ? `월 -${formatPrice(monthlyDiscount)}` : undefined,
+            final: (monthlyPrice - monthlyDiscount) > 0 ? `월 ${formatPrice(monthlyPrice - monthlyDiscount)}` : (monthlyPrice > 0 ? `월 ${formatPrice(monthlyPrice)}` : undefined),
           },
           image_url: rec.image_url || '',
           isRecommended: rec.is_recommended || false,
           score: rec.score || rec.taste_score || 0,
         }
       })
+      
+      console.log('[PortfolioResult] 포맷팅된 제품:', formattedProducts)
       setProducts(formattedProducts)
       setLoading(false)
       return
@@ -135,54 +136,74 @@ const PortfolioResult = () => {
   const fetchPortfolioData = async (portfolioId) => {
     try {
       setLoading(true)
+      console.log(`[PortfolioResult] 포트폴리오 조회: ${portfolioId}`)
+      
       const data = await apiRequest(`/api/portfolio/${portfolioId}/`, {
         method: 'GET',
       })
+      
+      console.log('[PortfolioResult] 포트폴리오 응답:', data)
       
       if (data.success && data.portfolio) {
         // 포트폴리오 데이터에서 제품 정보 추출
         const portfolioProducts = data.portfolio.products || []
         
+        if (portfolioProducts.length === 0) {
+          console.warn('[PortfolioResult] 포트폴리오에 제품이 없습니다.')
+          loadSampleData()
+          return
+        }
+        
         // 제품 데이터를 포맷팅
         const formattedProducts = portfolioProducts.map((product) => {
           // 가격 정보 포맷팅
           let priceInfo = {}
+          const price = product.price || product.discount_price || 0
+          const discountPrice = product.discount_price || 0
+          
           if (purchaseType === '가전구독') {
-            // 가전구독 가격 정보
+            // 가전구독 가격 정보 (월 가격으로 변환)
+            const monthlyPrice = Math.floor(price / 72) // 6년 기준
+            const monthlyDiscount = Math.floor(discountPrice / 72)
             priceInfo = {
-              original: product.monthly_price ? `월 ${formatPrice(product.monthly_price)}` : undefined,
-              discount: product.monthly_discount ? `월 -${formatPrice(Math.abs(product.monthly_discount))}` : undefined,
-              final: product.monthly_final_price ? `월 ${formatPrice(product.monthly_final_price)}` : undefined,
+              original: monthlyPrice > 0 ? `월 ${formatPrice(monthlyPrice)}` : undefined,
+              discount: monthlyDiscount > 0 ? `월 -${formatPrice(monthlyDiscount)}` : undefined,
+              final: (monthlyPrice - monthlyDiscount) > 0 ? `월 ${formatPrice(monthlyPrice - monthlyDiscount)}` : undefined,
             }
           } else {
             // 일반구매 가격 정보
             priceInfo = {
-              discount: product.discount_price ? `-${formatPrice(product.price - product.discount_price)}` : undefined,
-              final: formatPrice(product.discount_price || product.price),
+              discount: discountPrice > 0 ? `-${formatPrice(discountPrice)}` : undefined,
+              final: formatPrice(price - discountPrice),
             }
           }
           
           return {
             id: product.id || product.product_id,
-            name: product.name || product.product_name,
-            model: product.model || product.model_number,
-            rating: product.rating,
-            reason: product.reason || product.recommend_reason,
-            category: product.category,
-            specs: product.specs,
-            contractPeriod: product.contract_period,
-            careServiceCycle: product.care_service_cycle,
-            careServiceType: product.care_service_type,
+            name: product.name || product.product_name || '제품명 없음',
+            model: product.model || product.model_number || '',
+            rating: product.rating || '',
+            reason: product.reason || product.recommend_reason || '고객님의 선호도에 맞는 제품입니다.',
+            category: product.category || '기타',
+            specs: product.specs || {},
+            contractPeriod: product.contract_period || '6년',
+            careServiceCycle: product.care_service_cycle || '',
+            careServiceType: product.care_service_type || '',
             price: priceInfo,
-            image_url: product.image_url,
-            isRecommended: product.is_recommended,
+            image_url: product.image_url || '',
+            isRecommended: product.is_recommended || false,
           }
         })
         
+        console.log('[PortfolioResult] 포맷팅된 제품:', formattedProducts)
         setProducts(formattedProducts)
+      } else {
+        console.error('[PortfolioResult] 포트폴리오 조회 실패:', data.error)
+        loadSampleData()
       }
     } catch (error) {
-      console.error('포트폴리오 데이터 로드 실패:', error)
+      console.error('[PortfolioResult] 포트폴리오 데이터 로드 실패:', error)
+      alert(`포트폴리오를 불러올 수 없습니다: ${error.message}`)
       // 에러 발생 시 샘플 데이터 사용
       loadSampleData()
     } finally {
@@ -246,20 +267,22 @@ const PortfolioResult = () => {
     ])
   }
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     // 다시 추천받기 로직
     navigate('/onboarding')
-  }
+  }, [navigate])
 
-  const handlePurchase = () => {
+  const handlePurchase = useCallback(() => {
     // 구매하기 로직
-    console.log('구매하기 클릭')
-  }
+    console.log('[PortfolioResult] 구매하기 클릭')
+    // TODO: 구매 페이지로 이동 또는 모달 표시
+  }, [])
 
-  const handleConsultation = () => {
+  const handleConsultation = useCallback(() => {
     // 베스트샵 상담예약 로직
-    console.log('베스트샵 상담예약 클릭')
-  }
+    console.log('[PortfolioResult] 베스트샵 상담예약 클릭')
+    // TODO: 상담예약 API 호출 또는 모달 표시
+  }, [])
 
   if (loading) {
     return (

@@ -57,12 +57,22 @@ csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 if csrf_origins_str:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()])
 
-# CORS 설정 (개발 환경)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# CORS 설정
+# 프로덕션에서는 환경 변수로 설정
+cors_origins_str = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if cors_origins_str:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',') if origin.strip()]
+else:
+    # 개발 환경 기본값
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 CORS_ALLOW_CREDENTIALS = True
+
+# 프로덕션 환경에서 CORS 허용 (필요시)
+if not DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'false').lower() == 'true'
 
 # ============================================================
 # 외부 API 키 설정
@@ -218,11 +228,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'assets',
 ]
+
+# React 빌드 결과물을 정적 파일로 포함
+if (BASE_DIR / 'staticfiles' / 'react').exists():
+    STATICFILES_DIRS.append(BASE_DIR / 'staticfiles' / 'react')
 
 # 프로덕션 환경에서 정적 파일 수집 디렉토리
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -230,10 +244,63 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # WhiteNoise 설정 (프로덕션 환경에서 정적 파일 서빙)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# WhiteNoise 추가 설정
+WHITENOISE_ROOT = BASE_DIR / 'staticfiles' / 'react'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ============================================================
+# 로깅 설정
+# ============================================================
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'api': {
+            'handlers': ['console', 'file'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
+
+# 로그 디렉토리 생성
+log_dir = BASE_DIR / 'logs'
+if not log_dir.exists():
+    log_dir.mkdir(exist_ok=True)
 
 # ============================================================
 # Django REST Framework 설정
@@ -243,11 +310,22 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',  # 브라우저 API 테스트 UI
-    ],
+    ] + (['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),  # 프로덕션에서는 비활성화
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ],
 }
+
+# ============================================================
+# 보안 설정 (프로덕션)
+# ============================================================
+if not DEBUG:
+    # HTTPS 강제 (프로덕션)
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'false').lower() == 'true'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
