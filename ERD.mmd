@@ -1,0 +1,360 @@
+```mermaid
+erDiagram
+
+    CART {
+        NUMBER CART_ID PK "장바구니 ID (PRIMARY KEY)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (FK, MEMBER.MEMBER_ID 참조)"
+        DATE CREATED_DATE "장바구니 생성 일시"
+    }
+
+    CART_ITEM {
+        NUMBER CART_ITEM_ID PK "장바구니 항목 ID (PRIMARY KEY)"
+        NUMBER CART_ID FK "장바구니 ID (FK, CART.CART_ID 참조)"
+        NUMBER PRODUCT_ID FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        NUMBER QUANTITY "제품 수량"
+    }
+
+    CATEGORY_COMMON_SPEC {
+        NUMBER COMMON_ID PK "공통 스펙 ID (PRIMARY KEY)"
+        VARCHAR2(100) MAIN_CATEGORY "메인 카테고리 (예: "TV", "냉장고")"
+        VARCHAR2(150) SPEC_KEY "스펙 키 (예: "용량", "화면크기")"
+    }
+
+    CONSULTATION {
+        NUMBER CONSULT_ID PK "상담 ID (PRIMARY KEY)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (FK, MEMBER.MEMBER_ID 참조)" nullable
+        NUMBER PORTFOLIO_ID FK "포트폴리오 ID (FK, PORTFOLIO 참조)" nullable
+        VARCHAR2(255) STORE_NAME "매장명" nullable
+        DATE RESERVATION_DATE "상담 예약 일시" nullable
+        DATE CREATED_DATE "상담 신청 일시"
+    }
+
+    ESTIMATE {
+        NUMBER ESTIMATE_ID PK "견적 ID (PRIMARY KEY)"
+        NUMBER PORTFOLIO_ID FK "포트폴리오 ID (FK, PORTFOLIO 참조)"
+        NUMBER TOTAL_PRICE "총 가격 (정가 합계)" nullable
+        NUMBER DISCOUNT_PRICE "할인 가격 (할인가 합계)" nullable
+        NUMBER RENTAL_MONTHLY "월 렌탈 비용" nullable
+        DATE CREATED_DATE "견적 생성 일시"
+    }
+
+    MEMBER {
+        VARCHAR2(30) MEMBER_ID PK "회원 ID (PRIMARY KEY)"
+        VARCHAR2(255) PASSWORD "회원 비밀번호 (암호화)"
+        VARCHAR2(100) NAME "회원 이름"
+        NUMBER AGE nullable
+        VARCHAR2(10) GENDER "회원 성별 (M/F)" nullable
+        VARCHAR2(20) CONTACT "회원 연락처" nullable
+        NUMBER POINT "회원 포인트" nullable
+        DATE CREATED_DATE "회원 가입 일시"
+        NUMBER(3) TASTE "할당된 Taste ID (1-120 범위, NULL 가능)" nullable
+    }
+
+    ONBOARDING_ANSWER {
+        NUMBER ANSWER_ID PK "선택지 ID (PRIMARY KEY)"
+        VARCHAR2(50) QUESTION_CODE FK "질문 코드 (시스템 내부 식별자)"
+        VARCHAR2(255) ANSWER_VALUE "선택지 값 (예: modern, alone, apartment)" nullable
+        DATE CREATED_DATE
+        VARCHAR2(255) ANSWER_TEXT "선택지 텍스트 (예: "모던 & 미니멀", "나 혼자 산다")" nullable
+    }
+
+    ONBOARDING_QUESTION {
+        VARCHAR2(50) QUESTION_CODE PK "질문 코드 (시스템 내부 식별자)"
+        VARCHAR2(255) QUESTION_TEXT "질문 텍스트"
+        VARCHAR2(50) QUESTION_TYPE "질문 유형 (vibe/mate/housing_type/cooking/laundry/m..."
+        VARCHAR2(5) IS_REQUIRED "필수 여부 (Y/N, 기본값: Y)"
+        DATE CREATED_DATE
+    }
+
+    ONBOARDING_SESSION {
+        NUMBER SESSION_ID PK "세션 ID (PRIMARY KEY, UUID 또는 고유 문자열)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (카카오 로그인 연동 시, FK: MEMBER.MEMBER_ID)"
+        DATE CREATED_DATE
+        DATE UPDATED_DATE "세션 수정 일시 (기본값: SYSDATE)" nullable
+        VARCHAR2(20) VIBE "Step 1: 인테리어 무드 (modern/cozy/pop/luxury)" nullable
+        NUMBER HOUSEHOLD_SIZE "Step 2: 가구 인원수 (1-5인)" nullable
+        CHAR(1) HAS_PET "Step 2: 반려동물 여부 (Y/N)" nullable
+        VARCHAR2(20) HOUSING_TYPE "Step 3: 주거 형태 (apartment/detached/villa/officet..." nullable
+        NUMBER PYUNG "Step 3: 평수 (예: 25평)" nullable
+        CLOB MAIN_SPACE "Step 3: 주요 공간 (JSON 배열 문자열: ["living", "kitchen"])" nullable
+        VARCHAR2(20) COOKING "Step 4: 요리 빈도 (rarely/sometimes/often)" nullable
+        VARCHAR2(20) LAUNDRY "Step 4: 세탁 빈도 (weekly/few_times/daily)" nullable
+        VARCHAR2(20) MEDIA "Step 4: 미디어 사용 패턴 (ott/gaming/tv/none)" nullable
+        VARCHAR2(20) PRIORITY "Step 5: 첫 번째 우선순위 (design/tech/eco/value)" nullable
+        CLOB PRIORITY_LIST "Step 5: 우선순위 목록 (JSON 배열 문자열: ["design", "tech"..." nullable
+        VARCHAR2(20) BUDGET_LEVEL "Step 6: 예산 범위 (budget/standard/premium)" nullable
+        CLOB SELECTED_CATEGORIES "선택한 카테고리 (JSON 배열 문자열: ["TV", "냉장고"])" nullable
+        CLOB RECOMMENDED_PRODUCTS "추천 제품 ID 목록 (JSON 배열 문자열: [1, 2, 3])" nullable
+        CLOB RECOMMENDATION_RESULT "최종 추천 결과 (JSON 객체 문자열)" nullable
+        NUMBER CURRENT_STEP "현재 진행 단계 (1~6, 기본값: 1)" nullable
+        VARCHAR2(20) STATUS "상태 (IN_PROGRESS: 진행중, COMPLETED: 완료, ABANDONED:..." nullable
+        DATE COMPLETED_AT "완료 일시 (STATUS가 COMPLETED일 때 설정)" nullable
+        VARCHAR2(100) USER_ID "사용자 ID (선택적, 카카오 로그인 연동 시)" nullable
+    }
+
+    ONBOARDING_SESSION_CATEGORIES {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(50) CATEGORY_NAME PK "선택한 카테고리명 (예: "TV", "냉장고", "에어컨")"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ONBOARDING_SESSION_MAIN_SPACES {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(50) MAIN_SPACE PK "주요 공간 (living/kitchen/bedroom/dressing/study/all)"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ONBOARDING_SESSION_PRIORITIES {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(20) PRIORITY "우선순위 값 (design/tech/eco/value)"
+        NUMBER PRIORITY_ORDER PK "우선순위 순서 (1, 2, 3...)"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ONBOARDING_USER_RESPONSE {
+        NUMBER RESPONSE_ID PK "응답 ID (PRIMARY KEY)"
+        NUMBER SESSION_ID FK "세션 ID (FK, ONBOARDING_SESSION 참조)"
+        VARCHAR2(50) QUESTION_CODE FK "질문 코드 (시스템 내부 식별자)"
+        NUMBER ANSWER_ID FK "선택지 ID (FK, ONBOARDING_ANSWER 참조, 단일 선택인 경우)" nullable
+        VARCHAR2(255) INPUT_VALUE "사용자 입력 값 (텍스트 입력인 경우)" nullable
+        DATE CREATED_DATE nullable
+    }
+
+    ONBOARD_SESS_CATEGORIES {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(50) CATEGORY_NAME PK "선택한 카테고리명 (예: "TV", "냉장고", "에어컨")"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ONBOARD_SESS_MAIN_SPACES {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(50) MAIN_SPACE PK "주요 공간 (living/kitchen/bedroom/dressing/study/all)"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ONBOARD_SESS_PRIORITIES {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(20) PRIORITY "우선순위 값 (design/tech/eco/value)"
+        NUMBER PRIORITY_ORDER PK "우선순위 순서 (1, 2, 3...)"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ONBOARD_SESS_REC_PRODUCTS {
+        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        NUMBER PRODUCT_ID PK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        VARCHAR2(50) CATEGORY_NAME "카테고리명 (예: "TV", "냉장고")" nullable
+        NUMBER RANK_ORDER "카테고리 내 순위 (1, 2, 3...)" nullable
+        NUMBER(5,2) SCORE "해당 제품의 점수 (0~100점, NUMBER(5,2))" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    ORDERS {
+        NUMBER ORDER_ID PK "주문 ID (PRIMARY KEY)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (FK, MEMBER.MEMBER_ID 참조)"
+        DATE ORDER_DATE "주문 일시"
+        NUMBER TOTAL_AMOUNT "주문 총액" nullable
+        VARCHAR2(50) ORDER_STATUS "주문 상태 (예: "주문완료", "배송중", "배송완료")" nullable
+        VARCHAR2(50) PAYMENT_STATUS "결제 상태 (예: "결제완료", "결제대기", "결제취소")" nullable
+    }
+
+    ORDER_DETAIL {
+        NUMBER DETAIL_ID PK "주문 상세 ID (PRIMARY KEY)"
+        NUMBER ORDER_ID FK "주문 ID (FK, ORDERS.ORDER_ID 참조)"
+        NUMBER PRODUCT_ID FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        NUMBER QUANTITY "제품 수량"
+    }
+
+    PAYMENT {
+        NUMBER PAYMENT_ID PK "결제 ID (PRIMARY KEY)"
+        DATE PAYMENT_DATE "결제 일시"
+        NUMBER ORDER_ID FK "주문 ID (FK, ORDERS.ORDER_ID 참조)"
+        VARCHAR2(50) PAYMENT_STATUS "결제 상태 (예: "결제완료", "결제대기", "결제취소")" nullable
+        VARCHAR2(50) METHOD "결제 방법 (예: "카드", "계좌이체", "무통장입금")" nullable
+    }
+
+    PORTFOLIO_PRODUCT {
+        NUMBER ID PK "포트폴리오 제품 ID (PRIMARY KEY)"
+        NUMBER PORTFOLIO_ID FK "포트폴리오 ID (FK, PORTFOLIO 참조)"
+        NUMBER PRODUCT_ID FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        VARCHAR2(500) RECOMMEND_REASON "추천 이유 텍스트" nullable
+        NUMBER PRIORITY "우선순위 (1, 2, 3...)" nullable
+    }
+
+    PORTFOLIO_SESSION {
+        NUMBER PORTFOLIO_ID PK "포트폴리오 ID (FK, PORTFOLIO 참조)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (FK, MEMBER.MEMBER_ID 참조)"
+        NUMBER SESSION_ID FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        DATE CREATED_DATE "생성 일시"
+    }
+
+    PRODUCT {
+        NUMBER PRODUCT_ID PK "제품 ID (PRIMARY KEY)"
+        VARCHAR2(255) PRODUCT_NAME "제품명 (예: "LG 올레드 TV 65인치")"
+        VARCHAR2(100) MAIN_CATEGORY "메인 카테고리 (예: "TV", "냉장고", "세탁기")"
+        VARCHAR2(100) SUB_CATEGORY "세부 카테고리 (예: "OLED", "QLED", "냉장고", "김치냉장고")" nullable
+        VARCHAR2(100) MODEL_CODE "모델 코드 (예: "OLED65C3PSA")" nullable
+        VARCHAR2(50) STATUS "판매 상태 (예: "판매중", "품절")" nullable
+        NUMBER PRICE "제품 가격 (원 단위)" nullable
+        FLOAT(126) RATING "제품 평점 (예: 4.5)" nullable
+        VARCHAR2(255) URL "제품 상세 페이지 URL" nullable
+        DATE CREATED_DATE
+    }
+
+    PRODUCT_IMAGE {
+        NUMBER PRODUCT_IMAGE_ID PK "제품 이미지 ID (PRIMARY KEY)"
+        NUMBER PRODUCT_ID FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        VARCHAR2(255) IMAGE_URL "제품 이미지 URL" nullable
+    }
+
+    PRODUCT_REVIEW {
+        "제품별 리뷰 관련 데이터"
+        NUMBER(22) PRODUCT_ID PK FK "제품 ID"
+        CLOB REVIEW_VECTOR "리뷰 텍스트 기반 임베딩 벡터" nullable
+        CLOB FAMILY_LIST "가족 구성 정보(인구통계)" nullable
+        CLOB SIZE_LIST "집 크기/평수 정보(인구통계)" nullable
+        CLOB HOUSE_LIST "주거 형태 정보(인구통계)" nullable
+        CLOB REASON_TEXT "제품 추천 사유 요약 한 문장" nullable
+    }
+
+    PRODUCT_SPEC {
+        NUMBER SPEC_ID PK
+        NUMBER PRODUCT_ID FK "제품 ID (FK, PRODUCT 참조)"
+        VARCHAR2(4000) SPEC_KEY "스펙 키 (예: "용량", "화면크기", "해상도", "에너지효율")"
+        VARCHAR2(4000) SPEC_VALUE "스펙 값 (예: "850L", "65인치", "4K", "1등급")" nullable
+        VARCHAR2(50) SPEC_TYPE "스펙 타입 (COMMON: 모든 variant에 공통, SPECIFIC: 특정 var..." nullable
+    }
+
+    PROD_DEMO_FAMILY_TYPES {
+        NUMBER PRODUCT_ID PK FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        VARCHAR2(50) FAMILY_TYPE PK "가족 구성 타입 (예: "신혼", "부모님", "1인가구")"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    PROD_DEMO_HOUSE_SIZES {
+        NUMBER PRODUCT_ID PK FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        VARCHAR2(50) HOUSE_SIZE PK "집 크기 (예: "20평", "30평대", "40평대")"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    PROD_DEMO_HOUSE_TYPES {
+        NUMBER PRODUCT_ID PK FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        VARCHAR2(50) HOUSE_TYPE PK "주거 형태 (예: "아파트", "원룸", "단독주택")"
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    TASTE_CATEGORY_SCORES {
+        NUMBER TASTE_ID PK FK "Taste ID (FK, TASTE_CONFIG 참조)"
+        VARCHAR2(50) CATEGORY_NAME PK "카테고리명 (예: "TV", "냉장고", "에어컨")"
+        NUMBER(5,2) SCORE "카테고리 점수 (0~100점, NUMBER(5,2))"
+        CHAR(1) IS_RECOMMENDED "추천 카테고리 여부 (Y/N, 기본값: N)" nullable
+        CHAR(1) IS_ILL_SUITED "부적합 카테고리 여부 (Y/N, 기본값: N)" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+        DATE UPDATED_AT "수정 일시 (기본값: SYSDATE)" nullable
+    }
+
+    TASTE_CONFIG {
+        "Taste별 추천 설정 관리 테이블"
+        NUMBER TASTE_ID PK "Taste ID (1-120 범위, PRIMARY KEY)"
+        VARCHAR2(500) DESCRIPTION "Taste에 대한 설명 (예: "모던 스타일, 1인 가구")" nullable
+        VARCHAR2(20) REPRESENTATIVE_VIBE "대표 인테리어 무드 (modern/cozy/pop/luxury)" nullable
+        NUMBER REPRESENTATIVE_HOUSEHOLD_SIZE "대표 가구 인원수 (1-5인)" nullable
+        VARCHAR2(50) REPRESENTATIVE_MAIN_SPACE "대표 주요 공간 (living/kitchen/bedroom/dressing 등)" nullable
+        CHAR(1) REPRESENTATIVE_HAS_PET "대표 반려동물 여부 (Y/N)" nullable
+        VARCHAR2(20) REPRESENTATIVE_PRIORITY "대표 구매 우선순위 (design/tech/eco/value)" nullable
+        VARCHAR2(20) REPRESENTATIVE_BUDGET_LEVEL "대표 예산 수준 (low/medium/high/premium/luxury)" nullable
+        CLOB RECOMMENDED_CATEGORIES "추천 MAIN_CATEGORY 리스트 (JSON 배열: ["TV", "냉장고", "에..." nullable
+        CLOB RECOMMENDED_PRODUCTS "카테고리별 추천 제품 ID 매핑 (JSON 객체: {"TV": [1,2,3], "냉장..." nullable
+        CHAR(1) IS_ACTIVE "활성화 여부 (Y/N, 기본값: Y)" nullable
+        CHAR(1) AUTO_GENERATED "자동 생성 여부 (Y/N, 기본값: N)" nullable
+        DATE LAST_SIMULATION_DATE "마지막 시뮬레이션 실행 일시" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+        DATE UPDATED_AT "수정 일시 (기본값: SYSDATE)" nullable
+        CLOB CATEGORY_SCORES "카테고리별 점수 매핑 (JSON 객체: {"TV": 85.0, "냉장고": 70.0})" nullable
+        NUMBER(5,2) 프로젝터_SCORE "프로젝터 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 스탠바이미_SCORE "스탠바이미 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 오디오_SCORE "오디오 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 사운드바_SCORE "사운드바 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 김치냉장고_SCORE "김치냉장고 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 건조기_SCORE "건조기 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 워시타워_SCORE "워시타워 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 전자레인지_SCORE "전자레인지 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 오븐_SCORE "오븐 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 공기청정기_SCORE "공기청정기 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 가습기_SCORE "가습기 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 제습기_SCORE "제습기 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 와인셀러_SCORE "와인셀러 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) OBJET_SCORE "LG Objet 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) SIGNATURE_SCORE "LG SIGNATURE 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 냉장고_SCORE "냉장고 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 세탁기_SCORE "세탁기 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 에어컨_SCORE "에어컨 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 청소기_SCORE "청소기 카테고리 점수 (0~100점)" nullable
+        CLOB ILL_SUITED_CATEGORIES "부적합 카테고리 리스트 (JSON 배열: ["의류관리기"])" nullable
+        NUMBER(5,2) 정수기_SCORE "정수기 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) TV_SCORE nullable
+        NUMBER(5,2) AIHOME_SCORE "AI Home 카테고리 점수 (0~100점)" nullable
+        NUMBER(5,2) 식기세척기_SCORE "식기세척기 카테고리 점수 (0~100점)" nullable
+        CLOB RECOMMENDED_PRODUCT_SCORES "카테고리별 추천 제품 점수 매핑 (JSON 객체, RECOMMENDED_PRODUCT..." nullable
+    }
+
+    TASTE_RECOMMENDED_PRODUCTS {
+        NUMBER TASTE_ID PK FK "Taste ID (FK, TASTE_CONFIG 참조)"
+        VARCHAR2(50) CATEGORY_NAME PK "카테고리명 (예: "TV", "냉장고")"
+        NUMBER PRODUCT_ID PK "제품 ID (FK, PRODUCT 테이블 참조)"
+        NUMBER(5,2) SCORE "해당 제품의 점수 (0~100점, NUMBER(5,2))" nullable
+        NUMBER(2) RANK_ORDER "카테고리 내 순위 (1, 2, 3...)" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+        DATE UPDATED_AT "수정 일시 (기본값: SYSDATE)" nullable
+    }
+
+    USER_SAMPLE_PURCHASED_ITEMS {
+        VARCHAR2(50) USER_ID PK "사용자 ID (FK, USER_SAMPLE.USER_ID 참조)"
+        NUMBER PRODUCT_ID PK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
+        DATE PURCHASED_AT "구매 일시" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    USER_SAMPLE_RECOMMENDATIONS {
+        VARCHAR2(50) USER_ID PK "사용자 ID (FK, USER_SAMPLE.USER_ID 참조)"
+        VARCHAR2(50) CATEGORY_NAME PK "카테고리명 (예: "냉장고", "세탁기", "TV")"
+        VARCHAR2(100) RECOMMENDED_VALUE "추천 값 (예: "850", "15", "65")" nullable
+        VARCHAR2(20) RECOMMENDED_UNIT "추천 단위 (예: "L", "kg", "inch")" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+    }
+
+    %% Foreign Key Relationships
+    CART ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
+    CART_ITEM ||--o{ CART : "CART_ID -> CART_ID"
+    CART_ITEM ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    CONSULTATION ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
+    CONSULTATION ||--o{ PORTFOLIO_SESSION : "PORTFOLIO_ID -> PORTFOLIO_ID"
+    ESTIMATE ||--o{ PORTFOLIO_SESSION : "PORTFOLIO_ID -> PORTFOLIO_ID"
+    ONBOARDING_ANSWER ||--o{ ONBOARDING_QUESTION : "QUESTION_CODE -> QUESTION_CODE"
+    ONBOARDING_SESSION ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
+    ONBOARDING_SESSION_CATEGORIES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARDING_SESSION_MAIN_SPACES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARDING_SESSION_PRIORITIES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARDING_USER_RESPONSE ||--o{ ONBOARDING_ANSWER : "ANSWER_ID -> ANSWER_ID"
+    ONBOARDING_USER_RESPONSE ||--o{ ONBOARDING_QUESTION : "QUESTION_CODE -> QUESTION_CODE"
+    ONBOARDING_USER_RESPONSE ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARD_SESS_CATEGORIES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARD_SESS_MAIN_SPACES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARD_SESS_PRIORITIES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ONBOARD_SESS_REC_PRODUCTS ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    ORDERS ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
+    ORDER_DETAIL ||--o{ ORDERS : "ORDER_ID -> ORDER_ID"
+    ORDER_DETAIL ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PAYMENT ||--o{ ORDERS : "ORDER_ID -> ORDER_ID"
+    PORTFOLIO_PRODUCT ||--o{ PORTFOLIO_SESSION : "PORTFOLIO_ID -> PORTFOLIO_ID"
+    PORTFOLIO_PRODUCT ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PORTFOLIO_SESSION ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
+    PORTFOLIO_SESSION ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
+    PRODUCT_IMAGE ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PRODUCT_REVIEW ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PRODUCT_SPEC ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PROD_DEMO_FAMILY_TYPES ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PROD_DEMO_HOUSE_SIZES ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PROD_DEMO_HOUSE_TYPES ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    TASTE_CATEGORY_SCORES ||--o{ TASTE_CONFIG : "TASTE_ID -> TASTE_ID"
+    TASTE_RECOMMENDED_PRODUCTS ||--o{ TASTE_CONFIG : "TASTE_ID -> TASTE_ID"
+```
