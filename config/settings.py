@@ -71,7 +71,6 @@ except ImportError:
 except Exception as e:
     print(f"[WARNING] .env 파일 로드 실패: {e}")
 
-<<<<<<< HEAD
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -138,8 +137,6 @@ if not DEBUG:
 # 외부 API 키 설정
 # ============================================================
 
-=======
->>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
 # 카카오 API (https://developers.kakao.com)
 KAKAO_REST_API_KEY = os.environ.get('KAKAO_REST_API_KEY', '')
 KAKAO_JS_KEY = os.environ.get('KAKAO_JS_KEY', '')
@@ -216,7 +213,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-<<<<<<< HEAD
 # ============================================================
 # Oracle 11g XE 데이터베이스 설정 (Thick 모드)
 # ============================================================
@@ -278,12 +274,6 @@ else:
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
-=======
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
->>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
     }
 
 
@@ -323,7 +313,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-<<<<<<< HEAD
 STATICFILES_DIRS = [
     BASE_DIR / 'assets',
 ]
@@ -341,8 +330,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # WhiteNoise 추가 설정
 WHITENOISE_ROOT = BASE_DIR / 'staticfiles' / 'react'
 
-=======
->>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -415,7 +402,6 @@ REST_FRAMEWORK = {
 }
 
 # ============================================================
-<<<<<<< HEAD
 # 보안 설정 (프로덕션)
 # ============================================================
 if not DEBUG:
@@ -426,10 +412,3 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
-=======
-# CSRF 설정 (ngrok 사용 시 필수)
-# ============================================================
-CSRF_TRUSTED_ORIGINS = [
-    'https://surer-tabatha-gullibly.ngrok-free.dev',
-]
->>>>>>> abb8b7c68ad7c89c354b261ae756408f770126c7
