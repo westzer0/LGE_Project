@@ -1,0 +1,29 @@
+# Fly.io 배포 설정 파일
+# 사용법: fly launch (처음), fly deploy (배포)
+
+app = "lge-project"
+primary_region = "icn"  # 서울 (Incheon)
+
+[build]
+
+[env]
+  DJANGO_DEBUG = "False"
+  USE_ORACLE = "true"
+  ORACLE_HOST = "project-db-campus.smhrd.com"
+  ORACLE_PORT = "1524"
+  ORACLE_USER = "campus_24K_LG3_DX7_p3_4"
+  ORACLE_SID = "xe"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+

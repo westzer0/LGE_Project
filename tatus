@@ -1,0 +1,76 @@
+[33mcommit 0fa97cd05164c574eea033c88dd7e398fce0176d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Yujid-catmom <tlswlem0430@gmail.com>
+Date:   Sat Dec 6 19:48:55 2025 +0900
+
+    feat: Oracle SQLD 연동 및 관련 로직 구현 완료
+    
+    - Oracle 11g (XE) 데이터베이스 연동 구현
+      - oracle_init.py: Oracle Instant Client 초기화 모듈
+      - api/db/oracle_client.py: Oracle Thick 모드 클라이언트
+      - api/db/oracle_backend/: Oracle 백엔드 지원
+      - SQL 스크립트 추가 (DDL, ALTER, 데이터 채우기 등)
+    
+    - Taste 기반 추천 시스템 개선
+      - Taste별 독립적인 scoring logic 서비스
+      - TasteConfig 모델 및 관리 명령어 추가
+      - 카테고리별 점수 계산 로직 구현
+    
+    - 포트폴리오 및 스타일 분석 서비스 추가
+      - portfolio_service.py: 포트폴리오 생성 및 관리
+      - style_analysis_service.py: 스타일 분석 및 메시지 생성
+    
+    - 데이터 시뮬레이션 및 시각화 추가
+      - taste_recommendations_simulation 데이터
+      - 카테고리별 통계 및 히트맵 시각화
+    
+    - 기타 개선사항
+      - 온보딩 플로우 개선
+      - 추천 엔진 로직 개선
+      - 모델 및 뷰 업데이트
+
+ .gitignore                                         |    6 [32m+[m
+ api/db/add_category_scores_column.sql              |   11 [32m+[m
+ api/db/fill_taste_random.sql                       |   40 [32m+[m
+ api/db/fill_taste_random_sqlite.sql                |   75 [32m+[m
+ api/db/member_taste_alter.sql                      |   73 [32m+[m
+ api/db/member_taste_alter_sqlite.sql               |   95 [32m++[m
+ api/db/member_taste_alter_universal.sql            |   81 [32m++[m
+ api/db/oracle_client.py                            |   43 [32m+[m[31m-[m
+ api/db/taste_config_ddl.sql                        |   63 [32m+[m
+ api/db/update_member_taste.py                      |  223 [32m+++[m
+ .../commands/add_category_scores_column.py         |   84 [32m++[m
+ .../commands/create_taste_config_table.py          |   92 [32m++[m
+ api/management/commands/fix_member_taste.py        |  153 [32m++[m
+ api/management/commands/import_all_categories.py   |   25 [32m+[m
+ api/management/commands/populate_taste_config.py   |  383 [32m+++++[m
+ .../commands/simulate_taste_recommendations.py     |  578 [32m++++++++[m
+ ...ve_cart_api_cart_user_id_be156f_idx_and_more.py |   55 [32m+[m
+ api/models.py                                      |  112 [32m+[m[31m-[m
+ api/services/__init__.py                           |    6 [32m+[m[31m-[m
+ api/services/portfolio_service.py                  |  412 [32m++++++[m
+ api/services/recommendation_engine.py              |  161 [32m+[m[31m-[m
+ api/services/style_analysis_service.py             |  314 [32m++++[m
+ api/services/taste_calculation_service.py          |   22 [32m+[m[31m-[m
+ api/services/taste_scoring_logic_service.py        |  364 [32m+++++[m
+ api/static/js/onboarding-flow.js                   |    8 [32m+[m
+ api/templates/result.html                          |  306 [32m++[m[31m--[m
+ api/utils/answer_category_mapper.py                |  376 [32m+++++[m
+ api/utils/taste_category_selector.py               |  622 [32m+++++++[m[31m-[m
+ api/utils/taste_classifier.py                      |    7 [32m+[m
+ api/utils/taste_scoring.py                         |  157 [32m+[m[31m-[m
+ api/utils/taste_scoring_registry.py                |  209 [32m+++[m
+ api/views.py                                       |  264 [32m+++[m[31m-[m
+ check_openai_key.py                                |  103 [32m++[m
+ check_taste_config.py                              |   69 [32m+[m
+ config/settings.py                                 |   47 [32m+[m[31m-[m
+ config/urls.py                                     |    8 [32m+[m
+ .../taste_recommendations_simulation.csv           |   11 [32m+[m
+ .../taste_recommendations_simulation.json          | 1533 [32m++++++++++++++++++++[m
+ ...e_recommendations_simulation_category_stats.csv |    7 [32m+[m
+ .../visualization/category_distribution.png        |  Bin [31m0[m -> [32m260672[m bytes
+ .../visualization/summary_statistics.png           |  Bin [31m0[m -> [32m206745[m bytes
+ .../visualization/taste_category_heatmap.png       |  Bin [31m0[m -> [32m143774[m bytes
+ fill_taste_random.py                               |  170 [32m+++[m
+ fix_taste_column.py                                |  197 [32m+++[m
+ oracle_init.py                                     |   25 [32m+[m[31m-[m
+ 45 files changed, 7245 insertions(+), 345 deletions(-)

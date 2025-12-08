@@ -1,0 +1,155 @@
+-- ============================================================
+-- TASTE_CONFIG 정규화 마이그레이션 스크립트
+-- ============================================================
+-- 이 스크립트는 TASTE_CONFIG 테이블을 정규화하여
+-- 카테고리별 점수와 추천 제품을 별도 테이블로 분리합니다.
+-- ============================================================
+
+-- ============================================================
+-- Step 1: 새 테이블 생성
+-- ============================================================
+
+-- 1.1 TASTE_CATEGORY_SCORES 테이블 생성
+CREATE TABLE TASTE_CATEGORY_SCORES (
+    TASTE_ID NUMBER NOT NULL,
+    CATEGORY_NAME VARCHAR2(50) NOT NULL,
+    SCORE NUMBER(5,2) NOT NULL,  -- 0~100점
+    IS_RECOMMENDED CHAR(1) DEFAULT 'N',  -- 'Y'/'N' - 추천 카테고리 여부
+    IS_ILL_SUITED CHAR(1) DEFAULT 'N',  -- 'Y'/'N' - 부적합 카테고리 여부
+    CREATED_AT DATE DEFAULT SYSDATE,
+    UPDATED_AT DATE DEFAULT SYSDATE,
+    
+    PRIMARY KEY (TASTE_ID, CATEGORY_NAME),
+    FOREIGN KEY (TASTE_ID) REFERENCES TASTE_CONFIG(TASTE_ID) ON DELETE CASCADE
+);
+
+CREATE INDEX IDX_TASTE_CAT_SCORES_TASTE ON TASTE_CATEGORY_SCORES(TASTE_ID);
+CREATE INDEX IDX_TASTE_CAT_SCORES_CAT ON TASTE_CATEGORY_SCORES(CATEGORY_NAME);
+CREATE INDEX IDX_TASTE_CAT_SCORES_REC ON TASTE_CATEGORY_SCORES(TASTE_ID, IS_RECOMMENDED);
+
+COMMENT ON TABLE TASTE_CATEGORY_SCORES IS 'Taste별 카테고리 점수 관리 테이블 (정규화)';
+COMMENT ON COLUMN TASTE_CATEGORY_SCORES.TASTE_ID IS 'Taste ID (FK)';
+COMMENT ON COLUMN TASTE_CATEGORY_SCORES.CATEGORY_NAME IS '카테고리명';
+COMMENT ON COLUMN TASTE_CATEGORY_SCORES.SCORE IS '카테고리 점수 (0~100점)';
+COMMENT ON COLUMN TASTE_CATEGORY_SCORES.IS_RECOMMENDED IS '추천 카테고리 여부';
+COMMENT ON COLUMN TASTE_CATEGORY_SCORES.IS_ILL_SUITED IS '부적합 카테고리 여부';
+
+-- 1.2 TASTE_RECOMMENDED_PRODUCTS 테이블 생성
+CREATE TABLE TASTE_RECOMMENDED_PRODUCTS (
+    TASTE_ID NUMBER NOT NULL,
+    CATEGORY_NAME VARCHAR2(50) NOT NULL,
+    PRODUCT_ID NUMBER NOT NULL,
+    SCORE NUMBER(5,2),  -- 해당 제품의 점수 (0~100점)
+    RANK_ORDER NUMBER(2),  -- 카테고리 내 순위 (1, 2, 3...)
+    CREATED_AT DATE DEFAULT SYSDATE,
+    UPDATED_AT DATE DEFAULT SYSDATE,
+    
+    PRIMARY KEY (TASTE_ID, CATEGORY_NAME, PRODUCT_ID),
+    FOREIGN KEY (TASTE_ID) REFERENCES TASTE_CONFIG(TASTE_ID) ON DELETE CASCADE
+);
+
+CREATE INDEX IDX_TASTE_REC_PROD_TASTE ON TASTE_RECOMMENDED_PRODUCTS(TASTE_ID);
+CREATE INDEX IDX_TASTE_REC_PROD_CAT ON TASTE_RECOMMENDED_PRODUCTS(CATEGORY_NAME);
+CREATE INDEX IDX_TASTE_REC_PROD_TASTE_CAT ON TASTE_RECOMMENDED_PRODUCTS(TASTE_ID, CATEGORY_NAME);
+
+COMMENT ON TABLE TASTE_RECOMMENDED_PRODUCTS IS 'Taste별 추천 제품 관리 테이블 (정규화)';
+COMMENT ON COLUMN TASTE_RECOMMENDED_PRODUCTS.TASTE_ID IS 'Taste ID (FK)';
+COMMENT ON COLUMN TASTE_RECOMMENDED_PRODUCTS.CATEGORY_NAME IS '카테고리명';
+COMMENT ON COLUMN TASTE_RECOMMENDED_PRODUCTS.PRODUCT_ID IS '제품 ID';
+COMMENT ON COLUMN TASTE_RECOMMENDED_PRODUCTS.SCORE IS '제품 점수 (0~100점)';
+COMMENT ON COLUMN TASTE_RECOMMENDED_PRODUCTS.RANK_ORDER IS '카테고리 내 순위';
+
+-- ============================================================
+-- Step 2: 기존 데이터 마이그레이션
+-- ============================================================
+-- 주의: 이 스크립트는 Oracle 11g에서 JSON 함수가 제한적이므로
+-- Python 스크립트로 마이그레이션하는 것을 권장합니다.
+-- ============================================================
+
+-- 2.1 개별 점수 컬럼에서 TASTE_CATEGORY_SCORES로 데이터 이전
+-- (Oracle 11g는 JSON 함수가 제한적이므로 Python 스크립트 사용 권장)
+
+-- 예시: TV_SCORE 컬럼이 있는 경우
+INSERT INTO TASTE_CATEGORY_SCORES (TASTE_ID, CATEGORY_NAME, SCORE, IS_RECOMMENDED, IS_ILL_SUITED)
+SELECT 
+    TASTE_ID,
+    'TV' AS CATEGORY_NAME,
+    NVL(TV_SCORE, 0) AS SCORE,
+    CASE 
+        WHEN RECOMMENDED_CATEGORIES IS NOT NULL 
+        AND (RECOMMENDED_CATEGORIES LIKE '%"TV"%' OR RECOMMENDED_CATEGORIES LIKE '%TV%')
+        THEN 'Y'
+        ELSE 'N'
+    END AS IS_RECOMMENDED,
+    CASE 
+        WHEN ILL_SUITED_CATEGORIES IS NOT NULL 
+        AND (ILL_SUITED_CATEGORIES LIKE '%"TV"%' OR ILL_SUITED_CATEGORIES LIKE '%TV%')
+        THEN 'Y'
+        ELSE 'N'
+    END AS IS_ILL_SUITED
+FROM TASTE_CONFIG
+WHERE TV_SCORE IS NOT NULL;
+
+-- 다른 카테고리들도 동일한 방식으로 INSERT
+-- (Python 스크립트로 자동화하는 것을 권장)
+
+-- ============================================================
+-- Step 3: 데이터 검증
+-- ============================================================
+
+-- 3.1 마이그레이션된 데이터 개수 확인
+SELECT 
+    'TASTE_CATEGORY_SCORES' AS TABLE_NAME,
+    COUNT(*) AS RECORD_COUNT
+FROM TASTE_CATEGORY_SCORES
+UNION ALL
+SELECT 
+    'TASTE_RECOMMENDED_PRODUCTS' AS TABLE_NAME,
+    COUNT(*) AS RECORD_COUNT
+FROM TASTE_RECOMMENDED_PRODUCTS;
+
+-- 3.2 Taste별 카테고리 점수 개수 확인
+SELECT 
+    TASTE_ID,
+    COUNT(*) AS CATEGORY_COUNT
+FROM TASTE_CATEGORY_SCORES
+GROUP BY TASTE_ID
+ORDER BY TASTE_ID;
+
+-- 3.3 추천 카테고리 확인
+SELECT 
+    TASTE_ID,
+    COUNT(*) AS RECOMMENDED_COUNT
+FROM TASTE_CATEGORY_SCORES
+WHERE IS_RECOMMENDED = 'Y'
+GROUP BY TASTE_ID
+ORDER BY TASTE_ID;
+
+-- ============================================================
+-- Step 4: 기존 컬럼 제거 (선택사항, 마이그레이션 완료 후)
+-- ============================================================
+-- 주의: 모든 코드가 새 테이블을 사용하는지 확인 후 실행
+-- ============================================================
+
+-- 4.1 개별 점수 컬럼 제거 (예시)
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN TV_SCORE;
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN "냉장고_SCORE";
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN "세탁기_SCORE";
+-- ... (다른 카테고리 컬럼들)
+
+-- 4.2 JSON 컬럼 제거 (예시)
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN RECOMMENDED_CATEGORIES;
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN CATEGORY_SCORES;
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN RECOMMENDED_PRODUCTS;
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN RECOMMENDED_PRODUCT_SCORES;
+-- ALTER TABLE TASTE_CONFIG DROP COLUMN ILL_SUITED_CATEGORIES;
+
+-- ============================================================
+-- 롤백 스크립트 (필요시)
+-- ============================================================
+
+-- DROP TABLE TASTE_RECOMMENDED_PRODUCTS;
+-- DROP TABLE TASTE_CATEGORY_SCORES;
+
+
+

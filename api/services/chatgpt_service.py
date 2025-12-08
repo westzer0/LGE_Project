@@ -237,13 +237,14 @@ JSON 형식으로 응답해주세요:
             return "다양한 고객들이 만족하며 사용 중인 제품이에요."
     
     @classmethod
-    def chat_response(cls, user_message: str, context: dict = None) -> str:
+    def chat_response(cls, user_message: str, context: dict = None, require_json: bool = False) -> str:
         """
         AI 상담 챗봇 응답
         
         Args:
             user_message: 사용자 메시지
             context: 대화 컨텍스트 (선택)
+            require_json: JSON 형식 응답 강제 여부
         
         Returns:
             AI 응답 문자열
@@ -252,7 +253,10 @@ JSON 형식으로 응답해주세요:
             return "죄송해요, 현재 AI 상담 서비스를 이용할 수 없어요. 잠시 후 다시 시도해주세요."
         
         try:
-            system_prompt = """
+            if require_json:
+                system_prompt = "당신은 LG전자 가전 추천 전문가입니다. 사용자의 자연어 요청을 분석하여 제품 추천에 필요한 정보를 JSON 형식으로만 응답합니다. 반드시 유효한 JSON 형식으로만 응답하세요."
+            else:
+                system_prompt = """
 당신은 LG전자 가전 전문 상담사 'LG 홈스타일링 AI'입니다.
 
 역할:
@@ -281,12 +285,18 @@ JSON 형식으로 응답해주세요:
             
             messages.append({"role": "user", "content": user_message})
             
-            response = client.chat.completions.create(
-                model=cls.MODEL,
-                messages=messages,
-                max_tokens=500,
-                temperature=0.7
-            )
+            # JSON 응답 강제 옵션
+            kwargs = {
+                "model": cls.MODEL,
+                "messages": messages,
+                "max_tokens": 500,
+                "temperature": 0.7
+            }
+            
+            if require_json:
+                kwargs["response_format"] = {"type": "json_object"}
+            
+            response = client.chat.completions.create(**kwargs)
             
             return response.choices[0].message.content.strip()
         

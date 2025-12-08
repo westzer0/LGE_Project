@@ -51,6 +51,15 @@ Thumbs.db
 scripts/
 merged_data_analysis.csv
 
+# Oracle Instant Client (용량이 크므로 Git에 포함하지 않음)
+libs/oracle_client/
+vendor/oracle_client/
+oracle_client/
+instantclient*/
+
 # Test files (optional - remove if you want to commit tests)
 test_oracle_connection.py
 test_figma_conversion.py
+
+# Node.js
+node_modules/

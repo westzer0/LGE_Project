@@ -1,101 +1,72 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Oracle 직접 연결 테스트 (Django 없이)
-Service Name 사용 확인
-"""
-import os
 import sys
-
-try:
-    import oracledb
-except ImportError:
-    print("❌ oracledb 모듈을 찾을 수 없습니다.")
-    print("설치: pip install oracledb")
-    sys.exit(1)
-
-# 환경 변수에서 설정 로드
+import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-env_path = Path(__file__).resolve().parent / '.env'
-load_dotenv(dotenv_path=env_path)
+BASE_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE_DIR))
 
-# Oracle 연결 정보
-host = os.environ.get('ORACLE_HOST') or os.environ.get('DB_HOST', 'project-db-campus.smhrd.com')
-port = os.environ.get('ORACLE_PORT') or os.environ.get('DB_PORT', '1524')
-service_name = os.environ.get('ORACLE_SERVICE_NAME') or os.environ.get('DB_SERVICE_NAME') or os.environ.get('DB_NAME', 'MAPPP')
-user = os.environ.get('ORACLE_USER') or os.environ.get('DB_USER', '')
-password = os.environ.get('ORACLE_PASSWORD') or os.environ.get('DB_PASSWORD', '')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-print("="*60)
-print("Oracle 직접 연결 테스트 (Service Name 사용)")
-print("="*60)
-print(f"\n연결 정보:")
-print(f"  Host: {host}")
-print(f"  Port: {port}")
-print(f"  Service Name: {service_name}")
-print(f"  User: {user}")
-print(f"  Password: {'설정됨' if password else '없음'}")
+import django
+django.setup()
 
-# 방법 1: DSN 문자열 사용
-print("\n" + "="*60)
-print("방법 1: DSN 문자열 사용")
-print("="*60)
-dsn = f"{host}:{port}/{service_name}"
-print(f"DSN: {dsn}")
+from api.db.oracle_client import get_connection, fetch_all_dict, fetch_one
+
+print("=" * 60)
+print("Oracle DB 연결 테스트")
+print("=" * 60)
 
 try:
-    conn = oracledb.connect(
-        user=user,
-        password=password,
-        dsn=dsn
-    )
-    cursor = conn.cursor()
-    cursor.execute("SELECT USER, SYSDATE, '연결 성공!' FROM DUAL")
-    result = cursor.fetchone()
-    print(f"\n✅ 연결 성공!")
-    print(f"사용자: {result[0]}")
-    print(f"서버 시간: {result[1]}")
-    print(f"상태: {result[2]}")
-    cursor.close()
-    conn.close()
-    print("\n✅ 방법 1이 성공했습니다. 이 형식을 Django에서 사용해야 합니다.")
-    sys.exit(0)
+    # 1. 연결 테스트
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT SYSDATE FROM DUAL")
+            result = cur.fetchone()
+            print(f"✅ 연결 성공! DB 시간: {result[0]}")
+    
+    # 2. 테이블 목록
+    tables = fetch_all_dict("SELECT table_name FROM user_tables ORDER BY table_name")
+    print(f"\n✅ 총 {len(tables)}개의 테이블 발견:")
+    for i, table in enumerate(tables[:15], 1):
+        print(f"   {i}. {table['TABLE_NAME']}")
+    if len(tables) > 15:
+        print(f"   ... 외 {len(tables) - 15}개")
+    
+    # 3. PRODUCT 테이블
+    try:
+        product_count = fetch_one("SELECT COUNT(*) FROM PRODUCT")
+        print(f"\n✅ PRODUCT 테이블: {product_count[0]}개 행")
+        
+        samples = fetch_all_dict("SELECT PRODUCT_ID, PRODUCT_NAME FROM PRODUCT WHERE ROWNUM <= 3")
+        if samples:
+            print("\n   샘플 데이터:")
+            for i, row in enumerate(samples, 1):
+                print(f"   {i}. ID: {row.get('PRODUCT_ID')}, 이름: {row.get('PRODUCT_NAME', 'N/A')[:50]}")
+    except Exception as e:
+        print(f"\n⚠️ PRODUCT 테이블 조회 실패: {e}")
+    
+    # 4. MEMBER 테이블
+    try:
+        member_count = fetch_one("SELECT COUNT(*) FROM MEMBER")
+        print(f"\n✅ MEMBER 테이블: {member_count[0]}개 행")
+    except Exception as e:
+        print(f"\n⚠️ MEMBER 테이블 조회 실패: {e}")
+    
+    # 5. ONBOARDING 테이블
+    try:
+        onboarding_count = fetch_one("SELECT COUNT(*) FROM ONBOARDING")
+        print(f"\n✅ ONBOARDING 테이블: {onboarding_count[0]}개 행")
+    except Exception as e:
+        print(f"\n⚠️ ONBOARDING 테이블 조회 실패: {e}")
+    
+    print("\n" + "=" * 60)
+    print("✅ 모든 테스트 완료!")
+    print("=" * 60)
     
 except Exception as e:
-    print(f"\n❌ 방법 1 실패: {type(e).__name__}: {str(e)}")
-
-# 방법 2: host, port, service_name 파라미터 사용
-print("\n" + "="*60)
-print("방법 2: host, port, service_name 파라미터 사용")
-print("="*60)
-
-try:
-    conn = oracledb.connect(
-        user=user,
-        password=password,
-        host=host,
-        port=int(port),
-        service_name=service_name
-    )
-    cursor = conn.cursor()
-    cursor.execute("SELECT USER, SYSDATE, '연결 성공!' FROM DUAL")
-    result = cursor.fetchone()
-    print(f"\n✅ 연결 성공!")
-    print(f"사용자: {result[0]}")
-    print(f"서버 시간: {result[1]}")
-    print(f"상태: {result[2]}")
-    cursor.close()
-    conn.close()
-    print("\n✅ 방법 2가 성공했습니다.")
-    sys.exit(0)
-    
-except Exception as e:
-    print(f"\n❌ 방법 2 실패: {type(e).__name__}: {str(e)}")
-
-print("\n" + "="*60)
-print("❌ 모든 연결 방법이 실패했습니다.")
-print("="*60)
-sys.exit(1)
-
+    print(f"\n❌ 오류 발생: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)

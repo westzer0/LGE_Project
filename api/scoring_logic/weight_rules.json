@@ -1,0 +1,300 @@
+{
+    "spec_score_rules": [
+        {
+            "key": [
+                "4인",
+                "냉장고",
+                "capacity_l"
+            ],
+            "ideal_range": [
+                700,
+                900
+            ],
+            "score": 10,
+            "tolerance": 100
+        },
+        {
+            "key": [
+                "2인",
+                "냉장고",
+                "capacity_l"
+            ],
+            "ideal_range": [
+                400,
+                600
+            ],
+            "score": 10,
+            "tolerance": 50
+        },
+        {
+            "key": [
+                "1인",
+                "냉장고",
+                "capacity_l"
+            ],
+            "ideal_range": [
+                150,
+                200
+            ],
+            "score": 10,
+            "tolerance": 30
+        },
+        {
+            "key": [
+                "영화",
+                "TV",
+                "panel_type"
+            ],
+            "match_value": "OLED",
+            "score": 10
+        },
+        {
+            "key": [
+                "게임",
+                "TV",
+                "refresh_rate"
+            ],
+            "min_value": 120,
+            "score": 10
+        },
+        {
+            "key": [
+                "게임",
+                "TV",
+                "hdmi_version"
+            ],
+            "match_value": "HDMI2.1",
+            "score": 5
+        },
+        {
+            "key": [
+                "드레스룸",
+                "세탁기",
+                "category_bonus"
+            ],
+            "score": 5
+        },
+        {
+            "key": [
+                "드레스룸",
+                "건조기",
+                "category_bonus"
+            ],
+            "score": 5
+        }
+    ],
+    "preference_score_rules": [
+        {
+            "key": [
+                "디자인",
+                "1순위"
+            ],
+            "multiplier": 1.5,
+            "target_specs": [
+                "design",
+                "panel_type",
+                "color_group"
+            ]
+        },
+        {
+            "key": [
+                "디자인",
+                "2순위"
+            ],
+            "multiplier": 1.3,
+            "target_specs": [
+                "design",
+                "panel_type"
+            ]
+        },
+        {
+            "key": [
+                "디자인",
+                "3순위"
+            ],
+            "multiplier": 1.1,
+            "target_specs": [
+                "design"
+            ]
+        },
+        {
+            "key": [
+                "AI기능",
+                "1순위"
+            ],
+            "multiplier": 1.5,
+            "target_specs": [
+                "ai_feature",
+                "thinq",
+                "smart"
+            ],
+            "keywords": [
+                "AI",
+                "ThinQ",
+                "스마트"
+            ]
+        },
+        {
+            "key": [
+                "AI기능",
+                "2순위"
+            ],
+            "multiplier": 1.3,
+            "target_specs": [
+                "ai_feature",
+                "thinq"
+            ]
+        },
+        {
+            "key": [
+                "에너지효율",
+                "1순위"
+            ],
+            "multiplier": 1.5,
+            "target_specs": [
+                "energy_efficiency",
+                "power_consumption"
+            ]
+        },
+        {
+            "key": [
+                "에너지효율",
+                "2순위"
+            ],
+            "multiplier": 1.3,
+            "target_specs": [
+                "energy_efficiency"
+            ]
+        },
+        {
+            "key": [
+                "가성비",
+                "1순위"
+            ],
+            "multiplier": 1.5,
+            "target_specs": [
+                "price_match"
+            ]
+        },
+        {
+            "key": [
+                "가성비",
+                "2순위"
+            ],
+            "multiplier": 1.3,
+            "target_specs": [
+                "price_match"
+            ]
+        }
+    ],
+    "lifestyle_score_rules": [
+        {
+            "key": [
+                "요리_high",
+                "냉장고",
+                "capacity_l"
+            ],
+            "min_value": 700,
+            "score": 5
+        },
+        {
+            "key": [
+                "요리_high",
+                "인덕션",
+                "구수"
+            ],
+            "min_value": 3,
+            "score": 5
+        },
+        {
+            "key": [
+                "요리_high",
+                "오븐",
+                "category_bonus"
+            ],
+            "score": 5
+        },
+        {
+            "key": [
+                "세탁_daily_small",
+                "세탁기",
+                "capacity_kg"
+            ],
+            "ideal_range": [
+                4,
+                7
+            ],
+            "score": 5
+        },
+        {
+            "key": [
+                "세탁_daily_small",
+                "미니워시",
+                "category_bonus"
+            ],
+            "score": 8
+        },
+        {
+            "key": [
+                "게임",
+                "TV",
+                "refresh_rate"
+            ],
+            "min_value": 120,
+            "score": 8
+        },
+        {
+            "key": [
+                "게임",
+                "TV",
+                "hdmi_version"
+            ],
+            "match_value": "HDMI2.1",
+            "score": 5
+        }
+    ],
+    "price_score_rules": [
+        {
+            "condition": "price <= budget",
+            "score": 10
+        },
+        {
+            "condition": "price <= budget * 1.1",
+            "score": 5
+        },
+        {
+            "condition": "price > budget * 1.1 && price <= budget * 1.3",
+            "score": -5
+        },
+        {
+            "condition": "price > budget * 1.3",
+            "score": -15
+        },
+        {
+            "condition": "budget_level == low && price > budget * 1.2",
+            "score": -10
+        }
+    ],
+    "review_score_rules": [
+        {
+            "condition": "avg_rating >= 4.7 && review_count >= 200",
+            "score": 8
+        },
+        {
+            "condition": "avg_rating >= 4.5 && review_count >= 100",
+            "score": 5
+        },
+        {
+            "condition": "avg_rating >= 4.3 && review_count >= 50",
+            "score": 3
+        },
+        {
+            "condition": "avg_rating < 3.5",
+            "score": -4
+        },
+        {
+            "condition": "negative_keyword_index >= 0.3",
+            "score": -4
+        }
+    ]
+}
