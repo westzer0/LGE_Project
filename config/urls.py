@@ -23,13 +23,39 @@ from api.views import (
     kakao_login_view, kakao_callback_view, kakao_logout_view, kakao_user_info_view, kakao_send_message_view,
 )
 from api.views_drf import convert_figma_to_code
+from api.views_auth import kakao_login_view as jwt_kakao_login_view, jwt_refresh_view, jwt_me_view
+from api.views_recommendations import onboarding_complete_view, taste_recommendations_view, portfolio_generate_view
 
 # DRF ViewSet 라우터
-# from api.views_drf import RecommendAPIView, PortfolioViewSet, OnboardingSessionViewSet
+from api.viewsets_erd import (
+    MemberViewSet, CartViewSet, CartItemViewSet,
+    OrderViewSet, OrderDetailViewSet, PaymentViewSet,
+    OnboardingQuestionViewSet, OnboardingAnswerViewSet, OnboardingUserResponseViewSet,
+    TasteConfigViewSet, TasteCategoryScoresViewSet, TasteRecommendedProductsViewSet,
+    PortfolioProductViewSet, EstimateViewSet, ConsultationViewSet,
+    ProductImageViewSet, ProductSpecNewViewSet, ProductReviewNewViewSet
+)
 
-# router = DefaultRouter()
-# router.register(r'portfolios', PortfolioViewSet, basename='portfolio')
-# router.register(r'onboarding-sessions', OnboardingSessionViewSet, basename='onboarding-session')
+# ERD 기반 ViewSet 라우터
+router = DefaultRouter()
+router.register(r'members', MemberViewSet, basename='member')
+router.register(r'carts', CartViewSet, basename='cart')
+router.register(r'cart-items', CartItemViewSet, basename='cart-item')
+router.register(r'orders', OrderViewSet, basename='order')
+router.register(r'order-details', OrderDetailViewSet, basename='order-detail')
+router.register(r'payments', PaymentViewSet, basename='payment')
+router.register(r'onboarding-questions', OnboardingQuestionViewSet, basename='onboarding-question')
+router.register(r'onboarding-answers', OnboardingAnswerViewSet, basename='onboarding-answer')
+router.register(r'onboarding-user-responses', OnboardingUserResponseViewSet, basename='onboarding-user-response')
+router.register(r'taste-configs', TasteConfigViewSet, basename='taste-config')
+router.register(r'taste-category-scores', TasteCategoryScoresViewSet, basename='taste-category-score')
+router.register(r'taste-recommended-products', TasteRecommendedProductsViewSet, basename='taste-recommended-product')
+router.register(r'portfolio-products', PortfolioProductViewSet, basename='portfolio-product')
+router.register(r'estimates', EstimateViewSet, basename='estimate')
+router.register(r'consultations', ConsultationViewSet, basename='consultation')
+router.register(r'product-images', ProductImageViewSet, basename='product-image')
+router.register(r'product-specs', ProductSpecNewViewSet, basename='product-spec')
+router.register(r'product-reviews', ProductReviewNewViewSet, basename='product-review')
 
 urlpatterns = [
     # 메인 페이지 (루트 경로)
@@ -124,9 +150,8 @@ urlpatterns = [
     path('api/wishlist/remove/', wishlist_remove_view, name='wishlist_remove'),
     path('api/wishlist/list/', wishlist_list_view, name='wishlist_list'),
     
-    # DRF API 엔드포인트 (새로운 방식)
-    # path('api/drf/recommend/', RecommendAPIView.as_view(), name='drf_recommend'),
-    # path('api/drf/', include(router.urls)),  # /api/drf/portfolios/, /api/drf/onboarding-sessions/
+    # DRF API 엔드포인트 (ERD 기반 완전한 REST API)
+    path('api/v1/', include(router.urls)),  # /api/v1/members/, /api/v1/carts/, etc.
     
     # AI (ChatGPT) API
     path('api/ai/status/', ai_status_view, name='ai_status'),
@@ -138,11 +163,21 @@ urlpatterns = [
     path('api/ai/chat-recommend/', ai_chat_recommend_view, name='ai_chat_recommend'),
     path('api/ai/product-compare/', ai_product_compare_view, name='ai_product_compare'),
     
-    # 카카오 인증 API
+    # 카카오 인증 API (기존 - 하위 호환성)
     path('api/auth/kakao/login/', kakao_login_view, name='kakao_login'),
     path('api/auth/kakao/callback/', kakao_callback_view, name='kakao_callback'),
     path('api/auth/kakao/logout/', kakao_logout_view, name='kakao_logout'),
     path('api/auth/kakao/user/', kakao_user_info_view, name='kakao_user_info'),
+    
+    # JWT + Kakao OAuth API (새로운 REST API)
+    path('api/v1/auth/kakao/', jwt_kakao_login_view, name='jwt_kakao_login'),
+    path('api/v1/auth/refresh/', jwt_refresh_view, name='jwt_refresh'),
+    path('api/v1/auth/me/', jwt_me_view, name='jwt_me'),
+    
+    # 추천 엔진 API
+    path('api/v1/onboarding/complete/', onboarding_complete_view, name='onboarding_complete'),
+    path('api/v1/recommendations/taste/<int:taste_id>/', taste_recommendations_view, name='taste_recommendations'),
+    path('api/v1/portfolio/generate/', portfolio_generate_view, name='portfolio_generate'),
     
     # 카카오 메시지 API
     path('api/kakao/send-message/', kakao_send_message_view, name='kakao_send_message'),

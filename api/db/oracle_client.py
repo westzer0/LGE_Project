@@ -1,31 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 """
-Oracle 11g (XE, SID=xe) 에 Thick 모드로 직접 붙는 전용 클라이언트 모듈.
-Django ORM 은 사용하지 않고, 이 모듈에서만 oracledb 로 쿼리를 실행한다.
+Oracle 11g 호환 cx_Oracle 클라이언트 (python-oracledb Thin 모드 미지원 해결)
 """
-
 import os
 from pathlib import Path
-
-import oracledb
+import cx_Oracle
 from dotenv import load_dotenv
 
-# 프로젝트 루트 기준 .env 로드
+# .env 로드 (기존 코드 그대로)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 env_path = BASE_DIR / ".env"
 if env_path.exists():
     try:
-        # UTF-8로 시도
         with open(env_path, 'r', encoding='utf-8') as f:
             from dotenv import dotenv_values
             env_vars = dotenv_values(stream=f)
             for key, value in env_vars.items():
                 if value is not None:
                     os.environ.setdefault(key, value)
-    except UnicodeDecodeError:
-        # UTF-8 실패 시 CP949 (Windows 기본 인코딩)로 시도
+    except:
         try:
             with open(env_path, 'r', encoding='cp949') as f:
                 from dotenv import dotenv_values
@@ -34,125 +28,360 @@ if env_path.exists():
                     if value is not None:
                         os.environ.setdefault(key, value)
         except Exception as e:
-            print(f"[WARNING] .env 파일 로드 실패 (CP949): {e}")
-    except Exception as e:
-        print(f"[WARNING] .env 파일 로드 실패: {e}")
+            print(f"[WARNING] .env 파일 로드 실패: {e}")
 
-# Thick 모드 초기화 (oracle_init.py의 초기화 함수 사용)
-# Oracle 11g는 thin mode를 지원하지 않으므로 Thick mode 필수
-_thick_mode_initialized = False
-
-# oracle_init.py의 초기화 함수 사용 (manage.py에서 이미 호출했을 수 있음)
-try:
-    from oracle_init import init_oracle_client
-    init_oracle_client()
-    _thick_mode_initialized = True
-except ImportError:
-    # oracle_init.py가 없으면 직접 초기화 시도
-    try:
-        oracledb.init_oracle_client()
-        _thick_mode_initialized = True
-        print("[Oracle] Thick 모드 초기화 완료 (직접)")
-    except Exception as e:
-        error_msg = str(e).lower()
-        if "already initialized" in error_msg:
-            _thick_mode_initialized = True
-            print("[Oracle] Thick 모드 이미 초기화됨")
-        else:
-            print(f"[Oracle Warning] Thick 모드 초기화 실패: {e}")
-            print("  Oracle 11g는 thin mode를 지원하지 않습니다.")
-            print("  Oracle Instant Client를 설치하고 PATH에 추가하거나")
-            print("  ORACLE_INSTANT_CLIENT_PATH 환경변수를 설정하세요.")
-except Exception as e:
-    error_msg = str(e).lower()
-    if "already initialized" in error_msg:
-        _thick_mode_initialized = True
-        print("[Oracle] Thick 모드 이미 초기화됨")
-    else:
-        print(f"[Oracle Warning] Thick 모드 초기화 실패: {e}")
-        print("  Oracle 11g는 thin mode를 지원하지 않습니다.")
-        print("  Oracle Instant Client를 설치하고 PATH에 추가하거나")
-        print("  ORACLE_INSTANT_CLIENT_PATH 환경변수를 설정하세요.")
-
-# DISABLE_DB 환경 변수 확인 (먼저 확인)
+# 환경 변수 설정 (기존 그대로)
 DISABLE_DB = os.getenv("DISABLE_DB", "false").lower() == "true"
-
-# PRD 개선: 환경 변수 필수 설정 (보안 강화)
-ORACLE_USER = os.getenv("ORACLE_USER")
-ORACLE_PASSWORD = os.getenv("ORACLE_PASSWORD")
-ORACLE_HOST = os.getenv("ORACLE_HOST")
-ORACLE_PORT = int(os.getenv("ORACLE_PORT", "1521"))
+ORACLE_USER = os.getenv("ORACLE_USER", "campus_24K_LG3_DX7_p3_4")
+ORACLE_PASSWORD = os.getenv("ORACLE_PASSWORD", "smhrd4")
+ORACLE_HOST = os.getenv("ORACLE_HOST", "project-db-campus.smhrd.com")
+ORACLE_PORT = int(os.getenv("ORACLE_PORT", "1524"))
 ORACLE_SID = os.getenv("ORACLE_SID", "xe")
 
-# 개발 환경에서만 기본값 허용 (DISABLE_DB가 아닌 경우)
 if not DISABLE_DB:
-    if not ORACLE_USER:
-        # 개발 환경 기본값 (프로덕션에서는 환경 변수 필수)
-        ORACLE_USER = os.getenv("ORACLE_USER", "campus_24K_LG3_DX7_p3_4")
-        ORACLE_PASSWORD = os.getenv("ORACLE_PASSWORD", "smhrd4")
-        ORACLE_HOST = os.getenv("ORACLE_HOST", "project-db-campus.smhrd.com")
-        ORACLE_PORT = int(os.getenv("ORACLE_PORT", "1524"))
-        print("[WARNING] Oracle DB 기본값 사용 중 (개발 환경). 프로덕션에서는 환경 변수를 설정하세요.")
-    elif not all([ORACLE_USER, ORACLE_PASSWORD, ORACLE_HOST]):
-        raise ValueError(
-            "Oracle DB 환경 변수가 설정되지 않았습니다. "
-            "ORACLE_USER, ORACLE_PASSWORD, ORACLE_HOST를 설정하거나 "
-            "DISABLE_DB=true로 설정하세요."
-        )
-    # DSN은 DISABLE_DB가 false일 때만 생성
-    DSN = oracledb.makedsn(ORACLE_HOST, ORACLE_PORT, sid=ORACLE_SID)
+    DSN = f"{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SID}"
 else:
-    # DISABLE_DB가 true일 때는 DSN을 None으로 설정
     DSN = None
 
-
 class DatabaseDisabledError(Exception):
-    """DB가 비활성화된 상태에서 DB 접근을 시도할 때 발생하는 예외"""
     pass
 
-
 def get_connection():
-    """새 Oracle 연결 생성."""
-    # DISABLE_DB가 설정되어 있으면 예외 발생
+    """cx_Oracle 연결 (11g 완벽 지원)"""
     if DISABLE_DB:
-        raise DatabaseDisabledError(
-            "데이터베이스 연결이 비활성화되었습니다. (DISABLE_DB=true) "
-            "DB를 사용하는 기능은 작동하지 않습니다."
-        )
+        raise DatabaseDisabledError("DISABLE_DB=true")
     
-    if not _thick_mode_initialized:
-        raise RuntimeError(
-            "Oracle Thick mode가 초기화되지 않았습니다. "
-            "Oracle 11g는 thin mode를 지원하지 않으므로 "
-            "Oracle Instant Client를 설치하고 초기화해야 합니다."
-        )
-    return oracledb.connect(
+    print(f"[Oracle] cx_Oracle 연결 시도: {ORACLE_USER}@{DSN}")
+    return cx_Oracle.connect(
         user=ORACLE_USER,
         password=ORACLE_PASSWORD,
         dsn=DSN,
     )
 
-
 def fetch_all(sql, params=None):
-    """모든 행을 튜플 리스트로 반환."""
+    """모든 행 반환"""
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql, params or {})
             return cur.fetchall()
 
-
 def fetch_all_dict(sql, params=None):
-    """각 행을 dict 로 변환해 리스트로 반환."""
+    """Dict 리스트 반환"""
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql, params or {})
             cols = [c[0] for c in cur.description]
-            return [dict(zip(cols, row)) for row in cur]
-
+            return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 def fetch_one(sql, params=None):
-    """단일 행 반환 (없으면 None)."""
+    """단일 행 반환"""
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql, params or {})
             return cur.fetchone()
+
+
+# ============================================================
+# 데이터 로드 함수 (Oracle → Django)
+# ============================================================
+
+def load_all_lg_products():
+    """
+    Oracle DB의 PRODUCT 테이블에서 모든 LG 가전 제품을 Django Product 모델로 로드
+    
+    사용법:
+        from api.db.oracle_client import load_all_lg_products
+        load_all_lg_products()
+    """
+    try:
+        from api.models import Product
+        
+        print("[데이터 로드] Oracle DB에서 제품 데이터 로드 시작...")
+        
+        # Oracle DB에서 제품 조회
+        products = fetch_all_dict("""
+            SELECT 
+                PRODUCT_ID,
+                PRODUCT_NAME,
+                MAIN_CATEGORY,
+                SUB_CATEGORY,
+                MODEL_CODE,
+                STATUS,
+                PRICE,
+                DISCOUNT_PRICE,
+                RATING,
+                URL,
+                IMAGE_URL
+            FROM PRODUCT
+            WHERE PRODUCT_NAME IS NOT NULL
+            ORDER BY PRODUCT_ID
+        """)
+        
+        print(f"[데이터 로드] Oracle DB에서 {len(products)}개 제품 조회 완료")
+        
+        created_count = 0
+        updated_count = 0
+        
+        for prod_data in products:
+            product_id = prod_data.get('PRODUCT_ID')
+            if not product_id:
+                continue
+            
+            # Django Product 모델에 저장/업데이트
+            product, created = Product.objects.update_or_create(
+                product_id=product_id,
+                defaults={
+                    'product_name': prod_data.get('PRODUCT_NAME', ''),
+                    'main_category': prod_data.get('MAIN_CATEGORY', ''),
+                    'sub_category': prod_data.get('SUB_CATEGORY'),
+                    'model_code': prod_data.get('MODEL_CODE'),
+                    'status': prod_data.get('STATUS'),
+                    'price': prod_data.get('PRICE'),
+                    'discount_price': prod_data.get('DISCOUNT_PRICE'),
+                    'rating': prod_data.get('RATING'),
+                    'url': prod_data.get('URL'),
+                    'image_url': prod_data.get('IMAGE_URL', ''),
+                    'name': prod_data.get('PRODUCT_NAME', ''),  # 하위 호환성
+                    'model_number': prod_data.get('MODEL_CODE'),
+                    'category': prod_data.get('MAIN_CATEGORY', ''),
+                }
+            )
+            
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+        
+        print(f"[데이터 로드] 완료: {created_count}개 생성, {updated_count}개 업데이트")
+        print(f"[데이터 로드] 총 {Product.objects.count()}개 제품이 Django DB에 저장됨")
+        
+        return {
+            'total': len(products),
+            'created': created_count,
+            'updated': updated_count,
+        }
+        
+    except Exception as e:
+        print(f"[데이터 로드] 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+def load_taste_configs():
+    """
+    Oracle DB의 TASTE_CONFIG 테이블에서 Taste 설정을 Django TasteConfig 모델로 로드
+    
+    사용법:
+        from api.db.oracle_client import load_taste_configs
+        load_taste_configs()
+    """
+    try:
+        from api.models import TasteConfig
+        import json
+        
+        print("[데이터 로드] Oracle DB에서 Taste 설정 로드 시작...")
+        
+        # Oracle DB에서 Taste 설정 조회
+        taste_configs = fetch_all_dict("""
+            SELECT 
+                TASTE_ID,
+                DESCRIPTION,
+                REPRESENTATIVE_VIBE,
+                REPRESENTATIVE_HOUSEHOLD_SIZE,
+                REPRESENTATIVE_MAIN_SPACE,
+                REPRESENTATIVE_HAS_PET,
+                REPRESENTATIVE_PRIORITY,
+                REPRESENTATIVE_BUDGET_LEVEL,
+                RECOMMENDED_CATEGORIES,
+                CATEGORY_SCORES,
+                RECOMMENDED_PRODUCTS,
+                ILL_SUITED_CATEGORIES,
+                IS_ACTIVE,
+                AUTO_GENERATED
+            FROM TASTE_CONFIG
+            ORDER BY TASTE_ID
+        """)
+        
+        print(f"[데이터 로드] Oracle DB에서 {len(taste_configs)}개 Taste 설정 조회 완료")
+        
+        created_count = 0
+        updated_count = 0
+        
+        for taste_data in taste_configs:
+            taste_id = taste_data.get('TASTE_ID')
+            if not taste_id:
+                continue
+            
+            # JSON 필드 파싱
+            recommended_categories = []
+            if taste_data.get('RECOMMENDED_CATEGORIES'):
+                try:
+                    if isinstance(taste_data['RECOMMENDED_CATEGORIES'], str):
+                        recommended_categories = json.loads(taste_data['RECOMMENDED_CATEGORIES'])
+                    else:
+                        recommended_categories = taste_data['RECOMMENDED_CATEGORIES']
+                except:
+                    recommended_categories = []
+            
+            category_scores = {}
+            if taste_data.get('CATEGORY_SCORES'):
+                try:
+                    if isinstance(taste_data['CATEGORY_SCORES'], str):
+                        category_scores = json.loads(taste_data['CATEGORY_SCORES'])
+                    else:
+                        category_scores = taste_data['CATEGORY_SCORES']
+                except:
+                    category_scores = {}
+            
+            recommended_products = {}
+            if taste_data.get('RECOMMENDED_PRODUCTS'):
+                try:
+                    if isinstance(taste_data['RECOMMENDED_PRODUCTS'], str):
+                        recommended_products = json.loads(taste_data['RECOMMENDED_PRODUCTS'])
+                    else:
+                        recommended_products = taste_data['RECOMMENDED_PRODUCTS']
+                except:
+                    recommended_products = {}
+            
+            ill_suited_categories = []
+            if taste_data.get('ILL_SUITED_CATEGORIES'):
+                try:
+                    if isinstance(taste_data['ILL_SUITED_CATEGORIES'], str):
+                        ill_suited_categories = json.loads(taste_data['ILL_SUITED_CATEGORIES'])
+                    else:
+                        ill_suited_categories = taste_data['ILL_SUITED_CATEGORIES']
+                except:
+                    ill_suited_categories = []
+            
+            # Django TasteConfig 모델에 저장/업데이트
+            taste_config, created = TasteConfig.objects.update_or_create(
+                taste_id=taste_id,
+                defaults={
+                    'description': taste_data.get('DESCRIPTION', ''),
+                    'representative_vibe': taste_data.get('REPRESENTATIVE_VIBE', ''),
+                    'representative_household_size': taste_data.get('REPRESENTATIVE_HOUSEHOLD_SIZE'),
+                    'representative_main_space': taste_data.get('REPRESENTATIVE_MAIN_SPACE', ''),
+                    'representative_has_pet': taste_data.get('REPRESENTATIVE_HAS_PET') == 1 if taste_data.get('REPRESENTATIVE_HAS_PET') is not None else None,
+                    'representative_priority': taste_data.get('REPRESENTATIVE_PRIORITY', ''),
+                    'representative_budget_level': taste_data.get('REPRESENTATIVE_BUDGET_LEVEL', ''),
+                    'recommended_categories': recommended_categories,
+                    'recommended_categories_with_scores': category_scores,
+                    'recommended_products': recommended_products,
+                    'ill_suited_categories': ill_suited_categories,
+                    'is_active': taste_data.get('IS_ACTIVE', 'Y') == 'Y' if isinstance(taste_data.get('IS_ACTIVE'), str) else bool(taste_data.get('IS_ACTIVE', True)),
+                    'auto_generated': taste_data.get('AUTO_GENERATED', 'N') == 'Y' if isinstance(taste_data.get('AUTO_GENERATED'), str) else bool(taste_data.get('AUTO_GENERATED', False)),
+                }
+            )
+            
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+        
+        print(f"[데이터 로드] 완료: {created_count}개 생성, {updated_count}개 업데이트")
+        print(f"[데이터 로드] 총 {TasteConfig.objects.count()}개 Taste 설정이 Django DB에 저장됨")
+        
+        return {
+            'total': len(taste_configs),
+            'created': created_count,
+            'updated': updated_count,
+        }
+        
+    except Exception as e:
+        print(f"[데이터 로드] 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+def load_onboarding_questions():
+    """
+    Oracle DB의 ONBOARDING_QUESTION 테이블에서 온보딩 질문을 Django OnboardingQuestion 모델로 로드
+    
+    사용법:
+        from api.db.oracle_client import load_onboarding_questions
+        load_onboarding_questions()
+    """
+    try:
+        from api.models import OnboardingQuestion, OnboardingAnswer
+        
+        print("[데이터 로드] Oracle DB에서 온보딩 질문 로드 시작...")
+        
+        # Oracle DB에서 온보딩 질문 조회
+        questions = fetch_all_dict("""
+            SELECT 
+                QUESTION_CODE,
+                QUESTION_TEXT,
+                QUESTION_TYPE,
+                IS_REQUIRED
+            FROM ONBOARDING_QUESTION
+            ORDER BY QUESTION_CODE
+        """)
+        
+        print(f"[데이터 로드] Oracle DB에서 {len(questions)}개 질문 조회 완료")
+        
+        created_count = 0
+        updated_count = 0
+        
+        for q_data in questions:
+            question_code = q_data.get('QUESTION_CODE')
+            if not question_code:
+                continue
+            
+            # Django OnboardingQuestion 모델에 저장/업데이트
+            question, created = OnboardingQuestion.objects.update_or_create(
+                question_code=question_code,
+                defaults={
+                    'question_text': q_data.get('QUESTION_TEXT', ''),
+                    'question_type': q_data.get('QUESTION_TYPE', ''),
+                    'is_required': q_data.get('IS_REQUIRED', 'Y'),
+                }
+            )
+            
+            if created:
+                created_count += 1
+            else:
+                updated_count += 1
+            
+            # 답변 선택지도 로드
+            answers = fetch_all_dict("""
+                SELECT 
+                    ANSWER_ID,
+                    ANSWER_VALUE,
+                    ANSWER_TEXT
+                FROM ONBOARDING_ANSWER
+                WHERE QUESTION_CODE = :question_code
+                ORDER BY ANSWER_ID
+            """, {'question_code': question_code})
+            
+            for a_data in answers:
+                answer_id = a_data.get('ANSWER_ID')
+                if not answer_id:
+                    continue
+                
+                OnboardingAnswer.objects.update_or_create(
+                    answer_id=answer_id,
+                    defaults={
+                        'question': question,
+                        'answer_value': a_data.get('ANSWER_VALUE'),
+                        'answer_text': a_data.get('ANSWER_TEXT'),
+                    }
+                )
+        
+        print(f"[데이터 로드] 완료: {created_count}개 질문 생성, {updated_count}개 질문 업데이트")
+        print(f"[데이터 로드] 총 {OnboardingQuestion.objects.count()}개 질문이 Django DB에 저장됨")
+        
+        return {
+            'total': len(questions),
+            'created': created_count,
+            'updated': updated_count,
+        }
+        
+    except Exception as e:
+        print(f"[데이터 로드] 오류 발생: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+print("✅ cx_Oracle Oracle 11g 클라이언트 로드 완료")

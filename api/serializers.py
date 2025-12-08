@@ -4,7 +4,18 @@ Django REST Framework Serializers
 데이터 검증 및 변환을 위한 Serializer 클래스들
 """
 from rest_framework import serializers
-from .models import Product, Portfolio, OnboardingSession
+from .models import (
+    Product, Portfolio, OnboardingSession,
+    Member, CartNew, CartItem, Orders, OrderDetail, Payment,
+    OnboardingQuestion, OnboardingAnswer, OnboardingUserResponse,
+    OnboardingSessionCategories, OnboardingSessionMainSpaces, OnboardingSessionPriorities,
+    OnboardSessRecProducts, PortfolioSession, PortfolioProduct,
+    Estimate, Consultation, ProductImage, ProductSpecNew, ProductReviewNew,
+    ProdDemoFamilyTypes, ProdDemoHouseSizes, ProdDemoHouseTypes,
+    TasteCategoryScores, TasteRecommendedProducts,
+    UserSamplePurchasedItems, UserSampleRecommendations, CategoryCommonSpec,
+    TasteConfig
+)
 
 
 # ============================================================
@@ -214,6 +225,9 @@ class OnboardingSessionSerializer(serializers.ModelSerializer):
         model = OnboardingSession
         fields = [
             'session_id',
+            'session_uuid',
+            'member',
+            'user_id',
             'current_step',
             'status',
             'vibe',
@@ -227,5 +241,220 @@ class OnboardingSessionSerializer(serializers.ModelSerializer):
             'created_at',
             'completed_at',
         ]
-        read_only_fields = ['session_id', 'created_at', 'completed_at']
+        read_only_fields = ['session_id', 'session_uuid', 'created_at', 'completed_at']
+
+
+# ============================================================
+# ERD 기반 추가 Serializers
+# ============================================================
+
+class MemberSerializer(serializers.ModelSerializer):
+    """회원 Serializer"""
+    class Meta:
+        model = Member
+        fields = [
+            'member_id', 'name', 'age', 'gender', 'contact',
+            'point', 'created_date', 'taste'
+        ]
+        read_only_fields = ['member_id', 'created_date']
+        extra_kwargs = {'password': {'write_only': True}}
+
+
+class CartSerializer(serializers.ModelSerializer):
+    """장바구니 Serializer"""
+    items = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = CartNew
+        fields = ['cart_id', 'member', 'created_date', 'items']
+        read_only_fields = ['cart_id', 'created_date']
+    
+    def get_items(self, obj):
+        return CartItemSerializer(obj.items.all(), many=True).data
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    """장바구니 항목 Serializer"""
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
+    product_price = serializers.DecimalField(source='product.price', max_digits=12, decimal_places=0, read_only=True)
+    
+    class Meta:
+        model = CartItem
+        fields = ['cart_item_id', 'cart', 'product', 'product_name', 'product_price', 'quantity']
+        read_only_fields = ['cart_item_id']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    """주문 Serializer"""
+    details = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Orders
+        fields = [
+            'order_id', 'member', 'order_date', 'total_amount',
+            'order_status', 'payment_status', 'details'
+        ]
+        read_only_fields = ['order_id', 'order_date']
+    
+    def get_details(self, obj):
+        return OrderDetailSerializer(obj.details.all(), many=True).data
+
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    """주문 상세 Serializer"""
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
+    
+    class Meta:
+        model = OrderDetail
+        fields = ['detail_id', 'order', 'product', 'product_name', 'quantity']
+        read_only_fields = ['detail_id']
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    """결제 Serializer"""
+    class Meta:
+        model = Payment
+        fields = [
+            'payment_id', 'payment_date', 'order', 'payment_status', 'method'
+        ]
+        read_only_fields = ['payment_id', 'payment_date']
+
+
+class OnboardingQuestionSerializer(serializers.ModelSerializer):
+    """온보딩 질문 Serializer"""
+    answers = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = OnboardingQuestion
+        fields = [
+            'question_code', 'question_text', 'question_type',
+            'is_required', 'created_date', 'answers'
+        ]
+        read_only_fields = ['created_date']
+    
+    def get_answers(self, obj):
+        return OnboardingAnswerSerializer(obj.answers.all(), many=True).data
+
+
+class OnboardingAnswerSerializer(serializers.ModelSerializer):
+    """온보딩 답변 선택지 Serializer"""
+    class Meta:
+        model = OnboardingAnswer
+        fields = ['answer_id', 'question', 'answer_value', 'answer_text', 'created_date']
+        read_only_fields = ['answer_id', 'created_date']
+
+
+class OnboardingUserResponseSerializer(serializers.ModelSerializer):
+    """온보딩 사용자 응답 Serializer"""
+    class Meta:
+        model = OnboardingUserResponse
+        fields = [
+            'response_id', 'session', 'question', 'answer', 'input_value', 'created_date'
+        ]
+        read_only_fields = ['response_id', 'created_date']
+
+
+class TasteConfigSerializer(serializers.ModelSerializer):
+    """Taste 설정 Serializer"""
+    category_scores = serializers.SerializerMethodField()
+    recommended_products_list = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = TasteConfig
+        fields = [
+            'taste_id', 'description', 'representative_vibe',
+            'representative_household_size', 'representative_main_space',
+            'representative_has_pet', 'representative_priority',
+            'representative_budget_level', 'recommended_categories',
+            'recommended_categories_with_scores', 'ill_suited_categories',
+            'recommended_products', 'is_active', 'auto_generated',
+            'last_simulation_date', 'created_at', 'updated_at',
+            'category_scores', 'recommended_products_list'
+        ]
+        read_only_fields = ['taste_id', 'created_at', 'updated_at']
+    
+    def get_category_scores(self, obj):
+        return TasteCategoryScoresSerializer(obj.category_scores.all(), many=True).data
+    
+    def get_recommended_products_list(self, obj):
+        return TasteRecommendedProductsSerializer(obj.recommended_products_new.all(), many=True).data
+
+
+class TasteCategoryScoresSerializer(serializers.ModelSerializer):
+    """Taste 카테고리 점수 Serializer"""
+    class Meta:
+        model = TasteCategoryScores
+        fields = [
+            'taste', 'category_name', 'score', 'is_recommended',
+            'is_ill_suited', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class TasteRecommendedProductsSerializer(serializers.ModelSerializer):
+    """Taste 추천 제품 Serializer"""
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
+    
+    class Meta:
+        model = TasteRecommendedProducts
+        fields = [
+            'taste', 'category_name', 'product', 'product_name',
+            'score', 'rank_order', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class PortfolioProductSerializer(serializers.ModelSerializer):
+    """포트폴리오 제품 Serializer"""
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
+    
+    class Meta:
+        model = PortfolioProduct
+        fields = ['id', 'portfolio', 'product', 'product_name', 'recommend_reason', 'priority']
+
+
+class EstimateSerializer(serializers.ModelSerializer):
+    """견적 Serializer"""
+    class Meta:
+        model = Estimate
+        fields = [
+            'estimate_id', 'portfolio', 'total_price', 'discount_price',
+            'rental_monthly', 'created_date'
+        ]
+        read_only_fields = ['estimate_id', 'created_date']
+
+
+class ConsultationSerializer(serializers.ModelSerializer):
+    """상담 Serializer"""
+    class Meta:
+        model = Consultation
+        fields = [
+            'consult_id', 'member', 'portfolio', 'store_name',
+            'reservation_date', 'created_date'
+        ]
+        read_only_fields = ['consult_id', 'created_date']
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    """제품 이미지 Serializer"""
+    class Meta:
+        model = ProductImage
+        fields = ['product_image_id', 'product', 'image_url']
+
+
+class ProductSpecNewSerializer(serializers.ModelSerializer):
+    """제품 스펙 Serializer (ERD)"""
+    class Meta:
+        model = ProductSpecNew
+        fields = ['spec_id', 'product', 'spec_key', 'spec_value', 'spec_type']
+
+
+class ProductReviewNewSerializer(serializers.ModelSerializer):
+    """제품 리뷰 Serializer (ERD)"""
+    class Meta:
+        model = ProductReviewNew
+        fields = [
+            'product', 'review_vector', 'family_list',
+            'size_list', 'house_list', 'reason_text'
+        ]
 

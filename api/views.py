@@ -5,6 +5,10 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
 from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics, Reservation, ProductSpec
+from .views_erd_helpers import (
+    save_onboarding_to_erd_models as _save_onboarding_to_erd_models,
+    save_recommended_products_to_erd as _save_recommended_products_to_erd
+)
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 from .services.chatgpt_service import chatgpt_service
@@ -1233,6 +1237,17 @@ def onboarding_complete_view(request):
                 }
             )
             print(f"[Onboarding Complete] 세션 저장 완료: {session_id}")
+            
+            # ERD 기반 모델에 데이터 저장
+            try:
+                _save_onboarding_to_erd_models(session, data)
+                print(f"[Onboarding Complete] ERD 모델 저장 완료")
+            except Exception as erd_error:
+                print(f"[Onboarding Complete] ERD 모델 저장 실패 (계속 진행): {erd_error}")
+                import traceback
+                traceback.print_exc()
+                # ERD 저장 실패해도 계속 진행 (하위 호환성)
+            
         except Exception as e:
             print(f"[Onboarding Complete] 세션 저장 실패: {e}")
             import traceback
@@ -1346,6 +1361,13 @@ def onboarding_complete_view(request):
             result_with_data['onboarding_data'] = onboarding_data
             session.recommendation_result = result_with_data
             session.save()
+            
+            # ERD 기반 추천 제품 저장 (OnboardSessRecProducts)
+            try:
+                _save_recommended_products_to_erd(session, result['recommendations'])
+                print(f"[Onboarding Complete] 추천 제품 ERD 저장 완료")
+            except Exception as erd_error:
+                print(f"[Onboarding Complete] 추천 제품 ERD 저장 실패 (계속 진행): {erd_error}")
             
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")
             

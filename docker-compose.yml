@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_DEBUG=True
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - USE_ORACLE=false
+      - DISABLE_DB=false
+      # 카카오 API 키 (환경 변수로 설정)
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY:-}
+      - KAKAO_JS_KEY=${KAKAO_JS_KEY:-}
+      - KAKAO_ADMIN_KEY=${KAKAO_ADMIN_KEY:-}
+      # CORS 설정
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    command: python manage.py runserver 0.0.0.0:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  static_volume:
+  redis_data:

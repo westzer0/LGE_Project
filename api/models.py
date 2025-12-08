@@ -1,10 +1,15 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
+import json
 
 
 class Product(models.Model):
-    """LG 가전 제품 모델"""
+    """
+    LG 가전 제품 모델 (ERD: PRODUCT)
+    """
     
     CATEGORY_CHOICES = [
         ('TV', 'TV/오디오'),
@@ -16,11 +21,22 @@ class Product(models.Model):
         ('SIGNATURE', 'LG SIGNATURE'),
     ]
     
-    name = models.CharField(max_length=200, verbose_name='제품명')
-    model_number = models.CharField(max_length=100, verbose_name='모델명', blank=True)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, verbose_name='카테고리')
+    product_id = models.AutoField(primary_key=True, verbose_name='제품 ID')
+    product_name = models.CharField(max_length=255, verbose_name='제품명')
+    main_category = models.CharField(max_length=100, verbose_name='메인 카테고리')
+    sub_category = models.CharField(max_length=100, null=True, blank=True, verbose_name='세부 카테고리')
+    model_code = models.CharField(max_length=100, null=True, blank=True, verbose_name='모델 코드')
+    status = models.CharField(max_length=50, null=True, blank=True, choices=[('판매중', '판매중'), ('품절', '품절')], verbose_name='판매 상태')
+    price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='제품 가격')
+    rating = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(5)], verbose_name='제품 평점')
+    url = models.CharField(max_length=255, null=True, blank=True, verbose_name='제품 상세 페이지 URL')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
+    
+    # 하위 호환성을 위한 필드 (기존 코드와의 호환)
+    name = models.CharField(max_length=200, null=True, blank=True, verbose_name='제품명 (하위 호환)')
+    model_number = models.CharField(max_length=100, null=True, blank=True, verbose_name='모델명 (하위 호환)')
+    category = models.CharField(max_length=20, null=True, blank=True, choices=CATEGORY_CHOICES, verbose_name='카테고리 (하위 호환)')
     description = models.TextField(verbose_name='설명', blank=True)
-    price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name='가격')
     discount_price = models.DecimalField(
         max_digits=12, 
         decimal_places=0, 
@@ -30,16 +46,26 @@ class Product(models.Model):
     )
     image_url = models.URLField(verbose_name='이미지 URL', blank=True)
     is_active = models.BooleanField(default=True, verbose_name='판매중')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
     
     class Meta:
         verbose_name = '제품'
         verbose_name_plural = '제품'
-        ordering = ['-created_at']
+        db_table = 'product'
+        ordering = ['-created_date']
     
     def __str__(self):
-        return f"{self.name} ({self.model_number})"
+        return f"{self.product_name or self.name} ({self.model_code or self.model_number})"
+    
+    def save(self, *args, **kwargs):
+        # 하위 호환성: name이 없으면 product_name 사용
+        if not self.name and self.product_name:
+            self.name = self.product_name
+        if not self.model_number and self.model_code:
+            self.model_number = self.model_code
+        if not self.category and self.main_category:
+            self.category = self.main_category
+        super().save(*args, **kwargs)
 
 
 class ProductSpec(models.Model):
@@ -263,12 +289,12 @@ class OnboardingSession(models.Model):
     = 사용자의 설문 응답을 저장하는 모델
     """
     
-    # 세션 정보
-    session_id = models.CharField(
-        max_length=100,
-        unique=True,
-        help_text="고유 세션 ID"
-    )
+    # 세션 정보 (ERD: SESSION_ID는 NUMBER PK)
+    session_id = models.AutoField(primary_key=True, verbose_name='세션 ID')
+    # 하위 호환성을 위한 UUID 문자열 필드 (기존 코드에서 사용)
+    session_uuid = models.CharField(max_length=100, unique=True, null=True, blank=True, help_text="UUID 문자열 (하위 호환성)")
+    member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True, blank=True, related_name='onboarding_sessions', db_column='member_id', verbose_name='회원')
+    user_id = models.CharField(max_length=100, null=True, blank=True, verbose_name='사용자 ID (카카오 로그인 연동 시)')
     
     # 온보딩 답변 (Step 1~5)
     vibe = models.CharField(
@@ -457,7 +483,7 @@ class OnboardingSession(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.session_id} - {self.get_status_display()} (Step {self.current_step})"
+        return f"Session {self.session_id} ({self.session_uuid}) - {self.get_status_display()} (Step {self.current_step})"
     
     def to_user_profile(self) -> dict:
         """
@@ -494,9 +520,9 @@ class OnboardingSession(models.Model):
         }
     
     def save(self, *args, **kwargs):
-        """세션 ID 자동 생성"""
-        if not self.session_id:
-            self.session_id = str(uuid.uuid4())[:8]
+        """세션 UUID 자동 생성 (하위 호환성)"""
+        if not self.session_uuid:
+            self.session_uuid = str(uuid.uuid4())[:8]
         super().save(*args, **kwargs)
     
     def mark_completed(self):
@@ -902,3 +928,601 @@ class Reservation(models.Model):
             portfolio_prefix = f"PF-{self.portfolio.portfolio_id.split('-')[-1]}" if self.portfolio else "BS"
             self.reservation_id = f"{portfolio_prefix}-{random_str}-{timestamp}"
         super().save(*args, **kwargs)
+
+
+# ============================================================
+# ERD 기반 추가 모델 (34개 테이블 완성)
+# ============================================================
+
+class Member(models.Model):
+    """
+    회원 테이블 (ERD: MEMBER)
+    """
+    member_id = models.CharField(max_length=30, primary_key=True, verbose_name='회원 ID')
+    password = models.CharField(max_length=255, verbose_name='비밀번호 (암호화)')
+    name = models.CharField(max_length=100, verbose_name='회원 이름')
+    age = models.IntegerField(null=True, blank=True, verbose_name='나이')
+    gender = models.CharField(max_length=10, null=True, blank=True, choices=[('M', '남성'), ('F', '여성')], verbose_name='성별')
+    contact = models.CharField(max_length=20, null=True, blank=True, verbose_name='연락처')
+    point = models.IntegerField(default=0, null=True, blank=True, verbose_name='포인트')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='가입 일시')
+    taste = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(120)], verbose_name='할당된 Taste ID')
+    
+    class Meta:
+        verbose_name = '회원'
+        verbose_name_plural = '회원'
+        db_table = 'member'
+        ordering = ['-created_date']
+    
+    def __str__(self):
+        return f"{self.member_id} - {self.name}"
+
+
+class CartNew(models.Model):
+    """
+    장바구니 테이블 (ERD: CART)
+    """
+    cart_id = models.AutoField(primary_key=True, verbose_name='장바구니 ID')
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='carts', db_column='member_id', verbose_name='회원')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '장바구니'
+        verbose_name_plural = '장바구니'
+        db_table = 'cart'
+        ordering = ['-created_date']
+    
+    def __str__(self):
+        return f"Cart {self.cart_id} - {self.member.member_id}"
+
+
+class CartItem(models.Model):
+    """
+    장바구니 항목 테이블 (ERD: CART_ITEM)
+    """
+    cart_item_id = models.AutoField(primary_key=True, verbose_name='장바구니 항목 ID')
+    cart = models.ForeignKey(CartNew, on_delete=models.CASCADE, related_name='items', db_column='cart_id', verbose_name='장바구니')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='cart_items_new', db_column='product_id', verbose_name='제품')
+    quantity = models.IntegerField(default=1, validators=[MinValueValidator(1)], verbose_name='수량')
+    
+    class Meta:
+        verbose_name = '장바구니 항목'
+        verbose_name_plural = '장바구니 항목'
+        db_table = 'cart_item'
+        unique_together = ['cart', 'product']
+        ordering = ['-cart_item_id']
+    
+    def __str__(self):
+        return f"CartItem {self.cart_item_id} - {self.product.name} x{self.quantity}"
+
+
+class Orders(models.Model):
+    """
+    주문 테이블 (ERD: ORDERS)
+    """
+    order_id = models.AutoField(primary_key=True, verbose_name='주문 ID')
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='orders', db_column='member_id', verbose_name='회원')
+    order_date = models.DateTimeField(auto_now_add=True, verbose_name='주문 일시')
+    total_amount = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='주문 총액')
+    order_status = models.CharField(max_length=50, null=True, blank=True, verbose_name='주문 상태')
+    payment_status = models.CharField(max_length=50, null=True, blank=True, verbose_name='결제 상태')
+    
+    class Meta:
+        verbose_name = '주문'
+        verbose_name_plural = '주문'
+        db_table = 'orders'
+        ordering = ['-order_date']
+    
+    def __str__(self):
+        return f"Order {self.order_id} - {self.member.member_id}"
+
+
+class OrderDetail(models.Model):
+    """
+    주문 상세 테이블 (ERD: ORDER_DETAIL)
+    """
+    detail_id = models.AutoField(primary_key=True, verbose_name='주문 상세 ID')
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name='details', db_column='order_id', verbose_name='주문')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_details', db_column='product_id', verbose_name='제품')
+    quantity = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='수량')
+    
+    class Meta:
+        verbose_name = '주문 상세'
+        verbose_name_plural = '주문 상세'
+        db_table = 'order_detail'
+        ordering = ['detail_id']
+    
+    def __str__(self):
+        return f"OrderDetail {self.detail_id} - {self.product.name} x{self.quantity}"
+
+
+class Payment(models.Model):
+    """
+    결제 테이블 (ERD: PAYMENT)
+    """
+    payment_id = models.AutoField(primary_key=True, verbose_name='결제 ID')
+    payment_date = models.DateTimeField(auto_now_add=True, verbose_name='결제 일시')
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name='payments', db_column='order_id', verbose_name='주문')
+    payment_status = models.CharField(max_length=50, null=True, blank=True, verbose_name='결제 상태')
+    method = models.CharField(max_length=50, null=True, blank=True, verbose_name='결제 방법')
+    
+    class Meta:
+        verbose_name = '결제'
+        verbose_name_plural = '결제'
+        db_table = 'payment'
+        ordering = ['-payment_date']
+    
+    def __str__(self):
+        return f"Payment {self.payment_id} - {self.order.order_id}"
+
+
+class OnboardingQuestion(models.Model):
+    """
+    온보딩 질문 테이블 (ERD: ONBOARDING_QUESTION)
+    """
+    question_code = models.CharField(max_length=50, primary_key=True, verbose_name='질문 코드')
+    question_text = models.CharField(max_length=255, verbose_name='질문 텍스트')
+    question_type = models.CharField(max_length=50, verbose_name='질문 유형')
+    is_required = models.CharField(max_length=5, default='Y', choices=[('Y', '필수'), ('N', '선택')], verbose_name='필수 여부')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 질문'
+        verbose_name_plural = '온보딩 질문'
+        db_table = 'onboarding_question'
+        ordering = ['question_code']
+    
+    def __str__(self):
+        return f"{self.question_code} - {self.question_text[:30]}"
+
+
+class OnboardingAnswer(models.Model):
+    """
+    온보딩 답변 선택지 테이블 (ERD: ONBOARDING_ANSWER)
+    """
+    answer_id = models.AutoField(primary_key=True, verbose_name='선택지 ID')
+    question = models.ForeignKey(OnboardingQuestion, on_delete=models.CASCADE, related_name='answers', db_column='question_code', verbose_name='질문')
+    answer_value = models.CharField(max_length=255, null=True, blank=True, verbose_name='선택지 값')
+    answer_text = models.CharField(max_length=255, null=True, blank=True, verbose_name='선택지 텍스트')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 답변 선택지'
+        verbose_name_plural = '온보딩 답변 선택지'
+        db_table = 'onboarding_answer'
+        ordering = ['answer_id']
+    
+    def __str__(self):
+        return f"{self.question.question_code} - {self.answer_text or self.answer_value}"
+
+
+class OnboardingUserResponse(models.Model):
+    """
+    사용자 온보딩 응답 테이블 (ERD: ONBOARDING_USER_RESPONSE)
+    """
+    response_id = models.AutoField(primary_key=True, verbose_name='응답 ID')
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='user_responses', db_column='session_id', verbose_name='세션')
+    question = models.ForeignKey(OnboardingQuestion, on_delete=models.CASCADE, related_name='user_responses', db_column='question_code', verbose_name='질문')
+    answer = models.ForeignKey(OnboardingAnswer, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_responses', db_column='answer_id', verbose_name='선택지')
+    input_value = models.CharField(max_length=255, null=True, blank=True, verbose_name='사용자 입력 값')
+    created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 사용자 응답'
+        verbose_name_plural = '온보딩 사용자 응답'
+        db_table = 'onboarding_user_response'
+        ordering = ['response_id']
+    
+    def __str__(self):
+        return f"Response {self.response_id} - {self.question.question_code}"
+
+
+class OnboardingSessionCategories(models.Model):
+    """
+    온보딩 세션 카테고리 테이블 (ERD: ONBOARDING_SESSION_CATEGORIES)
+    """
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_categories', db_column='session_id', primary_key=True, verbose_name='세션')
+    category_name = models.CharField(max_length=50, verbose_name='카테고리명')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 세션 카테고리'
+        verbose_name_plural = '온보딩 세션 카테고리'
+        db_table = 'onboarding_session_categories'
+        unique_together = ['session', 'category_name']
+    
+    def __str__(self):
+        return f"{self.session.session_id} - {self.category_name}"
+
+
+class OnboardingSessionMainSpaces(models.Model):
+    """
+    온보딩 세션 주요 공간 테이블 (ERD: ONBOARDING_SESSION_MAIN_SPACES)
+    """
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_main_spaces', db_column='session_id', primary_key=True, verbose_name='세션')
+    main_space = models.CharField(max_length=50, verbose_name='주요 공간')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 세션 주요 공간'
+        verbose_name_plural = '온보딩 세션 주요 공간'
+        db_table = 'onboarding_session_main_spaces'
+        unique_together = ['session', 'main_space']
+    
+    def __str__(self):
+        return f"{self.session.session_id} - {self.main_space}"
+
+
+class OnboardingSessionPriorities(models.Model):
+    """
+    온보딩 세션 우선순위 테이블 (ERD: ONBOARDING_SESSION_PRIORITIES)
+    """
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_priorities', db_column='session_id', verbose_name='세션')
+    priority = models.CharField(max_length=20, verbose_name='우선순위 값')
+    priority_order = models.IntegerField(verbose_name='우선순위 순서')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 세션 우선순위'
+        verbose_name_plural = '온보딩 세션 우선순위'
+        db_table = 'onboarding_session_priorities'
+        unique_together = ['session', 'priority_order']
+        ordering = ['priority_order']
+    
+    def __str__(self):
+        return f"{self.session.session_id} - {self.priority} ({self.priority_order})"
+
+
+# ONBOARD_SESS_* 테이블들 (ERD에 중복으로 나타남, 별칭으로 처리)
+class OnboardSessCategories(models.Model):
+    """ONBOARD_SESS_CATEGORIES (ONBOARDING_SESSION_CATEGORIES와 동일)"""
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_categories', db_column='session_id', primary_key=True)
+    category_name = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'onboard_sess_categories'
+        unique_together = ['session', 'category_name']
+
+
+class OnboardSessMainSpaces(models.Model):
+    """ONBOARD_SESS_MAIN_SPACES (ONBOARDING_SESSION_MAIN_SPACES와 동일)"""
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_main_spaces', db_column='session_id', primary_key=True)
+    main_space = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'onboard_sess_main_spaces'
+        unique_together = ['session', 'main_space']
+
+
+class OnboardSessPriorities(models.Model):
+    """ONBOARD_SESS_PRIORITIES (ONBOARDING_SESSION_PRIORITIES와 동일)"""
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_priorities', db_column='session_id')
+    priority = models.CharField(max_length=20)
+    priority_order = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'onboard_sess_priorities'
+        unique_together = ['session', 'priority_order']
+
+
+class OnboardSessRecProducts(models.Model):
+    """
+    온보딩 세션 추천 제품 테이블 (ERD: ONBOARD_SESS_REC_PRODUCTS)
+    """
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_rec_products', db_column='session_id', verbose_name='세션')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='onboard_sess_rec_products', db_column='product_id', verbose_name='제품')
+    category_name = models.CharField(max_length=50, null=True, blank=True, verbose_name='카테고리명')
+    rank_order = models.IntegerField(null=True, blank=True, verbose_name='카테고리 내 순위')
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='점수')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '온보딩 세션 추천 제품'
+        verbose_name_plural = '온보딩 세션 추천 제품'
+        db_table = 'onboard_sess_rec_products'
+        unique_together = ['session', 'product']
+        ordering = ['rank_order']
+    
+    def __str__(self):
+        return f"{self.session.session_id} - {self.product.name} (순위: {self.rank_order})"
+
+
+class PortfolioSession(models.Model):
+    """
+    포트폴리오 세션 테이블 (ERD: PORTFOLIO_SESSION)
+    """
+    portfolio = models.OneToOneField(Portfolio, on_delete=models.CASCADE, related_name='portfolio_session', db_column='portfolio_id', primary_key=True, verbose_name='포트폴리오')
+    member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='portfolio_sessions', db_column='member_id', verbose_name='회원')
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='portfolio_sessions', db_column='session_id', verbose_name='세션')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '포트폴리오 세션'
+        verbose_name_plural = '포트폴리오 세션'
+        db_table = 'portfolio_session'
+    
+    def __str__(self):
+        return f"PortfolioSession - {self.portfolio.portfolio_id}"
+
+
+class PortfolioProduct(models.Model):
+    """
+    포트폴리오 제품 테이블 (ERD: PORTFOLIO_PRODUCT)
+    """
+    id = models.AutoField(primary_key=True, verbose_name='포트폴리오 제품 ID')
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='portfolio_products', db_column='portfolio_id', verbose_name='포트폴리오')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='portfolio_products', db_column='product_id', verbose_name='제품')
+    recommend_reason = models.CharField(max_length=500, null=True, blank=True, verbose_name='추천 이유')
+    priority = models.IntegerField(null=True, blank=True, verbose_name='우선순위')
+    
+    class Meta:
+        verbose_name = '포트폴리오 제품'
+        verbose_name_plural = '포트폴리오 제품'
+        db_table = 'portfolio_product'
+        ordering = ['priority']
+    
+    def __str__(self):
+        return f"PortfolioProduct {self.id} - {self.product.name}"
+
+
+class Estimate(models.Model):
+    """
+    견적 테이블 (ERD: ESTIMATE)
+    """
+    estimate_id = models.AutoField(primary_key=True, verbose_name='견적 ID')
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='estimates', db_column='portfolio_id', verbose_name='포트폴리오')
+    total_price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='총 가격 (정가 합계)')
+    discount_price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='할인 가격 (할인가 합계)')
+    rental_monthly = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='월 렌탈 비용')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='견적 생성 일시')
+    
+    class Meta:
+        verbose_name = '견적'
+        verbose_name_plural = '견적'
+        db_table = 'estimate'
+        ordering = ['-created_date']
+    
+    def __str__(self):
+        return f"Estimate {self.estimate_id} - {self.portfolio.portfolio_id}"
+
+
+class Consultation(models.Model):
+    """
+    상담 테이블 (ERD: CONSULTATION)
+    """
+    consult_id = models.AutoField(primary_key=True, verbose_name='상담 ID')
+    member = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultations', db_column='member_id', verbose_name='회원')
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultations', db_column='portfolio_id', verbose_name='포트폴리오')
+    store_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='매장명')
+    reservation_date = models.DateTimeField(null=True, blank=True, verbose_name='상담 예약 일시')
+    created_date = models.DateTimeField(auto_now_add=True, verbose_name='상담 신청 일시')
+    
+    class Meta:
+        verbose_name = '상담'
+        verbose_name_plural = '상담'
+        db_table = 'consultation'
+        ordering = ['-created_date']
+    
+    def __str__(self):
+        return f"Consultation {self.consult_id} - {self.store_name or '미정'}"
+
+
+class ProductImage(models.Model):
+    """
+    제품 이미지 테이블 (ERD: PRODUCT_IMAGE)
+    """
+    product_image_id = models.AutoField(primary_key=True, verbose_name='제품 이미지 ID')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images', db_column='product_id', verbose_name='제품')
+    image_url = models.CharField(max_length=255, null=True, blank=True, verbose_name='제품 이미지 URL')
+    
+    class Meta:
+        verbose_name = '제품 이미지'
+        verbose_name_plural = '제품 이미지'
+        db_table = 'product_image'
+        ordering = ['product_image_id']
+    
+    def __str__(self):
+        return f"ProductImage {self.product_image_id} - {self.product.name}"
+
+
+class ProductSpecNew(models.Model):
+    """
+    제품 스펙 테이블 (ERD: PRODUCT_SPEC) - 기존 ProductSpec과 구분
+    """
+    spec_id = models.AutoField(primary_key=True, verbose_name='스펙 ID')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_specs_new', db_column='product_id', verbose_name='제품')
+    spec_key = models.CharField(max_length=4000, verbose_name='스펙 키')
+    spec_value = models.CharField(max_length=4000, null=True, blank=True, verbose_name='스펙 값')
+    spec_type = models.CharField(max_length=50, null=True, blank=True, choices=[('COMMON', '공통'), ('SPECIFIC', '특정 variant 전용')], verbose_name='스펙 타입')
+    
+    class Meta:
+        verbose_name = '제품 스펙 (ERD)'
+        verbose_name_plural = '제품 스펙 (ERD)'
+        db_table = 'product_spec'
+        ordering = ['spec_id']
+    
+    def __str__(self):
+        return f"ProductSpec {self.spec_id} - {self.product.name}: {self.spec_key}"
+
+
+class ProductReviewNew(models.Model):
+    """
+    제품 리뷰 테이블 (ERD: PRODUCT_REVIEW) - 기존 ProductReview와 구분
+    """
+    product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='product_review_new', db_column='product_id', primary_key=True, verbose_name='제품')
+    review_vector = models.TextField(null=True, blank=True, verbose_name='리뷰 텍스트 기반 임베딩 벡터')
+    family_list = models.TextField(null=True, blank=True, verbose_name='가족 구성 정보')
+    size_list = models.TextField(null=True, blank=True, verbose_name='집 크기/평수 정보')
+    house_list = models.TextField(null=True, blank=True, verbose_name='주거 형태 정보')
+    reason_text = models.TextField(null=True, blank=True, verbose_name='제품 추천 사유 요약')
+    
+    class Meta:
+        verbose_name = '제품 리뷰 (ERD)'
+        verbose_name_plural = '제품 리뷰 (ERD)'
+        db_table = 'product_review'
+    
+    def __str__(self):
+        return f"ProductReview - {self.product.name}"
+
+
+class ProdDemoFamilyTypes(models.Model):
+    """
+    제품 인구통계 - 가족 구성 타입 테이블 (ERD: PROD_DEMO_FAMILY_TYPES)
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='demo_family_types', db_column='product_id', verbose_name='제품')
+    family_type = models.CharField(max_length=50, verbose_name='가족 구성 타입')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '제품 인구통계 - 가족 구성'
+        verbose_name_plural = '제품 인구통계 - 가족 구성'
+        db_table = 'prod_demo_family_types'
+        unique_together = ['product', 'family_type']
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.family_type}"
+
+
+class ProdDemoHouseSizes(models.Model):
+    """
+    제품 인구통계 - 집 크기 테이블 (ERD: PROD_DEMO_HOUSE_SIZES)
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='demo_house_sizes', db_column='product_id', verbose_name='제품')
+    house_size = models.CharField(max_length=50, verbose_name='집 크기')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '제품 인구통계 - 집 크기'
+        verbose_name_plural = '제품 인구통계 - 집 크기'
+        db_table = 'prod_demo_house_sizes'
+        unique_together = ['product', 'house_size']
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.house_size}"
+
+
+class ProdDemoHouseTypes(models.Model):
+    """
+    제품 인구통계 - 주거 형태 테이블 (ERD: PROD_DEMO_HOUSE_TYPES)
+    """
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='demo_house_types', db_column='product_id', verbose_name='제품')
+    house_type = models.CharField(max_length=50, verbose_name='주거 형태')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '제품 인구통계 - 주거 형태'
+        verbose_name_plural = '제품 인구통계 - 주거 형태'
+        db_table = 'prod_demo_house_types'
+        unique_together = ['product', 'house_type']
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.house_type}"
+
+
+class TasteCategoryScores(models.Model):
+    """
+    Taste 카테고리 점수 테이블 (ERD: TASTE_CATEGORY_SCORES)
+    """
+    taste = models.ForeignKey(TasteConfig, on_delete=models.CASCADE, related_name='category_scores', db_column='taste_id', verbose_name='Taste')
+    category_name = models.CharField(max_length=50, verbose_name='카테고리명')
+    score = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='카테고리 점수')
+    is_recommended = models.CharField(max_length=1, null=True, blank=True, choices=[('Y', '추천'), ('N', '비추천')], default='N', verbose_name='추천 카테고리 여부')
+    is_ill_suited = models.CharField(max_length=1, null=True, blank=True, choices=[('Y', '부적합'), ('N', '적합')], default='N', verbose_name='부적합 카테고리 여부')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name='수정 일시')
+    
+    class Meta:
+        verbose_name = 'Taste 카테고리 점수'
+        verbose_name_plural = 'Taste 카테고리 점수'
+        db_table = 'taste_category_scores'
+        unique_together = ['taste', 'category_name']
+        ordering = ['-score']
+    
+    def __str__(self):
+        return f"Taste {self.taste.taste_id} - {self.category_name}: {self.score}"
+
+
+class TasteRecommendedProducts(models.Model):
+    """
+    Taste 추천 제품 테이블 (ERD: TASTE_RECOMMENDED_PRODUCTS)
+    """
+    taste = models.ForeignKey(TasteConfig, on_delete=models.CASCADE, related_name='recommended_products_new', db_column='taste_id', verbose_name='Taste')
+    category_name = models.CharField(max_length=50, verbose_name='카테고리명')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='taste_recommended_products', db_column='product_id', verbose_name='제품')
+    score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)], verbose_name='제품 점수')
+    rank_order = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)], verbose_name='카테고리 내 순위')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True, verbose_name='수정 일시')
+    
+    class Meta:
+        verbose_name = 'Taste 추천 제품'
+        verbose_name_plural = 'Taste 추천 제품'
+        db_table = 'taste_recommended_products'
+        unique_together = ['taste', 'category_name', 'product']
+        ordering = ['rank_order']
+    
+    def __str__(self):
+        return f"Taste {self.taste.taste_id} - {self.category_name} - {self.product.name} (순위: {self.rank_order})"
+
+
+class UserSamplePurchasedItems(models.Model):
+    """
+    사용자 샘플 구매 항목 테이블 (ERD: USER_SAMPLE_PURCHASED_ITEMS)
+    """
+    user = models.ForeignKey(UserSample, on_delete=models.CASCADE, related_name='sample_purchased_items', db_column='user_id', verbose_name='사용자')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='user_sample_purchased_items', db_column='product_id', verbose_name='제품')
+    purchased_at = models.DateTimeField(null=True, blank=True, verbose_name='구매 일시')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '사용자 샘플 구매 항목'
+        verbose_name_plural = '사용자 샘플 구매 항목'
+        db_table = 'user_sample_purchased_items'
+        unique_together = ['user', 'product']
+        ordering = ['-purchased_at']
+    
+    def __str__(self):
+        return f"{self.user.user_id} - {self.product.name}"
+
+
+class UserSampleRecommendations(models.Model):
+    """
+    사용자 샘플 추천 테이블 (ERD: USER_SAMPLE_RECOMMENDATIONS)
+    """
+    user = models.ForeignKey(UserSample, on_delete=models.CASCADE, related_name='recommendations', db_column='user_id', verbose_name='사용자')
+    category_name = models.CharField(max_length=50, verbose_name='카테고리명')
+    recommended_value = models.CharField(max_length=100, null=True, blank=True, verbose_name='추천 값')
+    recommended_unit = models.CharField(max_length=20, null=True, blank=True, verbose_name='추천 단위')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    
+    class Meta:
+        verbose_name = '사용자 샘플 추천'
+        verbose_name_plural = '사용자 샘플 추천'
+        db_table = 'user_sample_recommendations'
+        unique_together = ['user', 'category_name']
+        ordering = ['category_name']
+    
+    def __str__(self):
+        return f"{self.user.user_id} - {self.category_name}: {self.recommended_value} {self.recommended_unit}"
+
+
+class CategoryCommonSpec(models.Model):
+    """
+    카테고리 공통 스펙 테이블 (ERD: CATEGORY_COMMON_SPEC)
+    """
+    common_id = models.AutoField(primary_key=True, verbose_name='공통 스펙 ID')
+    main_category = models.CharField(max_length=100, verbose_name='메인 카테고리')
+    spec_key = models.CharField(max_length=150, verbose_name='스펙 키')
+    
+    class Meta:
+        verbose_name = '카테고리 공통 스펙'
+        verbose_name_plural = '카테고리 공통 스펙'
+        db_table = 'category_common_spec'
+        unique_together = ['main_category', 'spec_key']
+        ordering = ['main_category', 'spec_key']
+    
+    def __str__(self):
+        return f"{self.main_category} - {self.spec_key}"

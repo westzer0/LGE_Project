@@ -166,6 +166,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',  # Django REST Framework
+    'rest_framework_simplejwt',  # JWT 인증
     'api',
 ]
 
@@ -399,6 +400,33 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ],
+    # JWT 인증 설정
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # 개발 환경용
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',  # 인증된 사용자만 쓰기, 읽기는 모두 허용
+    ],
+}
+
+# ============================================================
+# JWT 설정 (Simple JWT)
+# ============================================================
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=6),  # 액세스 토큰 6시간
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # 리프레시 토큰 7일
+    'ROTATE_REFRESH_TOKENS': True,  # 리프레시 토큰 갱신 시 새 토큰 발급
+    'BLACKLIST_AFTER_ROTATION': True,  # 기존 리프레시 토큰 블랙리스트 처리
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
 # ============================================================

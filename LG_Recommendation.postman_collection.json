@@ -1,0 +1,351 @@
+{
+	"info": {
+		"_postman_id": "lg-recommendation-api",
+		"name": "LG 가전 추천 시스템 API",
+		"description": "LG 가전 추천 시스템 REST API 컬렉션\n\n기본 URL: http://localhost:8000",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "인증 (JWT + Kakao)",
+			"item": [
+				{
+					"name": "카카오 로그인 (JWT 발급)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"access_token\": \"카카오_액세스_토큰\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/kakao/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "kakao", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "JWT 토큰 갱신",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"리프레시_토큰\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/refresh/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "refresh", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "내 정보 조회",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/me/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "me", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "제품",
+			"item": [
+				{
+					"name": "제품 목록 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/product-specs/?main_category=TV",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "product-specs", ""],
+							"query": [
+								{
+									"key": "main_category",
+									"value": "TV"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "제품 상세 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/product-specs/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "product-specs", "1", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "온보딩",
+			"item": [
+				{
+					"name": "온보딩 질문 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/onboarding-questions/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "onboarding-questions", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "온보딩 완료 (Taste 할당)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"session_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/onboarding/complete/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "onboarding", "complete", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "추천",
+			"item": [
+				{
+					"name": "Taste별 추천 제품 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/recommendations/taste/23/?category=TV",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "recommendations", "taste", "23", ""],
+							"query": [
+								{
+									"key": "category",
+									"value": "TV"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "포트폴리오 생성",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"session_id\": 1,\n    \"selected_products\": [\n        {\"product_id\": 1, \"category\": \"TV\"},\n        {\"product_id\": 2, \"category\": \"냉장고\"}\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/portfolio/generate/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "portfolio", "generate", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Taste 설정",
+			"item": [
+				{
+					"name": "Taste 설정 목록",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/taste-configs/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "taste-configs", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Taste별 추천 제품 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/taste-configs/23/recommendations/?category=TV",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "taste-configs", "23", "recommendations", ""],
+							"query": [
+								{
+									"key": "category",
+									"value": "TV"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "장바구니",
+			"item": [
+				{
+					"name": "장바구니 목록",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/carts/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "carts", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "장바구니에 제품 추가",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1,\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/carts/1/add_item/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "carts", "1", "add_item", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "주문",
+			"item": [
+				{
+					"name": "주문 목록",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/orders/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "orders", ""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "장바구니에서 주문 생성",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cart_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/orders/1/create_from_cart/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "orders", "1", "create_from_cart", ""]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
