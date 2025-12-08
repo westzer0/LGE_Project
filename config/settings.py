@@ -55,6 +55,12 @@ except Exception as e:
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
+# SECURITY WARNING: don't run with debug turned on in production!
+# PRD 개선: 프로덕션에서는 기본값 False (보안 강화)
+# DEBUG를 먼저 정의해야 SECRET_KEY에서 사용 가능
+# 개발 환경에서는 기본값 True (환경 변수로 명시적으로 False 설정하지 않는 한)
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'
+
 # SECURITY WARNING: keep the secret key used in production secret!
 # PRD 개선: 프로덕션에서는 환경 변수 필수
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
@@ -65,10 +71,6 @@ if not SECRET_KEY:
         print("[WARNING] SECRET_KEY 기본값 사용 중 (개발 환경). 프로덕션에서는 DJANGO_SECRET_KEY 환경 변수를 설정하세요.")
     else:
         raise ValueError("DJANGO_SECRET_KEY 환경 변수가 설정되지 않았습니다. 프로덕션에서는 필수입니다.")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-# PRD 개선: 프로덕션에서는 기본값 False (보안 강화)
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
 # ALLOWED_HOSTS: 환경 변수로 제어 (쉼표로 구분, 기본값: localhost,127.0.0.1)
 # 프로덕션에서는 환경 변수에 도메인을 설정: ALLOWED_HOSTS=your-app.railway.app,yourdomain.com
