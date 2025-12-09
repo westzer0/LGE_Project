@@ -50,7 +50,6 @@ try:
                 for key, value in env_vars.items():
                     if value is not None:
                         os.environ.setdefault(key, value)
-            print(f"[ENV] .env 파일 로드 완료: {env_path}")
         except UnicodeDecodeError:
             # UTF-8 실패 시 CP949 (Windows 기본 인코딩)로 시도
             try:
@@ -59,17 +58,14 @@ try:
                     for key, value in env_vars.items():
                         if value is not None:
                             os.environ.setdefault(key, value)
-                print(f"[ENV] .env 파일 로드 완료 (CP949): {env_path}")
-            except Exception as e:
-                print(f"[WARNING] .env 파일 로드 실패 (CP949): {e}")
-        except Exception as e:
-            print(f"[WARNING] .env 파일 로드 실패: {e}")
-    else:
-        print(f"[WARNING] .env 파일을 찾을 수 없습니다: {env_path}")
+            except Exception:
+                pass
+        except Exception:
+            pass
 except ImportError:
-    print("[WARNING] python-dotenv가 설치되지 않았습니다. pip install python-dotenv 실행하세요.")
-except Exception as e:
-    print(f"[WARNING] .env 파일 로드 실패: {e}")
+    pass
+except Exception:
+    pass
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -87,7 +83,6 @@ if not SECRET_KEY:
     if DEBUG:
         # 개발 환경만 기본값 허용
         SECRET_KEY = 'django-insecure-8zb-1$0d6^f=&c@v8-l2-9b*9ydnp7k3m0-s_y8gljjkvtiyt8'
-        print("[WARNING] SECRET_KEY 기본값 사용 중 (개발 환경). 프로덕션에서는 DJANGO_SECRET_KEY 환경 변수를 설정하세요.")
     else:
         raise ValueError("DJANGO_SECRET_KEY 환경 변수가 설정되지 않았습니다. 프로덕션에서는 필수입니다.")
 
@@ -147,13 +142,7 @@ KAKAO_ADMIN_KEY = os.environ.get('KAKAO_ADMIN_KEY', '')
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 # API 키 설정 확인 (디버그 모드에서만)
-if DEBUG:
-    print(f"[API Keys Status]")
-    print(f"  KAKAO_REST_API_KEY: {'[OK] 설정됨' if KAKAO_REST_API_KEY else '[X] 미설정'}")
-    print(f"  KAKAO_JS_KEY: {'[OK] 설정됨' if KAKAO_JS_KEY else '[X] 미설정'}")
-    print(f"  KAKAO_NATIVE_APP_KEY: {'[OK] 설정됨' if KAKAO_NATIVE_APP_KEY else '[X] 미설정'}")
-    print(f"  KAKAO_ADMIN_KEY: {'[OK] 설정됨' if KAKAO_ADMIN_KEY else '[X] 미설정'}")
-    print(f"  OPENAI_API_KEY: {'[OK] 설정됨' if OPENAI_API_KEY else '[X] 미설정'}")
+# 경고 메시지 출력 제거
 
 
 # Application definition

@@ -51,9 +51,13 @@ def onboarding_complete_view(request):
         }
     }
     """
+    print(f"[Onboarding Complete (views_recommendations)] 요청 시작...", flush=True)
+    print(f"[Onboarding Complete (views_recommendations)] request.data: {request.data}", flush=True)
     try:
         session_id = request.data.get('session_id')
         session_uuid = request.data.get('session_uuid')
+        
+        print(f"[Onboarding Complete (views_recommendations)] session_id={session_id}, session_uuid={session_uuid}", flush=True)
         
         if not session_id and not session_uuid:
             return Response({

@@ -30,7 +30,7 @@ const Onboarding = () => {
   const [loading, setLoading] = useState(false)
 
   const generateSessionId = () => {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `${Date.now()}`
   }
 
   useEffect(() => {

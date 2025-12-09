@@ -10,13 +10,14 @@ class OnboardingDBService:
     """온보딩 데이터를 Oracle DB에 저장/조회하는 서비스"""
     
     @staticmethod
-    def create_or_update_session(session_id, user_id=None, current_step=1, status='IN_PROGRESS', **kwargs):
+    def create_or_update_session(session_id, user_id=None, member_id=None, current_step=1, status='IN_PROGRESS', **kwargs):
         """
         온보딩 세션 생성 또는 업데이트
         
         Args:
             session_id: 세션 ID
             user_id: 사용자 ID (선택적)
+            member_id: 회원 ID (선택적, NOT NULL 제약조건이 있는 경우 필수)
             current_step: 현재 단계
             status: 상태 (IN_PROGRESS, COMPLETED, ABANDONED)
             **kwargs: 추가 필드 (vibe, household_size, housing_type, pyung, priority, budget_level 등)
@@ -77,8 +78,29 @@ class OnboardingDBService:
                             pass
                     
                     # 기본 테이블 업데이트 (CLOB 컬럼은 NULL로 유지 - 정규화 테이블 사용)
+                    # MEMBER_ID가 없으면 실제 존재하는 MEMBER_ID를 찾아서 사용 (외래키 제약조건 대응)
+                    final_member_id = member_id or kwargs.get('member_id')
+                    if not final_member_id:
+                        # MEMBER 테이블에서 첫 번째 MEMBER_ID를 가져오거나, 없으면 'GUEST' 생성 시도
+                        cur.execute("SELECT MEMBER_ID FROM MEMBER WHERE ROWNUM = 1")
+                        result = cur.fetchone()
+                        if result:
+                            final_member_id = result[0]
+                        else:
+                            # MEMBER 테이블이 비어있으면 'GUEST' 레코드 생성 시도
+                            try:
+                                cur.execute("""
+                                    INSERT INTO MEMBER (MEMBER_ID, CREATED_DATE) 
+                                    VALUES ('GUEST', SYSDATE)
+                                """)
+                                conn.commit()
+                                final_member_id = 'GUEST'
+                            except:
+                                # GUEST 생성 실패 시 기본값 사용 (에러 발생 가능)
+                                final_member_id = 'GUEST'
                     cur.execute("""
                         UPDATE ONBOARDING_SESSION SET
+                            MEMBER_ID = :member_id,
                             USER_ID = :user_id,
                             CURRENT_STEP = :current_step,
                             STATUS = :status,
@@ -93,11 +115,12 @@ class OnboardingDBService:
                             PRIORITY = :priority,
                             BUDGET_LEVEL = :budget_level,
                             RECOMMENDATION_RESULT = :recommendation_result,
-                            UPDATED_AT = SYSDATE,
+                            UPDATED_DATE = SYSDATE,
                             COMPLETED_AT = CASE WHEN :status = 'COMPLETED' THEN SYSDATE ELSE COMPLETED_AT END
                         WHERE SESSION_ID = :session_id
                     """, {
                         'session_id': session_id,
+                        'member_id': final_member_id,
                         'user_id': user_id,
                         'current_step': current_step,
                         'status': status,
@@ -169,16 +192,36 @@ class OnboardingDBService:
                             pass
                     
                     # 기본 테이블 생성 (CLOB 컬럼은 NULL - 정규화 테이블 사용)
+                    # MEMBER_ID가 없으면 실제 존재하는 MEMBER_ID를 찾아서 사용 (외래키 제약조건 대응)
+                    final_member_id = member_id or kwargs.get('member_id')
+                    if not final_member_id:
+                        # MEMBER 테이블에서 첫 번째 MEMBER_ID를 가져오거나, 없으면 'GUEST' 생성 시도
+                        cur.execute("SELECT MEMBER_ID FROM MEMBER WHERE ROWNUM = 1")
+                        result = cur.fetchone()
+                        if result:
+                            final_member_id = result[0]
+                        else:
+                            # MEMBER 테이블이 비어있으면 'GUEST' 레코드 생성 시도
+                            try:
+                                cur.execute("""
+                                    INSERT INTO MEMBER (MEMBER_ID, CREATED_DATE) 
+                                    VALUES ('GUEST', SYSDATE)
+                                """)
+                                conn.commit()
+                                final_member_id = 'GUEST'
+                            except:
+                                # GUEST 생성 실패 시 기본값 사용 (에러 발생 가능)
+                                final_member_id = 'GUEST'
                     cur.execute("""
                         INSERT INTO ONBOARDING_SESSION (
-                            SESSION_ID, USER_ID, CURRENT_STEP, STATUS,
+                            SESSION_ID, MEMBER_ID, USER_ID, CURRENT_STEP, STATUS,
                             VIBE, HOUSEHOLD_SIZE, HAS_PET, HOUSING_TYPE, PYUNG,
                             COOKING, LAUNDRY, MEDIA,
                             PRIORITY, BUDGET_LEVEL,
                             RECOMMENDATION_RESULT,
-                            CREATED_AT, UPDATED_AT, COMPLETED_AT
+                            CREATED_DATE, UPDATED_DATE, COMPLETED_AT
                         ) VALUES (
-                            :session_id, :user_id, :current_step, :status,
+                            :session_id, :member_id, :user_id, :current_step, :status,
                             :vibe, :household_size, :has_pet, :housing_type, :pyung,
                             :cooking, :laundry, :media,
                             :priority, :budget_level,
@@ -188,6 +231,7 @@ class OnboardingDBService:
                         )
                     """, {
                         'session_id': session_id,
+                        'member_id': final_member_id,
                         'user_id': user_id,
                         'current_step': current_step,
                         'status': status,
@@ -256,7 +300,7 @@ class OnboardingDBService:
                 if not question_id:
                     cur.execute("""
                         SELECT QUESTION_ID FROM ONBOARDING_QUESTION
-                        WHERE STEP_NUMBER = :step_number AND QUESTION_TYPE = :question_type
+                        WHERE CURRENT_STEP = :step_number AND QUESTION_TYPE = :question_type
                         AND ROWNUM = 1
                     """, {
                         'step_number': step_number,
@@ -300,7 +344,7 @@ class OnboardingDBService:
                             ANSWER_ID = :answer_id,
                             ANSWER_VALUE = :answer_value,
                             RESPONSE_TEXT = :response_text,
-                            STEP_NUMBER = :step_number
+                            CURRENT_STEP = :step_number
                         WHERE RESPONSE_ID = :response_id
                     """, {
                         'response_id': existing[0],
@@ -313,20 +357,19 @@ class OnboardingDBService:
                     # 생성
                     cur.execute("""
                         INSERT INTO ONBOARDING_USER_RESPONSE (
-                            RESPONSE_ID, SESSION_ID, QUESTION_ID, ANSWER_ID,
-                            ANSWER_VALUE, RESPONSE_TEXT, STEP_NUMBER, CREATED_AT
+                            RESPONSE_ID, SESSION_ID, QUESTION_CODE, ANSWER_ID,
+                            INPUT_VALUE, CREATED_DATE
                         ) VALUES (
                             SEQ_ONBOARDING_USER_RESPONSE.NEXTVAL,
                             :session_id, :question_id, :answer_id,
-                            :answer_value, :response_text, :step_number, SYSDATE
+                            :answer_value, :response_text,  SYSDATE
                         )
                     """, {
                         'session_id': session_id,
                         'question_id': question_id,
                         'answer_id': answer_id,
                         'answer_value': answer_value,
-                        'response_text': answer_text,
-                        'step_number': step_number
+                        'response_text': answer_text
                     })
                 
                 conn.commit()
@@ -348,7 +391,7 @@ class OnboardingDBService:
             with conn.cursor() as cur:
                 # 질문 ID 조회
                 cur.execute("""
-                    SELECT QUESTION_ID FROM ONBOARDING_QUESTION
+                    SELECT QUESTION_CODE FROM ONBOARDING_QUESTION
                     WHERE STEP_NUMBER = :step_number AND QUESTION_TYPE = :question_type
                     AND ROWNUM = 1
                 """, {
@@ -385,12 +428,12 @@ class OnboardingDBService:
                     
                     cur.execute("""
                         INSERT INTO ONBOARDING_USER_RESPONSE (
-                            RESPONSE_ID, SESSION_ID, QUESTION_ID, ANSWER_ID,
-                            ANSWER_VALUE, RESPONSE_TEXT, STEP_NUMBER, CREATED_AT
+                            RESPONSE_ID, SESSION_ID, QUESTION_CODE, ANSWER_ID,
+                            INPUT_VALUE, CREATED_DATE
                         ) VALUES (
                             SEQ_ONBOARDING_USER_RESPONSE.NEXTVAL,
                             :session_id, :question_id, :answer_id,
-                            :answer_value, NULL, :step_number, SYSDATE
+                            :answer_value SYSDATE
                         )
                     """, {
                         'session_id': session_id,

@@ -783,23 +783,29 @@ def onboarding_step_view(request):
         "next_step": 3
     }
     """
+    print(f"[Onboarding Step] 요청 시작...", flush=True)
     try:
         # 요청 데이터 파싱
         try:
+            print(f"[Onboarding Step] 요청 데이터 파싱 시작...", flush=True)
             if hasattr(request, 'data'):
                 data = request.data
+                print(f"[Onboarding Step] request.data 사용: {data}", flush=True)
             else:
                 body_str = request.body.decode("utf-8")
+                print(f"[Onboarding Step] request.body: {body_str[:500]}", flush=True)
                 if body_str:
                     data = json.loads(body_str)
                 else:
                     data = {}
         except json.JSONDecodeError as e:
+            print(f"[Onboarding Step] JSON 파싱 오류: {e}", flush=True)
             return JsonResponse({
                 'success': False,
                 'error': f'JSON 파싱 오류: {str(e)}'
             }, status=400)
         except Exception as e:
+            print(f"[Onboarding Step] 요청 데이터 처리 오류: {e}", flush=True)
             return JsonResponse({
                 'success': False,
                 'error': f'요청 데이터 처리 오류: {str(e)}'
@@ -809,21 +815,28 @@ def onboarding_step_view(request):
         step = int(data.get('step', 1))
         step_data = data.get('data', {})
         
+        print(f"[Onboarding Step] 파싱 완료 - session_id={session_id}, step={step}, step_data={step_data}", flush=True)
+        
         if not session_id:
+            print(f"[Onboarding Step] session_id 누락", flush=True)
             return JsonResponse({
                 'success': False,
                 'error': 'session_id 필수'
             }, status=400)
         
         # 세션 생성 또는 조회
+        print(f"[Onboarding Step] 세션 조회/생성 시작 - session_id={session_id}", flush=True)
         session, created = OnboardingSession.objects.get_or_create(
             session_id=session_id,
             defaults={'current_step': 1, 'status': 'in_progress'}
         )
+        print(f"[Onboarding Step] 세션 {'생성됨' if created else '조회됨'} - current_step={session.current_step}, status={session.status}", flush=True)
         
         # Step별 데이터 저장
+        print(f"[Onboarding Step] Step {step} 데이터 저장 시작...", flush=True)
         if step == 1:
             session.vibe = step_data.get('vibe')
+            print(f"[Onboarding Step] Step 1 저장 - vibe={session.vibe}", flush=True)
         elif step == 2:
             # household_size 또는 mate 값 처리
             household_size = step_data.get('household_size')
@@ -848,6 +861,7 @@ def onboarding_step_view(request):
                     session.recommendation_result = {}
                 session.recommendation_result['has_pet'] = (pet == 'yes')
                 session.recommendation_result['pet'] = pet
+            print(f"[Onboarding Step] Step 2 저장 - household_size={session.household_size}, pet={pet}", flush=True)
         elif step == 3:
             session.housing_type = step_data.get('housing_type')
             pyung = step_data.get('pyung')
@@ -860,6 +874,7 @@ def onboarding_step_view(request):
                 if not session.recommendation_result:
                     session.recommendation_result = {}
                 session.recommendation_result['main_space'] = main_space
+            print(f"[Onboarding Step] Step 3 저장 - housing_type={session.housing_type}, pyung={session.pyung}, main_space={main_space}", flush=True)
         elif step == 4:
             # 생활 패턴 정보 저장 (요리, 세탁, 미디어)
             cooking = step_data.get('cooking')
@@ -881,7 +896,7 @@ def onboarding_step_view(request):
             if main_space:
                 session.recommendation_result['main_space'] = main_space
             
-            print(f"[Step 4 저장] 요리: {cooking}, 세탁: {laundry}, 미디어: {media}")
+            print(f"[Onboarding Step] Step 4 저장 - 요리: {cooking}, 세탁: {laundry}, 미디어: {media}", flush=True)
         elif step == 5:
             # 우선순위 정보 저장
             priority = step_data.get('priority', [])  # 우선순위 순서 배열
@@ -897,6 +912,7 @@ def onboarding_step_view(request):
             # priority 필드에 첫 번째 우선순위 저장 (기존 필드 호환성)
             if priority and len(priority) > 0:
                 session.priority = priority[0]
+            print(f"[Onboarding Step] Step 5 저장 - priority={session.priority}, priority_list={priority}", flush=True)
         elif step == 6:
             # 예산 범위 정보 저장
             budget = step_data.get('budget')
@@ -918,16 +934,20 @@ def onboarding_step_view(request):
             
             # 온보딩 완료 처리
             session.is_completed = True
+            print(f"[Onboarding Step] Step 6 저장 - budget_level={session.budget_level}, is_completed={session.is_completed}", flush=True)
         
         # 진행 상태 업데이트
+        print(f"[Onboarding Step] Django ORM 저장 시작...", flush=True)
         session.current_step = step
         session.updated_at = timezone.now()
         session.save()
+        print(f"[Onboarding Step] Django ORM 저장 완료 - current_step={session.current_step}, status={session.status}", flush=True)
         
         # ============================================================
         # Oracle DB에도 저장
         # ============================================================
         try:
+            print(f"[Onboarding Step] Oracle DB 저장 시작...", flush=True)
             # 세션 정보 준비
             session_status = 'IN_PROGRESS'
             if step == 6:
@@ -935,9 +955,14 @@ def onboarding_step_view(request):
             elif session.status == 'abandoned':
                 session_status = 'ABANDONED'
             
+            print(f"[Onboarding Step] Oracle DB 세션 정보 - session_id={session_id}, step={step}, status={session_status}", flush=True)
+            print(f"[Onboarding Step] Oracle DB 저장 데이터 - vibe={session.vibe}, household_size={session.household_size}, housing_type={session.housing_type}, pyung={session.pyung}", flush=True)
+            
             # Oracle DB 세션 저장/업데이트
             onboarding_db_service.create_or_update_session(
                 session_id=session_id,
+                user_id=data.get('user_id'),
+                member_id=data.get('member_id'),
                 current_step=step,
                 status=session_status,
                 vibe=session.vibe,
@@ -1071,20 +1096,25 @@ def onboarding_step_view(request):
                         answer_value=step_data.get('budget')
                     )
             
-            print(f"[Oracle DB 저장 성공] 세션 ID: {session_id}, 단계: {step}")
+            print(f"[Onboarding Step] Oracle DB 사용자 응답 저장 완료 (Step {step})", flush=True)
+            print(f"[Onboarding Step] Oracle DB 저장 성공 - 세션 ID: {session_id}, 단계: {step}", flush=True)
         
         except Exception as oracle_error:
             # Oracle DB 저장 실패해도 Django DB 저장은 성공했으므로 계속 진행
-            print(f"[Oracle DB 저장 실패] {str(oracle_error)}")
+            print(f"[Onboarding Step] Oracle DB 저장 실패 (계속 진행): {str(oracle_error)}", flush=True)
             import traceback
             traceback.print_exc()
         
-        print(f"\n[온보딩 저장 성공]")
+        print(f"\n[Onboarding Step] 온보딩 저장 성공", flush=True)
+            
+            # Step별 사용자 응답 저장
+        print(f"[Onboarding Step] Oracle DB 사용자 응답 저장 시작 (Step {step})...", flush=True)
+       
         print(f"  세션 ID: {session_id}")
         print(f"  단계: {step}")
-        print(f"  저장된 데이터: {step_data}")
-        print(f"  현재 단계: {session.current_step}")
-        print(f"  상태: {session.status}")
+        print(f"  저장된 데이터: {step_data}", flush=True)
+        print(f"  현재 단계: {session.current_step}", flush=True)
+        print(f"  상태: {session.status}", flush=True)
         
         return JsonResponse({
             'success': True,
@@ -1134,9 +1164,11 @@ def onboarding_complete_view(request):
         "recommendations": [...]
     }
     """
+    print(f"[Onboarding Complete] 요청 시작...", flush=True)
     try:
         # 요청 데이터 파싱
         try:
+            print(f"[Onboarding Complete] 요청 데이터 파싱 시작...", flush=True)
             if hasattr(request, 'data'):
                 data = request.data
             else:
@@ -1247,6 +1279,65 @@ def onboarding_complete_view(request):
                 import traceback
                 traceback.print_exc()
                 # ERD 저장 실패해도 계속 진행 (하위 호환성)
+            
+            # Oracle DB에도 저장 (기본 정보)
+            try:
+                print(f"[Onboarding Complete] Oracle DB 저장 시작 (기본 정보)...", flush=True)
+                print(f"[Oracle DB] session_id={session_id}, vibe={session.vibe}, household_size={session.household_size}", flush=True)
+                
+                # main_space와 priority_list 처리
+                main_space_list = session.main_space
+                if isinstance(main_space_list, str):
+                    try:
+                        import json
+                        main_space_list = json.loads(main_space_list)
+                    except:
+                        main_space_list = [main_space_list] if main_space_list else []
+                elif not isinstance(main_space_list, list):
+                    main_space_list = [main_space_list] if main_space_list else []
+                
+                priority_list_data = session.priority_list
+                if isinstance(priority_list_data, str):
+                    try:
+                        import json
+                        priority_list_data = json.loads(priority_list_data)
+                    except:
+                        priority_list_data = [priority_list_data] if priority_list_data else []
+                elif not isinstance(priority_list_data, list):
+                    priority_list_data = [priority_list_data] if priority_list_data else []
+                
+                selected_categories_list = session.selected_categories
+                if not isinstance(selected_categories_list, list):
+                    selected_categories_list = [selected_categories_list] if selected_categories_list else []
+                
+                print(f"[Oracle DB] main_space={main_space_list}, priority_list={priority_list_data}, categories={selected_categories_list}", flush=True)
+                
+                onboarding_db_service.create_or_update_session(
+                    session_id=session_id,
+                    user_id=data.get('user_id', data.get('member_id')),
+                    member_id=data.get('member_id'),
+                    current_step=6,
+                    status='COMPLETED',
+                    vibe=session.vibe,
+                    household_size=session.household_size,
+                    has_pet=session.has_pet,
+                    housing_type=session.housing_type,
+                    main_space=main_space_list,
+                    pyung=session.pyung,
+                    cooking=session.cooking,
+                    laundry=session.laundry,
+                    media=session.media,
+                    priority=session.priority,
+                    priority_list=priority_list_data,
+                    budget_level=session.budget_level,
+                    selected_categories=selected_categories_list,
+                )
+                print(f"[Onboarding Complete] Oracle DB 저장 완료 (기본 정보)", flush=True)
+            except Exception as oracle_error:
+                print(f"[Onboarding Complete] Oracle DB 저장 실패 (기본 정보, 계속 진행): {oracle_error}", flush=True)
+                import traceback
+                traceback.print_exc()
+                # Oracle 저장 실패해도 계속 진행
             
         except Exception as e:
             print(f"[Onboarding Complete] 세션 저장 실패: {e}")
@@ -1371,10 +1462,74 @@ def onboarding_complete_view(request):
             
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")
             
+            # Oracle DB에 추천 결과 포함해서 최종 저장
+            try:
+                print(f"[Onboarding Complete] Oracle DB 최종 저장 시작 (추천 결과 포함)...")
+                print(f"[Oracle DB] 추천 제품 수: {len(session.recommended_products) if session.recommended_products else 0}")
+                
+                # main_space와 priority_list 처리
+                main_space_list = session.main_space
+                if isinstance(main_space_list, str):
+                    try:
+                        import json
+                        main_space_list = json.loads(main_space_list)
+                    except:
+                        main_space_list = [main_space_list] if main_space_list else []
+                elif not isinstance(main_space_list, list):
+                    main_space_list = [main_space_list] if main_space_list else []
+                
+                priority_list_data = session.priority_list
+                if isinstance(priority_list_data, str):
+                    try:
+                        import json
+                        priority_list_data = json.loads(priority_list_data)
+                    except:
+                        priority_list_data = [priority_list_data] if priority_list_data else []
+                elif not isinstance(priority_list_data, list):
+                    priority_list_data = [priority_list_data] if priority_list_data else []
+                
+                selected_categories_list = session.selected_categories
+                if not isinstance(selected_categories_list, list):
+                    selected_categories_list = [selected_categories_list] if selected_categories_list else []
+                
+                recommended_products_list = session.recommended_products
+                if not isinstance(recommended_products_list, list):
+                    recommended_products_list = [recommended_products_list] if recommended_products_list else []
+                
+                print(f"[Oracle DB] 추천 제품 ID 목록: {recommended_products_list[:5]}..." if len(recommended_products_list) > 5 else f"[Oracle DB] 추천 제품 ID 목록: {recommended_products_list}")
+                
+                onboarding_db_service.create_or_update_session(
+                    session_id=session_id,
+                    user_id=data.get('user_id', data.get('member_id')),
+                    current_step=6,
+                    status='COMPLETED',
+                    vibe=session.vibe,
+                    household_size=session.household_size,
+                    has_pet=session.has_pet,
+                    housing_type=session.housing_type,
+                    main_space=main_space_list,
+                    pyung=session.pyung,
+                    cooking=session.cooking,
+                    laundry=session.laundry,
+                    media=session.media,
+                    priority=session.priority,
+                    priority_list=priority_list_data,
+                    budget_level=session.budget_level,
+                    selected_categories=selected_categories_list,
+                    recommended_products=recommended_products_list,
+                    recommendation_result=session.recommendation_result if session.recommendation_result else {},
+                )
+                print(f"[Onboarding Complete] Oracle DB 최종 저장 완료 (추천 결과 포함)")
+            except Exception as oracle_error:
+                print(f"[Onboarding Complete] Oracle DB 최종 저장 실패 (계속 진행): {oracle_error}")
+                import traceback
+                traceback.print_exc()
+                # Oracle 저장 실패해도 계속 진행
+            
             # 6. 포트폴리오 자동 생성 (PRD: 온보딩 완료 시 포트폴리오 생성)
             portfolio_id = None
             try:
-                user_id = data.get('user_id', f"session_{session_id}")
+                user_id = data.get('user_id', f"{session_id}")
                 print(f"[Onboarding Complete] 포트폴리오 생성 시작...")
                 portfolio_result = portfolio_service.create_portfolio_from_onboarding(
                     session_id=session_id,

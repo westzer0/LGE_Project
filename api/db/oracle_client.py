@@ -1,12 +1,51 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Oracle 11g 호환 cx_Oracle 클라이언트 (python-oracledb Thin 모드 미지원 해결)
+Oracle 11g 호환 oracledb 클라이언트 (Thick 모드로 11g 지원)
 """
 import os
 from pathlib import Path
-import cx_Oracle
+import oracledb
 from dotenv import load_dotenv
+
+# Oracle 11g 호환을 위해 Thick 모드 활성화
+_thick_mode_initialized = False
+try:
+    # 이미 초기화되었는지 확인 (이미 초기화된 경우 예외 발생)
+    # Oracle Client 라이브러리 경로 자동 감지
+    oracle_home = os.environ.get('ORACLE_HOME')
+    if oracle_home:
+        try:
+            oracledb.init_oracle_client(lib_dir=oracle_home)
+            _thick_mode_initialized = True
+        except Exception as e:
+            if "already initialized" in str(e).lower() or "ORA-24315" in str(e):
+                _thick_mode_initialized = True
+            else:
+                raise
+    else:
+        # PATH에서 자동 감지 시도
+        oracle_paths = [
+            r"C:\oraclexe\app\oracle\product\11.2.0\server\bin",
+            r"C:\app\oracle\product\11.2.0\server\bin",
+            r"C:\instantclient_21_3",
+            r"C:\instantclient_19_8",
+        ]
+        for path in oracle_paths:
+            if os.path.exists(path):
+                try:
+                    oracledb.init_oracle_client(lib_dir=path)
+                    _thick_mode_initialized = True
+                    break
+                except Exception as e:
+                    if "already initialized" in str(e).lower() or "ORA-24315" in str(e):
+                        _thick_mode_initialized = True
+                        break
+                    continue
+except Exception as e:
+    error_msg = str(e).lower()
+    if "already initialized" in error_msg or "ORA-24315" in str(e):
+        _thick_mode_initialized = True
 
 # .env 로드 (기존 코드 그대로)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -27,8 +66,8 @@ if env_path.exists():
                 for key, value in env_vars.items():
                     if value is not None:
                         os.environ.setdefault(key, value)
-        except Exception as e:
-            print(f"[WARNING] .env 파일 로드 실패: {e}")
+        except Exception:
+            pass
 
 # 환경 변수 설정 (기존 그대로)
 DISABLE_DB = os.getenv("DISABLE_DB", "false").lower() == "true"
@@ -47,12 +86,11 @@ class DatabaseDisabledError(Exception):
     pass
 
 def get_connection():
-    """cx_Oracle 연결 (11g 완벽 지원)"""
+    """oracledb 연결 (11g 완벽 지원)"""
     if DISABLE_DB:
         raise DatabaseDisabledError("DISABLE_DB=true")
     
-    print(f"[Oracle] cx_Oracle 연결 시도: {ORACLE_USER}@{DSN}")
-    return cx_Oracle.connect(
+    return oracledb.connect(
         user=ORACLE_USER,
         password=ORACLE_PASSWORD,
         dsn=DSN,
@@ -384,4 +422,4 @@ def load_onboarding_questions():
         traceback.print_exc()
         raise
 
-print("✅ cx_Oracle Oracle 11g 클라이언트 로드 완료")
+# oracledb Oracle 11g 클라이언트 로드 완료

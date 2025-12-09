@@ -903,7 +903,7 @@
             // 세션 ID 가져오기 또는 생성
             let sessionId = sessionStorage.getItem('onboarding_session_id');
             if (!sessionId) {
-                sessionId = 'session_' + Date.now();
+                sessionId = Date.now().toString();
                 sessionStorage.setItem('onboarding_session_id', sessionId);
             }
 

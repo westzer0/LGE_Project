@@ -1127,20 +1127,20 @@
         let currentStep = 1;
         const totalSteps = 4;
         let sessionId = null; // 온보딩 세션 ID
-        
+
         // 세션 ID 생성 또는 가져오기
         function getOrCreateSessionId() {
             if (!sessionId) {
                 sessionId = sessionStorage.getItem('onboarding_session_id');
                 if (!sessionId) {
                     // 새 세션 ID 생성
-                    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    sessionId = Date.now();
                     sessionStorage.setItem('onboarding_session_id', sessionId);
                 }
             }
             return sessionId;
         }
-        
+
         const formData = {
             housing_type: null,
             family_size: 2,
@@ -1284,13 +1284,13 @@
                 submitOnboarding();
             }
         }
-        
+
         // 현재 단계 데이터를 서버에 저장
         async function saveCurrentStep() {
             try {
                 const sessionId = getOrCreateSessionId();
                 let stepData = {};
-                
+
                 // 단계별 데이터 매핑
                 if (currentStep === 1) {
                     // Step 1: housing_type (주거 형태)
@@ -1303,9 +1303,9 @@
                     stepData = {
                         vibe: formData.style,
                         household_size: formData.family_size || 2,
-                        mate: formData.family_size === 1 ? 'alone' : 
-                              formData.family_size === 2 ? 'couple' :
-                              formData.family_size <= 4 ? 'family_3_4' : 'family_5plus'
+                        mate: formData.family_size === 1 ? 'alone' :
+                            formData.family_size === 2 ? 'couple' :
+                                formData.family_size <= 4 ? 'family_3_4' : 'family_5plus'
                     };
                 } else if (currentStep === 3) {
                     // Step 3: 생활 패턴 (cooking, laundry, media, pet)
@@ -1322,7 +1322,7 @@
                         priority: [formData.priority] // 배열로 전달
                     };
                 }
-                
+
                 // API 호출
                 const response = await fetch('/api/onboarding/step/', {
                     method: 'POST',
@@ -1336,7 +1336,7 @@
                         data: stepData
                     })
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     console.log(`Step ${currentStep} 저장 완료:`, result);
@@ -1368,10 +1368,10 @@
 
             try {
                 const sessionId = getOrCreateSessionId();
-                
+
                 // 마지막 단계 데이터 저장
                 await saveCurrentStep();
-                
+
                 // Map formData to API format (온보딩 완료 API 형식)
                 const apiData = {
                     session_id: sessionId,
@@ -1407,17 +1407,17 @@
                     // Store data in sessionStorage for result page
                     sessionStorage.setItem('onboardingData', JSON.stringify(formData));
                     sessionStorage.setItem('recommendations', JSON.stringify(result.recommendations));
-                    
+
                     // 포트폴리오 ID가 있으면 저장
                     if (result.portfolio_id) {
                         sessionStorage.setItem('portfolio_id', result.portfolio_id);
                     }
 
                     // Redirect to results page with portfolio_id or session_id
-                    const redirectUrl = result.portfolio_id 
+                    const redirectUrl = result.portfolio_id
                         ? `/result/?portfolio_id=${result.portfolio_id}`
                         : `/result/?session_id=${sessionId}`;
-                    
+
                     window.location.href = redirectUrl;
                 } else {
                     throw new Error(result.error || '추천 결과가 없습니다.');

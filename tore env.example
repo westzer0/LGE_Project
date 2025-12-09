@@ -20,7 +20,7 @@ OPENAI_API_KEY=your_openai_api_key_here
 # Oracle 데이터베이스 설정
 # SID 기반 연결 (SQL Developer에서 확인한 SID: xe)
 ORACLE_USER=campus_24K_LG3_DX7_p3_4
-ORACLE_PASSWORD=smhrd4
+ORACLE_PASSWORD=your_db_password_here
 ORACLE_HOST=project-db-campus.smhrd.com
 ORACLE_PORT=1524
 ORACLE_SID=xe
@@ -34,7 +34,7 @@ ORACLE_INSTANT_CLIENT_PATH=C:\oracle\instantclient_19_23
 # 기존 형식도 호환성을 위해 유지 (자동으로 ORACLE_* 형식으로 매핑됨)
 DB_NAME=MAPPP
 DB_USER=campus_24K_LG3_DX7_p3_4
-DB_PASSWORD=smhrd4
+DB_PASSWORD=your_db_password_here
 DB_HOST=project-db-campus.smhrd.com
 DB_PORT=1524
 DB_SERVICE_NAME=MAPPP
