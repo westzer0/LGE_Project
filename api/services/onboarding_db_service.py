@@ -5,6 +5,7 @@ import json
 import uuid
 from datetime import datetime
 from api.db.oracle_client import get_connection, fetch_all_dict, fetch_one
+from api.services.taste_calculation_service import taste_calculation_service
 
 
 class OnboardingDBService:
@@ -1104,6 +1105,48 @@ class OnboardingDBService:
                             print(f"[create_or_update_session] ⚠️ 경고: 커밋 후에도 데이터를 찾을 수 없습니다!", flush=True)
                     except Exception as e:
                         print(f"[create_or_update_session] 저장 확인 중 오류: {str(e)}", flush=True)
+                    
+                    # ============================================================
+                    # Taste 계산 및 할당 (온보딩 완료 시, 회원인 경우)
+                    # ============================================================
+                    if status == 'COMPLETED' and final_member_id and final_member_id != 'GUEST':
+                        try:
+                            print(f"\n{'='*80}", flush=True)
+                            print(f"[Taste 계산 및 할당] 시작", flush=True)
+                            print(f"{'='*80}", flush=True)
+                            print(f"  MEMBER_ID: {final_member_id}", flush=True)
+                            print(f"  SESSION_ID: {session_id}", flush=True)
+                            print(f"  STATUS: {status} (완료)", flush=True)
+                            
+                            # Taste 계산 및 저장
+                            taste_id = taste_calculation_service.calculate_and_save_taste(
+                                member_id=final_member_id,
+                                onboarding_session_id=session_id
+                            )
+                            
+                            print(f"  ✅ Taste 계산 및 저장 성공!", flush=True)
+                            print(f"    계산된 TASTE_ID: {taste_id} (1~120 범위)", flush=True)
+                            print(f"    MEMBER 테이블 업데이트 완료", flush=True)
+                            print(f"{'='*80}\n", flush=True)
+                        except Exception as taste_error:
+                            # Taste 계산 실패해도 온보딩 저장은 성공으로 처리
+                            print(f"\n{'='*80}", flush=True)
+                            print(f"[Taste 계산 및 할당] ⚠️ 경고: Taste 계산 실패", flush=True)
+                            print(f"{'='*80}", flush=True)
+                            print(f"  MEMBER_ID: {final_member_id}", flush=True)
+                            print(f"  SESSION_ID: {session_id}", flush=True)
+                            print(f"  에러 타입: {type(taste_error).__name__}", flush=True)
+                            print(f"  에러 메시지: {str(taste_error)}", flush=True)
+                            print(f"  ⚠️ 온보딩 데이터는 정상 저장되었지만, Taste 계산은 실패했습니다.", flush=True)
+                            print(f"  ⚠️ 나중에 수동으로 Taste를 계산할 수 있습니다.", flush=True)
+                            import traceback
+                            print(f"  [트레이스백]", flush=True)
+                            traceback.print_exc()
+                            print(f"{'='*80}\n", flush=True)
+                    elif status == 'COMPLETED' and (not final_member_id or final_member_id == 'GUEST'):
+                        print(f"\n[Taste 계산 및 할당] 건너뜀 (GUEST 회원이므로 Taste 계산하지 않음)", flush=True)
+                        print(f"  MEMBER_ID: {final_member_id}", flush=True)
+                        print(f"  STATUS: {status}", flush=True)
                     
                     print(f"\n{'='*80}", flush=True)
                     print(f"[create_or_update_session] ✅ Oracle DB 저장 성공", flush=True)

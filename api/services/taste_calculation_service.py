@@ -121,11 +121,18 @@ class TasteCalculationService:
                 priorities = [row[0] for row in cur.fetchall()]
                 if priorities:
                     onboarding_data['priority'] = priorities
+                else:
+                    # 정규화 테이블이 비어있으면 ONBOARDING_SESSION의 PRIORITY 컬럼을 배열로 변환
+                    raw_priority = session.get('PRIORITY')
+                    if raw_priority:
+                        onboarding_data['priority'] = [raw_priority]
+                    else:
+                        onboarding_data['priority'] = []
                 
-                # 생활 패턴 (기본 테이블에서 직접 가져오기)
-                onboarding_data['cooking'] = session.get('COOKING', 'sometimes')
-                onboarding_data['laundry'] = session.get('LAUNDRY', 'weekly')
-                onboarding_data['media'] = session.get('MEDIA', 'balanced')
+                # 생활 패턴 (기본 테이블에서 직접 가져오기, NULL일 경우 기본값 설정)
+                onboarding_data['cooking'] = session.get('COOKING') or 'sometimes'
+                onboarding_data['laundry'] = session.get('LAUNDRY') or 'weekly'
+                onboarding_data['media'] = session.get('MEDIA') or 'balanced'
         
         return onboarding_data
     

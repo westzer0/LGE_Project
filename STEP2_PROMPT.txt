@@ -1,0 +1,47 @@
+Step 2: 온보딩 데이터 조회 로직 검증
+
+현재 상황:
+- Step 1 완료: 모든 필수 인프라 준비됨 (테이블, 컬럼, 제약조건 확인 완료)
+- 실제 DB에 ONBOARDING_SESSION 레코드 1,056개 존재
+- 정규화 테이블 (ONBOARD_SESS_MAIN_SPACES, ONBOARD_SESS_PRIORITIES) 생성 완료
+
+목표:
+TasteCalculationService._get_onboarding_data_from_session() 메서드가 올바르게 작동하는지 검증
+
+검증 항목:
+1. ONBOARDING_SESSION 테이블에서 기본 데이터 읽기 성공
+2. ONBOARD_SESS_MAIN_SPACES 테이블에서 MAIN_SPACE 배열 읽기 성공
+3. ONBOARD_SESS_PRIORITIES 테이블에서 PRIORITY 배열 읽기 성공
+4. 데이터 형식 변환 정확성 확인 (예: HAS_PET 'Y' → True)
+5. NULL 값 처리 확인
+6. 빈 배열 처리 확인
+
+관련 파일:
+- api/services/taste_calculation_service.py (라인 58~130)
+- api/db/oracle_client.py
+
+작업:
+1. test_taste_data_retrieval.py 테스트 스크립트 작성
+2. 실제 SESSION_ID로 데이터 조회 테스트
+3. 각 검증 항목별로 성공/실패 케이스 확인
+4. 데이터 형식 변환 정확성 확인
+
+예상 반환 형식:
+{
+    'vibe': 'modern',
+    'household_size': 4,
+    'housing_type': 'apartment',
+    'pyung': 30,
+    'budget_level': 'medium',
+    'priority': ['tech', 'design'],  # 정규화 테이블에서
+    'main_space': ['living', 'kitchen'],  # 정규화 테이블에서
+    'has_pet': False,  # 'Y' → True 변환
+    'cooking': 'frequently',
+    'laundry': 'weekly',
+    'media': 'balanced'
+}
+
+참고:
+- 실제 SESSION_ID 샘플: 1764840383702, 1764840384247, 1764840384743
+- 정규화 테이블이 비어있을 수 있으므로 테스트용 데이터 생성 필요할 수 있음
+
