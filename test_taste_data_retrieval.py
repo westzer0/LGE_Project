@@ -68,11 +68,20 @@ class TasteDataRetrievalValidator:
             print()
             
             # 2. 각 세션별로 데이터 조회 검증
-            for i, session_id in enumerate(sample_sessions[:5], 1):  # 최대 5개만 테스트
-                print(f"[{i}] SESSION_ID: {session_id} 검증 중...")
+            test_count = min(20, len(sample_sessions))
+            print(f"총 {test_count}개 세션 검증 시작...")
+            print()
+            
+            for i, session_id in enumerate(sample_sessions[:test_count], 1):
+                print(f"[{i}/{test_count}] SESSION_ID: {session_id} 검증 중...", end=' ')
                 result = self._validate_session_data(session_id)
                 self.results['test_sessions'].append(result)
-                print()
+                if result.get('passed', False):
+                    print("✅")
+                else:
+                    print("❌")
+            
+            print()
             
             # 3. 특수 케이스 검증 (NULL, 빈 배열 등)
             print("[특수 케이스 검증]")
@@ -82,6 +91,10 @@ class TasteDataRetrievalValidator:
             # 4. 결과 출력
             self._print_results()
             
+            # 5. 시각화 생성
+            if HAS_MATPLOTLIB:
+                self._create_visualizations()
+            
         except Exception as e:
             print(f"\n❌ 검증 중 예외 발생: {e}")
             import traceback
@@ -90,7 +103,7 @@ class TasteDataRetrievalValidator:
         
         return self._is_all_passed()
     
-    def _get_sample_sessions(self):
+    def _get_sample_sessions(self, count=20):
         """실제 DB에서 테스트할 SESSION_ID 샘플 조회"""
         try:
             with get_connection() as conn:
@@ -107,19 +120,25 @@ class TasteDataRetrievalValidator:
                         if cur.fetchone()[0] > 0:
                             existing_sessions.append(session_id)
                     
-                    # 샘플이 없으면 랜덤으로 5개 조회
-                    if not existing_sessions:
-                        cur.execute("""
+                    # 필요한 만큼 추가로 가져오기
+                    if len(existing_sessions) < count:
+                        # IN 절을 위한 플레이스홀더 생성
+                        placeholders = ','.join([f"'{sid}'" for sid in existing_sessions])
+                        where_clause = f"WHERE SESSION_ID NOT IN ({placeholders})" if existing_sessions else ""
+                        
+                        cur.execute(f"""
                             SELECT SESSION_ID 
                             FROM (
                                 SELECT SESSION_ID 
                                 FROM ONBOARDING_SESSION 
+                                {where_clause}
                                 ORDER BY DBMS_RANDOM.VALUE
-                            ) WHERE ROWNUM <= 5
-                        """)
-                        existing_sessions = [row[0] for row in cur.fetchall()]
+                            ) WHERE ROWNUM <= :limit
+                        """, {'limit': count - len(existing_sessions)})
+                        additional_sessions = [row[0] for row in cur.fetchall()]
+                        existing_sessions.extend(additional_sessions)
                     
-                    return existing_sessions
+                    return existing_sessions[:count]
         except Exception as e:
             self.results['errors'].append(f"샘플 세션 조회 실패: {str(e)}")
             return []
@@ -181,28 +200,10 @@ class TasteDataRetrievalValidator:
             )
             result['passed'] = all_passed
             
-            # 결과 출력
-            if all_passed:
-                print(f"  ✅ 모든 검증 통과")
-            else:
-                print(f"  ⚠️ 일부 검증 실패")
-                for check_name, check_result in checks.items():
-                    if not check_result.get('passed', False):
-                        print(f"    - {check_name}: {check_result.get('message', '실패')}")
-            
-            # 상세 데이터 출력
-            print(f"  [조회된 데이터]")
-            print(f"    vibe: {retrieved_data.get('vibe')}")
-            print(f"    household_size: {retrieved_data.get('household_size')}")
-            print(f"    housing_type: {retrieved_data.get('housing_type')}")
-            print(f"    pyung: {retrieved_data.get('pyung')}")
-            print(f"    budget_level: {retrieved_data.get('budget_level')}")
-            print(f"    priority: {retrieved_data.get('priority')}")
-            print(f"    main_space: {retrieved_data.get('main_space')}")
-            print(f"    has_pet: {retrieved_data.get('has_pet')} (원본: {raw_data.get('HAS_PET')})")
-            print(f"    cooking: {retrieved_data.get('cooking')}")
-            print(f"    laundry: {retrieved_data.get('laundry')}")
-            print(f"    media: {retrieved_data.get('media')}")
+            # 결과 출력 (간소화)
+            if not all_passed:
+                failed_checks = [name for name, check in checks.items() if not check.get('passed', False)]
+                result['failed_checks'] = failed_checks
             
         except Exception as e:
             result['errors'].append(f"검증 중 예외: {str(e)}")
@@ -574,6 +575,210 @@ class TasteDataRetrievalValidator:
             result.get('passed', False) 
             for result in self.results['test_sessions']
         )
+    
+    def _create_visualizations(self):
+        """검증 결과 시각화"""
+        if not HAS_MATPLOTLIB:
+            return
+        
+        print("[시각화 생성 중...]")
+        
+        try:
+            # 한글 폰트 설정
+            plt.rcParams['font.family'] = 'Malgun Gothic'  # Windows
+            plt.rcParams['axes.unicode_minus'] = False
+            
+            # 결과 데이터 수집
+            test_sessions = self.results['test_sessions']
+            total_count = len(test_sessions)
+            passed_count = sum(1 for r in test_sessions if r.get('passed', False))
+            failed_count = total_count - passed_count
+            
+            # 검증 항목별 통과/실패 통계
+            check_stats = {
+                'basic_fields': {'passed': 0, 'failed': 0},
+                'main_space': {'passed': 0, 'failed': 0},
+                'priority': {'passed': 0, 'failed': 0},
+                'data_conversion': {'passed': 0, 'failed': 0},
+                'null_handling': {'passed': 0, 'failed': 0},
+            }
+            
+            # 데이터 분포 수집
+            vibes = []
+            household_sizes = []
+            housing_types = []
+            budget_levels = []
+            priorities_list = []
+            main_spaces_list = []
+            has_pets = []
+            
+            for result in test_sessions:
+                # 검증 항목별 통계
+                for check_name in check_stats.keys():
+                    check_result = result.get('checks', {}).get(check_name, {})
+                    if check_result.get('passed', False):
+                        check_stats[check_name]['passed'] += 1
+                    else:
+                        check_stats[check_name]['failed'] += 1
+                
+                # 데이터 분포
+                retrieved_data = result.get('retrieved_data', {})
+                if retrieved_data:
+                    if retrieved_data.get('vibe'):
+                        vibes.append(retrieved_data['vibe'])
+                    if retrieved_data.get('household_size') is not None:
+                        household_sizes.append(retrieved_data['household_size'])
+                    if retrieved_data.get('housing_type'):
+                        housing_types.append(retrieved_data['housing_type'])
+                    if retrieved_data.get('budget_level'):
+                        budget_levels.append(retrieved_data['budget_level'])
+                    if retrieved_data.get('priority'):
+                        priorities_list.extend(retrieved_data['priority'])
+                    if retrieved_data.get('main_space'):
+                        main_spaces_list.extend(retrieved_data['main_space'])
+                    if retrieved_data.get('has_pet') is not None:
+                        has_pets.append('반려동물 있음' if retrieved_data['has_pet'] else '반려동물 없음')
+            
+            # 시각화 생성
+            fig = plt.figure(figsize=(20, 14))
+            gs = fig.add_gridspec(3, 3, hspace=0.3, wspace=0.3)
+            
+            # 1. 전체 검증 결과 (파이 차트)
+            ax1 = fig.add_subplot(gs[0, 0])
+            if failed_count > 0:
+                ax1.pie([passed_count, failed_count], 
+                       labels=[f'통과 ({passed_count})', f'실패 ({failed_count})'],
+                       autopct='%1.1f%%',
+                       colors=['#4CAF50', '#F44336'],
+                       startangle=90)
+            else:
+                ax1.pie([passed_count], 
+                       labels=[f'통과 ({passed_count})'],
+                       autopct='%1.1f%%',
+                       colors=['#4CAF50'],
+                       startangle=90)
+            ax1.set_title('전체 검증 결과', fontsize=14, fontweight='bold')
+            
+            # 2. 검증 항목별 통과율 (바 차트)
+            ax2 = fig.add_subplot(gs[0, 1])
+            check_names = list(check_stats.keys())
+            check_names_kr = {
+                'basic_fields': '기본 필드',
+                'main_space': 'MAIN_SPACE',
+                'priority': 'PRIORITY',
+                'data_conversion': '데이터 변환',
+                'null_handling': 'NULL 처리'
+            }
+            check_labels = [check_names_kr.get(name, name) for name in check_names]
+            passed_counts = [check_stats[name]['passed'] for name in check_names]
+            failed_counts = [check_stats[name]['failed'] for name in check_names]
+            
+            x = np.arange(len(check_labels))
+            width = 0.35
+            ax2.bar(x - width/2, passed_counts, width, label='통과', color='#4CAF50', alpha=0.8)
+            ax2.bar(x + width/2, failed_counts, width, label='실패', color='#F44336', alpha=0.8)
+            ax2.set_xlabel('검증 항목')
+            ax2.set_ylabel('세션 수')
+            ax2.set_title('검증 항목별 통과/실패 현황', fontsize=14, fontweight='bold')
+            ax2.set_xticks(x)
+            ax2.set_xticklabels(check_labels, rotation=15, ha='right')
+            ax2.legend()
+            ax2.grid(True, alpha=0.3, axis='y')
+            
+            # 3. VIBE 분포
+            ax3 = fig.add_subplot(gs[0, 2])
+            if vibes:
+                vibe_counts = Counter(vibes)
+                vibes_sorted = sorted(vibe_counts.items(), key=lambda x: x[1], reverse=True)
+                ax3.barh([v[0] for v in vibes_sorted], [v[1] for v in vibes_sorted], color='skyblue')
+                ax3.set_xlabel('세션 수')
+                ax3.set_title('VIBE 분포', fontsize=14, fontweight='bold')
+                ax3.grid(True, alpha=0.3, axis='x')
+            
+            # 4. 가구 인원수 분포
+            ax4 = fig.add_subplot(gs[1, 0])
+            if household_sizes:
+                ax4.hist(household_sizes, bins=range(1, max(household_sizes)+2), 
+                        color='lightcoral', edgecolor='black', alpha=0.7)
+                ax4.set_xlabel('가구 인원수')
+                ax4.set_ylabel('세션 수')
+                ax4.set_title('가구 인원수 분포', fontsize=14, fontweight='bold')
+                ax4.grid(True, alpha=0.3, axis='y')
+            
+            # 5. 주거 형태 분포
+            ax5 = fig.add_subplot(gs[1, 1])
+            if housing_types:
+                housing_counts = Counter(housing_types)
+                housing_sorted = sorted(housing_counts.items(), key=lambda x: x[1], reverse=True)
+                ax5.bar([h[0] for h in housing_sorted], [h[1] for h in housing_sorted], 
+                       color='lightgreen')
+                ax5.set_xlabel('주거 형태')
+                ax5.set_ylabel('세션 수')
+                ax5.set_title('주거 형태 분포', fontsize=14, fontweight='bold')
+                ax5.tick_params(axis='x', rotation=15)
+                ax5.grid(True, alpha=0.3, axis='y')
+            
+            # 6. 예산 수준 분포
+            ax6 = fig.add_subplot(gs[1, 2])
+            if budget_levels:
+                budget_counts = Counter(budget_levels)
+                budget_sorted = sorted(budget_counts.items(), key=lambda x: x[1], reverse=True)
+                ax6.bar([b[0] for b in budget_sorted], [b[1] for b in budget_sorted], 
+                       color='orange')
+                ax6.set_xlabel('예산 수준')
+                ax6.set_ylabel('세션 수')
+                ax6.set_title('예산 수준 분포', fontsize=14, fontweight='bold')
+                ax6.grid(True, alpha=0.3, axis='y')
+            
+            # 7. PRIORITY 분포
+            ax7 = fig.add_subplot(gs[2, 0])
+            if priorities_list:
+                priority_counts = Counter(priorities_list)
+                priority_sorted = sorted(priority_counts.items(), key=lambda x: x[1], reverse=True)
+                ax7.barh([p[0] for p in priority_sorted], [p[1] for p in priority_sorted], 
+                        color='plum')
+                ax7.set_xlabel('세션 수')
+                ax7.set_title('PRIORITY 분포', fontsize=14, fontweight='bold')
+                ax7.grid(True, alpha=0.3, axis='x')
+            
+            # 8. MAIN_SPACE 분포
+            ax8 = fig.add_subplot(gs[2, 1])
+            if main_spaces_list:
+                space_counts = Counter(main_spaces_list)
+                space_sorted = sorted(space_counts.items(), key=lambda x: x[1], reverse=True)
+                ax8.barh([s[0] for s in space_sorted], [s[1] for s in space_sorted], 
+                        color='khaki')
+                ax8.set_xlabel('세션 수')
+                ax8.set_title('MAIN_SPACE 분포', fontsize=14, fontweight='bold')
+                ax8.grid(True, alpha=0.3, axis='x')
+            
+            # 9. 반려동물 여부 분포
+            ax9 = fig.add_subplot(gs[2, 2])
+            if has_pets:
+                pet_counts = Counter(has_pets)
+                pet_sorted = sorted(pet_counts.items(), key=lambda x: x[1], reverse=True)
+                ax9.pie([p[1] for p in pet_sorted], 
+                       labels=[p[0] for p in pet_sorted],
+                       autopct='%1.1f%%',
+                       colors=['#FF9800', '#2196F3'],
+                       startangle=90)
+                ax9.set_title('반려동물 여부 분포', fontsize=14, fontweight='bold')
+            
+            # 전체 제목
+            fig.suptitle(f'온보딩 데이터 조회 로직 검증 결과 (총 {total_count}개 세션)', 
+                        fontsize=16, fontweight='bold', y=0.995)
+            
+            # 저장
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            output_path = f'taste_data_retrieval_validation_{timestamp}.png'
+            plt.savefig(output_path, dpi=150, bbox_inches='tight')
+            print(f"✅ 시각화 저장 완료: {output_path}")
+            plt.close()
+            
+        except Exception as e:
+            print(f"⚠️ 시각화 생성 중 오류: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 def main():
