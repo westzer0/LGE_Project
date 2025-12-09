@@ -456,9 +456,38 @@ def _generate_portfolio_title(taste_or_session):
 
 
 def _extract_onboarding_data(session):
-    """온보딩 세션에서 데이터 추출"""
+    """온보딩 세션에서 데이터 추출 (정규화 테이블 사용)"""
     if not session:
         return {}
+    
+    # 정규화 테이블에서 main_space와 selected_categories 읽기
+    main_spaces = []
+    selected_categories = []
+    
+    try:
+        from api.services.onboarding_db_service import onboarding_db_service
+        session_data = onboarding_db_service.get_session(session.session_id)
+        
+        if session_data:
+            # main_space 정규화 테이블에서 읽기
+            if 'MAIN_SPACE' in session_data and session_data['MAIN_SPACE']:
+                import json
+                try:
+                    main_space_str = session_data['MAIN_SPACE']
+                    main_spaces = json.loads(main_space_str) if isinstance(main_space_str, str) else main_space_str
+                except:
+                    main_spaces = []
+            
+            # selected_categories 정규화 테이블에서 읽기
+            if 'SELECTED_CATEGORIES' in session_data:
+                selected_categories = session_data['SELECTED_CATEGORIES']
+                if not isinstance(selected_categories, list):
+                    selected_categories = [selected_categories] if selected_categories else []
+    except Exception as e:
+        print(f"[views_recommendations] 정규화 테이블 읽기 실패: {e}")
+        # 기본값 사용
+        main_spaces = ['living']
+        selected_categories = []
     
     return {
         'vibe': session.vibe,
@@ -466,11 +495,11 @@ def _extract_onboarding_data(session):
         'has_pet': session.has_pet,
         'housing_type': session.housing_type,
         'pyung': session.pyung,
-        'main_space': session.main_space,
+        'main_space': main_spaces[0] if main_spaces else 'living',
         'cooking': session.cooking,
         'laundry': session.laundry,
         'media': session.media,
         'priority': session.priority,
         'budget_level': session.budget_level,
-        'selected_categories': session.selected_categories,
+        'selected_categories': selected_categories,
     }

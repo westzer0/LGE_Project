@@ -49,26 +49,36 @@ class PortfolioService:
             user_profile = session.to_user_profile()
             print(f"[Portfolio Service] 사용자 프로필 생성 완료: {user_profile}")
             
-            # 온보딩 데이터 추출
-            onboarding_data = {}
-            if session.recommendation_result:
-                if isinstance(session.recommendation_result, dict):
-                    onboarding_data = session.recommendation_result.get('onboarding_data', {})
+            # 온보딩 데이터 추출 (정규화 테이블에서 읽기)
+            from api.services.onboarding_db_service import onboarding_db_service
+            
+            session_data = onboarding_db_service.get_session(session_id)
+            
+            # main_space 정규화 테이블에서 읽기
+            main_spaces = []
+            if session_data and 'MAIN_SPACE' in session_data:
+                import json
+                try:
+                    main_space_str = session_data['MAIN_SPACE']
+                    if main_space_str:
+                        main_spaces = json.loads(main_space_str) if isinstance(main_space_str, str) else main_space_str
+                except:
+                    main_spaces = []
             
             # 온보딩 데이터 병합
-            onboarding_data.update({
+            onboarding_data = {
                 'vibe': session.vibe,
                 'household_size': session.household_size,
                 'housing_type': session.housing_type,
                 'pyung': session.pyung,
                 'priority': session.priority,
                 'budget_level': session.budget_level,
-                'has_pet': onboarding_data.get('has_pet', False),
-                'cooking': onboarding_data.get('cooking', 'sometimes'),
-                'laundry': onboarding_data.get('laundry', 'weekly'),
-                'media': onboarding_data.get('media', 'balanced'),
-                'main_space': onboarding_data.get('main_space', 'living'),
-            })
+                'has_pet': session.has_pet if session.has_pet is not None else False,
+                'cooking': session.cooking or 'sometimes',
+                'laundry': session.laundry or 'weekly',
+                'media': session.media or 'balanced',
+                'main_space': main_spaces[0] if main_spaces else 'living',
+            }
             
             # 스타일 분석 생성
             style_analysis = style_analysis_service.generate_style_analysis(
@@ -140,7 +150,23 @@ class PortfolioService:
                     match_score=85,  # 기본 매칭 점수
                     status='draft'
                 )
-                print(f"[Portfolio Service] 포트폴리오 DB 저장 성공: portfolio_id={portfolio.portfolio_id}")
+                print(f"[Portfolio Service] 포트폴리오 Django DB 저장 성공: portfolio_id={portfolio.portfolio_id}")
+                
+                # Oracle DB에도 저장
+                try:
+                    PortfolioService._save_portfolio_to_oracle(
+                        portfolio=portfolio,
+                        session_id=session_id,
+                        member_id=session.member_id if hasattr(session, 'member_id') else None,
+                        recommendations=final_recommendations
+                    )
+                    print(f"[Portfolio Service] 포트폴리오 Oracle DB 저장 성공")
+                except Exception as oracle_error:
+                    print(f"[Portfolio Service] 포트폴리오 Oracle DB 저장 실패 (계속 진행): {oracle_error}")
+                    import traceback
+                    traceback.print_exc()
+                    # Oracle 저장 실패해도 계속 진행 (하위 호환성)
+                    
             except Exception as create_error:
                 print(f"[Portfolio Service] 포트폴리오 DB 저장 실패: {create_error}")
                 import traceback
@@ -761,6 +787,142 @@ class PortfolioService:
                 'success': False,
                 'error': str(e)
             }
+    
+    @staticmethod
+    def _save_portfolio_to_oracle(portfolio, session_id: str, member_id: str = None, recommendations: list = None):
+        """
+        포트폴리오를 Oracle DB에 저장 (PORTFOLIO, PORTFOLIO_PRODUCT, PORTFOLIO_SESSION 테이블)
+        
+        Args:
+            portfolio: Portfolio Django 모델 인스턴스
+            session_id: 온보딩 세션 ID
+            member_id: 회원 ID (선택적)
+            recommendations: 추천 제품 리스트
+        """
+        from api.db.oracle_client import get_connection
+        
+        try:
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    # PORTFOLIO 테이블에 저장
+                    # PORTFOLIO_ID는 시퀀스나 자동 증가를 사용하거나, portfolio_id를 숫자로 변환
+                    # portfolio_id가 "PF-001" 형식이면 숫자 부분만 추출
+                    portfolio_id_str = portfolio.portfolio_id
+                    try:
+                        # "PF-001" -> 1 또는 직접 숫자 추출
+                        if portfolio_id_str.startswith('PF-'):
+                            portfolio_id_num = int(portfolio_id_str.replace('PF-', ''))
+                        else:
+                            # 숫자만 추출 시도
+                            import re
+                            numbers = re.findall(r'\d+', portfolio_id_str)
+                            portfolio_id_num = int(numbers[0]) if numbers else abs(hash(portfolio_id_str)) % 1000000
+                    except:
+                        # 실패 시 해시값 사용
+                        portfolio_id_num = abs(hash(portfolio_id_str)) % 1000000
+                    
+                    print(f"[Oracle DB] PORTFOLIO 저장: portfolio_id={portfolio_id_num}, portfolio_key={portfolio_id_str}")
+                    
+                    # PORTFOLIO 테이블 INSERT 또는 UPDATE
+                    cur.execute("""
+                        MERGE INTO PORTFOLIO p
+                        USING (SELECT :portfolio_id AS PORTFOLIO_ID FROM DUAL) d
+                        ON (p.PORTFOLIO_ID = d.PORTFOLIO_ID)
+                        WHEN MATCHED THEN
+                            UPDATE SET
+                                PORTFOLIO_KEY = :portfolio_key,
+                                USER_ID = :user_id,
+                                STYLE_TYPE = :style_type,
+                                STYLE_TITLE = :style_title,
+                                STYLE_SUBTITLE = :style_subtitle,
+                                TOTAL_PRICE = :total_price,
+                                DISCOUNT_PRICE = :discount_price,
+                                MATCH_SCORE = :match_score,
+                                STATUS = :status,
+                                UPDATED_AT = SYSDATE
+                        WHEN NOT MATCHED THEN
+                            INSERT (
+                                PORTFOLIO_ID, PORTFOLIO_KEY, USER_ID, STYLE_TYPE, STYLE_TITLE, STYLE_SUBTITLE,
+                                TOTAL_PRICE, DISCOUNT_PRICE, MATCH_SCORE, STATUS, CREATED_AT, UPDATED_AT
+                            ) VALUES (
+                                :portfolio_id, :portfolio_key, :user_id, :style_type, :style_title, :style_subtitle,
+                                :total_price, :discount_price, :match_score, :status, SYSDATE, SYSDATE
+                            )
+                    """, {
+                        'portfolio_id': portfolio_id_num,
+                        'portfolio_key': portfolio_id_str,
+                        'user_id': portfolio.user_id,
+                        'style_type': portfolio.style_type,
+                        'style_title': portfolio.style_title or '',
+                        'style_subtitle': portfolio.style_subtitle or '',
+                        'total_price': int(portfolio.total_original_price or 0),
+                        'discount_price': int(portfolio.total_discount_price or 0),
+                        'match_score': portfolio.match_score or 0,
+                        'status': portfolio.status or 'draft'
+                    })
+                    
+                    # PORTFOLIO_PRODUCT 테이블에 제품 저장
+                    if recommendations:
+                        print(f"[Oracle DB] PORTFOLIO_PRODUCT 저장: {len(recommendations)}개 제품")
+                        # 기존 제품 삭제
+                        cur.execute("DELETE FROM PORTFOLIO_PRODUCT WHERE PORTFOLIO_ID = :portfolio_id", {
+                            'portfolio_id': portfolio_id_num
+                        })
+                        
+                        # 제품별로 저장
+                        for idx, rec in enumerate(recommendations, start=1):
+                            product_id = rec.get('product_id') or rec.get('id')
+                            if not product_id:
+                                continue
+                            
+                            # ID 시퀀스 조회 또는 자동 생성
+                            cur.execute("""
+                                SELECT NVL(MAX(ID), 0) + 1 FROM PORTFOLIO_PRODUCT
+                            """)
+                            next_id = cur.fetchone()[0]
+                            
+                            cur.execute("""
+                                INSERT INTO PORTFOLIO_PRODUCT (
+                                    ID, PORTFOLIO_ID, PRODUCT_ID, RECOMMEND_REASON, PRIORITY
+                                ) VALUES (
+                                    :id, :portfolio_id, :product_id, :recommend_reason, :priority
+                                )
+                            """, {
+                                'id': next_id,
+                                'portfolio_id': portfolio_id_num,
+                                'product_id': int(product_id),
+                                'recommend_reason': rec.get('reason') or rec.get('recommend_reason') or '',
+                                'priority': idx
+                            })
+                    
+                    # PORTFOLIO_SESSION 테이블에 세션 연결
+                    print(f"[Oracle DB] PORTFOLIO_SESSION 저장: portfolio_id={portfolio_id_num}, session_id={session_id}")
+                    cur.execute("""
+                        MERGE INTO PORTFOLIO_SESSION ps
+                        USING (SELECT :portfolio_id AS PORTFOLIO_ID FROM DUAL) d
+                        ON (ps.PORTFOLIO_ID = d.PORTFOLIO_ID)
+                        WHEN MATCHED THEN
+                            UPDATE SET
+                                MEMBER_ID = :member_id,
+                                SESSION_ID = :session_id,
+                                CREATED_AT = SYSDATE
+                        WHEN NOT MATCHED THEN
+                            INSERT (PORTFOLIO_ID, MEMBER_ID, SESSION_ID, CREATED_AT)
+                            VALUES (:portfolio_id, :member_id, :session_id, SYSDATE)
+                    """, {
+                        'portfolio_id': portfolio_id_num,
+                        'member_id': member_id,
+                        'session_id': session_id
+                    })
+                    
+                    conn.commit()
+                    print(f"[Oracle DB] 포트폴리오 저장 완료: portfolio_id={portfolio_id_num}")
+                    
+        except Exception as e:
+            print(f"[Oracle DB] 포트폴리오 저장 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
 
 
 # Singleton 인스턴스

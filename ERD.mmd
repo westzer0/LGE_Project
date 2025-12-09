@@ -67,25 +67,20 @@ erDiagram
     }
 
     ONBOARDING_SESSION {
-        NUMBER SESSION_ID PK "세션 ID (PRIMARY KEY, UUID 또는 고유 문자열)"
-        VARCHAR2(30) MEMBER_ID FK "회원 ID (카카오 로그인 연동 시, FK: MEMBER.MEMBER_ID)"
-        DATE CREATED_DATE
-        DATE UPDATED_DATE "세션 수정 일시 (기본값: SYSDATE)" nullable
+        VARCHAR2(100) SESSION_ID PK "세션 ID (PRIMARY KEY, UUID 문자열)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (카카오 로그인 연동 시, FK: MEMBER.MEMBER_ID, NULL 허용)" nullable
+        DATE CREATED_AT "세션 생성 일시 (기본값: SYSDATE)"
+        DATE UPDATED_AT "세션 수정 일시 (기본값: SYSDATE)" nullable
         VARCHAR2(20) VIBE "Step 1: 인테리어 무드 (modern/cozy/pop/luxury)" nullable
         NUMBER HOUSEHOLD_SIZE "Step 2: 가구 인원수 (1-5인)" nullable
         CHAR(1) HAS_PET "Step 2: 반려동물 여부 (Y/N)" nullable
         VARCHAR2(20) HOUSING_TYPE "Step 3: 주거 형태 (apartment/detached/villa/officet..." nullable
         NUMBER PYUNG "Step 3: 평수 (예: 25평)" nullable
-        CLOB MAIN_SPACE "Step 3: 주요 공간 (JSON 배열 문자열: ["living", "kitchen"])" nullable
         VARCHAR2(20) COOKING "Step 4: 요리 빈도 (rarely/sometimes/often)" nullable
         VARCHAR2(20) LAUNDRY "Step 4: 세탁 빈도 (weekly/few_times/daily)" nullable
         VARCHAR2(20) MEDIA "Step 4: 미디어 사용 패턴 (ott/gaming/tv/none)" nullable
         VARCHAR2(20) PRIORITY "Step 5: 첫 번째 우선순위 (design/tech/eco/value)" nullable
-        CLOB PRIORITY_LIST "Step 5: 우선순위 목록 (JSON 배열 문자열: ["design", "tech"..." nullable
         VARCHAR2(20) BUDGET_LEVEL "Step 6: 예산 범위 (budget/standard/premium)" nullable
-        CLOB SELECTED_CATEGORIES "선택한 카테고리 (JSON 배열 문자열: ["TV", "냉장고"])" nullable
-        CLOB RECOMMENDED_PRODUCTS "추천 제품 ID 목록 (JSON 배열 문자열: [1, 2, 3])" nullable
-        CLOB RECOMMENDATION_RESULT "최종 추천 결과 (JSON 객체 문자열)" nullable
         NUMBER CURRENT_STEP "현재 진행 단계 (1~6, 기본값: 1)" nullable
         VARCHAR2(20) STATUS "상태 (IN_PROGRESS: 진행중, COMPLETED: 완료, ABANDONED:..." nullable
         DATE COMPLETED_AT "완료 일시 (STATUS가 COMPLETED일 때 설정)" nullable
@@ -93,19 +88,19 @@ erDiagram
     }
 
     ONBOARDING_SESSION_CATEGORIES {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(50) CATEGORY_NAME PK "선택한 카테고리명 (예: "TV", "냉장고", "에어컨")"
         DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     ONBOARDING_SESSION_MAIN_SPACES {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(50) MAIN_SPACE PK "주요 공간 (living/kitchen/bedroom/dressing/study/all)"
         DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     ONBOARDING_SESSION_PRIORITIES {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(20) PRIORITY "우선순위 값 (design/tech/eco/value)"
         NUMBER PRIORITY_ORDER PK "우선순위 순서 (1, 2, 3...)"
         DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
@@ -113,34 +108,34 @@ erDiagram
 
     ONBOARDING_USER_RESPONSE {
         NUMBER RESPONSE_ID PK "응답 ID (PRIMARY KEY)"
-        NUMBER SESSION_ID FK "세션 ID (FK, ONBOARDING_SESSION 참조)"
+        VARCHAR2(100) SESSION_ID FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(50) QUESTION_CODE FK "질문 코드 (시스템 내부 식별자)"
         NUMBER ANSWER_ID FK "선택지 ID (FK, ONBOARDING_ANSWER 참조, 단일 선택인 경우)" nullable
         VARCHAR2(255) INPUT_VALUE "사용자 입력 값 (텍스트 입력인 경우)" nullable
-        DATE CREATED_DATE nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     ONBOARD_SESS_CATEGORIES {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(50) CATEGORY_NAME PK "선택한 카테고리명 (예: "TV", "냉장고", "에어컨")"
         DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     ONBOARD_SESS_MAIN_SPACES {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(50) MAIN_SPACE PK "주요 공간 (living/kitchen/bedroom/dressing/study/all)"
         DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     ONBOARD_SESS_PRIORITIES {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         VARCHAR2(20) PRIORITY "우선순위 값 (design/tech/eco/value)"
         NUMBER PRIORITY_ORDER PK "우선순위 순서 (1, 2, 3...)"
         DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     ONBOARD_SESS_REC_PRODUCTS {
-        NUMBER SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
+        VARCHAR2(100) SESSION_ID PK FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
         NUMBER PRODUCT_ID PK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
         VARCHAR2(50) CATEGORY_NAME "카테고리명 (예: "TV", "냉장고")" nullable
         NUMBER RANK_ORDER "카테고리 내 순위 (1, 2, 3...)" nullable
@@ -172,19 +167,34 @@ erDiagram
         VARCHAR2(50) METHOD "결제 방법 (예: "카드", "계좌이체", "무통장입금")" nullable
     }
 
+    PORTFOLIO {
+        NUMBER PORTFOLIO_ID PK "포트폴리오 ID (PRIMARY KEY)"
+        VARCHAR2(20) PORTFOLIO_KEY "포트폴리오 키 (예: PF-001, UNIQUE)" nullable
+        VARCHAR2(100) USER_ID "사용자 ID (카카오 ID 또는 세션 ID)" nullable
+        VARCHAR2(50) STYLE_TYPE "스타일 유형 (modern/cozy/natural/luxury)" nullable
+        VARCHAR2(255) STYLE_TITLE "스타일 타이틀" nullable
+        CLOB STYLE_SUBTITLE "스타일 설명" nullable
+        NUMBER TOTAL_PRICE "총 가격 (정가 합계)" nullable
+        NUMBER DISCOUNT_PRICE "할인 가격 (할인가 합계)" nullable
+        NUMBER MATCH_SCORE "매칭 점수 (0~100)" nullable
+        VARCHAR2(20) STATUS "상태 (draft/completed)" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
+        DATE UPDATED_AT "수정 일시 (기본값: SYSDATE)" nullable
+    }
+
     PORTFOLIO_PRODUCT {
         NUMBER ID PK "포트폴리오 제품 ID (PRIMARY KEY)"
-        NUMBER PORTFOLIO_ID FK "포트폴리오 ID (FK, PORTFOLIO 참조)"
+        NUMBER PORTFOLIO_ID FK "포트폴리오 ID (FK, PORTFOLIO.PORTFOLIO_ID 참조)"
         NUMBER PRODUCT_ID FK "제품 ID (FK, PRODUCT.PRODUCT_ID 참조)"
         VARCHAR2(500) RECOMMEND_REASON "추천 이유 텍스트" nullable
         NUMBER PRIORITY "우선순위 (1, 2, 3...)" nullable
     }
 
     PORTFOLIO_SESSION {
-        NUMBER PORTFOLIO_ID PK "포트폴리오 ID (FK, PORTFOLIO 참조)"
-        VARCHAR2(30) MEMBER_ID FK "회원 ID (FK, MEMBER.MEMBER_ID 참조)"
-        NUMBER SESSION_ID FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)"
-        DATE CREATED_DATE "생성 일시"
+        NUMBER PORTFOLIO_ID PK FK "포트폴리오 ID (FK, PORTFOLIO.PORTFOLIO_ID 참조)"
+        VARCHAR2(30) MEMBER_ID FK "회원 ID (FK, MEMBER.MEMBER_ID 참조)" nullable
+        VARCHAR2(100) SESSION_ID FK "세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)" nullable
+        DATE CREATED_AT "생성 일시 (기본값: SYSDATE)" nullable
     }
 
     PRODUCT {
@@ -327,8 +337,8 @@ erDiagram
     CART_ITEM ||--o{ CART : "CART_ID -> CART_ID"
     CART_ITEM ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
     CONSULTATION ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
-    CONSULTATION ||--o{ PORTFOLIO_SESSION : "PORTFOLIO_ID -> PORTFOLIO_ID"
-    ESTIMATE ||--o{ PORTFOLIO_SESSION : "PORTFOLIO_ID -> PORTFOLIO_ID"
+    CONSULTATION ||--o{ PORTFOLIO : "PORTFOLIO_ID -> PORTFOLIO_ID"
+    ESTIMATE ||--o{ PORTFOLIO : "PORTFOLIO_ID -> PORTFOLIO_ID"
     ONBOARDING_ANSWER ||--o{ ONBOARDING_QUESTION : "QUESTION_CODE -> QUESTION_CODE"
     ONBOARDING_SESSION ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
     ONBOARDING_SESSION_CATEGORIES ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
@@ -345,8 +355,9 @@ erDiagram
     ORDER_DETAIL ||--o{ ORDERS : "ORDER_ID -> ORDER_ID"
     ORDER_DETAIL ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
     PAYMENT ||--o{ ORDERS : "ORDER_ID -> ORDER_ID"
-    PORTFOLIO_PRODUCT ||--o{ PORTFOLIO_SESSION : "PORTFOLIO_ID -> PORTFOLIO_ID"
+    PORTFOLIO_PRODUCT ||--o{ PORTFOLIO : "PORTFOLIO_ID -> PORTFOLIO_ID"
     PORTFOLIO_PRODUCT ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"
+    PORTFOLIO_SESSION ||--o{ PORTFOLIO : "PORTFOLIO_ID -> PORTFOLIO_ID"
     PORTFOLIO_SESSION ||--o{ MEMBER : "MEMBER_ID -> MEMBER_ID"
     PORTFOLIO_SESSION ||--o{ ONBOARDING_SESSION : "SESSION_ID -> SESSION_ID"
     PRODUCT_IMAGE ||--o{ PRODUCT : "PRODUCT_ID -> PRODUCT_ID"

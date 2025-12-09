@@ -858,6 +858,12 @@
                         console.log('현재 단계:', data.current_step);
                         console.log('다음 단계:', data.next_step);
 
+                        // 서버에서 반환된 session_id를 sessionStorage에 저장 (Step 1에서 생성된 고정 ID)
+                        if (data.session_id) {
+                            sessionStorage.setItem('onboarding_session_id', data.session_id);
+                            console.log('✅ Step 1에서 생성된 session_id를 sessionStorage에 저장:', data.session_id);
+                        }
+
                         // 저장 성공 시 2단계로 이동
                         window.location.href = '/onboarding/step2/';
                     } else {

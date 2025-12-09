@@ -817,34 +817,129 @@ def onboarding_step_view(request):
         
         print(f"[Onboarding Step] 파싱 완료 - session_id={session_id}, step={step}, step_data={step_data}", flush=True)
         
+        # 세션 ID 처리
         if not session_id:
-            print(f"[Onboarding Step] session_id 누락", flush=True)
-            return JsonResponse({
-                'success': False,
-                'error': 'session_id 필수'
-            }, status=400)
+            if step == 1:
+                # Step 1: 타임스탬프 기반 정수 생성
+                import time
+                session_id = str(int(time.time() * 1000))  # 밀리초 단위 타임스탬프
+                print(f"[Onboarding Step] Step 1: session_id가 없어서 타임스탬프로 생성: {session_id}", flush=True)
+            else:
+                # Step 2~7: session_id가 없으면 Step 1에서 생성된 세션을 찾아서 사용
+                # Step 1에서 생성된 세션 (current_step=1 또는 가장 최근 IN_PROGRESS 세션)
+                try:
+                    # Step 1 세션 찾기 (current_step=1이고 IN_PROGRESS인 가장 최근 세션)
+                    step1_session = OnboardingSession.objects.filter(
+                        current_step=1,
+                        status='in_progress'
+                    ).order_by('-created_at').first()
+                    
+                    if step1_session:
+                        session_id = step1_session.session_id
+                        print(f"[Onboarding Step] Step {step}: session_id가 없어서 Step 1 세션 사용: {session_id}", flush=True)
+                    else:
+                        # Step 1 세션이 없으면 가장 최근 IN_PROGRESS 세션 사용
+                        latest_session = OnboardingSession.objects.filter(
+                            status='in_progress'
+                        ).order_by('-created_at').first()
+                        
+                        if latest_session:
+                            session_id = latest_session.session_id
+                            print(f"[Onboarding Step] Step {step}: session_id가 없어서 가장 최근 세션 사용: {session_id}", flush=True)
+                        else:
+                            # 세션이 전혀 없으면 에러 반환
+                            print(f"[Onboarding Step] ❌ Step {step}: session_id가 없고 Step 1 세션도 없습니다.", flush=True)
+                            return JsonResponse({
+                                'success': False,
+                                'error': f'세션이 없습니다. Step 1부터 다시 시작해주세요.'
+                            }, status=400)
+                except Exception as e:
+                    print(f"[Onboarding Step] ⚠️ Step {step}: 세션 조회 실패: {e}", flush=True)
+                    return JsonResponse({
+                        'success': False,
+                        'error': f'세션 조회 실패: {str(e)}'
+                    }, status=500)
         
-        # 세션 생성 또는 조회
+        # session_id를 문자열로 변환 (VARCHAR2 타입 호환성)
+        session_id = str(session_id)
+        
+        # 숫자 문자열인 경우 그대로 사용 (UUID 변환하지 않음)
+        if session_id.isdigit():
+            print(f"[Onboarding Step] 타임스탬프 기반 session_id 사용: {session_id}", flush=True)
+        else:
+            # UUID 형식이거나 다른 형식이면 그대로 사용
+            print(f"[Onboarding Step] 기존 session_id 형식 사용: {session_id}", flush=True)
+        
+        # 세션 조회 또는 생성
         print(f"[Onboarding Step] 세션 조회/생성 시작 - session_id={session_id}", flush=True)
-        session, created = OnboardingSession.objects.get_or_create(
-            session_id=session_id,
-            defaults={'current_step': 1, 'status': 'in_progress'}
-        )
-        print(f"[Onboarding Step] 세션 {'생성됨' if created else '조회됨'} - current_step={session.current_step}, status={session.status}", flush=True)
+        
+        if step == 1:
+            # Step 1: INSERT (없으면 생성, 있으면 조회)
+            session, created = OnboardingSession.objects.get_or_create(
+                session_id=session_id,
+                defaults={'current_step': 1, 'status': 'in_progress'}
+            )
+            print(f"[Onboarding Step] Step 1: 세션 {'생성됨 (INSERT)' if created else '조회됨 (이미 존재)'} - current_step={session.current_step}, status={session.status}", flush=True)
+        else:
+            # Step 2~7: UPDATE만 (Step 1에서 생성된 세션을 찾아서 업데이트)
+            try:
+                session = OnboardingSession.objects.get(session_id=session_id)
+                print(f"[Onboarding Step] Step {step}: 기존 세션 조회 성공 - current_step={session.current_step}, status={session.status}", flush=True)
+            except OnboardingSession.DoesNotExist:
+                print(f"[Onboarding Step] ❌ Step {step}: session_id={session_id}에 해당하는 세션을 찾을 수 없습니다.", flush=True)
+                return JsonResponse({
+                    'success': False,
+                    'error': f'세션을 찾을 수 없습니다. Step 1부터 다시 시작해주세요. (session_id: {session_id})'
+                }, status=404)
+        
+        # 세션에서 조회한 기존 데이터 확인
+        print(f"\n{'='*80}", flush=True)
+        print(f"[Onboarding Step] 세션에서 조회한 기존 데이터", flush=True)
+        print(f"{'='*80}", flush=True)
+        print(f"  vibe: {session.vibe}", flush=True)
+        print(f"  household_size: {session.household_size}", flush=True)
+        print(f"  housing_type: {session.housing_type}", flush=True)
+        print(f"  pyung: {session.pyung}", flush=True)
+        print(f"  priority: {session.priority}", flush=True)
+        print(f"  budget_level: {session.budget_level}", flush=True)
+        print(f"  recommendation_result: {session.recommendation_result}", flush=True)
+        if session.recommendation_result:
+            print(f"    - priority: {session.recommendation_result.get('priority')}", flush=True)
+            print(f"    - priority_map: {session.recommendation_result.get('priority_map')}", flush=True)
+        print(f"{'='*80}\n", flush=True)
         
         # Step별 데이터 저장
+        print(f"\n{'='*80}", flush=True)
         print(f"[Onboarding Step] Step {step} 데이터 저장 시작...", flush=True)
+        print(f"{'='*80}", flush=True)
+        print(f"  [전달받은 step_data]", flush=True)
+        print(f"    step_data 전체: {step_data} (타입: {type(step_data).__name__})", flush=True)
+        if step_data and isinstance(step_data, dict):
+            for key, value in step_data.items():
+                print(f"    {key}: {value} (타입: {type(value).__name__})", flush=True)
+        else:
+            print(f"    ⚠️ 경고: step_data가 dict가 아니거나 None입니다!", flush=True)
+        print(f"{'='*80}\n", flush=True)
         if step == 1:
-            session.vibe = step_data.get('vibe')
-            print(f"[Onboarding Step] Step 1 저장 - vibe={session.vibe}", flush=True)
+            print(f"  [Step 1] vibe 정보 저장 시작", flush=True)
+            vibe = step_data.get('vibe')
+            print(f"    step_data에서 가져온 vibe: {vibe} (타입: {type(vibe).__name__})", flush=True)
+            session.vibe = vibe
+            print(f"  [Step 1] 저장 완료 - session.vibe={session.vibe}", flush=True)
         elif step == 2:
+            print(f"  [Step 2] 가구 정보 저장 시작", flush=True)
             # household_size 또는 mate 값 처리
             household_size = step_data.get('household_size')
             mate = step_data.get('mate')  # 2단계에서 전달되는 mate 값
             pet = step_data.get('pet')  # 반려동물 정보
             
+            print(f"    step_data에서 가져온 household_size: {household_size}", flush=True)
+            print(f"    step_data에서 가져온 mate: {mate}", flush=True)
+            print(f"    step_data에서 가져온 pet: {pet}", flush=True)
+            
             if household_size:
                 session.household_size = int(household_size)
+                print(f"    household_size 직접 설정: {session.household_size}", flush=True)
             elif mate:
                 # mate 값을 household_size로 변환
                 mate_to_size = {
@@ -854,6 +949,7 @@ def onboarding_step_view(request):
                     'family_5plus': 5  # 5인 이상은 5로 설정
                 }
                 session.household_size = mate_to_size.get(mate, 2)
+                print(f"    mate에서 변환한 household_size: {session.household_size} (mate={mate})", flush=True)
             
             # 반려동물 정보를 recommendation_result에 저장 (임시)
             if pet:
@@ -861,26 +957,42 @@ def onboarding_step_view(request):
                     session.recommendation_result = {}
                 session.recommendation_result['has_pet'] = (pet == 'yes')
                 session.recommendation_result['pet'] = pet
-            print(f"[Onboarding Step] Step 2 저장 - household_size={session.household_size}, pet={pet}", flush=True)
+                print(f"    pet 정보 저장: has_pet={session.recommendation_result['has_pet']}, pet={pet}", flush=True)
+            print(f"  [Step 2] 저장 완료 - household_size={session.household_size}, pet={pet}", flush=True)
         elif step == 3:
-            session.housing_type = step_data.get('housing_type')
+            print(f"  [Step 3] 주거 정보 저장 시작", flush=True)
+            housing_type = step_data.get('housing_type')
             pyung = step_data.get('pyung')
+            main_space = step_data.get('main_space')
+            
+            print(f"    step_data에서 가져온 housing_type: {housing_type}", flush=True)
+            print(f"    step_data에서 가져온 pyung: {pyung} (타입: {type(pyung).__name__})", flush=True)
+            print(f"    step_data에서 가져온 main_space: {main_space} (타입: {type(main_space).__name__})", flush=True)
+            
+            session.housing_type = housing_type
             if pyung:
                 session.pyung = int(pyung)
+                print(f"    pyung 변환 후: {session.pyung}", flush=True)
             
             # 주요 공간 정보 저장 (recommendation_result에 저장)
-            main_space = step_data.get('main_space')
             if main_space:
                 if not session.recommendation_result:
                     session.recommendation_result = {}
                 session.recommendation_result['main_space'] = main_space
-            print(f"[Onboarding Step] Step 3 저장 - housing_type={session.housing_type}, pyung={session.pyung}, main_space={main_space}", flush=True)
+                print(f"    main_space 저장: {session.recommendation_result['main_space']}", flush=True)
+            print(f"  [Step 3] 저장 완료 - housing_type={session.housing_type}, pyung={session.pyung}, main_space={main_space}", flush=True)
         elif step == 4:
+            print(f"  [Step 4] 생활 패턴 정보 저장 시작", flush=True)
             # 생활 패턴 정보 저장 (요리, 세탁, 미디어)
             cooking = step_data.get('cooking')
             laundry = step_data.get('laundry')
             media = step_data.get('media')
             main_space = step_data.get('main_space')  # 3단계에서 선택한 주요 공간
+            
+            print(f"    step_data에서 가져온 cooking: {cooking}", flush=True)
+            print(f"    step_data에서 가져온 laundry: {laundry}", flush=True)
+            print(f"    step_data에서 가져온 media: {media}", flush=True)
+            print(f"    step_data에서 가져온 main_space: {main_space}", flush=True)
             
             # recommendation_result에 저장
             if not session.recommendation_result:
@@ -889,37 +1001,75 @@ def onboarding_step_view(request):
             # 생활 패턴 데이터 저장
             if cooking:
                 session.recommendation_result['cooking'] = cooking
+                print(f"    cooking 저장: {cooking}", flush=True)
             if laundry:
                 session.recommendation_result['laundry'] = laundry
+                print(f"    laundry 저장: {laundry}", flush=True)
             if media:
                 session.recommendation_result['media'] = media
+                print(f"    media 저장: {media}", flush=True)
             if main_space:
                 session.recommendation_result['main_space'] = main_space
+                print(f"    main_space 저장: {main_space}", flush=True)
             
-            print(f"[Onboarding Step] Step 4 저장 - 요리: {cooking}, 세탁: {laundry}, 미디어: {media}", flush=True)
+            print(f"  [Step 4] 저장 완료 - 요리: {cooking}, 세탁: {laundry}, 미디어: {media}", flush=True)
         elif step == 5:
             # 우선순위 정보 저장
+            print(f"  [Step 5] 우선순위 정보 저장 시작", flush=True)
             priority = step_data.get('priority', [])  # 우선순위 순서 배열
             priority_map = step_data.get('priority_map', {})  # 우선순위 맵
+            
+            print(f"    step_data에서 가져온 priority: {priority} (타입: {type(priority).__name__})", flush=True)
+            print(f"    step_data에서 가져온 priority_map: {priority_map} (타입: {type(priority_map).__name__})", flush=True)
             
             # recommendation_result에 저장
             if not session.recommendation_result:
                 session.recommendation_result = {}
+                print(f"    recommendation_result 초기화됨", flush=True)
             
+            print(f"    저장 전 recommendation_result['priority']: {session.recommendation_result.get('priority')}", flush=True)
             session.recommendation_result['priority'] = priority
             session.recommendation_result['priority_map'] = priority_map
+            print(f"    저장 후 recommendation_result['priority']: {session.recommendation_result.get('priority')}", flush=True)
+            print(f"    저장 후 recommendation_result['priority_map']: {session.recommendation_result.get('priority_map')}", flush=True)
             
             # priority 필드에 첫 번째 우선순위 저장 (기존 필드 호환성)
             if priority and len(priority) > 0:
                 session.priority = priority[0]
-            print(f"[Onboarding Step] Step 5 저장 - priority={session.priority}, priority_list={priority}", flush=True)
+                print(f"    session.priority에 첫 번째 값 저장: {session.priority}", flush=True)
+            else:
+                print(f"    ⚠️ 경고: priority가 비어있거나 유효하지 않음", flush=True)
+            
+            print(f"  [Step 5] 저장 완료 - session.priority={session.priority}, priority_list={priority}", flush=True)
         elif step == 6:
             # 예산 범위 정보 저장
+            print(f"  [Step 6] 예산 범위 정보 저장 시작", flush=True)
             budget = step_data.get('budget')
+            
+            print(f"    step_data에서 가져온 budget: {budget} (타입: {type(budget).__name__})", flush=True)
+            print(f"    step_data에서 가져온 priority: {step_data.get('priority')} (타입: {type(step_data.get('priority')).__name__})", flush=True)
             
             # recommendation_result에 저장
             if not session.recommendation_result:
                 session.recommendation_result = {}
+                print(f"    recommendation_result 초기화됨", flush=True)
+            
+            # Step 5에서 저장한 priority가 있는지 확인
+            existing_priority = session.recommendation_result.get('priority')
+            existing_priority_map = session.recommendation_result.get('priority_map')
+            print(f"    세션에서 조회한 기존 priority: {existing_priority}", flush=True)
+            print(f"    세션에서 조회한 기존 priority_map: {existing_priority_map}", flush=True)
+            
+            # step_data에 priority가 없거나 비어있으면 기존 값 유지
+            step_priority = step_data.get('priority', [])
+            if not step_priority or len(step_priority) == 0:
+                if existing_priority:
+                    print(f"    ⚠️ step_data의 priority가 비어있음. 기존 priority 유지: {existing_priority}", flush=True)
+                else:
+                    print(f"    ⚠️ 경고: step_data와 세션 모두 priority가 없음!", flush=True)
+            else:
+                print(f"    step_data의 priority 사용: {step_priority}", flush=True)
+                session.recommendation_result['priority'] = step_priority
             
             session.recommendation_result['budget'] = budget
             
@@ -934,14 +1084,28 @@ def onboarding_step_view(request):
             
             # 온보딩 완료 처리
             session.is_completed = True
-            print(f"[Onboarding Step] Step 6 저장 - budget_level={session.budget_level}, is_completed={session.is_completed}", flush=True)
+            print(f"  [Step 6] 저장 완료 - budget_level={session.budget_level}, is_completed={session.is_completed}", flush=True)
+            print(f"    최종 recommendation_result['priority']: {session.recommendation_result.get('priority')}", flush=True)
         
         # 진행 상태 업데이트
+        print(f"\n{'='*80}", flush=True)
         print(f"[Onboarding Step] Django ORM 저장 시작...", flush=True)
+        print(f"{'='*80}", flush=True)
+        print(f"  저장 전 상태:", flush=True)
+        print(f"    current_step: {session.current_step} -> {step}", flush=True)
+        print(f"    priority: {session.priority}", flush=True)
+        print(f"    recommendation_result['priority']: {session.recommendation_result.get('priority') if session.recommendation_result else None}", flush=True)
+        
         session.current_step = step
         session.updated_at = timezone.now()
         session.save()
-        print(f"[Onboarding Step] Django ORM 저장 완료 - current_step={session.current_step}, status={session.status}", flush=True)
+        
+        print(f"  저장 후 상태:", flush=True)
+        print(f"    current_step: {session.current_step}", flush=True)
+        print(f"    status: {session.status}", flush=True)
+        print(f"    priority: {session.priority}", flush=True)
+        print(f"    recommendation_result['priority']: {session.recommendation_result.get('priority') if session.recommendation_result else None}", flush=True)
+        print(f"{'='*80}\n", flush=True)
         
         # ============================================================
         # Oracle DB에도 저장
@@ -971,8 +1135,8 @@ def onboarding_step_view(request):
                 pyung=session.pyung,
                 priority=session.priority,
                 budget_level=session.budget_level,
-                selected_categories=session.selected_categories,
-                recommended_products=session.recommended_products,
+                selected_categories=getattr(session, 'selected_categories', []),
+                recommended_products=getattr(session, 'recommended_products', []),
                 recommendation_result=session.recommendation_result
             )
             
@@ -1097,24 +1261,48 @@ def onboarding_step_view(request):
                     )
             
             print(f"[Onboarding Step] Oracle DB 사용자 응답 저장 완료 (Step {step})", flush=True)
-            print(f"[Onboarding Step] Oracle DB 저장 성공 - 세션 ID: {session_id}, 단계: {step}", flush=True)
+            print(f"\n{'='*80}", flush=True)
+            print(f"[Onboarding Step] ✅ Oracle DB 저장 성공", flush=True)
+            print(f"{'='*80}", flush=True)
+            print(f"  세션 ID: {session_id}", flush=True)
+            print(f"  단계: {step}", flush=True)
+            print(f"{'='*80}\n", flush=True)
         
         except Exception as oracle_error:
             # Oracle DB 저장 실패해도 Django DB 저장은 성공했으므로 계속 진행
-            print(f"[Onboarding Step] Oracle DB 저장 실패 (계속 진행): {str(oracle_error)}", flush=True)
+            error_type = type(oracle_error).__name__
+            error_message = str(oracle_error)
+            # Oracle 에러 코드 추출 (예: ORA-00904)
+            error_code = ""
+            if "ORA-" in error_message:
+                import re
+                match = re.search(r'ORA-\d+', error_message)
+                if match:
+                    error_code = match.group()
+            
+            print(f"\n{'='*80}", flush=True)
+            print(f"[Onboarding Step] ❌ Oracle DB 저장 실패", flush=True)
+            print(f"{'='*80}", flush=True)
+            print(f"  세션 ID: {session_id}", flush=True)
+            print(f"  단계: {step}", flush=True)
+            if error_code:
+                print(f"  에러 코드: {error_code}", flush=True)
+            print(f"  에러 타입: {error_type}", flush=True)
+            print(f"  에러 메시지: {error_message}", flush=True)
+            print(f"{'='*80}\n", flush=True)
             import traceback
             traceback.print_exc()
         
-        print(f"\n[Onboarding Step] 온보딩 저장 성공", flush=True)
-            
-            # Step별 사용자 응답 저장
-        print(f"[Onboarding Step] Oracle DB 사용자 응답 저장 시작 (Step {step})...", flush=True)
-       
-        print(f"  세션 ID: {session_id}")
-        print(f"  단계: {step}")
-        print(f"  저장된 데이터: {step_data}", flush=True)
+        print(f"\n{'='*80}", flush=True)
+        print(f"[Onboarding Step] Django ORM 저장 성공", flush=True)
+        print(f"{'='*80}", flush=True)
+        print(f"  세션 ID: {session_id}", flush=True)
+        print(f"  단계: {step}", flush=True)
         print(f"  현재 단계: {session.current_step}", flush=True)
         print(f"  상태: {session.status}", flush=True)
+        print(f"  priority: {session.priority}", flush=True)
+        print(f"  recommendation_result['priority']: {session.recommendation_result.get('priority') if session.recommendation_result else None}", flush=True)
+        print(f"{'='*80}\n", flush=True)
         
         return JsonResponse({
             'success': True,
@@ -1131,6 +1319,15 @@ def onboarding_step_view(request):
             'message': 'DB 없이 서버가 실행 중입니다. 온보딩 데이터는 Django DB에만 저장됩니다.',
         }, json_dumps_params={'ensure_ascii': False}, status=503)
     except Exception as e:
+        print(f"\n{'='*80}", flush=True)
+        print(f"[Onboarding Step] ❌ 전체 프로세스 중 예외 발생!", flush=True)
+        print(f"{'='*80}", flush=True)
+        print(f"  예외 타입: {type(e).__name__}", flush=True)
+        print(f"  예외 메시지: {str(e)}", flush=True)
+        import traceback
+        print(f"  전체 트레이스백:", flush=True)
+        traceback.print_exc()
+        print(f"{'='*80}\n", flush=True)
         return JsonResponse({
             'success': False,
             'error': str(e)
@@ -1306,11 +1503,13 @@ def onboarding_complete_view(request):
                 elif not isinstance(priority_list_data, list):
                     priority_list_data = [priority_list_data] if priority_list_data else []
                 
-                selected_categories_list = session.selected_categories
+                # selected_categories는 data에서 직접 가져옴 (모델 필드 없음)
+                selected_categories_list = data.get('selected_categories', [])
                 if not isinstance(selected_categories_list, list):
                     selected_categories_list = [selected_categories_list] if selected_categories_list else []
                 
                 print(f"[Oracle DB] main_space={main_space_list}, priority_list={priority_list_data}, categories={selected_categories_list}", flush=True)
+                print(f"[Oracle DB] selected_categories 전달값: {selected_categories_list} (타입: {type(selected_categories_list).__name__}, 길이: {len(selected_categories_list)})", flush=True)
                 
                 onboarding_db_service.create_or_update_session(
                     session_id=session_id,
@@ -1332,9 +1531,31 @@ def onboarding_complete_view(request):
                     budget_level=session.budget_level,
                     selected_categories=selected_categories_list,
                 )
-                print(f"[Onboarding Complete] Oracle DB 저장 완료 (기본 정보)", flush=True)
+                print(f"\n{'='*80}", flush=True)
+                print(f"[Onboarding Complete] ✅ Oracle DB 저장 성공 (기본 정보)", flush=True)
+                print(f"{'='*80}", flush=True)
+                print(f"  세션 ID: {session_id}", flush=True)
+                print(f"{'='*80}\n", flush=True)
             except Exception as oracle_error:
-                print(f"[Onboarding Complete] Oracle DB 저장 실패 (기본 정보, 계속 진행): {oracle_error}", flush=True)
+                error_type = type(oracle_error).__name__
+                error_message = str(oracle_error)
+                # Oracle 에러 코드 추출 (예: ORA-00904)
+                error_code = ""
+                if "ORA-" in error_message:
+                    import re
+                    match = re.search(r'ORA-\d+', error_message)
+                    if match:
+                        error_code = match.group()
+                
+                print(f"\n{'='*80}", flush=True)
+                print(f"[Onboarding Complete] ❌ Oracle DB 저장 실패 (기본 정보)", flush=True)
+                print(f"{'='*80}", flush=True)
+                print(f"  세션 ID: {session_id}", flush=True)
+                if error_code:
+                    print(f"  에러 코드: {error_code}", flush=True)
+                print(f"  에러 타입: {error_type}", flush=True)
+                print(f"  에러 메시지: {error_message}", flush=True)
+                print(f"{'='*80}\n", flush=True)
                 import traceback
                 traceback.print_exc()
                 # Oracle 저장 실패해도 계속 진행
@@ -1367,7 +1588,7 @@ def onboarding_complete_view(request):
             'pyung': session.pyung or 25,
             'priority': session.priority or 'value',
             'budget_level': session.budget_level or 'medium',
-            'categories': session.selected_categories or [],
+            'categories': getattr(session, 'selected_categories', []) or [],
             'main_space': 'living',
             'space_size': 'medium',
             'has_pet': onboarding_data.get('pet') == 'yes',
@@ -1488,15 +1709,22 @@ def onboarding_complete_view(request):
                 elif not isinstance(priority_list_data, list):
                     priority_list_data = [priority_list_data] if priority_list_data else []
                 
-                selected_categories_list = session.selected_categories
+                # selected_categories는 data에서 직접 가져옴 (모델 필드 없음)
+                selected_categories_list = data.get('selected_categories', [])
                 if not isinstance(selected_categories_list, list):
                     selected_categories_list = [selected_categories_list] if selected_categories_list else []
                 
-                recommended_products_list = session.recommended_products
-                if not isinstance(recommended_products_list, list):
-                    recommended_products_list = [recommended_products_list] if recommended_products_list else []
+                # recommended_products는 추천 결과에서 직접 추출 (모델 필드 없음)
+                recommended_products_list = []
+                if result.get('success') and result.get('recommendations'):
+                    recommended_products_list = [
+                        r.get('product_id') or r.get('id')
+                        for r in result['recommendations']
+                        if r.get('product_id') or r.get('id')
+                    ]
                 
                 print(f"[Oracle DB] 추천 제품 ID 목록: {recommended_products_list[:5]}..." if len(recommended_products_list) > 5 else f"[Oracle DB] 추천 제품 ID 목록: {recommended_products_list}")
+                print(f"[Oracle DB] recommended_products 전달값: {recommended_products_list[:10]} (타입: {type(recommended_products_list).__name__}, 길이: {len(recommended_products_list)})", flush=True)
                 
                 onboarding_db_service.create_or_update_session(
                     session_id=session_id,
@@ -1519,9 +1747,31 @@ def onboarding_complete_view(request):
                     recommended_products=recommended_products_list,
                     recommendation_result=session.recommendation_result if session.recommendation_result else {},
                 )
-                print(f"[Onboarding Complete] Oracle DB 최종 저장 완료 (추천 결과 포함)")
+                print(f"\n{'='*80}", flush=True)
+                print(f"[Onboarding Complete] ✅ Oracle DB 저장 성공 (추천 결과 포함)", flush=True)
+                print(f"{'='*80}", flush=True)
+                print(f"  세션 ID: {session_id}", flush=True)
+                print(f"{'='*80}\n", flush=True)
             except Exception as oracle_error:
-                print(f"[Onboarding Complete] Oracle DB 최종 저장 실패 (계속 진행): {oracle_error}")
+                error_type = type(oracle_error).__name__
+                error_message = str(oracle_error)
+                # Oracle 에러 코드 추출 (예: ORA-00904)
+                error_code = ""
+                if "ORA-" in error_message:
+                    import re
+                    match = re.search(r'ORA-\d+', error_message)
+                    if match:
+                        error_code = match.group()
+                
+                print(f"\n{'='*80}", flush=True)
+                print(f"[Onboarding Complete] ❌ Oracle DB 저장 실패 (추천 결과 포함)", flush=True)
+                print(f"{'='*80}", flush=True)
+                print(f"  세션 ID: {session_id}", flush=True)
+                if error_code:
+                    print(f"  에러 코드: {error_code}", flush=True)
+                print(f"  에러 타입: {error_type}", flush=True)
+                print(f"  에러 메시지: {error_message}", flush=True)
+                print(f"{'='*80}\n", flush=True)
                 import traceback
                 traceback.print_exc()
                 # Oracle 저장 실패해도 계속 진행
@@ -1620,7 +1870,7 @@ def onboarding_session_view(request, session_id):
                 'pyung': session.pyung,
                 'priority': session.priority,
                 'budget_level': session.budget_level,
-                'selected_categories': session.selected_categories,
+                'selected_categories': getattr(session, 'selected_categories', []),
                 'recommendation_result': session.recommendation_result,
                 'created_at': session.created_at.isoformat(),
                 'completed_at': session.completed_at.isoformat() if session.completed_at else None,

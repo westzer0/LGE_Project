@@ -352,7 +352,7 @@ class Command(BaseCommand):
         try:
             with get_connection() as conn:
                 with conn.cursor() as cur:
-                    # 모든 세션 조회
+                    # 모든 세션 조회 (MEMBER_ID 오름차순 정렬)
                     cur.execute("""
                         SELECT 
                             SESSION_ID,
@@ -361,6 +361,7 @@ class Command(BaseCommand):
                             SELECTED_CATEGORIES,
                             RECOMMENDED_PRODUCTS
                         FROM ONBOARDING_SESSION
+                        ORDER BY MEMBER_ID ASC
                     """)
                     
                     rows = cur.fetchall()

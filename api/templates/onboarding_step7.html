@@ -909,12 +909,15 @@
         // 세션 저장 및 결과 페이지로 이동
         // ============================================
         function saveStepAndNavigate() {
-            // 세션 ID 가져오기 또는 생성
+            // 세션 ID 가져오기 (Step 1에서 생성된 것을 재사용)
             let sessionId = sessionStorage.getItem('onboarding_session_id');
             if (!sessionId) {
-                sessionId = Date.now().toString();
-                sessionStorage.setItem('onboarding_session_id', sessionId);
+                console.error('❌ session_id가 없습니다. Step 1부터 다시 시작해주세요.');
+                alert('세션이 만료되었습니다. 처음부터 다시 시작해주세요.');
+                window.location.href = '/onboarding/';
+                return;
             }
+            console.log('Step 7에서 사용할 session_id:', sessionId);
 
             // 이전 단계에서 선택한 값 가져오기
             const step1Vibe = sessionStorage.getItem('step1_vibe');

@@ -220,14 +220,18 @@ class PortfolioCreateSerializer(serializers.Serializer):
 # ============================================================
 
 class OnboardingSessionSerializer(serializers.ModelSerializer):
-    """온보딩 세션 Serializer"""
+    """온보딩 세션 Serializer (정규화 테이블 사용)"""
+    main_spaces = serializers.SerializerMethodField()
+    priorities = serializers.SerializerMethodField()
+    selected_categories = serializers.SerializerMethodField()
+    recommended_products = serializers.SerializerMethodField()
+    
     class Meta:
         model = OnboardingSession
         fields = [
             'session_id',
             'session_uuid',
             'member',
-            'user_id',
             'current_step',
             'status',
             'vibe',
@@ -236,12 +240,68 @@ class OnboardingSessionSerializer(serializers.ModelSerializer):
             'pyung',
             'priority',
             'budget_level',
-            'selected_categories',
             'has_pet',
+            'cooking',
+            'laundry',
+            'media',
+            'main_spaces',
+            'priorities',
+            'selected_categories',
+            'recommended_products',
             'created_at',
             'completed_at',
         ]
         read_only_fields = ['session_id', 'session_uuid', 'created_at', 'completed_at']
+    
+    def get_main_spaces(self, obj):
+        """정규화 테이블에서 main_spaces 읽기"""
+        try:
+            from api.services.onboarding_db_service import onboarding_db_service
+            session_data = onboarding_db_service.get_session(obj.session_id)
+            if session_data and 'MAIN_SPACE' in session_data:
+                import json
+                main_space_str = session_data['MAIN_SPACE']
+                if main_space_str:
+                    return json.loads(main_space_str) if isinstance(main_space_str, str) else main_space_str
+        except:
+            pass
+        return []
+    
+    def get_priorities(self, obj):
+        """정규화 테이블에서 priorities 읽기"""
+        try:
+            from api.services.onboarding_db_service import onboarding_db_service
+            session_data = onboarding_db_service.get_session(obj.session_id)
+            if session_data and 'PRIORITY_LIST' in session_data:
+                import json
+                priority_str = session_data['PRIORITY_LIST']
+                if priority_str:
+                    return json.loads(priority_str) if isinstance(priority_str, str) else priority_str
+        except:
+            pass
+        return []
+    
+    def get_selected_categories(self, obj):
+        """정규화 테이블에서 selected_categories 읽기"""
+        try:
+            from api.services.onboarding_db_service import onboarding_db_service
+            session_data = onboarding_db_service.get_session(obj.session_id)
+            if session_data and 'SELECTED_CATEGORIES' in session_data:
+                return session_data['SELECTED_CATEGORIES']
+        except:
+            pass
+        return []
+    
+    def get_recommended_products(self, obj):
+        """정규화 테이블에서 recommended_products 읽기"""
+        try:
+            from api.services.onboarding_db_service import onboarding_db_service
+            session_data = onboarding_db_service.get_session(obj.session_id)
+            if session_data and 'RECOMMENDED_PRODUCTS' in session_data:
+                return session_data['RECOMMENDED_PRODUCTS']
+        except:
+            pass
+        return []
 
 
 # ============================================================
@@ -254,9 +314,9 @@ class MemberSerializer(serializers.ModelSerializer):
         model = Member
         fields = [
             'member_id', 'name', 'age', 'gender', 'contact',
-            'point', 'created_date', 'taste'
+            'point', 'created_at', 'taste'
         ]
-        read_only_fields = ['member_id', 'created_date']
+        read_only_fields = ['member_id', 'created_at']
         extra_kwargs = {'password': {'write_only': True}}
 
 
@@ -266,8 +326,8 @@ class CartSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CartNew
-        fields = ['cart_id', 'member', 'created_date', 'items']
-        read_only_fields = ['cart_id', 'created_date']
+        fields = ['cart_id', 'member', 'created_at', 'items']
+        read_only_fields = ['cart_id', 'created_at']
     
     def get_items(self, obj):
         return CartItemSerializer(obj.items.all(), many=True).data
@@ -328,9 +388,9 @@ class OnboardingQuestionSerializer(serializers.ModelSerializer):
         model = OnboardingQuestion
         fields = [
             'question_code', 'question_text', 'question_type',
-            'is_required', 'created_date', 'answers'
+            'is_required', 'created_at', 'answers'
         ]
-        read_only_fields = ['created_date']
+        read_only_fields = ['created_at']
     
     def get_answers(self, obj):
         return OnboardingAnswerSerializer(obj.answers.all(), many=True).data
@@ -340,8 +400,8 @@ class OnboardingAnswerSerializer(serializers.ModelSerializer):
     """온보딩 답변 선택지 Serializer"""
     class Meta:
         model = OnboardingAnswer
-        fields = ['answer_id', 'question', 'answer_value', 'answer_text', 'created_date']
-        read_only_fields = ['answer_id', 'created_date']
+        fields = ['answer_id', 'question', 'answer_value', 'answer_text', 'created_at']
+        read_only_fields = ['answer_id', 'created_at']
 
 
 class OnboardingUserResponseSerializer(serializers.ModelSerializer):
@@ -349,9 +409,9 @@ class OnboardingUserResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = OnboardingUserResponse
         fields = [
-            'response_id', 'session', 'question', 'answer', 'input_value', 'created_date'
+            'response_id', 'session', 'question', 'answer', 'input_value', 'created_at'
         ]
-        read_only_fields = ['response_id', 'created_date']
+        read_only_fields = ['response_id', 'created_at']
 
 
 class TasteConfigSerializer(serializers.ModelSerializer):
@@ -419,9 +479,9 @@ class EstimateSerializer(serializers.ModelSerializer):
         model = Estimate
         fields = [
             'estimate_id', 'portfolio', 'total_price', 'discount_price',
-            'rental_monthly', 'created_date'
+            'rental_monthly', 'created_at'
         ]
-        read_only_fields = ['estimate_id', 'created_date']
+        read_only_fields = ['estimate_id', 'created_at']
 
 
 class ConsultationSerializer(serializers.ModelSerializer):
@@ -430,9 +490,9 @@ class ConsultationSerializer(serializers.ModelSerializer):
         model = Consultation
         fields = [
             'consult_id', 'member', 'portfolio', 'store_name',
-            'reservation_date', 'created_date'
+            'reservation_date', 'created_at'
         ]
-        read_only_fields = ['consult_id', 'created_date']
+        read_only_fields = ['consult_id', 'created_at']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):

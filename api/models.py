@@ -30,7 +30,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='제품 가격')
     rating = models.FloatField(null=True, blank=True, validators=[MinValueValidator(0), MaxValueValidator(5)], verbose_name='제품 평점')
     url = models.CharField(max_length=255, null=True, blank=True, verbose_name='제품 상세 페이지 URL')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성일')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='생성일')
     
     # 하위 호환성을 위한 필드 (기존 코드와의 호환)
     name = models.CharField(max_length=200, null=True, blank=True, verbose_name='제품명 (하위 호환)')
@@ -52,7 +52,7 @@ class Product(models.Model):
         verbose_name = '제품'
         verbose_name_plural = '제품'
         db_table = 'product'
-        ordering = ['-created_date']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"{self.product_name or self.name} ({self.model_code or self.model_number})"
@@ -251,6 +251,12 @@ class ProductRecommendReason(models.Model):
 
 
 class UserSample(models.Model):
+    """
+    사용자 샘플 모델
+    
+    주의: 이 모델은 실제로 사용되지 않습니다.
+    모델만 정의되어 있고 실제 코드에서 조회/사용하지 않습니다.
+    """
     user_id = models.CharField(max_length=50, unique=True)
     household_size = models.CharField(max_length=20, blank=True)
     space_type = models.CharField(max_length=20, blank=True)
@@ -287,14 +293,29 @@ class OnboardingSession(models.Model):
     """
     사용자 온보딩 세션
     = 사용자의 설문 응답을 저장하는 모델
+    
+    변경사항:
+    - session_id: AutoField → CharField (UUID 문자열)
+    - CLOB 필드 제거 (정규화 테이블 사용: ONBOARD_SESS_MAIN_SPACES, ONBOARD_SESS_PRIORITIES, ONBOARD_SESS_CATEGORIES, ONBOARD_SESS_REC_PRODUCTS)
+    - user_id 필드 제거 (중복)
+    - member 필드: NULL 허용, 기본값 'GUEST'
     """
     
-    # 세션 정보 (ERD: SESSION_ID는 NUMBER PK)
-    session_id = models.AutoField(primary_key=True, verbose_name='세션 ID')
+    # 세션 정보 (UUID 문자열로 변경)
+    session_id = models.CharField(max_length=100, primary_key=True, verbose_name='세션 ID', help_text="UUID 문자열")
     # 하위 호환성을 위한 UUID 문자열 필드 (기존 코드에서 사용)
     session_uuid = models.CharField(max_length=100, unique=True, null=True, blank=True, help_text="UUID 문자열 (하위 호환성)")
-    member = models.ForeignKey('Member', on_delete=models.SET_NULL, null=True, blank=True, related_name='onboarding_sessions', db_column='member_id', verbose_name='회원')
-    user_id = models.CharField(max_length=100, null=True, blank=True, verbose_name='사용자 ID (카카오 로그인 연동 시)')
+    member = models.ForeignKey(
+        'Member',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='onboarding_sessions',
+        db_column='member_id',
+        verbose_name='회원'
+        # 기본값 'GUEST'는 서비스 레이어에서 처리
+    )
+    # user_id 필드 제거됨 (중복)
     
     # 온보딩 답변 (Step 1~5)
     vibe = models.CharField(
@@ -342,11 +363,8 @@ class OnboardingSession(models.Model):
         help_text="Step 3: 주거 평수"
     )
     
-    main_space = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Step 3: 주요 공간 (JSON 배열, 예: ['living', 'kitchen'])"
-    )
+    # main_space 필드 제거됨 (정규화 테이블 ONBOARD_SESS_MAIN_SPACES 사용)
+    # main_space = models.JSONField(...)  # 제거
     
     # Step 4: 라이프스타일
     cooking = models.CharField(
@@ -398,11 +416,8 @@ class OnboardingSession(models.Model):
         help_text="Step 5: 첫 번째 구매 우선순위"
     )
     
-    priority_list = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="Step 5: 우선순위 목록 (JSON 배열, 순서 중요, 예: ['design', 'tech', 'eco'])"
-    )
+    # priority_list 필드 제거됨 (정규화 테이블 ONBOARD_SESS_PRIORITIES 사용)
+    # priority_list = models.JSONField(...)  # 제거
     
     budget_level = models.CharField(
         max_length=20,
@@ -420,21 +435,19 @@ class OnboardingSession(models.Model):
         help_text="Step 6: 예산 범위"
     )
     
-    # 선택한 카테고리
-    selected_categories = models.JSONField(
-        default=list,
-        help_text="선택한 제품 카테고리 (예: ['TV', 'KITCHEN'])"
-    )
+    # selected_categories 필드 제거됨 (정규화 테이블 ONBOARD_SESS_CATEGORIES 사용)
+    # selected_categories = models.JSONField(...)  # 제거
     
-    # 추천 결과 저장
-    recommended_products = models.JSONField(
-        default=list,
-        help_text="추천 제품 ID 목록"
-    )
+    # recommended_products 필드 제거됨 (정규화 테이블 ONBOARD_SESS_REC_PRODUCTS 사용)
+    # recommended_products = models.JSONField(...)  # 제거
     
+    # recommendation_result 필드 (중간 단계 데이터 및 최종 추천 결과 저장용)
+    # SQLite에서는 JSONField 사용 가능, Oracle에서는 CLOB 대신 사용
     recommendation_result = models.JSONField(
         default=dict,
-        help_text="최종 추천 결과 (JSON)"
+        blank=True,
+        null=True,
+        help_text='중간 단계 데이터 및 최종 추천 결과 (JSON)'
     )
     
     # 상태 관리
@@ -455,14 +468,16 @@ class OnboardingSession(models.Model):
         help_text="온보딩 상태"
     )
     
-    # 타임스탬프
+    # 타임스탬프 (db_column 명시)
     created_at = models.DateTimeField(
         auto_now_add=True,
+        db_column='created_at',
         help_text="세션 생성 시간"
     )
     
     updated_at = models.DateTimeField(
         auto_now=True,
+        db_column='updated_at',
         help_text="마지막 업데이트 시간"
     )
     
@@ -475,6 +490,8 @@ class OnboardingSession(models.Model):
     class Meta:
         verbose_name = '온보딩 세션'
         verbose_name_plural = '온보딩 세션'
+        db_table = 'onboarding_session'
+        managed = True  # Django가 테이블 관리 (SQLite용)
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['session_id']),
@@ -483,23 +500,59 @@ class OnboardingSession(models.Model):
         ]
     
     def __str__(self):
-        return f"Session {self.session_id} ({self.session_uuid}) - {self.get_status_display()} (Step {self.current_step})"
+        return f"Session {self.session_id} - {self.get_status_display()} (Step {self.current_step})"
     
     def to_user_profile(self) -> dict:
         """
         OnboardingSession을 RecommendationEngine용 user_profile로 변환
+        정규화 테이블에서 데이터를 읽어옴
         """
-        # recommendation_result에서 추가 정보 추출 (온보딩 데이터가 저장된 경우)
-        extra_data = {}
-        if isinstance(self.recommendation_result, dict):
-            extra_data = self.recommendation_result.get('onboarding_data', {})
+        # 정규화 테이블에서 main_space 읽기
+        main_spaces = []
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT MAIN_SPACE FROM ONBOARD_SESS_MAIN_SPACES
+                        WHERE SESSION_ID = :session_id
+                        ORDER BY MAIN_SPACE
+                    """, {'session_id': self.session_id})
+                    main_spaces = [row[0] for row in cur.fetchall()]
+        except:
+            pass
         
-        # main_space 처리 (JSONField 또는 extra_data에서)
-        main_space_value = self.main_space if isinstance(self.main_space, list) and len(self.main_space) > 0 else (
-            extra_data.get('main_space', ['living']) if isinstance(extra_data, dict) else ['living']
-        )
-        if isinstance(main_space_value, str):
-            main_space_value = [main_space_value]
+        # 정규화 테이블에서 priority_list 읽기
+        priority_list = []
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT PRIORITY FROM ONBOARD_SESS_PRIORITIES
+                        WHERE SESSION_ID = :session_id
+                        ORDER BY PRIORITY_ORDER
+                    """, {'session_id': self.session_id})
+                    priority_list = [row[0] for row in cur.fetchall()]
+        except:
+            pass
+        
+        # 정규화 테이블에서 selected_categories 읽기
+        selected_categories = []
+        try:
+            from api.db.oracle_client import get_connection
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT CATEGORY_NAME FROM ONBOARD_SESS_CATEGORIES
+                        WHERE SESSION_ID = :session_id
+                        ORDER BY CATEGORY_NAME
+                    """, {'session_id': self.session_id})
+                    selected_categories = [row[0] for row in cur.fetchall()]
+        except:
+            pass
+        
+        main_space_value = main_spaces[0] if main_spaces else 'living'
         
         return {
             'vibe': self.vibe or 'modern',
@@ -508,21 +561,22 @@ class OnboardingSession(models.Model):
             'pyung': self.pyung or 25,
             'priority': self.priority or 'value',
             'budget_level': self.budget_level or 'medium',
-            'categories': self.selected_categories or [],
-            'main_space': main_space_value[0] if main_space_value else 'living',
+            'categories': selected_categories,
+            'main_space': main_space_value,
             'space_size': 'medium',
-            'has_pet': self.has_pet if self.has_pet is not None else (
-                extra_data.get('pet') == 'yes' or extra_data.get('has_pet') == True if isinstance(extra_data, dict) else False
-            ),
-            'cooking': self.cooking or extra_data.get('cooking', 'sometimes') if isinstance(extra_data, dict) else 'sometimes',
-            'laundry': self.laundry or extra_data.get('laundry', 'weekly') if isinstance(extra_data, dict) else 'weekly',
-            'media': self.media or extra_data.get('media', 'balanced') if isinstance(extra_data, dict) else 'balanced',
+            'has_pet': self.has_pet if self.has_pet is not None else False,
+            'cooking': self.cooking or 'sometimes',
+            'laundry': self.laundry or 'weekly',
+            'media': self.media or 'balanced',
         }
     
     def save(self, *args, **kwargs):
         """세션 UUID 자동 생성 (하위 호환성)"""
         if not self.session_uuid:
             self.session_uuid = str(uuid.uuid4())[:8]
+        # session_id가 없으면 UUID 생성
+        if not self.session_id:
+            self.session_id = str(uuid.uuid4())
         super().save(*args, **kwargs)
     
     def mark_completed(self):
@@ -945,14 +999,14 @@ class Member(models.Model):
     gender = models.CharField(max_length=10, null=True, blank=True, choices=[('M', '남성'), ('F', '여성')], verbose_name='성별')
     contact = models.CharField(max_length=20, null=True, blank=True, verbose_name='연락처')
     point = models.IntegerField(default=0, null=True, blank=True, verbose_name='포인트')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='가입 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='가입 일시')
     taste = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(120)], verbose_name='할당된 Taste ID')
     
     class Meta:
         verbose_name = '회원'
         verbose_name_plural = '회원'
         db_table = 'member'
-        ordering = ['-created_date']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"{self.member_id} - {self.name}"
@@ -964,13 +1018,13 @@ class CartNew(models.Model):
     """
     cart_id = models.AutoField(primary_key=True, verbose_name='장바구니 ID')
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='carts', db_column='member_id', verbose_name='회원')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='생성 일시')
     
     class Meta:
         verbose_name = '장바구니'
         verbose_name_plural = '장바구니'
         db_table = 'cart'
-        ordering = ['-created_date']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"Cart {self.cart_id} - {self.member.member_id}"
@@ -1064,7 +1118,7 @@ class OnboardingQuestion(models.Model):
     question_text = models.CharField(max_length=255, verbose_name='질문 텍스트')
     question_type = models.CharField(max_length=50, verbose_name='질문 유형')
     is_required = models.CharField(max_length=5, default='Y', choices=[('Y', '필수'), ('N', '선택')], verbose_name='필수 여부')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='생성 일시')
     
     class Meta:
         verbose_name = '온보딩 질문'
@@ -1084,7 +1138,7 @@ class OnboardingAnswer(models.Model):
     question = models.ForeignKey(OnboardingQuestion, on_delete=models.CASCADE, related_name='answers', db_column='question_code', verbose_name='질문')
     answer_value = models.CharField(max_length=255, null=True, blank=True, verbose_name='선택지 값')
     answer_text = models.CharField(max_length=255, null=True, blank=True, verbose_name='선택지 텍스트')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='생성 일시')
     
     class Meta:
         verbose_name = '온보딩 답변 선택지'
@@ -1105,7 +1159,7 @@ class OnboardingUserResponse(models.Model):
     question = models.ForeignKey(OnboardingQuestion, on_delete=models.CASCADE, related_name='user_responses', db_column='question_code', verbose_name='질문')
     answer = models.ForeignKey(OnboardingAnswer, on_delete=models.SET_NULL, null=True, blank=True, related_name='user_responses', db_column='answer_id', verbose_name='선택지')
     input_value = models.CharField(max_length=255, null=True, blank=True, verbose_name='사용자 입력 값')
-    created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, db_column='created_at', verbose_name='생성 일시')
     
     class Meta:
         verbose_name = '온보딩 사용자 응답'
@@ -1120,6 +1174,9 @@ class OnboardingUserResponse(models.Model):
 class OnboardingSessionCategories(models.Model):
     """
     온보딩 세션 카테고리 테이블 (ERD: ONBOARDING_SESSION_CATEGORIES)
+    
+    주의: 이 모델은 실제로 사용되지 않습니다.
+    실제 코드에서는 OnboardSessCategories (ONBOARD_SESS_CATEGORIES)를 사용합니다.
     """
     session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_categories', db_column='session_id', primary_key=True, verbose_name='세션')
     category_name = models.CharField(max_length=50, verbose_name='카테고리명')
@@ -1138,6 +1195,9 @@ class OnboardingSessionCategories(models.Model):
 class OnboardingSessionMainSpaces(models.Model):
     """
     온보딩 세션 주요 공간 테이블 (ERD: ONBOARDING_SESSION_MAIN_SPACES)
+    
+    주의: 이 모델은 실제로 사용되지 않습니다.
+    실제 코드에서는 OnboardSessMainSpaces (ONBOARD_SESS_MAIN_SPACES)를 사용합니다.
     """
     session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_main_spaces', db_column='session_id', primary_key=True, verbose_name='세션')
     main_space = models.CharField(max_length=50, verbose_name='주요 공간')
@@ -1156,6 +1216,9 @@ class OnboardingSessionMainSpaces(models.Model):
 class OnboardingSessionPriorities(models.Model):
     """
     온보딩 세션 우선순위 테이블 (ERD: ONBOARDING_SESSION_PRIORITIES)
+    
+    주의: 이 모델은 실제로 사용되지 않습니다.
+    실제 코드에서는 OnboardSessPriorities (ONBOARD_SESS_PRIORITIES)를 사용합니다.
     """
     session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_priorities', db_column='session_id', verbose_name='세션')
     priority = models.CharField(max_length=20, verbose_name='우선순위 값')
@@ -1237,7 +1300,7 @@ class PortfolioSession(models.Model):
     portfolio = models.OneToOneField(Portfolio, on_delete=models.CASCADE, related_name='portfolio_session', db_column='portfolio_id', primary_key=True, verbose_name='포트폴리오')
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='portfolio_sessions', db_column='member_id', verbose_name='회원')
     session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='portfolio_sessions', db_column='session_id', verbose_name='세션')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='생성 일시')
     
     class Meta:
         verbose_name = '포트폴리오 세션'
@@ -1246,6 +1309,69 @@ class PortfolioSession(models.Model):
     
     def __str__(self):
         return f"PortfolioSession - {self.portfolio.portfolio_id}"
+
+
+class StyleMessage(models.Model):
+    """
+    신규 모델: 스타일 분석 메시지
+    포트폴리오 결과 화면의 스타일 분석 메시지 관리
+    """
+    message_id = models.AutoField(primary_key=True)
+    vibe = models.CharField(max_length=20)
+    household_size = models.IntegerField(null=True, blank=True)
+    budget_level = models.CharField(max_length=20, null=True, blank=True)
+    title_text = models.CharField(max_length=500)
+    subtitle_text = models.CharField(max_length=1000)
+    is_active = models.CharField(max_length=1, default='Y')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'style_message'
+        managed = False  # Oracle에서 직접 관리
+    
+    def __str__(self):
+        return f"StyleMessage({self.vibe}, {self.household_size})"
+
+
+class ShareLink(models.Model):
+    """
+    신규 모델: 공유 링크
+    포트폴리오 외부 공유 링크 관리
+    """
+    link_id = models.CharField(max_length=50, primary_key=True)
+    portfolio = models.ForeignKey('PortfolioSession', on_delete=models.CASCADE, db_column='portfolio_id')
+    share_type = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    access_count = models.IntegerField(default=0)
+    
+    class Meta:
+        db_table = 'share_link'
+        managed = False  # Oracle에서 직접 관리
+    
+    def __str__(self):
+        return f"ShareLink({self.link_id}, {self.share_type})"
+
+
+class PortfolioVersion(models.Model):
+    """
+    신규 모델: 포트폴리오 버전 관리
+    포트폴리오 버전 이력 관리 (다시 추천받기 기능)
+    """
+    version_id = models.AutoField(primary_key=True)
+    portfolio = models.ForeignKey('PortfolioSession', on_delete=models.CASCADE, db_column='portfolio_id')
+    version_number = models.IntegerField()
+    change_type = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'portfolio_version'
+        managed = False  # Oracle에서 직접 관리
+        unique_together = [['portfolio', 'version_number']]
+    
+    def __str__(self):
+        return f"PortfolioVersion({self.portfolio_id}, v{self.version_number})"
 
 
 class PortfolioProduct(models.Model):
@@ -1277,13 +1403,13 @@ class Estimate(models.Model):
     total_price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='총 가격 (정가 합계)')
     discount_price = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='할인 가격 (할인가 합계)')
     rental_monthly = models.DecimalField(max_digits=12, decimal_places=0, null=True, blank=True, verbose_name='월 렌탈 비용')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='견적 생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='견적 생성 일시')
     
     class Meta:
         verbose_name = '견적'
         verbose_name_plural = '견적'
         db_table = 'estimate'
-        ordering = ['-created_date']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"Estimate {self.estimate_id} - {self.portfolio.portfolio_id}"
@@ -1298,13 +1424,13 @@ class Consultation(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.SET_NULL, null=True, blank=True, related_name='consultations', db_column='portfolio_id', verbose_name='포트폴리오')
     store_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='매장명')
     reservation_date = models.DateTimeField(null=True, blank=True, verbose_name='상담 예약 일시')
-    created_date = models.DateTimeField(auto_now_add=True, verbose_name='상담 신청 일시')
+    created_at = models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='상담 신청 일시')
     
     class Meta:
         verbose_name = '상담'
         verbose_name_plural = '상담'
         db_table = 'consultation'
-        ordering = ['-created_date']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"Consultation {self.consult_id} - {self.store_name or '미정'}"
@@ -1471,6 +1597,9 @@ class TasteRecommendedProducts(models.Model):
 class UserSamplePurchasedItems(models.Model):
     """
     사용자 샘플 구매 항목 테이블 (ERD: USER_SAMPLE_PURCHASED_ITEMS)
+    
+    주의: 이 모델은 실제로 사용되지 않습니다.
+    모델만 정의되어 있고 실제 코드에서 조회/사용하지 않습니다.
     """
     user = models.ForeignKey(UserSample, on_delete=models.CASCADE, related_name='sample_purchased_items', db_column='user_id', verbose_name='사용자')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='user_sample_purchased_items', db_column='product_id', verbose_name='제품')
@@ -1491,6 +1620,9 @@ class UserSamplePurchasedItems(models.Model):
 class UserSampleRecommendations(models.Model):
     """
     사용자 샘플 추천 테이블 (ERD: USER_SAMPLE_RECOMMENDATIONS)
+    
+    주의: 이 모델은 실제로 사용되지 않습니다.
+    모델만 정의되어 있고 실제 코드에서 조회/사용하지 않습니다.
     """
     user = models.ForeignKey(UserSample, on_delete=models.CASCADE, related_name='recommendations', db_column='user_id', verbose_name='사용자')
     category_name = models.CharField(max_length=50, verbose_name='카테고리명')

@@ -61,79 +61,71 @@ class TasteCalculationService:
         """
         from api.db.oracle_client import fetch_all_dict
         
-        # ONBOARDING_SESSION 조회
-        sessions = fetch_all_dict("""
-            SELECT 
-                SESSION_ID,
-                VIBE,
-                HOUSEHOLD_SIZE,
-                HOUSING_TYPE,
-                PYUNG,
-                BUDGET_LEVEL,
-                PRIORITY,
-                HAS_PET,
-                MAIN_SPACE,
-                COOKING,
-                LAUNDRY,
-                MEDIA,
-                RECOMMENDATION_RESULT
-            FROM ONBOARDING_SESSION
-            WHERE SESSION_ID = :session_id
-        """, {'session_id': session_id})
+        # ONBOARDING_SESSION 조회 (정규화 테이블 사용)
+        from api.db.oracle_client import get_connection
         
-        if not sessions:
-            raise ValueError(f"세션을 찾을 수 없습니다: {session_id}")
-        
-        session = sessions[0]
-        
-        if not session:
-            raise ValueError(f"세션을 찾을 수 없습니다: {session_id}")
-        
-        # ONBOARDING_SESSION 데이터를 onboarding_data 형식으로 변환
-        onboarding_data = {
-            'vibe': session.get('VIBE'),
-            'household_size': session.get('HOUSEHOLD_SIZE'),
-            'housing_type': session.get('HOUSING_TYPE'),
-            'pyung': session.get('PYUNG'),
-            'budget_level': session.get('BUDGET_LEVEL'),
-            'priority': session.get('PRIORITY'),
-            'has_pet': session.get('HAS_PET') == 'Y' if session.get('HAS_PET') else False,
-        }
-        
-        # MAIN_SPACE 파싱
-        main_space = session.get('MAIN_SPACE')
-        if main_space:
-            import json
-            try:
-                if isinstance(main_space, str):
-                    main_space = json.loads(main_space)
-                onboarding_data['main_space'] = main_space if isinstance(main_space, list) else [main_space]
-            except:
-                onboarding_data['main_space'] = []
-        else:
-            onboarding_data['main_space'] = []
-        
-        # 생활 패턴
-        onboarding_data['cooking'] = session.get('COOKING', 'sometimes')
-        onboarding_data['laundry'] = session.get('LAUNDRY', 'weekly')
-        onboarding_data['media'] = session.get('MEDIA', 'balanced')
-        
-        # RECOMMENDATION_RESULT에서 추가 데이터 추출
-        recommendation_result = session.get('RECOMMENDATION_RESULT', {})
-        if isinstance(recommendation_result, str):
-            import json
-            try:
-                recommendation_result = json.loads(recommendation_result)
-            except:
-                recommendation_result = {}
-        
-        if recommendation_result:
-            onboarding_data['cooking'] = recommendation_result.get('cooking', onboarding_data.get('cooking', 'sometimes'))
-            onboarding_data['laundry'] = recommendation_result.get('laundry', onboarding_data.get('laundry', 'weekly'))
-            onboarding_data['media'] = recommendation_result.get('media', onboarding_data.get('media', 'balanced'))
-            onboarding_data['main_space'] = recommendation_result.get('main_space', onboarding_data.get('main_space', []))
-            onboarding_data['has_pet'] = recommendation_result.get('has_pet', onboarding_data.get('has_pet', False))
-            onboarding_data['priority'] = recommendation_result.get('priority', onboarding_data.get('priority', ['value']))
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                # 기본 세션 정보 조회
+                cur.execute("""
+                    SELECT 
+                        SESSION_ID,
+                        VIBE,
+                        HOUSEHOLD_SIZE,
+                        HOUSING_TYPE,
+                        PYUNG,
+                        BUDGET_LEVEL,
+                        PRIORITY,
+                        HAS_PET,
+                        COOKING,
+                        LAUNDRY,
+                        MEDIA
+                    FROM ONBOARDING_SESSION
+                    WHERE SESSION_ID = :session_id
+                """, {'session_id': session_id})
+                
+                cols = [c[0] for c in cur.description]
+                row = cur.fetchone()
+                
+                if not row:
+                    raise ValueError(f"세션을 찾을 수 없습니다: {session_id}")
+                
+                session = dict(zip(cols, row))
+                
+                # ONBOARDING_SESSION 데이터를 onboarding_data 형식으로 변환
+                onboarding_data = {
+                    'vibe': session.get('VIBE'),
+                    'household_size': session.get('HOUSEHOLD_SIZE'),
+                    'housing_type': session.get('HOUSING_TYPE'),
+                    'pyung': session.get('PYUNG'),
+                    'budget_level': session.get('BUDGET_LEVEL'),
+                    'priority': session.get('PRIORITY'),
+                    'has_pet': session.get('HAS_PET') == 'Y' if session.get('HAS_PET') else False,
+                }
+                
+                # MAIN_SPACE 정규화 테이블에서 읽기
+                cur.execute("""
+                    SELECT MAIN_SPACE FROM ONBOARD_SESS_MAIN_SPACES
+                    WHERE SESSION_ID = :session_id
+                    ORDER BY MAIN_SPACE
+                """, {'session_id': session_id})
+                main_spaces = [row[0] for row in cur.fetchall()]
+                onboarding_data['main_space'] = main_spaces if main_spaces else []
+                
+                # PRIORITY_LIST 정규화 테이블에서 읽기
+                cur.execute("""
+                    SELECT PRIORITY FROM ONBOARD_SESS_PRIORITIES
+                    WHERE SESSION_ID = :session_id
+                    ORDER BY PRIORITY_ORDER
+                """, {'session_id': session_id})
+                priorities = [row[0] for row in cur.fetchall()]
+                if priorities:
+                    onboarding_data['priority'] = priorities
+                
+                # 생활 패턴 (기본 테이블에서 직접 가져오기)
+                onboarding_data['cooking'] = session.get('COOKING', 'sometimes')
+                onboarding_data['laundry'] = session.get('LAUNDRY', 'weekly')
+                onboarding_data['media'] = session.get('MEDIA', 'balanced')
         
         return onboarding_data
     
