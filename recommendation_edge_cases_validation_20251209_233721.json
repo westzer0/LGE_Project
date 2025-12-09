@@ -1,0 +1,162 @@
+{
+  "test_cases": [
+    {
+      "test_name": "TASTE 값이 없는 회원 처리",
+      "status": "SKIP",
+      "message": "엣지 케이스 데이터 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:20.690035"
+    },
+    {
+      "test_name": "온보딩 데이터가 없는 회원 처리",
+      "status": "SKIP",
+      "message": "엣지 케이스 데이터 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:20.690455"
+    },
+    {
+      "test_name": "필터링 후 제품이 없는 경우 처리",
+      "status": "SKIP",
+      "message": "제품 데이터 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:20.693619"
+    },
+    {
+      "test_name": "경계값 처리",
+      "status": "SKIP",
+      "message": "Taste ID 1를 가진 회원 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:20.694252"
+    },
+    {
+      "test_name": "경계값 처리",
+      "status": "SKIP",
+      "message": "Taste ID 120를 가진 회원 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:20.694997"
+    },
+    {
+      "test_name": "NULL 값 처리",
+      "status": "SKIP",
+      "message": "NULL 예산 데이터 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:20.696387"
+    },
+    {
+      "test_name": "잘못된 데이터 타입 처리",
+      "status": "FAIL",
+      "message": "NULL 회원 ID: 에러가 발생해야 함",
+      "elapsed_time": 0.19392824172973633,
+      "timestamp": "2025-12-09T23:37:20.890601",
+      "member_id": "None",
+      "error": "에러가 발생하지 않음"
+    },
+    {
+      "test_name": "잘못된 데이터 타입 처리",
+      "status": "FAIL",
+      "message": "빈 문자열 회원 ID: 에러가 발생해야 함",
+      "elapsed_time": 0.18547916412353516,
+      "timestamp": "2025-12-09T23:37:21.076516",
+      "member_id": "",
+      "error": "에러가 발생하지 않음"
+    },
+    {
+      "test_name": "잘못된 데이터 타입 처리",
+      "status": "FAIL",
+      "message": "존재하지 않는 회원 ID: 에러가 발생해야 함",
+      "elapsed_time": 0.21376609802246094,
+      "timestamp": "2025-12-09T23:37:21.290625",
+      "member_id": "invalid_member_id_999999",
+      "error": "에러가 발생하지 않음"
+    },
+    {
+      "test_name": "잘못된 데이터 타입 처리",
+      "status": "PASS",
+      "message": "숫자 타입 회원 ID: 적절한 에러 메시지",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:21.520223",
+      "member_id": "12345"
+    },
+    {
+      "test_name": "동시성 처리",
+      "status": "SKIP",
+      "message": "테스트할 회원 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:21.521571"
+    },
+    {
+      "test_name": "대용량 데이터 처리",
+      "status": "SKIP",
+      "message": "카테고리 데이터 없음",
+      "elapsed_time": null,
+      "timestamp": "2025-12-09T23:37:21.522755"
+    }
+  ],
+  "summary": {
+    "total": 12,
+    "passed": 1,
+    "failed": 3,
+    "errors": [
+      {
+        "test": "잘못된 데이터 타입 처리",
+        "error": "에러가 발생하지 않음"
+      },
+      {
+        "test": "잘못된 데이터 타입 처리",
+        "error": "에러가 발생하지 않음"
+      },
+      {
+        "test": "잘못된 데이터 타입 처리",
+        "error": "에러가 발생하지 않음"
+      }
+    ]
+  },
+  "edge_cases_found": {
+    "members_no_taste": [],
+    "members_no_onboarding": [],
+    "empty_categories": [
+      {
+        "id": 1,
+        "name": "냉장고"
+      },
+      {
+        "id": 2,
+        "name": "세탁"
+      },
+      {
+        "id": 3,
+        "name": "김치냉장고"
+      },
+      {
+        "id": 4,
+        "name": "TV"
+      },
+      {
+        "id": 5,
+        "name": "컨버터블 패키"
+      },
+      {
+        "id": 6,
+        "name": "에어컨"
+      },
+      {
+        "id": 7,
+        "name": "전기레인지"
+      },
+      {
+        "id": 8,
+        "name": "AIHome"
+      },
+      {
+        "id": 9,
+        "name": "청소기"
+      },
+      {
+        "id": 10,
+        "name": "공기청정기"
+      }
+    ],
+    "members_with_taste_1": [],
+    "members_with_taste_120": []
+  }
+}

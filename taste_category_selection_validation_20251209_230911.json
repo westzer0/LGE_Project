@@ -1,0 +1,634 @@
+{
+  "timestamp": "20251209_230911",
+  "mapping_tests": [
+    {
+      "test": "function_exists",
+      "status": "pass",
+      "result": "9 categories"
+    }
+  ],
+  "all_taste_ids_summary": {
+    "1": {
+      "count": 9,
+      "status": "success"
+    },
+    "2": {
+      "count": 9,
+      "status": "success"
+    },
+    "3": {
+      "count": 9,
+      "status": "success"
+    },
+    "4": {
+      "count": 9,
+      "status": "success"
+    },
+    "5": {
+      "count": 9,
+      "status": "success"
+    },
+    "6": {
+      "count": 9,
+      "status": "success"
+    },
+    "7": {
+      "count": 9,
+      "status": "success"
+    },
+    "8": {
+      "count": 9,
+      "status": "success"
+    },
+    "9": {
+      "count": 9,
+      "status": "success"
+    },
+    "10": {
+      "count": 9,
+      "status": "success"
+    },
+    "11": {
+      "count": 9,
+      "status": "success"
+    },
+    "12": {
+      "count": 9,
+      "status": "success"
+    },
+    "13": {
+      "count": 9,
+      "status": "success"
+    },
+    "14": {
+      "count": 9,
+      "status": "success"
+    },
+    "15": {
+      "count": 9,
+      "status": "success"
+    },
+    "16": {
+      "count": 9,
+      "status": "success"
+    },
+    "17": {
+      "count": 9,
+      "status": "success"
+    },
+    "18": {
+      "count": 9,
+      "status": "success"
+    },
+    "19": {
+      "count": 9,
+      "status": "success"
+    },
+    "20": {
+      "count": 9,
+      "status": "success"
+    },
+    "21": {
+      "count": 9,
+      "status": "success"
+    },
+    "22": {
+      "count": 9,
+      "status": "success"
+    },
+    "23": {
+      "count": 9,
+      "status": "success"
+    },
+    "24": {
+      "count": 9,
+      "status": "success"
+    },
+    "25": {
+      "count": 9,
+      "status": "success"
+    },
+    "26": {
+      "count": 9,
+      "status": "success"
+    },
+    "27": {
+      "count": 9,
+      "status": "success"
+    },
+    "28": {
+      "count": 9,
+      "status": "success"
+    },
+    "29": {
+      "count": 9,
+      "status": "success"
+    },
+    "30": {
+      "count": 9,
+      "status": "success"
+    },
+    "31": {
+      "count": 9,
+      "status": "success"
+    },
+    "32": {
+      "count": 9,
+      "status": "success"
+    },
+    "33": {
+      "count": 9,
+      "status": "success"
+    },
+    "34": {
+      "count": 9,
+      "status": "success"
+    },
+    "35": {
+      "count": 9,
+      "status": "success"
+    },
+    "36": {
+      "count": 9,
+      "status": "success"
+    },
+    "37": {
+      "count": 9,
+      "status": "success"
+    },
+    "38": {
+      "count": 9,
+      "status": "success"
+    },
+    "39": {
+      "count": 9,
+      "status": "success"
+    },
+    "40": {
+      "count": 9,
+      "status": "success"
+    },
+    "41": {
+      "count": 9,
+      "status": "success"
+    },
+    "42": {
+      "count": 9,
+      "status": "success"
+    },
+    "43": {
+      "count": 9,
+      "status": "success"
+    },
+    "44": {
+      "count": 9,
+      "status": "success"
+    },
+    "45": {
+      "count": 9,
+      "status": "success"
+    },
+    "46": {
+      "count": 9,
+      "status": "success"
+    },
+    "47": {
+      "count": 9,
+      "status": "success"
+    },
+    "48": {
+      "count": 9,
+      "status": "success"
+    },
+    "49": {
+      "count": 9,
+      "status": "success"
+    },
+    "50": {
+      "count": 9,
+      "status": "success"
+    },
+    "51": {
+      "count": 9,
+      "status": "success"
+    },
+    "52": {
+      "count": 9,
+      "status": "success"
+    },
+    "53": {
+      "count": 9,
+      "status": "success"
+    },
+    "54": {
+      "count": 9,
+      "status": "success"
+    },
+    "55": {
+      "count": 9,
+      "status": "success"
+    },
+    "56": {
+      "count": 9,
+      "status": "success"
+    },
+    "57": {
+      "count": 9,
+      "status": "success"
+    },
+    "58": {
+      "count": 9,
+      "status": "success"
+    },
+    "59": {
+      "count": 9,
+      "status": "success"
+    },
+    "60": {
+      "count": 9,
+      "status": "success"
+    },
+    "61": {
+      "count": 9,
+      "status": "success"
+    },
+    "62": {
+      "count": 9,
+      "status": "success"
+    },
+    "63": {
+      "count": 9,
+      "status": "success"
+    },
+    "64": {
+      "count": 9,
+      "status": "success"
+    },
+    "65": {
+      "count": 9,
+      "status": "success"
+    },
+    "66": {
+      "count": 9,
+      "status": "success"
+    },
+    "67": {
+      "count": 9,
+      "status": "success"
+    },
+    "68": {
+      "count": 9,
+      "status": "success"
+    },
+    "69": {
+      "count": 9,
+      "status": "success"
+    },
+    "70": {
+      "count": 9,
+      "status": "success"
+    },
+    "71": {
+      "count": 9,
+      "status": "success"
+    },
+    "72": {
+      "count": 9,
+      "status": "success"
+    },
+    "73": {
+      "count": 9,
+      "status": "success"
+    },
+    "74": {
+      "count": 9,
+      "status": "success"
+    },
+    "75": {
+      "count": 9,
+      "status": "success"
+    },
+    "76": {
+      "count": 9,
+      "status": "success"
+    },
+    "77": {
+      "count": 9,
+      "status": "success"
+    },
+    "78": {
+      "count": 9,
+      "status": "success"
+    },
+    "79": {
+      "count": 9,
+      "status": "success"
+    },
+    "80": {
+      "count": 9,
+      "status": "success"
+    },
+    "81": {
+      "count": 9,
+      "status": "success"
+    },
+    "82": {
+      "count": 9,
+      "status": "success"
+    },
+    "83": {
+      "count": 9,
+      "status": "success"
+    },
+    "84": {
+      "count": 9,
+      "status": "success"
+    },
+    "85": {
+      "count": 9,
+      "status": "success"
+    },
+    "86": {
+      "count": 9,
+      "status": "success"
+    },
+    "87": {
+      "count": 9,
+      "status": "success"
+    },
+    "88": {
+      "count": 9,
+      "status": "success"
+    },
+    "89": {
+      "count": 9,
+      "status": "success"
+    },
+    "90": {
+      "count": 9,
+      "status": "success"
+    },
+    "91": {
+      "count": 9,
+      "status": "success"
+    },
+    "92": {
+      "count": 9,
+      "status": "success"
+    },
+    "93": {
+      "count": 9,
+      "status": "success"
+    },
+    "94": {
+      "count": 9,
+      "status": "success"
+    },
+    "95": {
+      "count": 9,
+      "status": "success"
+    },
+    "96": {
+      "count": 9,
+      "status": "success"
+    },
+    "97": {
+      "count": 9,
+      "status": "success"
+    },
+    "98": {
+      "count": 9,
+      "status": "success"
+    },
+    "99": {
+      "count": 9,
+      "status": "success"
+    },
+    "100": {
+      "count": 9,
+      "status": "success"
+    },
+    "101": {
+      "count": 9,
+      "status": "success"
+    },
+    "102": {
+      "count": 9,
+      "status": "success"
+    },
+    "103": {
+      "count": 9,
+      "status": "success"
+    },
+    "104": {
+      "count": 9,
+      "status": "success"
+    },
+    "105": {
+      "count": 9,
+      "status": "success"
+    },
+    "106": {
+      "count": 9,
+      "status": "success"
+    },
+    "107": {
+      "count": 9,
+      "status": "success"
+    },
+    "108": {
+      "count": 9,
+      "status": "success"
+    },
+    "109": {
+      "count": 9,
+      "status": "success"
+    },
+    "110": {
+      "count": 9,
+      "status": "success"
+    },
+    "111": {
+      "count": 9,
+      "status": "success"
+    },
+    "112": {
+      "count": 9,
+      "status": "success"
+    },
+    "113": {
+      "count": 9,
+      "status": "success"
+    },
+    "114": {
+      "count": 9,
+      "status": "success"
+    },
+    "115": {
+      "count": 9,
+      "status": "success"
+    },
+    "116": {
+      "count": 9,
+      "status": "success"
+    },
+    "117": {
+      "count": 9,
+      "status": "success"
+    },
+    "118": {
+      "count": 9,
+      "status": "success"
+    },
+    "119": {
+      "count": 9,
+      "status": "success"
+    },
+    "120": {
+      "count": 9,
+      "status": "success"
+    }
+  },
+  "real_member_tests_count": 0,
+  "consistency_tests": [
+    {
+      "taste_id": 1,
+      "status": "consistent",
+      "categories": [
+        "TV",
+        "공기청정기",
+        "냉장고",
+        "세탁",
+        "식기세척기",
+        "에어컨",
+        "오디오",
+        "의류관리기",
+        "청소기"
+      ]
+    },
+    {
+      "taste_id": 50,
+      "status": "consistent",
+      "categories": [
+        "TV",
+        "공기청정기",
+        "냉장고",
+        "세탁",
+        "식기세척기",
+        "에어컨",
+        "오디오",
+        "의류관리기",
+        "청소기"
+      ]
+    },
+    {
+      "taste_id": 100,
+      "status": "consistent",
+      "categories": [
+        "TV",
+        "공기청정기",
+        "냉장고",
+        "세탁",
+        "식기세척기",
+        "에어컨",
+        "오디오",
+        "의류관리기",
+        "청소기"
+      ]
+    },
+    {
+      "taste_id": 120,
+      "status": "consistent",
+      "categories": [
+        "TV",
+        "공기청정기",
+        "냉장고",
+        "세탁",
+        "식기세척기",
+        "에어컨",
+        "오디오",
+        "의류관리기",
+        "청소기"
+      ]
+    }
+  ],
+  "boundary_tests": [
+    {
+      "taste_id": 1,
+      "status": "success",
+      "categories": [
+        "세탁",
+        "TV",
+        "에어컨",
+        "냉장고",
+        "공기청정기",
+        "청소기",
+        "의류관리기",
+        "식기세척기",
+        "오디오"
+      ],
+      "count": 9
+    },
+    {
+      "taste_id": 120,
+      "status": "success",
+      "categories": [
+        "세탁",
+        "TV",
+        "에어컨",
+        "냉장고",
+        "공기청정기",
+        "청소기",
+        "의류관리기",
+        "식기세척기",
+        "오디오"
+      ],
+      "count": 9
+    },
+    {
+      "taste_id": 0,
+      "status": "handled",
+      "categories": [
+        "세탁",
+        "TV",
+        "에어컨",
+        "냉장고",
+        "공기청정기",
+        "청소기",
+        "의류관리기",
+        "식기세척기",
+        "오디오"
+      ],
+      "note": "범위 밖 값이지만 처리됨"
+    },
+    {
+      "taste_id": 121,
+      "status": "handled",
+      "categories": [
+        "세탁",
+        "TV",
+        "에어컨",
+        "냉장고",
+        "공기청정기",
+        "청소기",
+        "의류관리기",
+        "식기세척기",
+        "오디오"
+      ],
+      "note": "범위 밖 값이지만 처리됨"
+    }
+  ],
+  "category_distribution": {
+    "세탁": 120,
+    "TV": 120,
+    "에어컨": 120,
+    "냉장고": 120,
+    "공기청정기": 120,
+    "청소기": 120,
+    "의류관리기": 120,
+    "식기세척기": 120,
+    "오디오": 120
+  },
+  "errors_count": 0,
+  "warnings_count": 1
+}

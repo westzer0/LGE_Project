@@ -1,0 +1,825 @@
+{
+  "structure_validation": {
+    "total_tested": 10,
+    "passed": 0,
+    "failed": 70,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 6,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 7,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 8,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_770",
+        "category_index": 9,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_771",
+        "category_index": 6,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_772",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_772",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_772",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_772",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_772",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_772",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 6,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_773",
+        "category_index": 7,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_774",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_774",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_774",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_774",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_774",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_774",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_775",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_775",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_775",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_775",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_775",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_775",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_776",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_776",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_776",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_776",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_776",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_776",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_777",
+        "category_index": 6,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_778",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_778",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_778",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_778",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_778",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_778",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 0,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 1,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 2,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 3,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 4,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 5,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 6,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      },
+      {
+        "member_id": "user_779",
+        "category_index": 7,
+        "issue": "카테고리가 dict 형식이 아닙니다."
+      }
+    ]
+  },
+  "category_grouping": {
+    "total_tested": 20,
+    "category_counts": {
+      "10": 1,
+      "7": 4,
+      "6": 7,
+      "8": 5,
+      "9": 3
+    },
+    "product_counts_per_category": {},
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_780",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_781",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_782",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_783",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_784",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_785",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_786",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_787",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_788",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_789",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      }
+    ]
+  },
+  "top_products_selection": {
+    "total_tested": 15,
+    "sorted_correctly": 0,
+    "sorted_incorrectly": 0,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_780",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_781",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_782",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_783",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_784",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      }
+    ]
+  },
+  "sorting_validation": {
+    "total_tested": 10,
+    "category_order_valid": 0,
+    "product_order_valid": 0,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      }
+    ]
+  },
+  "api_response": {
+    "total_tested": 5,
+    "successful": 0,
+    "failed": 5,
+    "status_codes": {
+      "404": 5
+    },
+    "issues": [
+      {
+        "member_id": "user_770",
+        "endpoint": "/api/recommendations/user_770",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_771",
+        "endpoint": "/api/recommendations/user_771",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_772",
+        "endpoint": "/api/recommendations/user_772",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_773",
+        "endpoint": "/api/recommendations/user_773",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_774",
+        "endpoint": "/api/recommendations/user_774",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      }
+    ]
+  },
+  "real_data_validation": {
+    "total_tested": 50,
+    "successful": 0,
+    "failed": 50,
+    "total_products_recommended": 0,
+    "categories_with_products": 0,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_780",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_781",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_782",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_783",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_784",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_785",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_786",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_787",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_788",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_789",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_790",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_791",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_792",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_793",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_794",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_795",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_796",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_797",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_798",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_799",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_800",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_801",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_802",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_803",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_804",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_805",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_806",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_807",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_808",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_809",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_810",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_811",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_812",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_813",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_814",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_815",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_816",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_817",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_818",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      },
+      {
+        "member_id": "user_819",
+        "issue": "검증 중 오류: 'str' object has no attribute 'get'"
+      }
+    ],
+    "sample_results": []
+  },
+  "errors": [],
+  "summary": {
+    "timestamp": "2025-12-09T23:40:29.156377",
+    "total_validations": 6,
+    "completed": 6,
+    "skipped": 0,
+    "errors": 0,
+    "overall_status": "success"
+  }
+}

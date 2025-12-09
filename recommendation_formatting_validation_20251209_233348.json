@@ -1,0 +1,30 @@
+{
+  "structure_validation": {
+    "status": "skipped",
+    "message": "테스트할 회원 데이터가 없습니다."
+  },
+  "category_grouping": {
+    "status": "skipped"
+  },
+  "top_products_selection": {
+    "status": "skipped"
+  },
+  "sorting_validation": {
+    "status": "skipped"
+  },
+  "api_response": {
+    "status": "skipped"
+  },
+  "real_data_validation": {
+    "status": "skipped"
+  },
+  "errors": [],
+  "summary": {
+    "timestamp": "2025-12-09T23:33:48.787037",
+    "total_validations": 6,
+    "completed": 0,
+    "skipped": 6,
+    "errors": 0,
+    "overall_status": "failed"
+  }
+}

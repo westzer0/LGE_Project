@@ -1,0 +1,509 @@
+{
+  "structure_validation": {
+    "total_tested": 0,
+    "passed": 0,
+    "failed": 10,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "추천 결과 조회 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      }
+    ]
+  },
+  "category_grouping": {
+    "total_tested": 0,
+    "category_counts": {},
+    "product_counts_per_category": {},
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_780",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_781",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_782",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_783",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_784",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_785",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_786",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_787",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_788",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_789",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      }
+    ]
+  },
+  "top_products_selection": {
+    "total_tested": 0,
+    "sorted_correctly": 0,
+    "sorted_incorrectly": 0,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_780",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_781",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_782",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_783",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_784",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      }
+    ]
+  },
+  "sorting_validation": {
+    "total_tested": 0,
+    "category_order_valid": 0,
+    "product_order_valid": 0,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      }
+    ]
+  },
+  "api_response": {
+    "total_tested": 5,
+    "successful": 0,
+    "failed": 5,
+    "status_codes": {
+      "404": 5
+    },
+    "issues": [
+      {
+        "member_id": "user_770",
+        "endpoint": "/api/recommendations/user_770",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_771",
+        "endpoint": "/api/recommendations/user_771",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_772",
+        "endpoint": "/api/recommendations/user_772",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_773",
+        "endpoint": "/api/recommendations/user_773",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      },
+      {
+        "member_id": "user_774",
+        "endpoint": "/api/recommendations/user_774",
+        "status_code": 404,
+        "issue": "HTTP 상태 코드가 200이 아닙니다: 404"
+      }
+    ]
+  },
+  "real_data_validation": {
+    "total_tested": 0,
+    "successful": 0,
+    "failed": 50,
+    "total_products_recommended": 0,
+    "categories_with_products": 0,
+    "issues": [
+      {
+        "member_id": "user_770",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_771",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_772",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_773",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_774",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_775",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_776",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_777",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_778",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_779",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_780",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_781",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_782",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_783",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_784",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_785",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_786",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_787",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_788",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_789",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_790",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_791",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_792",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_793",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_794",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_795",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_796",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_797",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_798",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_799",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_800",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_801",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_802",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_803",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_804",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_805",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_806",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_807",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_808",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_809",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_810",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_811",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_812",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_813",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_814",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_815",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_816",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_817",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_818",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      },
+      {
+        "member_id": "user_819",
+        "issue": "검증 중 오류: TasteBasedRecommendationEngine.get_recommendations() missing 1 required positional argument: 'taste_id'"
+      }
+    ],
+    "sample_results": []
+  },
+  "errors": [],
+  "summary": {
+    "timestamp": "2025-12-09T23:34:21.894510",
+    "total_validations": 6,
+    "completed": 6,
+    "skipped": 0,
+    "errors": 0,
+    "overall_status": "success"
+  }
+}

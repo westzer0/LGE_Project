@@ -1,0 +1,459 @@
+Step 8: 추천 결과 저장 (정규화 테이블) - ONBOARD_SESS_REC_PRODUCTS 테이블에 추천 제품 저장 검증
+
+
+현재 상황:
+
+- Step 1~7 완료: 추천 엔진 전체 플로우 구현 및 통합 검증 완료
+- 추천 결과가 API 응답으로 반환됨
+- 추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장하는 로직 필요
+- 추천 이력 관리 및 재추천 지원을 위한 데이터 저장 검증 필요
+
+
+목표:
+
+추천 결과를 ONBOARD_SESS_REC_PRODUCTS 정규화 테이블에 올바르게 저장하는지 검증
+- 추천 결과 저장 로직 검증
+- 테이블 저장 여부 확인
+- 카테고리/순위/점수 포함 여부 확인
+- 추천 이력 관리 및 재추천 지원 검증
+
+
+검증 항목:
+
+1. 추천 결과 저장 로직 검증
+   - 추천 결과 생성 후 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장되는지 확인
+   - 저장 시점 확인 (추천 생성 직후 또는 온보딩 완료 시)
+   - 저장 실패 시 에러 처리 확인
+
+2. 테이블 저장 여부 검증
+   - SESSION_ID별로 추천 제품이 저장되는지 확인
+   - 저장된 레코드 수가 추천 결과와 일치하는지 확인
+   - 중복 저장 방지 로직 확인
+
+3. 카테고리 정보 포함 여부 검증
+   - CATEGORY_NAME 필드에 카테고리명이 올바르게 저장되는지 확인
+   - 각 제품이 올바른 카테고리에 매핑되는지 확인
+   - 카테고리별 제품 수 확인
+
+4. 순위 정보 포함 여부 검증
+   - RANK_ORDER 필드에 카테고리 내 순위가 올바르게 저장되는지 확인
+   - 순위가 1부터 시작하는지 확인
+   - 동일 카테고리 내 순위 중복 확인
+
+5. 점수 정보 포함 여부 검증
+   - SCORE 필드에 추천 점수가 올바르게 저장되는지 확인
+   - 점수 범위 확인 (0~100점, NUMBER(5,2))
+   - NULL 값 처리 확인
+
+6. 외래키 관계 검증
+   - SESSION_ID가 ONBOARDING_SESSION 테이블의 유효한 세션인지 확인
+   - PRODUCT_ID가 PRODUCT 테이블의 유효한 제품인지 확인
+   - 외래키 제약조건 위반 시 에러 처리 확인
+
+7. 실제 추천 결과로 검증
+   - 실제 회원의 추천 결과를 생성하고 저장
+   - 저장된 데이터와 추천 결과 일치 확인
+   - 여러 세션에 대한 저장 검증
+
+8. 재추천 지원 검증
+   - 동일 세션에 대한 재추천 시 기존 데이터 처리 확인
+   - 업데이트 또는 삭제 후 재삽입 로직 확인
+   - 재추천 이력 관리 확인
+
+
+관련 파일:
+
+- api/services/recommendation_service.py (예상)
+  - get_recommendations() 메서드
+  - 추천 결과 생성 및 반환
+
+- api/services/taste_based_recommendation_engine.py
+  - 추천 엔진 로직
+
+- api/views.py 또는 api/views_recommendations.py
+  - 추천 API 엔드포인트
+  - 추천 결과 저장 호출
+
+- api/services/onboarding_db_service.py
+  - Oracle DB 저장 서비스
+  - ONBOARD_SESS_REC_PRODUCTS 테이블 저장 로직 (추가 필요)
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - SESSION_ID: 세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)
+  - PRODUCT_ID: 제품 ID
+  - CATEGORY_NAME: 카테고리명 (예: "TV", "냉장고")
+  - RANK_ORDER: 카테고리 내 순위 (1, 2, 3...)
+  - SCORE: 해당 제품의 점수 (0~100점, NUMBER(5,2))
+  - CREATED_AT: 생성 일시 (기본값: SYSDATE)
+
+
+작업:
+
+1. 추천 결과 저장 로직 찾기:
+   - 코드베이스에서 ONBOARD_SESS_REC_PRODUCTS 저장 로직 검색
+   - 저장 함수/메서드 확인
+   - 저장 시점 확인
+
+2. 저장 로직 구현 (없는 경우):
+   - 추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장하는 함수 작성
+   - 카테고리별 제품 순위 및 점수 포함
+   - 기존 데이터 처리 (업데이트 또는 삭제 후 재삽입)
+
+3. 테이블 저장 검증:
+   - 추천 결과 생성 후 저장 실행
+   - 저장된 레코드 조회 및 검증
+   - 저장된 데이터와 추천 결과 일치 확인
+
+4. 카테고리/순위/점수 포함 검증:
+   - CATEGORY_NAME 필드 검증
+   - RANK_ORDER 필드 검증
+   - SCORE 필드 검증
+
+5. 실제 추천 결과로 검증:
+   - 실제 회원의 추천 결과 생성 및 저장
+   - 저장된 데이터 검증
+   - 여러 세션에 대한 저장 검증
+
+6. 재추천 지원 검증:
+   - 동일 세션에 대한 재추천 시나리오 테스트
+   - 기존 데이터 처리 확인
+   - 재추천 이력 관리 확인
+
+7. 시각화 생성:
+   - 저장 성공/실패 비율
+   - 카테고리별 저장된 제품 수 분포
+   - 점수 분포
+   - 저장 시간 분포
+
+
+검증 방법:
+
+1. 추천 결과 저장 테스트:
+   ```python
+   # 추천 결과 생성
+   member_id = 'user_123'
+   recommendations = get_recommendations(member_id)
+   
+   # 세션 ID 조회
+   session = get_latest_completed_session(member_id)
+   session_id = session['session_id']
+   
+   # 추천 결과 저장
+   save_recommendation_results(session_id, recommendations)
+   
+   # 저장된 데이터 조회
+   saved_products = get_saved_recommendation_products(session_id)
+   
+   # 검증
+   assert len(saved_products) > 0
+   assert len(saved_products) == count_total_recommended_products(recommendations)
+   ```
+
+2. 카테고리/순위/점수 포함 검증:
+   ```python
+   # 추천 결과 저장
+   save_recommendation_results(session_id, recommendations)
+   
+   # 저장된 데이터 조회
+   saved_products = get_saved_recommendation_products(session_id)
+   
+   # 카테고리별로 그룹화
+   for category in recommendations.get('categories', []):
+       category_name = category['category_name']
+       category_products = [p for p in saved_products if p['category_name'] == category_name]
+       
+       # 카테고리별 제품 수 확인
+       assert len(category_products) == len(category['products'])
+       
+       # 순위 확인
+       for idx, product in enumerate(category['products'], start=1):
+           saved_product = next((p for p in category_products if p['product_id'] == product['product_id']), None)
+           assert saved_product is not None
+           assert saved_product['rank_order'] == idx
+           
+           # 점수 확인
+           if product.get('recommendation_score'):
+               assert saved_product['score'] == product['recommendation_score']
+   ```
+
+3. 외래키 관계 검증:
+   ```python
+   # 저장된 데이터 조회
+   saved_products = get_saved_recommendation_products(session_id)
+   
+   # 세션 ID 유효성 확인
+   session = get_session_by_id(session_id)
+   assert session is not None
+   
+   # 제품 ID 유효성 확인
+   for saved_product in saved_products:
+       product = get_product_by_id(saved_product['product_id'])
+       assert product is not None
+   ```
+
+4. 재추천 지원 검증:
+   ```python
+   # 첫 번째 추천 및 저장
+   recommendations1 = get_recommendations(member_id)
+   save_recommendation_results(session_id, recommendations1)
+   saved_count1 = count_saved_products(session_id)
+   
+   # 두 번째 추천 및 저장 (재추천)
+   recommendations2 = get_recommendations(member_id)
+   save_recommendation_results(session_id, recommendations2)
+   saved_count2 = count_saved_products(session_id)
+   
+   # 기존 데이터 처리 확인
+   # 옵션 1: 기존 데이터 삭제 후 재삽입
+   assert saved_count2 == count_total_recommended_products(recommendations2)
+   
+   # 옵션 2: 기존 데이터 업데이트
+   # 또는 기존 데이터 유지 및 새 데이터 추가
+   ```
+
+5. 실제 추천 결과로 검증:
+   ```python
+   # 실제 회원 데이터로 추천 및 저장
+   members = get_members_with_taste(limit=50)
+   
+   success_count = 0
+   error_count = 0
+   
+   for member in members:
+       member_id = member['member_id']
+       try:
+           # 추천 결과 생성
+           recommendations = get_recommendations(member_id)
+           
+           # 세션 조회
+           session = get_latest_completed_session(member_id)
+           if not session:
+               continue
+           
+           session_id = session['session_id']
+           
+           # 추천 결과 저장
+           save_recommendation_results(session_id, recommendations)
+           
+           # 저장 검증
+           saved_products = get_saved_recommendation_products(session_id)
+           assert len(saved_products) > 0
+           
+           success_count += 1
+       except Exception as e:
+           error_count += 1
+           print(f"Error for member {member_id}: {e}")
+   
+   # 성공률 확인
+   success_rate = success_count / len(members)
+   assert success_rate >= 0.9  # 최소 90% 성공률
+   ```
+
+
+예상 저장 로직:
+
+```python
+def save_recommendation_results(session_id: str, recommendations: dict):
+    """
+    추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장
+    
+    Args:
+        session_id: 온보딩 세션 ID
+        recommendations: 추천 결과 딕셔너리
+            {
+                'categories': [
+                    {
+                        'category_id': 1,
+                        'category_name': 'TV',
+                        'products': [
+                            {
+                                'product_id': 101,
+                                'recommendation_score': 95.5,
+                                ...
+                            },
+                            ...
+                        ]
+                    },
+                    ...
+                ]
+            }
+    """
+    # 기존 데이터 삭제 (재추천 시)
+    delete_existing_recommendations(session_id)
+    
+    # 카테고리별 제품 저장
+    for category in recommendations.get('categories', []):
+        category_name = category['category_name']
+        
+        for rank, product in enumerate(category['products'], start=1):
+            product_id = product['product_id']
+            score = product.get('recommendation_score')
+            
+            # ONBOARD_SESS_REC_PRODUCTS 테이블에 저장
+            insert_recommendation_product(
+                session_id=session_id,
+                product_id=product_id,
+                category_name=category_name,
+                rank_order=rank,
+                score=score
+            )
+```
+
+```python
+def insert_recommendation_product(session_id: str, product_id: int, 
+                                   category_name: str, rank_order: int, 
+                                   score: float = None):
+    """
+    ONBOARD_SESS_REC_PRODUCTS 테이블에 추천 제품 저장
+    
+    Args:
+        session_id: 세션 ID
+        product_id: 제품 ID
+        category_name: 카테고리명
+        rank_order: 카테고리 내 순위
+        score: 추천 점수 (0~100)
+    """
+    from api.services.onboarding_db_service import onboarding_db_service
+    
+    conn = onboarding_db_service.get_connection()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+            INSERT INTO ONBOARD_SESS_REC_PRODUCTS
+            (SESSION_ID, PRODUCT_ID, CATEGORY_NAME, RANK_ORDER, SCORE, CREATED_AT)
+            VALUES (:p_session_id, :p_product_id, :p_category_name, :p_rank_order, :p_score, SYSDATE)
+        """, {
+            'p_session_id': session_id,
+            'p_product_id': product_id,
+            'p_category_name': category_name,
+            'p_rank_order': rank_order,
+            'p_score': float(score) if score is not None else None
+        })
+        
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        cur.close()
+```
+
+
+예상 결과:
+
+1. 추천 결과 저장:
+   - 추천 결과 생성 후 자동으로 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장됨
+   - 저장 실패 시 적절한 에러 처리 및 로깅
+   - 저장 성공률 90% 이상
+
+2. 테이블 저장:
+   - SESSION_ID별로 추천 제품이 올바르게 저장됨
+   - 저장된 레코드 수가 추천 결과와 일치함
+   - 중복 저장 방지 로직 작동
+
+3. 카테고리/순위/점수 포함:
+   - CATEGORY_NAME 필드에 카테고리명이 올바르게 저장됨
+   - RANK_ORDER 필드에 카테고리 내 순위가 올바르게 저장됨 (1부터 시작)
+   - SCORE 필드에 추천 점수가 올바르게 저장됨 (0~100점 범위)
+
+4. 외래키 관계:
+   - SESSION_ID가 유효한 세션을 참조함
+   - PRODUCT_ID가 유효한 제품을 참조함
+   - 외래키 제약조건 위반 시 적절한 에러 처리
+
+5. 재추천 지원:
+   - 동일 세션에 대한 재추천 시 기존 데이터가 올바르게 처리됨
+   - 재추천 이력이 관리됨
+
+
+테스트 스크립트 구조:
+
+```python
+class RecommendationStorageValidator:
+    """추천 결과 저장 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 추천 결과 저장 로직 검증
+        # 2. 테이블 저장 여부 검증
+        # 3. 카테고리 정보 포함 여부 검증
+        # 4. 순위 정보 포함 여부 검증
+        # 5. 점수 정보 포함 여부 검증
+        # 6. 외래키 관계 검증
+        # 7. 실제 추천 결과로 검증
+        # 8. 재추천 지원 검증
+    
+    def _validate_storage_logic(self):
+        """추천 결과 저장 로직 검증"""
+        # 저장 함수/메서드 존재 확인
+        # 저장 시점 확인
+        # 에러 처리 확인
+    
+    def _validate_table_storage(self):
+        """테이블 저장 여부 검증"""
+        # 저장된 레코드 수 확인
+        # 저장된 데이터와 추천 결과 일치 확인
+        # 중복 저장 방지 확인
+    
+    def _validate_category_info(self):
+        """카테고리 정보 포함 여부 검증"""
+        # CATEGORY_NAME 필드 검증
+        # 카테고리별 제품 매핑 확인
+    
+    def _validate_rank_info(self):
+        """순위 정보 포함 여부 검증"""
+        # RANK_ORDER 필드 검증
+        # 순위 중복 확인
+    
+    def _validate_score_info(self):
+        """점수 정보 포함 여부 검증"""
+        # SCORE 필드 검증
+        # 점수 범위 확인
+    
+    def _validate_foreign_keys(self):
+        """외래키 관계 검증"""
+        # SESSION_ID 유효성 확인
+        # PRODUCT_ID 유효성 확인
+    
+    def _validate_with_real_recommendations(self):
+        """실제 추천 결과로 검증"""
+        # 실제 회원 데이터로 추천 및 저장
+        # 저장된 데이터 검증
+    
+    def _validate_re_recommendation(self):
+        """재추천 지원 검증"""
+        # 동일 세션에 대한 재추천 테스트
+        # 기존 데이터 처리 확인
+    
+    def _save_recommendation_results(self, session_id: str, recommendations: dict):
+        """추천 결과 저장 (구현 필요)"""
+    
+    def _get_saved_recommendation_products(self, session_id: str):
+        """저장된 추천 제품 조회"""
+    
+    def _count_saved_products(self, session_id: str):
+        """저장된 제품 수 조회"""
+```
+
+
+시각화 항목:
+
+1. 저장 성공/실패 비율 파이 차트
+2. 카테고리별 저장된 제품 수 분포 바 차트
+3. 점수 분포 히스토그램
+4. 저장 시간 분포 박스 플롯
+5. 세션별 저장된 제품 수 분포
+6. 재추천 빈도 분포
+
+
+참고:
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블은 정규화된 구조로 추천 이력을 관리
+- 추천 결과 저장은 추천 이력 관리 및 재추천 지원에 중요
+- 카테고리/순위/점수 정보가 올바르게 저장되어야 재추천 시 활용 가능
+- 외래키 관계를 통해 데이터 무결성 보장
+- 재추천 시 기존 데이터 처리 방식 명확히 정의 필요
+- Step 1~7에서 검증한 추천 결과를 저장하는 것이 목표
+- 실제 운영 환경에서 추천 이력 조회 및 분석에 활용
+
