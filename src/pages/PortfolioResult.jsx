@@ -155,13 +155,28 @@ const PortfolioResult = () => {
       return
     }
 
-    // URL 파라미터에서 portfolio_id 가져오기
+    // URL 경로 또는 쿼리 파라미터에서 portfolio_id 가져오기
     const urlParams = new URLSearchParams(window.location.search)
-    const portfolioId = urlParams.get('portfolio_id') || urlParams.get('id')
+    let portfolioId = urlParams.get('portfolio_id') || urlParams.get('id')
+    
+    // URL 경로에서 portfolio_id 추출 (예: /portfolio/PF-001/)
+    if (!portfolioId) {
+      const pathMatch = window.location.pathname.match(/\/portfolio\/([^\/]+)\/?$/)
+      if (pathMatch && pathMatch[1]) {
+        portfolioId = pathMatch[1]
+        console.log('[PortfolioResult] URL 경로에서 portfolio_id 추출:', portfolioId)
+      }
+    }
+
+    console.log('[PortfolioResult] 최종 portfolio_id:', portfolioId)
+    console.log('[PortfolioResult] 현재 URL:', window.location.href)
+    console.log('[PortfolioResult] 현재 경로:', window.location.pathname)
 
     if (portfolioId) {
+      console.log('[PortfolioResult] 포트폴리오 데이터 로드 시작:', portfolioId)
       fetchPortfolioData(portfolioId)
     } else {
+      console.warn('[PortfolioResult] portfolio_id를 찾을 수 없어 기본 샘플 데이터를 로드합니다.')
       // 기본 샘플 데이터
       loadSampleData()
       setLoading(false)
@@ -178,6 +193,8 @@ const PortfolioResult = () => {
       })
 
       console.log('[PortfolioResult] 포트폴리오 응답:', data)
+      console.log('[PortfolioResult] portfolio_id:', portfolioId)
+      console.log('[PortfolioResult] style_type:', data?.portfolio?.style_type)
 
       if (data.success && data.portfolio) {
         // 포트폴리오 전체 데이터 저장 (스타일 분석 포함)
@@ -186,14 +203,26 @@ const PortfolioResult = () => {
         // 포트폴리오 데이터에서 제품 정보 추출
         const portfolioProducts = data.portfolio.products || []
 
+        console.log('[PortfolioResult] 제품 수:', portfolioProducts.length)
+        console.log('[PortfolioResult] 제품 목록:', portfolioProducts)
+
         if (portfolioProducts.length === 0) {
           console.warn('[PortfolioResult] 포트폴리오에 제품이 없습니다.')
-          loadSampleData()
+          console.error('[PortfolioResult] portfolio_id:', portfolioId, '에 제품이 없습니다.')
+          // 제품이 없어도 스타일 정보는 표시
+          if (data.portfolio.style_type && data.portfolio.style_title) {
+            console.log('[PortfolioResult] 스타일 정보는 있지만 제품이 없습니다. 스타일 정보만 표시합니다.')
+            // 스타일 정보는 유지하고 제품만 빈 배열로 설정
+            setProducts([])
+          } else {
+            loadSampleData()
+          }
           return
         }
 
         // 제품 데이터를 포맷팅
-        const formattedProducts = portfolioProducts.map((product) => {
+        const formattedProducts = portfolioProducts.map((product, index) => {
+          console.log(`[PortfolioResult] 제품 ${index} 포맷팅:`, product)
           // 가격 정보 포맷팅
           let priceInfo = {}
           const price = product.price || product.discount_price || 0
@@ -216,8 +245,8 @@ const PortfolioResult = () => {
             }
           }
 
-          return {
-            id: product.id || product.product_id,
+          const formattedProduct = {
+            id: product.id || product.product_id || `product-${index}`,
             name: product.name || product.product_name || '제품명 없음',
             model: product.model || product.model_number || '',
             rating: product.rating || '',
@@ -231,18 +260,41 @@ const PortfolioResult = () => {
             image_url: product.image_url || '',
             isRecommended: product.is_recommended || false,
           }
+          console.log(`[PortfolioResult] 포맷팅된 제품 ${index}:`, formattedProduct)
+          return formattedProduct
         })
 
-        console.log('[PortfolioResult] 포맷팅된 제품:', formattedProducts)
+        console.log('[PortfolioResult] 포맷팅된 제품 목록:', formattedProducts)
+        console.log('[PortfolioResult] 스타일 타입:', data.portfolio.style_type)
+        console.log('[PortfolioResult] 스타일 제목:', data.portfolio.style_title)
+        console.log('[PortfolioResult] 포트폴리오 ID:', data.portfolio.portfolio_id)
+        
+        // 스타일 타입과 제품이 올바르게 로드되었는지 확인
+        if (data.portfolio.style_type && formattedProducts.length > 0) {
+          console.log(`[PortfolioResult] ✅ 포트폴리오 로드 성공: ${data.portfolio.portfolio_id} (${data.portfolio.style_type})`)
+        } else {
+          console.error('[PortfolioResult] ❌ 포트폴리오 데이터가 불완전합니다:', {
+            style_type: data.portfolio.style_type,
+            products_count: formattedProducts.length
+          })
+        }
+        
         setProducts(formattedProducts)
       } else {
         console.error('[PortfolioResult] 포트폴리오 조회 실패:', data.error)
+        console.error('[PortfolioResult] 응답 데이터:', data)
+        console.error('[PortfolioResult] portfolio_id:', portfolioId)
+        // API 응답이 실패했지만 portfolio_id가 있으면 재시도하지 않고 에러 표시
+        alert(`포트폴리오를 불러올 수 없습니다: ${data.error || '알 수 없는 오류'}\n포트폴리오 ID: ${portfolioId}`)
         loadSampleData()
       }
     } catch (error) {
       console.error('[PortfolioResult] 포트폴리오 데이터 로드 실패:', error)
-      alert(`포트폴리오를 불러올 수 없습니다: ${error.message}`)
+      console.error('[PortfolioResult] 에러 상세:', error.stack)
+      console.error('[PortfolioResult] portfolio_id:', portfolioId)
+      console.error('[PortfolioResult] 요청 URL:', `/api/portfolio/${portfolioId}/`)
       // 에러 발생 시 샘플 데이터 사용
+      alert(`포트폴리오를 불러올 수 없습니다: ${error.message}\n포트폴리오 ID: ${portfolioId}`)
       loadSampleData()
     } finally {
       setLoading(false)

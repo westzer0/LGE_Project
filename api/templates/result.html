@@ -785,7 +785,7 @@
             color: #666666;
             text-decoration: line-through;
             text-align: left;
-            padding-left: 208px;
+            padding-left: 240px;
             margin-top: 2px;
         }
 
@@ -817,7 +817,7 @@
 
         /* 두번째 가전(광파오븐)의 가격 숫자들을 오른쪽으로 이동 */
         #product-microwave .price-original {
-            padding-left: 210px;
+            padding-left: 240px;
         }
 
         #product-microwave .price-sale {
@@ -3071,18 +3071,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
+                        {% if user.is_authenticated %}
                         <a href="/my-page/" style="display: flex; align-items: center;">
                             <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                         </a>
+                        {% endif %}
                         <svg class="header-top-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
                         </svg>
                     </div>
+                    {% if user.is_authenticated %}
+                    <a href="/my-page/" class="header-top-link">{{ user.username }}님</a>
+                    <a href="{% url 'logout' %}" class="header-top-link">로그아웃</a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="header-top-link">로그인</a>
+                    <a href="{% url 'signup' %}" class="header-top-link">회원가입</a>
+                    {% endif %}
                     <a href="#" class="header-top-link">회사소개</a>
                     <a href="#" class="header-top-link">사업자몰</a>
                 </div>
@@ -3219,26 +3228,25 @@
                         <h2 class="product-title">LG 디오스 AI 오브제컬렉션 STEM 얼음정수 냉장고 (노크온 매직스페이스)</h2>
                         <div class="recommend-reason-box">
                             <div class="recommend-reason-title">추천 이유</div>
-                            <div class="recommend-reason-text">용량이 크고 아이들과 함께하는 4인 가구와 함께 지내도 넉넉한 냉장고</div>
+                            <div class="recommend-reason-text">넓은 공간, 자동 얼음 생성, 편리한 정수기 기능으로 쾌적하고 간편한 사용 경험을 제공합니다.</div>
                         </div>
                         <div class="review-analysis-box">
                             <div class="review-analysis-title">구매 리뷰 분석</div>
-                            <div class="review-analysis-text">이쁜 건 물론이고 공간 활용부터 성능, 수납력까지 대만족</div>
-                            <div class="review-analysis-text">가구장과 간격이 빌트인처럼 딱 맞아요</div>
+                            <div class="review-analysis-text">다양한 얼음을 즐길수 있어요</div>
+                            <div class="review-analysis-text">AI 기능으로 생활 패턴에 맞춰 자동으로 냉기를 조절해줘요</div>
                         </div>
                         <div class="price-section">
                             <div class="price-section-title">구매 가격</div>
                             <div class="price-row">
-                                <span class="price-label">정가</span>
-                                <span class="price-original">3,340,000원</span>
+                                <span class="price-original">6,383,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">판매가</span>
-                                <span class="price-sale">2,140,000원</span>
+                                <span class="price-sale">5,750,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">최대 혜택가</span>
-                                <span class="price-final">1,990,200원</span>
+                                <span class="price-final">5,180,100원</span>
                             </div>
                             <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
                         </div>
@@ -3259,17 +3267,16 @@
                         <h2 class="product-title">LG 디오스 오브제컬렉션 광파오븐</h2>
                         <div class="recommend-reason-box">
                             <div class="recommend-reason-title">추천 이유</div>
-                            <div class="recommend-reason-text">용량이 크고 아이들과 함께하는 4인 가구와 함께 지내도 넉넉한 냉장고</div>
+                            <div class="recommend-reason-text">다양한 기능(오븐,에어프라이어 등)과 뛰어난 디자인으로 최적의 선택</div>
                         </div>
                         <div class="review-analysis-box">
                             <div class="review-analysis-title">구매 리뷰 분석</div>
-                            <div class="review-analysis-text">고급스러운 디자인</div>
-                            <div class="review-analysis-text">하나로 모든기능을 사용할수 있어서 편하고 좋아요</div>
+                            <div class="review-analysis-text">다양한 조리 기능이 편리해요</div>
+                            <div class="review-analysis-text">디자인이 깔끔하고 사용하기 편해요</div>
                         </div>
                         <div class="price-section">
                             <div class="price-section-title">구매 가격</div>
                             <div class="price-row">
-                                <span class="price-label">정가</span>
                                 <span class="price-original">1,065,000원</span>
                             </div>
                             <div class="price-row">
@@ -3299,26 +3306,25 @@
                         <h2 class="product-title">LG 디오스 AI 오브제컬렉션 식기세척기</h2>
                         <div class="recommend-reason-box">
                             <div class="recommend-reason-title">추천 이유</div>
-                            <div class="recommend-reason-text">용량이 크고 아이들과 함께하는 4인 가구와 함께 지내도 넉넉한 냉장고</div>
+                            <div class="recommend-reason-text">주방을 깔끔하게 유지 및 기름기 걱정 없이 식기 세척/건조 기능으로 편리</div>
                         </div>
                         <div class="review-analysis-box">
                             <div class="review-analysis-title">구매 리뷰 분석</div>
-                            <div class="review-analysis-text">TV는 역시 LG</div>
-                            <div class="review-analysis-text">집에서도 영화관 같은 분위기</div>
+                            <div class="review-analysis-text">생활이 편리해요</div>
+                            <div class="review-analysis-text">디자인도 예쁘고 성능도 뛰어나요</div>
                         </div>
                         <div class="price-section">
                             <div class="price-section-title">구매 가격</div>
                             <div class="price-row">
-                                <span class="price-label">정가</span>
-                                <span class="price-original">2,080,000원</span>
+                                <span class="price-original">2,300,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">판매가</span>
-                                <span class="price-sale">1,960,000원</span>
+                                <span class="price-sale">2,080,000원</span>
                             </div>
                             <div class="price-row">
                                 <span class="price-label">최대 혜택가</span>
-                                <span class="price-final">1,960,000원</span>
+                                <span class="price-final">1,822,800원</span>
                             </div>
                             <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
                         </div>
@@ -3808,30 +3814,34 @@
             }
 
             // 가격 업데이트
-            if (product.price !== undefined) {
-                // 정가 (원래 가격)
-                const priceOriginal = document.querySelector(`#product-${productId} .price-original`);
-                if (priceOriginal && product.original_price) {
+            // 정가 (원래 가격)
+            const priceOriginal = document.querySelector(`#product-${productId} .price-original`);
+            if (priceOriginal) {
+                if (product.original_price) {
                     priceOriginal.textContent = `${formatPrice(product.original_price)}원`;
-                } else if (priceOriginal && product.price) {
+                } else if (product.price) {
                     priceOriginal.textContent = `${formatPrice(product.price)}원`;
                 }
+            }
 
-                // 판매가
-                const priceSale = document.querySelector(`#product-${productId} .price-sale`);
-                if (priceSale && product.sale_price) {
+            // 판매가
+            const priceSale = document.querySelector(`#product-${productId} .price-sale`);
+            if (priceSale) {
+                if (product.sale_price) {
                     priceSale.textContent = `${formatPrice(product.sale_price)}원`;
-                } else if (priceSale && product.price) {
+                } else if (product.price) {
                     priceSale.textContent = `${formatPrice(product.price)}원`;
                 }
+            }
 
-                // 최대 혜택가
-                const priceFinal = document.querySelector(`#product-${productId} .price-final`);
-                if (priceFinal && product.discount_price) {
+            // 최대 혜택가
+            const priceFinal = document.querySelector(`#product-${productId} .price-final`);
+            if (priceFinal) {
+                if (product.discount_price) {
                     priceFinal.textContent = `${formatPrice(product.discount_price)}원`;
-                } else if (priceFinal && product.sale_price) {
+                } else if (product.sale_price) {
                     priceFinal.textContent = `${formatPrice(product.sale_price)}원`;
-                } else if (priceFinal && product.price) {
+                } else if (product.price) {
                     priceFinal.textContent = `${formatPrice(product.price)}원`;
                 }
             }
@@ -3841,6 +3851,407 @@
         function formatPrice(price) {
             if (!price) return '0';
             return Math.round(price).toLocaleString('ko-KR');
+        }
+
+        // 스타일 타입에 따라 제품 정보 업데이트
+        function updateProductsByStyle(styleType) {
+            if (styleType === 'modern') {
+                // 모던&미니멀 스타일 제품 정보
+                const modernProducts = {
+                    'refrigerator': {
+                        name: 'LG 디오스 AI 오브제컬렉션 STEM 얼음정수 냉장고 (노크온 매직스페이스)',
+                        reason: '넓은 공간, 자동 얼음 생성, 편리한 정수기 기능으로 쾌적하고 간편한 사용 경험을 제공합니다.',
+                        reviews: [
+                            '다양한 얼음을 즐길수 있어요',
+                            'AI 기능으로 생활 패턴에 맞춰 자동으로 냉기를 조절해줘요'
+                        ],
+                        originalPrice: 6383000,
+                        salePrice: 5750000,
+                        discountPrice: 5180100,
+                        score: 0.85
+                    },
+                    'microwave': {
+                        name: 'LG 디오스 오브제컬렉션 광파오븐',
+                        reason: '다양한 기능(오븐,에어프라이어 등)과 뛰어난 디자인으로 최적의 선택',
+                        reviews: [
+                            '다양한 조리 기능이 편리해요',
+                            '디자인이 깔끔하고 사용하기 편해요'
+                        ],
+                        originalPrice: 1065000,
+                        salePrice: 950000,
+                        discountPrice: 855600,
+                        score: 0.69
+                    },
+                    'dishwasher': {
+                        name: 'LG 디오스 AI 오브제컬렉션 식기세척기',
+                        reason: '주방을 깔끔하게 유지 및 기름기 걱정 없이 식기 세척/건조 기능으로 편리',
+                        reviews: [
+                            '생활이 편리해요',
+                            '디자인도 예쁘고 성능도 뛰어나요'
+                        ],
+                        originalPrice: 2300000,
+                        salePrice: 2080000,
+                        discountPrice: 1822800,
+                        score: 0.75
+                    }
+                };
+
+                // 각 제품 정보 업데이트
+                Object.keys(modernProducts).forEach(productId => {
+                    const product = modernProducts[productId];
+                    
+                    // 제품 정보 업데이트
+                    updateProductInfo(productId, {
+                        name: product.name,
+                        reason: product.reason,
+                        original_price: product.originalPrice,
+                        sale_price: product.salePrice,
+                        discount_price: product.discountPrice,
+                        score: product.score
+                    });
+                    
+                    // 리뷰 분석 업데이트
+                    const reviewBox = document.querySelector(`#product-${productId} .review-analysis-box`);
+                    if (reviewBox) {
+                        const reviewTexts = reviewBox.querySelectorAll('.review-analysis-text');
+                        product.reviews.forEach((review, index) => {
+                            if (reviewTexts[index]) {
+                                reviewTexts[index].textContent = review;
+                                reviewTexts[index].style.display = 'block';
+                            }
+                        });
+                    }
+                });
+            } else if (styleType === 'pop') {
+                // 컬러&팝 스타일 제품 정보
+                const popProducts = {
+                    'refrigerator': {
+                        name: 'LG 디오스 오브제컬렉션 무드업 냉장고',
+                        image: 'https://www.lge.co.kr/kr/images/refrigerators/md09946863/gallery/medium-interior01.jpg',
+                        reason: '다양한 색상과 음악으로 기분 전환이 가능하며, 넉넉한 수납공간을 제공하여 만족스러운 경험을 선사합니다.',
+                        reviews: [
+                            '인테리어로 넘 이뿌고 우울한 날 색깔 바꾸고 노래까지 들면 기분이 좋아져요',
+                            '다양한 컬러변화는 물론 음악도 분위기에 맞게 다양하게 탑재되어 있어요'
+                        ],
+                        originalPrice: 6327000,
+                        salePrice: 5700000,
+                        discountPrice: 5133600,
+                        score: 0.89
+                    },
+                    'microwave': {
+                        name: 'LG 트롬 오브제컬렉션 워시콤보',
+                        image: 'https://www.lge.co.kr/kr/images/wash-combo/md10335844/gallery/medium-interior01.jpg',
+                        reason: '세탁 및 건조 동시 작동으로 공간 활용이 용이하고, 시간 단축과 쾌적한 빨래를 제공합니다.',
+                        reviews: [
+                            '건조기 따로 쓰느라 자리도 많이 차지했는데, 이건 한 번에 끝나서 너무 좋아요',
+                            '디자인, 성능 다 마음에 들어서 매일 잘 쓰고 있습니다'
+                        ],
+                        originalPrice: 4440000,
+                        salePrice: 3300000,
+                        discountPrice: 2901600,
+                        score: 0.85
+                    },
+                    'dishwasher': {
+                        name: 'LG QNED TV (벽걸이형)',
+                        image: 'https://www.lge.co.kr/kr/images/tvs/md10319863/gallery/medium-interior01.jpg',
+                        reason: '압도적 큰 화면과 선명한 화질, 탁월한 가성비로 만족도가 높습니다. 편리한 AI 리모컨까지 갖춘 제품입니다.',
+                        reviews: [
+                            '가성비 상 골랏고 크기가 큰걸로 골랐어요! 화질도 좋아요',
+                            '인공지능 리모컨으로 컨트롤하기 훨씬 수월하네요'
+                        ],
+                        originalPrice: 3890000,
+                        salePrice: 2680000,
+                        discountPrice: 2380800,
+                        score: 0.80
+                    }
+                };
+
+                // 각 제품 정보 업데이트
+                Object.keys(popProducts).forEach(productId => {
+                    const product = popProducts[productId];
+                    
+                    // 이미지 업데이트
+                    const imgElement = document.getElementById(`product-image-${productId}`);
+                    if (imgElement) {
+                        imgElement.src = product.image;
+                        imgElement.alt = product.name;
+                    }
+                    
+                    // 제품 정보 업데이트
+                    updateProductInfo(productId, {
+                        name: product.name,
+                        reason: product.reason,
+                        original_price: product.originalPrice,
+                        sale_price: product.salePrice,
+                        discount_price: product.discountPrice,
+                        score: product.score
+                    });
+                    
+                    // 리뷰 분석 업데이트
+                    const reviewBox = document.querySelector(`#product-${productId} .review-analysis-box`);
+                    if (reviewBox) {
+                        const reviewTexts = reviewBox.querySelectorAll('.review-analysis-text');
+                        product.reviews.forEach((review, index) => {
+                            if (reviewTexts[index]) {
+                                reviewTexts[index].textContent = review;
+                                reviewTexts[index].style.display = 'block';
+                            }
+                        });
+                    }
+                });
+                
+                // 가전 아이콘 및 라벨 업데이트 (DOM이 준비된 후 실행)
+                setTimeout(() => {
+                    updateApplianceIcons('pop');
+                }, 100);
+            } else if (styleType === 'luxury') {
+                // 럭셔리 스타일 제품 정보
+                const luxuryProducts = {
+                    'refrigerator': {
+                        name: 'LG 디오스 오브제컬렉션 무드업 빌트인 타입 냉장고 (노크온)',
+                        image: 'https://www.lge.co.kr/kr/images/refrigerators/md10010866/gallery/medium-interior01.jpg',
+                        reason: '개인 맞춤형 디자인과 편리한 LG ThinQ 기능으로, 무드업 냉장고는 삶의 중심이 되어줍니다.',
+                        reviews: [
+                            '비록가격은 있지만 정말 만족스러운 무드업 냉장고',
+                            '냉장고에 다가가면 선택한 색상이 켜져서 기분이 좋아져요',
+                            '인테리어 효과로도 정말 최고입니다'
+                        ],
+                        originalPrice: 6660000,
+                        salePrice: 6000000,
+                        discountPrice: 5412600,
+                        score: 0.92
+                    },
+                    'microwave': {
+                        name: 'LG 트롬 AI 오브제컬렉션 워시타워',
+                        image: 'https://www.lge.co.kr/kr/images/wash-tower/md10576831/gallery/medium-interior01.jpg',
+                        reason: '대용량 건조 및 자동 세제 투입, AI 시스템까지, 섬세한 옷 관리와 편리한 건조 경험을 선사합니다.',
+                        reviews: [
+                            '색감도 너무 이쁘고 자동세제함 있는것도 너무 편리해요',
+                            '앱으로 세탁건조알림 오는게 너무 좋네요'
+                        ],
+                        originalPrice: 5330000,
+                        salePrice: 4890000,
+                        discountPrice: 4280300,
+                        score: 0.88
+                    },
+                    'dishwasher': {
+                        name: 'LG 올레드 evo AI (스탠드형)',
+                        image: 'https://www.lge.co.kr/kr/images/tvs/md10542831/gallery/medium-interior01.jpg',
+                        reason: '화질, 음향, 디자인, 편의성 모두 최상의 모델입니다.',
+                        reviews: [
+                            '올레드 특유의 완벽한 블랙 표현 덕분에 영화 볼 때 몰입감이 장난 아니에요',
+                            'AI 프로세서가 예전 예능이나 저화질 영상도 4K급으로 선명하게 보정해줘서 놀랐습니다'
+                        ],
+                        originalPrice: 49728000,
+                        salePrice: 44800000,
+                        discountPrice: 41620000,
+                        score: 0.95
+                    }
+                };
+
+                // 각 제품 정보 업데이트
+                Object.keys(luxuryProducts).forEach(productId => {
+                    const product = luxuryProducts[productId];
+                    
+                    // 이미지 업데이트
+                    const imgElement = document.getElementById(`product-image-${productId}`);
+                    if (imgElement) {
+                        imgElement.src = product.image;
+                        imgElement.alt = product.name;
+                    }
+                    
+                    // 제품 정보 업데이트
+                    updateProductInfo(productId, {
+                        name: product.name,
+                        reason: product.reason,
+                        original_price: product.originalPrice,
+                        sale_price: product.salePrice,
+                        discount_price: product.discountPrice,
+                        score: product.score
+                    });
+                    
+                    // 리뷰 분석 업데이트
+                    const reviewBox = document.querySelector(`#product-${productId} .review-analysis-box`);
+                    if (reviewBox) {
+                        const reviewTexts = reviewBox.querySelectorAll('.review-analysis-text');
+                        product.reviews.forEach((review, index) => {
+                            if (reviewTexts[index]) {
+                                reviewTexts[index].textContent = review;
+                                reviewTexts[index].style.display = 'block';
+                            } else if (index === 2 && product.reviews.length > 2) {
+                                // 세 번째 리뷰가 있으면 새로 추가
+                                const newReview = document.createElement('div');
+                                newReview.className = 'review-analysis-text';
+                                newReview.textContent = review;
+                                reviewBox.appendChild(newReview);
+                            }
+                        });
+                    }
+                });
+                
+                // 가전 아이콘 및 라벨 업데이트 (DOM이 준비된 후 실행)
+                setTimeout(() => {
+                    updateApplianceIcons('luxury');
+                }, 100);
+            } else if (styleType === 'cozy') {
+                // 코지&네이처 스타일 제품 정보
+                const cozyProducts = {
+                    'refrigerator': {
+                        name: 'LG 디오스 오브제컬렉션 매직스페이스 냉장고',
+                        image: 'https://www.lge.co.kr/kr/images/refrigerators/md10411859/gallery/medium-interior01.jpg',
+                        reason: '넓은 수납 공간과 깔끔한 디자인으로 편리하게 물품을 정리하고, 친절한 서비스로 만족스러운 구매 경험을 제공합니다.',
+                        reviews: [
+                            '실용성도 좋고, 디자인도 이쁘고, 색상도 깔끔하니 맘에들어요',
+                            '용기의 정리폭이 넓어서 정리도 되고 찾기도 좋고 너무 좋아요'
+                        ],
+                        originalPrice: 2850000,
+                        salePrice: 1950000,
+                        discountPrice: 1720500,
+                        score: 0.87
+                    },
+                    'microwave': {
+                        name: 'LG 트롬 세탁기',
+                        image: 'https://www.lge.co.kr/kr/images/washing-machines/md09786827/gallery/medium-interior01.jpg',
+                        reason: '세련된 디자인과 대용량, 10% 할인 혜택으로 깨끗하고 효율적인 세탁을 누릴 수 있습니다.',
+                        reviews: [
+                            '수려한 디자인이지만 합리적인 가격 그리고 용량도 커서 세탁통이 큼지막 합니다',
+                            '으뜸 효율 가전이라 10프로 할인까지 되니까 아주 잘 선택한 것 같습니다'
+                        ],
+                        originalPrice: 1350000,
+                        salePrice: 910000,
+                        discountPrice: 846300,
+                        score: 0.82
+                    },
+                    'dishwasher': {
+                        name: 'LG 일반 LED TV (스탠드형)',
+                        image: 'https://www.lge.co.kr/kr/images/tvs/md10272837/gallery/medium-interior02.jpg',
+                        reason: '저렴한 가격에 선명한 화질, 깔끔한 설치, 친절한 배송으로 높은 만족도를 자랑합니다. 적당한 크기에 에너지 효율, 부가 기능까지 뛰어난 모델입니다.',
+                        reviews: [
+                            '방에서 보는 조그마한 텔레비전이 필요해서 저렴하게 구입했어요',
+                            '착한가격에 아주 잘 구입했어요',
+                            '환급까지 가능한 에너지소비효율 1등급 제품을 구매하였답니다'
+                        ],
+                        originalPrice: 450000,
+                        salePrice: 290000,
+                        discountPrice: 290000,
+                        score: 0.75
+                    }
+                };
+
+                // 각 제품 정보 업데이트
+                Object.keys(cozyProducts).forEach(productId => {
+                    const product = cozyProducts[productId];
+                    
+                    // 이미지 업데이트
+                    const imgElement = document.getElementById(`product-image-${productId}`);
+                    if (imgElement) {
+                        imgElement.src = product.image;
+                        imgElement.alt = product.name;
+                    }
+                    
+                    // 제품 정보 업데이트
+                    updateProductInfo(productId, {
+                        name: product.name,
+                        reason: product.reason,
+                        original_price: product.originalPrice,
+                        sale_price: product.salePrice,
+                        discount_price: product.discountPrice,
+                        score: product.score
+                    });
+                    
+                    // 리뷰 분석 업데이트
+                    const reviewBox = document.querySelector(`#product-${productId} .review-analysis-box`);
+                    if (reviewBox) {
+                        const reviewTexts = reviewBox.querySelectorAll('.review-analysis-text');
+                        product.reviews.forEach((review, index) => {
+                            if (reviewTexts[index]) {
+                                reviewTexts[index].textContent = review;
+                                reviewTexts[index].style.display = 'block';
+                            } else if (index >= 2 && product.reviews.length > 2) {
+                                // 세 번째 리뷰가 있으면 새로 추가
+                                const newReview = document.createElement('div');
+                                newReview.className = 'review-analysis-text';
+                                newReview.textContent = review;
+                                reviewBox.appendChild(newReview);
+                            }
+                        });
+                    }
+                });
+                
+                // 가전 아이콘 및 라벨 업데이트 (DOM이 준비된 후 실행)
+                setTimeout(() => {
+                    updateApplianceIcons('cozy');
+                }, 100);
+            }
+        }
+
+        // 스타일 타입에 따라 가전 아이콘 및 라벨 업데이트
+        function updateApplianceIcons(styleType) {
+            if (styleType === 'modern') {
+                // 모던&미니멀: 냉장고, 광파오븐, 식기세척기 (기본값 유지)
+                return;
+            }
+            
+            // 나머지 스타일: 냉장고, 세탁기, TV
+            // DOM이 완전히 로드될 때까지 대기
+            const tryUpdate = () => {
+                const applianceIcons = document.querySelectorAll('.appliance-icon');
+                
+                if (applianceIcons.length >= 3) {
+                    // 두 번째 아이콘 (microwave 위치) -> 세탁기
+                    const secondIcon = applianceIcons[1];
+                    const secondIconImg = secondIcon.querySelector('.appliance-icon-circle img');
+                    const secondIconLabel = secondIcon.querySelector('.appliance-icon-label');
+                    
+                    if (styleType === 'pop') {
+                        // 컬러&팝: 워시콤보
+                        if (secondIconImg) {
+                            secondIconImg.src = '/static/images/가전 카테고리/워시콤보.png';
+                            secondIconImg.alt = '워시콤보';
+                        }
+                        if (secondIconLabel) {
+                            secondIconLabel.textContent = '세탁기';
+                        }
+                    } else if (styleType === 'cozy') {
+                        // 코지&네이처: 워시콤보 (컬러&팝과 동일)
+                        if (secondIconImg) {
+                            secondIconImg.src = '/static/images/가전 카테고리/워시콤보.png';
+                            secondIconImg.alt = '워시콤보';
+                        }
+                        if (secondIconLabel) {
+                            secondIconLabel.textContent = '세탁기';
+                        }
+                    } else if (styleType === 'luxury') {
+                        // 럭셔리: 워시타워
+                        if (secondIconImg) {
+                            secondIconImg.src = '/static/images/가전 카테고리/워시타워.png';
+                            secondIconImg.alt = '워시타워';
+                        }
+                        if (secondIconLabel) {
+                            secondIconLabel.textContent = '세탁기';
+                        }
+                    }
+                    
+                    // 세 번째 아이콘 (dishwasher 위치) -> TV
+                    const thirdIcon = applianceIcons[2];
+                    const thirdIconImg = thirdIcon.querySelector('.appliance-icon-circle img');
+                    const thirdIconLabel = thirdIcon.querySelector('.appliance-icon-label');
+                    
+                    if (thirdIconImg) {
+                        thirdIconImg.src = '/static/images/가전 카테고리/TV.png';
+                        thirdIconImg.alt = 'TV';
+                    }
+                    if (thirdIconLabel) {
+                        thirdIconLabel.textContent = 'TV';
+                    }
+                } else if (applianceIcons.length === 0) {
+                    // DOM이 아직 준비되지 않았으면 재시도
+                    setTimeout(tryUpdate, 50);
+                }
+            };
+            
+            // 즉시 시도하고, 실패하면 재시도
+            tryUpdate();
         }
 
         // 스펙 모달 열기
@@ -3854,14 +4265,125 @@
             // 로딩 메시지 표시
             specList.innerHTML = '<li class="spec-item">스펙 정보를 불러오는 중...</li>';
 
-            // 1. 전역 변수에서 제품 정보 확인
+            // 1. 하드코딩된 스펙 정보 우선 사용
+            // 스타일 타입 확인 (전역 변수에서 가져오기)
+            const currentStyleType = window.currentStyleType || 'modern';
+            
+            let hardcodedSpecs = {};
+            
+            if (currentStyleType === 'pop') {
+                // 컬러&팝 스타일 스펙
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '826',
+                        '색상': '색상가변 글라스',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '1등급'
+                    },
+                    'microwave': {
+                        '색상': '스페이스 블랙',
+                        '조작 및 표현 방식': '다이얼+풀터치버튼 및 LCD+LED 디스플레이',
+                        '트루스팀': 'X'
+                    },
+                    'dishwasher': {
+                        '화면 사이즈 (베젤 미포함)': '217 cm',
+                        '해상도': '4K UHD (3,840 x 2,160)',
+                        '스피커 출력': '20W',
+                        '스피커 채널': '2.0ch'
+                    }
+                };
+            } else if (currentStyleType === 'luxury') {
+                // 럭셔리 스타일 스펙
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '610',
+                        '색상': '색상가변 글라스',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '2등급'
+                    },
+                    'microwave': {
+                        '색상 (세탁/건조)': '스페이스 블랙',
+                        '트루스팀': 'O 스팀건조, 스팀리프레쉬, 스팀살균, 스팀통살균',
+                        '자동세제 플러스': 'O'
+                    },
+                    'dishwasher': {
+                        '화면 사이즈 (베젤 미포함)': '245 cm',
+                        '해상도': '4K UHD (3,840 x 2,160)',
+                        '스피커 출력': '60W',
+                        '스피커 채널': '4.2ch'
+                    }
+                };
+            } else if (currentStyleType === 'cozy') {
+                // 코지&네이처 스타일 스펙
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '870',
+                        '색상': '오브제컬렉션 베이지',
+                        '도어스타일/재질': '메탈',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '1등급'
+                    },
+                    'microwave': {
+                        '인버터 DD모터': 'O'
+                    },
+                    'dishwasher': {
+                        '화면 사이즈 (베젤 미포함)': '80 cm',
+                        '디스플레이 종류': 'LED',
+                        '해상도': 'HD (1,366 x 768)',
+                        '백라이트': 'O',
+                        '주사율': '60Hz',
+                        '시야각': '광시야각'
+                    }
+                };
+            } else {
+                // 모던&미니멀 스타일 스펙 (기본값)
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '817',
+                        '색상': '오브제컬렉션 베이지 / 에센스 화이트 / 실버 / 토프',
+                        '도어스타일/재질': '글라스 / 메탈 / 스테인리스',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '2등급'
+                    },
+                    'microwave': {
+                        '가열방식': '트리플광파쿡+스팀',
+                        '조리 형태': '자동+수동',
+                        '용량 (가용용량)(L)': '32(32)',
+                        '도어 색상': '카밍 베이지'
+                    },
+                    'dishwasher': {
+                        '설치타입': '빌트인전용',
+                        '용량': '3~5인가구용 (14인용)',
+                        '걸레받이 높이(mm)': '150mm',
+                        '색상': '네이처 베이지'
+                    }
+                };
+            }
+
+            // 하드코딩된 스펙이 있으면 바로 표시하고 종료
+            if (productId && hardcodedSpecs[productId]) {
+                specList.innerHTML = '';
+                const specs = hardcodedSpecs[productId];
+                Object.keys(specs).forEach(key => {
+                    const value = specs[key];
+                    if (value) {
+                        const li = document.createElement('li');
+                        li.className = 'spec-item';
+                        li.textContent = `${key}: ${value}`;
+                        specList.appendChild(li);
+                    }
+                });
+                return;
+            }
+
+            // 2. 전역 변수에서 제품 정보 확인 (하드코딩된 스펙이 없을 경우)
             if (globalRecommendations && globalRecommendations.length > 0) {
                 const productIds = ['refrigerator', 'microwave', 'dishwasher'];
                 const index = productIds.indexOf(productId);
                 
                 if (index >= 0 && index < globalRecommendations.length) {
                     const product = globalRecommendations[index];
-                    displaySpecModal(product);
+                    displaySpecModal(product, productId);
                     return;
                 }
             }
@@ -3948,6 +4470,119 @@
         function displaySpecModal(product, productId = null) {
             const specList = document.getElementById('specList');
             specList.innerHTML = '';
+
+            // 제품 ID 확인 (productId 파라미터 또는 product 객체에서)
+            const actualProductId = productId || (product && product.product_id) || null;
+            
+            // 스타일 타입 확인 (전역 변수에서 가져오기)
+            const currentStyleType = window.currentStyleType || 'modern';
+            
+            // 하드코딩된 스펙 정보 (제품 ID 및 스타일 타입 기반)
+            let hardcodedSpecs = {};
+            
+            if (currentStyleType === 'pop') {
+                // 컬러&팝 스타일 스펙
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '826',
+                        '색상': '색상가변 글라스',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '1등급'
+                    },
+                    'microwave': {
+                        '색상': '스페이스 블랙',
+                        '조작 및 표현 방식': '다이얼+풀터치버튼 및 LCD+LED 디스플레이',
+                        '트루스팀': 'X'
+                    },
+                    'dishwasher': {
+                        '화면 사이즈 (베젤 미포함)': '217 cm',
+                        '해상도': '4K UHD (3,840 x 2,160)',
+                        '스피커 출력': '20W',
+                        '스피커 채널': '2.0ch'
+                    }
+                };
+            } else if (currentStyleType === 'luxury') {
+                // 럭셔리 스타일 스펙
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '610',
+                        '색상': '색상가변 글라스',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '2등급'
+                    },
+                    'microwave': {
+                        '색상 (세탁/건조)': '스페이스 블랙',
+                        '트루스팀': 'O 스팀건조, 스팀리프레쉬, 스팀살균, 스팀통살균',
+                        '자동세제 플러스': 'O'
+                    },
+                    'dishwasher': {
+                        '화면 사이즈 (베젤 미포함)': '245 cm',
+                        '해상도': '4K UHD (3,840 x 2,160)',
+                        '스피커 출력': '60W',
+                        '스피커 채널': '4.2ch'
+                    }
+                };
+            } else if (currentStyleType === 'cozy') {
+                // 코지&네이처 스타일 스펙
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '870',
+                        '색상': '오브제컬렉션 베이지',
+                        '도어스타일/재질': '메탈',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '1등급'
+                    },
+                    'microwave': {
+                        '인버터 DD모터': 'O'
+                    },
+                    'dishwasher': {
+                        '화면 사이즈 (베젤 미포함)': '80 cm',
+                        '디스플레이 종류': 'LED',
+                        '해상도': 'HD (1,366 x 768)',
+                        '백라이트': 'O',
+                        '주사율': '60Hz',
+                        '시야각': '광시야각'
+                    }
+                };
+            } else {
+                // 모던&미니멀 스타일 스펙 (기본값)
+                hardcodedSpecs = {
+                    'refrigerator': {
+                        '전체 용량 (L)': '817',
+                        '색상': '오브제컬렉션 베이지 / 에센스 화이트 / 실버 / 토프',
+                        '도어스타일/재질': '글라스 / 메탈 / 스테인리스',
+                        '냉각방식': '멀티냉각방식',
+                        '에너지 소비효율등급': '2등급'
+                    },
+                    'microwave': {
+                        '가열방식': '트리플광파쿡+스팀',
+                        '조리 형태': '자동+수동',
+                        '용량 (가용용량)(L)': '32(32)',
+                        '도어 색상': '카밍 베이지'
+                    },
+                    'dishwasher': {
+                        '설치타입': '빌트인전용',
+                        '용량': '3~5인가구용 (14인용)',
+                        '걸레받이 높이(mm)': '150mm',
+                        '색상': '네이처 베이지'
+                    }
+                };
+            }
+
+            // productId가 하드코딩된 스펙에 있으면 사용
+            if (actualProductId && hardcodedSpecs[actualProductId]) {
+                const specs = hardcodedSpecs[actualProductId];
+                Object.keys(specs).forEach(key => {
+                    const value = specs[key];
+                    if (value) {
+                        const li = document.createElement('li');
+                        li.className = 'spec-item';
+                        li.textContent = `${key}: ${value}`;
+                        specList.appendChild(li);
+                    }
+                });
+                return;
+            }
 
             if (product && product.product_id) {
                 // API에서 제품 스펙 가져오기
@@ -4056,7 +4691,7 @@
             });
         }
 
-        function initPage() {
+        async function initPage() {
             // 초기 제품 이름들에 줄바꿈 적용
             applyLineBreaksToInitialTitles();
             // 제품 이미지 로드 (비동기이므로 await하지 않음)
@@ -4064,8 +4699,53 @@
                 console.error('제품 이미지 로드 실패:', err);
             });
 
-            // sessionStorage에서 vibe 값 가져오기
-            const vibe = sessionStorage.getItem('step1_vibe');
+            // URL 경로에서 portfolio_id 추출 (예: /portfolio/PF-001/)
+            let portfolioId = null;
+            const pathMatch = window.location.pathname.match(/\/portfolio\/([^\/]+)\/?$/);
+            if (pathMatch && pathMatch[1]) {
+                portfolioId = pathMatch[1];
+                console.log('[Result Page] URL 경로에서 portfolio_id 추출:', portfolioId);
+            }
+
+            // portfolio_id가 있으면 API 호출
+            let vibe = null;
+            if (portfolioId) {
+                try {
+                    console.log('[Result Page] 포트폴리오 API 호출:', portfolioId);
+                    const response = await fetch(`/api/portfolio/${portfolioId}/`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.portfolio) {
+                            vibe = data.portfolio.style_type;
+                            console.log('[Result Page] 포트폴리오 스타일 타입:', vibe);
+                            
+                            // 전역 변수에 스타일 타입 저장 (스펙 모달에서 사용)
+                            window.currentStyleType = vibe;
+                            
+                            // 배너 문구는 style_type에 따라 하드코딩된 값 사용 (엑셀 데이터 무시)
+                            // 엑셀 데이터는 스타일 분석 메시지에만 사용
+                            
+                            // 스타일 타입에 따라 제품 정보 업데이트
+                            updateProductsByStyle(vibe);
+                        }
+                    }
+                } catch (error) {
+                    console.error('[Result Page] 포트폴리오 API 호출 실패:', error);
+                }
+            }
+
+            // portfolio_id가 없거나 API 호출 실패 시 sessionStorage에서 vibe 값 가져오기
+            if (!vibe) {
+                vibe = sessionStorage.getItem('step1_vibe');
+                console.log('[Result Page] sessionStorage에서 vibe 가져옴:', vibe);
+            }
+            
+            // 전역 변수에 스타일 타입 저장 (스펙 모달에서 사용)
+            if (vibe) {
+                window.currentStyleType = vibe;
+                // 스타일 타입에 따라 제품 정보 업데이트
+                updateProductsByStyle(vibe);
+            }
 
             // vibe 값에 따른 이미지 매핑
             const vibeImagePaths = {
@@ -4077,18 +4757,18 @@
 
             // vibe 값에 따른 제목 매핑
             const vibeTitleMap = {
-                'modern': '둘만의 신혼 무드를 완성하는 오브제 스타일',
-                'cozy': '따뜻한 자연의 감성을 담은 오브제 스타일',
-                'pop': '유니크하고 컬러풀한 오브제 스타일',
-                'luxury': '럭셔리한 프리미엄 오브제 스타일'
+                'modern': '모던 & 미니멀 라이프를 위한 오브제 스타일',
+                'cozy': '따뜻하고 자연스러운 코지 패밀리 스타일',
+                'pop': '나만의 컬러 플레이, 유니크 MoodUP 스타일',
+                'luxury': '하이엔드 하우스를 위한 시그니처 스타일'
             };
 
             // vibe 값에 따른 설명 매핑
             const vibeDescriptionMap = {
-                'modern': '당신의 공간 분위기와 요리 중심의 라이프스타일을 반영해 Essence White 컬러의 오브제컬렉션 냉장고, 광파오븐, 식기세척기로 구성했어요.<br>완성도와 기능성을 모두 갖춘 표준 예산 범위 내의 추천이에요.',
-                'cozy': '자연스러운 우드 톤과 코지한 분위기를 반영해 Nature Beige 컬러의 오브제컬렉션으로 구성했어요.<br>따뜻하고 편안한 공간을 만들어줄 가전 패키지예요.',
-                'pop': '유니크하고 컬러풀한 감성을 담아 다양한 컬러의 오브제컬렉션으로 구성했어요.<br>개성 있는 공간을 완성할 수 있는 추천이에요.',
-                'luxury': '고급스러운 프리미엄 감성을 반영해 하이엔드 오브제컬렉션으로 구성했어요.<br>최고의 품질과 성능을 갖춘 럭셔리한 가전 패키지예요.'
+                'modern': '당신의 공간 분위기와 요리 중심 라이프스타일을 반영해<br>Essence White 컬러의 오브제컬렉션 냉장고, 인덕션, 식기세척기 중심으로 구성했어요.<br>균형 잡힌 표준형 예산 안에서 디자인 완성도와 기능성을 모두 담았어요.',
+                'cozy': 'Nature Beige 톤과 패밀리 구성에 최적화된<br>대용량 냉장고·표준형 세탁기·에너지 효율 1등급 TV 조합이에요.<br>가성비와 효율성을 모두 갖춘 실속형 패키지로 공간을 따뜻하게 완성합니다.',
+                'pop': '다양한 컬러 연출이 가능한 MoodUP 냉장고와<br>AI 기반의 스마트 기능을 갖춘 워시타워·TV 조합입니다.<br>원룸에서도 돋보이는 컴팩트·프리미엄 셋업을 경험해보세요.',
+                'luxury': '기분에 따라 컬러를 바꾸는 무드업 기능으로 공간에 생동감을 더하고,<br>워시타워와 스탠드형 올레드 TV로 공간 효율과 미학을 동시에 잡았습니다.<br>제한된 공간에서도 타협하지 않는 최상의 라이프스타일을 경험해보세요.'
             };
 
             // 배너 이미지 설정
@@ -4100,12 +4780,18 @@
                 bannerImage.src = vibeImagePaths['modern'];
             }
 
-            // 제목과 설명 업데이트
+            // 제목과 설명 업데이트 (style_type에 따라 하드코딩된 값 사용)
             if (vibe && vibeTitleMap[vibe]) {
-                document.getElementById('bannerTitle').textContent = vibeTitleMap[vibe];
+                const bannerTitle = document.getElementById('bannerTitle');
+                if (bannerTitle) {
+                    bannerTitle.textContent = vibeTitleMap[vibe];
+                }
             }
             if (vibe && vibeDescriptionMap[vibe]) {
-                document.getElementById('bannerDescription').innerHTML = vibeDescriptionMap[vibe];
+                const bannerDescription = document.getElementById('bannerDescription');
+                if (bannerDescription) {
+                    bannerDescription.innerHTML = vibeDescriptionMap[vibe];
+                }
             }
 
             // 하이엔드_럭셔리.png와 신혼 무드_유니크_팝.png 사용 시 모든 텍스트를 흰색으로 변경
@@ -5179,7 +5865,7 @@
                 sessionStorage.setItem('reservation_data', JSON.stringify(reservationData));
 
                 // 예약 조회 페이지로 이동
-                window.location.href = '/reservation/status/';
+                window.location.href = '/reservation-status/';
             }
         }
 
@@ -5200,8 +5886,16 @@
         // 다른 추천 후보 확인
         // ============================================
         function goToOtherRecommendations() {
-            // 다른 추천 후보 확인 페이지로 이동
-            window.location.href = '/other-recommendations/';
+            // 현재 스타일 타입 가져오기 (여러 소스에서 확인)
+            let styleType = window.currentStyleType;
+            
+            // currentStyleType이 없으면 sessionStorage나 URL에서 가져오기
+            if (!styleType) {
+                styleType = sessionStorage.getItem('step1_vibe') || 'modern';
+            }
+            
+            // 다른 추천 후보 확인 페이지로 이동 (스타일 타입을 URL 파라미터로 전달)
+            window.location.href = `/other-recommendations/?style=${styleType}`;
         }
 
         // ============================================

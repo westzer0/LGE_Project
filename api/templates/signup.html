@@ -1,0 +1,889 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 | LG전자</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo1.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+            background-color: #F5F5F5;
+            color: #1a1a1a;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Signup Card */
+        .signup-card {
+            background: #fff;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Header with back arrow and title */
+        .signup-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .back-arrow {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            margin-right: 12px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-arrow:hover {
+            color: #EA1917;
+        }
+
+        .signup-header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: #EA1917;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            color: #1a1a1a;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        /* Telecom Carrier Select */
+        .telecom-select-wrapper {
+            position: relative;
+            margin-top: 8px;
+        }
+
+        .telecom-select {
+            width: 100%;
+            padding: 14px 16px;
+            padding-right: 40px;
+            font-size: 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            color: #1a1a1a;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .telecom-select:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        .telecom-select-arrow {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            color: #666;
+        }
+
+        .mvno-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #0066CC;
+            text-decoration: none;
+        }
+
+        .mvno-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Terms Agreement */
+        .terms-agreement {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            padding: 12px;
+            background: #F9F9F9;
+            border-radius: 4px;
+        }
+
+        .terms-agreement input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .terms-agreement label {
+            flex: 1;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .terms-arrow {
+            width: 16px;
+            height: 16px;
+            color: #666;
+        }
+
+        /* Password Requirements */
+        .password-requirements {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .password-requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            color: #666;
+        }
+
+        .password-requirement-item.valid {
+            color: #22543D;
+        }
+
+        .password-requirement-item::before {
+            content: '○';
+            font-size: 10px;
+        }
+
+        .password-requirement-item.valid::before {
+            content: '✓';
+            color: #22543D;
+            font-weight: 700;
+        }
+
+        /* Birth Date and Gender */
+        .birth-gender-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .birth-input {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            color: #1a1a1a;
+        }
+
+        .birth-input:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        .birth-separator {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .gender-mask {
+            width: 120px;
+            padding: 14px 16px;
+            font-size: 14px;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            background: #fff;
+            color: #1a1a1a;
+            letter-spacing: 4px;
+            text-align: center;
+        }
+
+        .gender-mask:focus {
+            outline: none;
+            border-color: #EA1917;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #E5E5E5;
+            color: #999;
+            border: none;
+            border-radius: 4px;
+            cursor: not-allowed;
+            transition: all 0.2s;
+            margin-top: 32px;
+        }
+
+        .submit-button.active {
+            background: #EA1917;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .submit-button.active:hover {
+            background: #C8102E;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #EA1917;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* Identity Verification Options */
+        .verification-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .verification-option {
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .verification-option:hover {
+            border-color: #EA1917;
+            background: #FFF5F5;
+        }
+
+        .verification-option-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .verification-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .verification-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Terms List */
+        .terms-list {
+            list-style: none;
+        }
+
+        .terms-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+
+        .terms-item:last-child {
+            border-bottom: none;
+        }
+
+        .terms-item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terms-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .terms-text {
+            font-size: 14px;
+            color: #1a1a1a;
+        }
+
+        .terms-text .required {
+            color: #EA1917;
+            margin-right: 4px;
+        }
+
+        .terms-text .optional {
+            color: #666;
+            margin-right: 4px;
+        }
+
+        .terms-arrow-right {
+            width: 16px;
+            height: 16px;
+            color: #666;
+        }
+
+        .terms-agree-all {
+            padding: 16px 0;
+            border-bottom: 2px solid #e5e5e5;
+            margin-bottom: 16px;
+        }
+
+        .modal-button {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            background: #EA1917;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+
+        .modal-button:hover {
+            background: #C8102E;
+        }
+
+        /* Messages */
+        .messages {
+            margin-bottom: 24px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .message.error {
+            background-color: #FFF5F5;
+            color: #C53030;
+            border: 1px solid #FED7D7;
+        }
+
+        .message.success {
+            background-color: #F0FFF4;
+            color: #22543D;
+            border: 1px solid #C6F6D5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-card">
+        <!-- Header with back arrow and title -->
+        <div class="signup-header">
+            <a href="{% url 'login' %}" class="back-arrow">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </a>
+            <h1 class="signup-header-title">회원가입</h1>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Signup Form -->
+        <form method="POST" action="{% url 'signup' %}" id="signupForm">
+            {% csrf_token %}
+
+            <!-- Mobile Phone Number ID -->
+            <div class="form-group">
+                <label for="phone" class="form-label">휴대폰 번호 아이디<span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" class="form-input" placeholder="휴대폰 번호를 입력하세요" required autocomplete="tel" value="">
+                
+                <div class="telecom-select-wrapper">
+                    <select id="telecom" name="telecom" class="telecom-select" required>
+                        <option value="">통신사</option>
+                        <option value="SKT">SKT</option>
+                        <option value="KT">KT</option>
+                        <option value="LGU+">LGU+</option>
+                        <option value="알뜰폰">알뜰폰</option>
+                    </select>
+                    <svg class="telecom-select-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                
+                <a href="#" class="mvno-link" onclick="event.preventDefault(); alert('알뜰폰 통신사 확인 페이지로 이동합니다.');">알뜰폰 통신사 확인</a>
+            </div>
+
+            <!-- Terms Agreement -->
+            <div class="terms-agreement">
+                <input type="checkbox" id="termsAll" name="termsAll">
+                <label for="termsAll" onclick="openTermsModal()">
+                    본인 확인 서비스 이용약관 모두 동의
+                    <svg class="terms-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </label>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="password" class="form-label">비밀번호<span class="required">*</span></label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="비밀번호를 입력하세요" required autocomplete="new-password" value="">
+                <div class="password-requirements" id="passwordRequirements">
+                    <div class="password-requirement-item" id="req1">
+                        3가지 이상 조합: 영대/영소/숫자/특수문자 중 (또는 10자리 이상일 경우 2가지 이상 조합)
+                    </div>
+                    <div class="password-requirement-item" id="req2">
+                        8자리 이상
+                    </div>
+                </div>
+            </div>
+
+            <!-- Name -->
+            <div class="form-group">
+                <label for="name" class="form-label">이름<span class="required">*</span></label>
+                <input type="text" id="name" name="name" class="form-input" placeholder="이름을 입력하세요" required autocomplete="name" value="">
+            </div>
+
+            <!-- Birth Date and Gender -->
+            <div class="form-group">
+                <label for="birth" class="form-label">생년월일/성별<span class="required">*</span></label>
+                <div class="birth-gender-group">
+                    <input type="text" id="birth" name="birth" class="birth-input" placeholder="생년월일 6자리" maxlength="6" required autocomplete="bday" value="">
+                    <span class="birth-separator">-</span>
+                    <input type="text" id="gender" name="gender" class="gender-mask" placeholder="●●●●●●" maxlength="6" required autocomplete="off" value="">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="button" class="submit-button" id="submitButton" onclick="openVerificationModal()">인증번호 발송</button>
+        </form>
+    </div>
+
+    <!-- Identity Verification Modal -->
+    <div class="modal-overlay" id="verificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <a href="#" onclick="closeVerificationModal(); return false;" class="back-arrow">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    본인인증 선택
+                </div>
+                <div class="modal-close" onclick="closeVerificationModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    본인 명의의 휴대폰이나 아이핀 계정으로 인증 후 가입 할 수 있습니다
+                </p>
+                <div class="verification-options">
+                    <div class="verification-option" onclick="selectVerification('phone')">
+                        <div class="verification-option-title">휴대폰 인증</div>
+                        <div class="verification-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                <text x="12" y="14" text-anchor="middle" font-size="8" fill="currentColor">***</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="verification-option" onclick="selectVerification('ipin')">
+                        <div class="verification-option-title">아이핀 인증</div>
+                        <div class="verification-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="3" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"></rect>
+                                <path d="M7 8h10M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                <circle cx="12" cy="16" r="1.5" fill="#FF6B9D" stroke="none"></circle>
+                                <path d="M10 16h4" stroke="#FF6B9D" stroke-width="1.5" stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Agreement Modal -->
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">약관 동의</div>
+                <div class="modal-close" onclick="closeTermsModal()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="terms-agree-all">
+                    <input type="checkbox" id="termsAllModal" class="terms-checkbox" onchange="toggleAllTerms(this.checked)">
+                    <label for="termsAllModal" class="terms-text">모두 동의</label>
+                </div>
+                <ul class="terms-list">
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term1">
+                            <span class="terms-text"><span class="required">(필수)</span> LG전자 서비스 이용약관</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term2">
+                            <span class="terms-text"><span class="required">(필수)</span> LG전자 서비스 전자상거래 이용약관</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term3">
+                            <span class="terms-text"><span class="required">(필수)</span> LG전자 한국 서비스 개인정보 수집 이용 동의</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term4">
+                            <span class="terms-text"><span class="optional">(선택)</span> 마케팅 목적 개인정보 수집 이용 동의</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term5">
+                            <span class="terms-text"><span class="optional">(선택)</span> 마케팅 목적 개인정보 국외이전 동의</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term6">
+                            <span class="terms-text"><span class="optional">(선택)</span> 마케팅 및 혜택알림 동의</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="toggleTerm(this)">
+                        <div class="terms-item-left">
+                            <input type="checkbox" class="terms-checkbox" id="term7">
+                            <span class="terms-text"><span class="optional">(선택)</span> LG전자 위치기반 서비스 이용약관</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                    <li class="terms-item" onclick="viewPolicy()">
+                        <div class="terms-item-left">
+                            <span class="terms-text">LG전자 서비스 개인정보 처리방침</span>
+                        </div>
+                        <svg class="terms-arrow-right" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </li>
+                </ul>
+                <button class="modal-button" onclick="agreeTerms()">동의</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password validation
+        const passwordInput = document.getElementById('password');
+        const req1 = document.getElementById('req1');
+        const req2 = document.getElementById('req2');
+
+        passwordInput.addEventListener('input', function() {
+            const value = this.value;
+            const length = value.length;
+            
+            // Check length requirement
+            if (length >= 8) {
+                req2.classList.add('valid');
+            } else {
+                req2.classList.remove('valid');
+            }
+            
+            // Check combination requirement
+            const hasUpper = /[A-Z]/.test(value);
+            const hasLower = /[a-z]/.test(value);
+            const hasNumber = /[0-9]/.test(value);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+            
+            const typeCount = [hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
+            
+            if (length >= 10 && typeCount >= 2) {
+                req1.classList.add('valid');
+            } else if (typeCount >= 3) {
+                req1.classList.add('valid');
+            } else {
+                req1.classList.remove('valid');
+            }
+            
+            checkFormValidity();
+        });
+
+        // Form validation
+        function checkFormValidity() {
+            const phone = document.getElementById('phone').value;
+            const telecom = document.getElementById('telecom').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            const birth = document.getElementById('birth').value;
+            const gender = document.getElementById('gender').value;
+            const termsAll = document.getElementById('termsAll').checked;
+            
+            const submitButton = document.getElementById('submitButton');
+            
+            if (phone && telecom && password && name && birth.length === 6 && gender.length === 6 && termsAll && 
+                req1.classList.contains('valid') && req2.classList.contains('valid')) {
+                submitButton.classList.add('active');
+            } else {
+                submitButton.classList.remove('active');
+            }
+        }
+
+        // Add event listeners for form validation
+        document.getElementById('phone').addEventListener('input', checkFormValidity);
+        document.getElementById('telecom').addEventListener('change', checkFormValidity);
+        document.getElementById('name').addEventListener('input', checkFormValidity);
+        document.getElementById('birth').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkFormValidity();
+        });
+        document.getElementById('gender').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            checkFormValidity();
+        });
+        document.getElementById('termsAll').addEventListener('change', checkFormValidity);
+
+        // Verification Modal
+        function openVerificationModal() {
+            const submitButton = document.getElementById('submitButton');
+            if (!submitButton.classList.contains('active')) {
+                return;
+            }
+            document.getElementById('verificationModal').classList.add('active');
+        }
+
+        function closeVerificationModal() {
+            document.getElementById('verificationModal').classList.remove('active');
+        }
+
+        function selectVerification(type) {
+            closeVerificationModal();
+            if (type === 'phone') {
+                alert('휴대폰 인증을 진행합니다.');
+            } else {
+                alert('아이핀 인증을 진행합니다.');
+            }
+        }
+
+        // Terms Modal
+        function openTermsModal() {
+            document.getElementById('termsModal').classList.add('active');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('termsModal').classList.remove('active');
+        }
+
+        function toggleTerm(item) {
+            const checkbox = item.querySelector('.terms-checkbox');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                updateAllTermsCheckbox();
+            }
+        }
+
+        function toggleAllTerms(checked) {
+            const checkboxes = document.querySelectorAll('.terms-list .terms-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        function updateAllTermsCheckbox() {
+            const checkboxes = document.querySelectorAll('.terms-list .terms-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            document.getElementById('termsAllModal').checked = allChecked;
+        }
+
+        function agreeTerms() {
+            const requiredTerms = ['term1', 'term2', 'term3'];
+            const allRequiredChecked = requiredTerms.every(id => document.getElementById(id).checked);
+            
+            if (!allRequiredChecked) {
+                alert('필수 약관에 모두 동의해주세요.');
+                return;
+            }
+            
+            document.getElementById('termsAll').checked = true;
+            closeTermsModal();
+            checkFormValidity();
+        }
+
+        function viewPolicy() {
+            alert('개인정보 처리방침 페이지로 이동합니다.');
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('verificationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVerificationModal();
+            }
+        });
+
+        document.getElementById('termsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTermsModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -12,7 +12,7 @@ class Cart(models.Model):
     CART 테이블
     """
 
-    cart_id = models.AutoField(primary_key=True)
+    cart_id = models.AutoField(blank=True, null=True)
     member_id = models.CharField(max_length=30)
     created_date = models.DateTimeField(blank=True, null=True)
 
@@ -24,12 +24,12 @@ class Cart(models.Model):
         return f"CART({self.cart_id})"
 
 
-class CartItem(models.Model):
+class Cart_item(models.Model):
     """
     CART_ITEM 테이블
     """
 
-    cart_item_id = models.AutoField(primary_key=True)
+    cart_item_id = models.AutoField(blank=True, null=True)
     cart_id = models.IntegerField(blank=True, null=True)
     product_id = models.IntegerField(blank=True, null=True)
     quantity = models.IntegerField(blank=True, null=True)
@@ -42,12 +42,12 @@ class CartItem(models.Model):
         return f"CART_ITEM({self.cart_item_id})"
 
 
-class CategoryCommonSpec(models.Model):
+class Category_common_spec(models.Model):
     """
     CATEGORY_COMMON_SPEC 테이블
     """
 
-    common_id = models.AutoField(primary_key=True)
+    common_id = models.AutoField(blank=True, null=True)
     main_category = models.CharField(max_length=100)
     spec_key = models.CharField(max_length=150)
 
@@ -64,7 +64,7 @@ class Consultation(models.Model):
     CONSULTATION 테이블
     """
 
-    consult_id = models.AutoField(primary_key=True)
+    consult_id = models.AutoField(blank=True, null=True)
     member_id = models.CharField(max_length=30, blank=True, null=True)
     portfolio_id = models.IntegerField(blank=True, null=True)
     store_name = models.CharField(max_length=255, blank=True, null=True)
@@ -84,7 +84,7 @@ class Estimate(models.Model):
     ESTIMATE 테이블
     """
 
-    estimate_id = models.AutoField(primary_key=True)
+    estimate_id = models.AutoField(blank=True, null=True)
     portfolio_id = models.IntegerField(blank=True, null=True)
     total_price = models.IntegerField(blank=True, null=True)
     discount_price = models.IntegerField(blank=True, null=True)
@@ -104,7 +104,7 @@ class Member(models.Model):
     MEMBER 테이블
     """
 
-    member_id = models.CharField(primary_key=True, max_length=30)
+    member_id = models.CharField(max_length=30)
     password = models.CharField(max_length=255)
     name = models.CharField(max_length=100)
     age = models.IntegerField(blank=True, null=True)
@@ -122,12 +122,12 @@ class Member(models.Model):
         return f"MEMBER({self.member_id})"
 
 
-class OnboardingAnswer(models.Model):
+class Onboarding_answer(models.Model):
     """
     ONBOARDING_ANSWER 테이블
     """
 
-    answer_id = models.AutoField(primary_key=True)
+    answer_id = models.AutoField(blank=True, null=True)
     question_code = models.CharField(max_length=50)
     answer_value = models.CharField(max_length=255, blank=True, null=True)
     created_date = models.DateTimeField(blank=True, null=True)
@@ -141,7 +141,7 @@ class OnboardingAnswer(models.Model):
         return f"ONBOARDING_ANSWER({self.answer_id})"
 
 
-class OnboardingQuestion(models.Model):
+class Onboarding_question(models.Model):
     """
     ONBOARDING_QUESTION 테이블
     """
@@ -160,12 +160,12 @@ class OnboardingQuestion(models.Model):
         return f"ONBOARDING_QUESTION({self.question_code})"
 
 
-class OnboardingSession(models.Model):
+class Onboarding_session(models.Model):
     """
     ONBOARDING_SESSION 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     member_id = models.CharField(max_length=30)
     created_date = models.DateTimeField(blank=True, null=True)
     updated_date = models.DateTimeField(blank=True, null=True)
@@ -197,12 +197,12 @@ class OnboardingSession(models.Model):
         return f"ONBOARDING_SESSION({self.session_id})"
 
 
-class OnboardingSessionCategories(models.Model):
+class Onboarding_session_categories(models.Model):
     """
     ONBOARDING_SESSION_CATEGORIES 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     category_name = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -214,12 +214,12 @@ class OnboardingSessionCategories(models.Model):
         return f"ONBOARDING_SESSION_CATEGORIES({self.session_id})"
 
 
-class OnboardingSessionMainSpaces(models.Model):
+class Onboarding_session_main_spaces(models.Model):
     """
     ONBOARDING_SESSION_MAIN_SPACES 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     main_space = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -231,14 +231,14 @@ class OnboardingSessionMainSpaces(models.Model):
         return f"ONBOARDING_SESSION_MAIN_SPACES({self.session_id})"
 
 
-class OnboardingSessionPriorities(models.Model):
+class Onboarding_session_priorities(models.Model):
     """
     ONBOARDING_SESSION_PRIORITIES 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     priority = models.CharField(max_length=20)
-    priority_order = models.IntegerField(blank=True, null=True)
+    priority_order = models.AutoField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -249,12 +249,12 @@ class OnboardingSessionPriorities(models.Model):
         return f"ONBOARDING_SESSION_PRIORITIES({self.session_id})"
 
 
-class OnboardingUserResponse(models.Model):
+class Onboarding_user_response(models.Model):
     """
     ONBOARDING_USER_RESPONSE 테이블
     """
 
-    response_id = models.AutoField(primary_key=True)
+    response_id = models.AutoField(blank=True, null=True)
     session_id = models.IntegerField(blank=True, null=True)
     question_code = models.CharField(max_length=50)
     answer_id = models.IntegerField(blank=True, null=True)
@@ -269,12 +269,12 @@ class OnboardingUserResponse(models.Model):
         return f"ONBOARDING_USER_RESPONSE({self.response_id})"
 
 
-class OnboardSessCategories(models.Model):
+class Onboard_sess_categories(models.Model):
     """
     ONBOARD_SESS_CATEGORIES 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     category_name = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -286,12 +286,12 @@ class OnboardSessCategories(models.Model):
         return f"ONBOARD_SESS_CATEGORIES({self.session_id})"
 
 
-class OnboardSessMainSpaces(models.Model):
+class Onboard_sess_main_spaces(models.Model):
     """
     ONBOARD_SESS_MAIN_SPACES 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     main_space = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -303,14 +303,14 @@ class OnboardSessMainSpaces(models.Model):
         return f"ONBOARD_SESS_MAIN_SPACES({self.session_id})"
 
 
-class OnboardSessPriorities(models.Model):
+class Onboard_sess_priorities(models.Model):
     """
     ONBOARD_SESS_PRIORITIES 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
+    session_id = models.AutoField(blank=True, null=True)
     priority = models.CharField(max_length=20)
-    priority_order = models.IntegerField(blank=True, null=True)
+    priority_order = models.AutoField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -321,13 +321,13 @@ class OnboardSessPriorities(models.Model):
         return f"ONBOARD_SESS_PRIORITIES({self.session_id})"
 
 
-class OnboardSessRecProducts(models.Model):
+class Onboard_sess_rec_products(models.Model):
     """
     ONBOARD_SESS_REC_PRODUCTS 테이블
     """
 
-    session_id = models.AutoField(primary_key=True)
-    product_id = models.IntegerField()
+    session_id = models.AutoField(blank=True, null=True)
+    product_id = models.AutoField(blank=True, null=True)
     category_name = models.CharField(max_length=50, blank=True, null=True)
     rank_order = models.IntegerField(blank=True, null=True)
     score = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
@@ -346,7 +346,7 @@ class Orders(models.Model):
     ORDERS 테이블
     """
 
-    order_id = models.AutoField(primary_key=True)
+    order_id = models.AutoField(blank=True, null=True)
     member_id = models.CharField(max_length=30)
     order_date = models.DateTimeField(blank=True, null=True)
     total_amount = models.IntegerField(blank=True, null=True)
@@ -361,12 +361,12 @@ class Orders(models.Model):
         return f"ORDERS({self.order_id})"
 
 
-class OrderDetail(models.Model):
+class Order_detail(models.Model):
     """
     ORDER_DETAIL 테이블
     """
 
-    detail_id = models.AutoField(primary_key=True)
+    detail_id = models.AutoField(blank=True, null=True)
     order_id = models.IntegerField(blank=True, null=True)
     product_id = models.IntegerField(blank=True, null=True)
     quantity = models.IntegerField(blank=True, null=True)
@@ -384,7 +384,7 @@ class Payment(models.Model):
     PAYMENT 테이블
     """
 
-    payment_id = models.AutoField(primary_key=True)
+    payment_id = models.AutoField(blank=True, null=True)
     payment_date = models.DateTimeField(blank=True, null=True)
     order_id = models.IntegerField(blank=True, null=True)
     payment_status = models.CharField(max_length=50, blank=True, null=True)
@@ -398,12 +398,12 @@ class Payment(models.Model):
         return f"PAYMENT({self.payment_id})"
 
 
-class PortfolioProduct(models.Model):
+class Portfolio_product(models.Model):
     """
     PORTFOLIO_PRODUCT 테이블
     """
 
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(blank=True, null=True)
     portfolio_id = models.IntegerField(blank=True, null=True)
     product_id = models.IntegerField(blank=True, null=True)
     recommend_reason = models.CharField(max_length=500, blank=True, null=True)
@@ -417,12 +417,12 @@ class PortfolioProduct(models.Model):
         return f"PORTFOLIO_PRODUCT({self.id})"
 
 
-class PortfolioSession(models.Model):
+class Portfolio_session(models.Model):
     """
     PORTFOLIO_SESSION 테이블
     """
 
-    portfolio_id = models.AutoField(primary_key=True)
+    portfolio_id = models.AutoField(blank=True, null=True)
     member_id = models.CharField(max_length=30)
     session_id = models.IntegerField(blank=True, null=True)
     created_date = models.DateTimeField(blank=True, null=True)
@@ -440,7 +440,7 @@ class Product(models.Model):
     PRODUCT 테이블
     """
 
-    product_id = models.AutoField(primary_key=True)
+    product_id = models.AutoField(blank=True, null=True)
     product_name = models.CharField(max_length=255)
     main_category = models.CharField(max_length=100)
     sub_category = models.CharField(max_length=100, blank=True, null=True)
@@ -459,12 +459,12 @@ class Product(models.Model):
         return f"PRODUCT({self.product_id})"
 
 
-class ProductImage(models.Model):
+class Product_image(models.Model):
     """
     PRODUCT_IMAGE 테이블
     """
 
-    product_image_id = models.AutoField(primary_key=True)
+    product_image_id = models.AutoField(blank=True, null=True)
     product_id = models.IntegerField(blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
 
@@ -476,12 +476,12 @@ class ProductImage(models.Model):
         return f"PRODUCT_IMAGE({self.product_image_id})"
 
 
-class ProductReview(models.Model):
+class Product_review(models.Model):
     """
     PRODUCT_REVIEW 테이블
     """
 
-    product_id = models.BigAutoField(primary_key=True)
+    product_id = models.BigAutoField(blank=True, null=True)
     review_vector = models.TextField(blank=True, null=True)
     family_list = models.TextField(blank=True, null=True)
     size_list = models.TextField(blank=True, null=True)
@@ -496,12 +496,12 @@ class ProductReview(models.Model):
         return f"PRODUCT_REVIEW({self.product_id})"
 
 
-class ProductSpec(models.Model):
+class Product_spec(models.Model):
     """
     PRODUCT_SPEC 테이블
     """
 
-    spec_id = models.AutoField(primary_key=True)
+    spec_id = models.AutoField(blank=True, null=True)
     product_id = models.IntegerField(blank=True, null=True)
     spec_key = models.CharField(max_length=4000)
     spec_value = models.CharField(max_length=4000, blank=True, null=True)
@@ -515,12 +515,12 @@ class ProductSpec(models.Model):
         return f"PRODUCT_SPEC({self.spec_id})"
 
 
-class ProdDemoFamilyTypes(models.Model):
+class Prod_demo_family_types(models.Model):
     """
     PROD_DEMO_FAMILY_TYPES 테이블
     """
 
-    product_id = models.AutoField(primary_key=True)
+    product_id = models.AutoField(blank=True, null=True)
     family_type = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -532,12 +532,12 @@ class ProdDemoFamilyTypes(models.Model):
         return f"PROD_DEMO_FAMILY_TYPES({self.product_id})"
 
 
-class ProdDemoHouseSizes(models.Model):
+class Prod_demo_house_sizes(models.Model):
     """
     PROD_DEMO_HOUSE_SIZES 테이블
     """
 
-    product_id = models.AutoField(primary_key=True)
+    product_id = models.AutoField(blank=True, null=True)
     house_size = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -549,12 +549,12 @@ class ProdDemoHouseSizes(models.Model):
         return f"PROD_DEMO_HOUSE_SIZES({self.product_id})"
 
 
-class ProdDemoHouseTypes(models.Model):
+class Prod_demo_house_types(models.Model):
     """
     PROD_DEMO_HOUSE_TYPES 테이블
     """
 
-    product_id = models.AutoField(primary_key=True)
+    product_id = models.AutoField(blank=True, null=True)
     house_type = models.CharField(max_length=50)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -566,12 +566,12 @@ class ProdDemoHouseTypes(models.Model):
         return f"PROD_DEMO_HOUSE_TYPES({self.product_id})"
 
 
-class TasteCategoryScores(models.Model):
+class Taste_category_scores(models.Model):
     """
     TASTE_CATEGORY_SCORES 테이블
     """
 
-    taste_id = models.AutoField(primary_key=True)
+    taste_id = models.AutoField(blank=True, null=True)
     category_name = models.CharField(max_length=50)
     score = models.DecimalField(max_digits=19, decimal_places=2)
     is_recommended = models.CharField(max_length=1, blank=True, null=True)
@@ -587,12 +587,12 @@ class TasteCategoryScores(models.Model):
         return f"TASTE_CATEGORY_SCORES({self.taste_id})"
 
 
-class TasteConfig(models.Model):
+class Taste_config(models.Model):
     """
     TASTE_CONFIG 테이블
     """
 
-    taste_id = models.AutoField(primary_key=True)
+    taste_id = models.AutoField(blank=True, null=True)
     description = models.CharField(max_length=500, blank=True, null=True)
     representative_vibe = models.CharField(max_length=20, blank=True, null=True)
     representative_household_size = models.IntegerField(blank=True, null=True)
@@ -642,14 +642,14 @@ class TasteConfig(models.Model):
         return f"TASTE_CONFIG({self.taste_id})"
 
 
-class TasteRecommendedProducts(models.Model):
+class Taste_recommended_products(models.Model):
     """
     TASTE_RECOMMENDED_PRODUCTS 테이블
     """
 
-    taste_id = models.AutoField(primary_key=True)
+    taste_id = models.AutoField(blank=True, null=True)
     category_name = models.CharField(max_length=50)
-    product_id = models.IntegerField()
+    product_id = models.AutoField(blank=True, null=True)
     score = models.DecimalField(max_digits=19, decimal_places=2, blank=True, null=True)
     rank_order = models.IntegerField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
@@ -663,13 +663,13 @@ class TasteRecommendedProducts(models.Model):
         return f"TASTE_RECOMMENDED_PRODUCTS({self.taste_id})"
 
 
-class UserSamplePurchasedItems(models.Model):
+class User_sample_purchased_items(models.Model):
     """
     USER_SAMPLE_PURCHASED_ITEMS 테이블
     """
 
     user_id = models.CharField(max_length=50)
-    product_id = models.AutoField(primary_key=True)
+    product_id = models.AutoField(blank=True, null=True)
     purchased_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
@@ -681,7 +681,7 @@ class UserSamplePurchasedItems(models.Model):
         return f"USER_SAMPLE_PURCHASED_ITEMS({self.user_id})"
 
 
-class UserSampleRecommendations(models.Model):
+class User_sample_recommendations(models.Model):
     """
     USER_SAMPLE_RECOMMENDATIONS 테이블
     """

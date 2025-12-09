@@ -4,7 +4,7 @@ Django REST Framework Serializers
 데이터 검증 및 변환을 위한 Serializer 클래스들
 """
 from rest_framework import serializers
-from .models import Product, Portfolio, OnboardingSession
+from .models import Product, PortfolioSession as Portfolio, OnboardingSession
 
 
 # ============================================================

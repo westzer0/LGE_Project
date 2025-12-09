@@ -1,10 +1,12 @@
 """
 스타일 분석 서비스
 PRD 기반 스타일 타이틀 및 서브타이틀 생성
+엑셀 데이터 기반 스타일 분석 메시지 통합
 """
 import json
 from typing import Dict, Optional
 from .chatgpt_service import chatgpt_service
+from .style_analyzer import StyleAnalyzer, get_style_analyzer
 
 
 class StyleAnalysisService:
@@ -60,7 +62,50 @@ class StyleAnalysisService:
             main_space=main_space
         )
         
-        # ChatGPT로 스타일 메시지 생성 (PRD 패턴 반영)
+        # 엑셀 데이터 기반 스타일 분석 메시지 가져오기 (우선순위 1)
+        try:
+            style_analyzer = get_style_analyzer()
+            
+            # 온보딩 데이터를 엑셀 형식에 맞게 변환
+            user_answers = StyleAnalysisService._convert_to_excel_format(
+                vibe=vibe,
+                household_size=household_size,
+                housing_type=housing_type,
+                pyung=pyung,
+                priority=priority,
+                budget_level=budget_level,
+                has_pet=has_pet,
+                cooking=cooking,
+                laundry=laundry,
+                media=media,
+                main_space=main_space
+            )
+            
+            # 엑셀 데이터에서 메시지 가져오기
+            excel_message = style_analyzer.get_result_message(user_answers)
+            excel_style_info = style_analyzer.get_style_info(user_answers)
+            
+            if excel_message and excel_style_info:
+                # 엑셀 데이터에서 가져온 메시지를 subtitle로 사용
+                # title은 기존 로직 사용
+                fallback_title = StyleAnalysisService._generate_title_fallback(
+                    vibe=vibe,
+                    household_size=household_size,
+                    housing_type=housing_type,
+                    priority=priority
+                )
+                
+                return {
+                    **style_info,
+                    "title": fallback_title,
+                    "subtitle": excel_message,
+                    "style_analysis_message": excel_message,  # 원본 메시지도 포함
+                    "style_name": excel_style_info.get('style', '')
+                }
+        except Exception as e:
+            print(f"[Style Analysis Excel Error] {e}")
+        
+        # ChatGPT로 스타일 메시지 생성 (PRD 패턴 반영) - 우선순위 2
         if chatgpt_service.is_available():
             try:
                 style_message = StyleAnalysisService._generate_style_message_with_gpt(
@@ -84,7 +129,7 @@ class StyleAnalysisService:
             except Exception as e:
                 print(f"[Style Analysis GPT Error] {e}")
         
-        # Fallback: 규칙 기반 생성
+        # Fallback: 규칙 기반 생성 - 우선순위 3
         return StyleAnalysisService._generate_style_message_fallback(
             vibe=vibe,
             household_size=household_size,
@@ -146,6 +191,132 @@ class StyleAnalysisService:
             style_info["materials"] = ["Stainless Steel", "Glass"]
         
         return style_info
+    
+    @staticmethod
+    def _convert_to_excel_format(
+        vibe: str,
+        household_size: int,
+        housing_type: str,
+        pyung: int,
+        priority: str,
+        budget_level: str,
+        has_pet: bool,
+        cooking: str,
+        laundry: str,
+        media: str,
+        main_space: str
+    ) -> Dict[str, str]:
+        """
+        온보딩 데이터를 엑셀 형식에 맞게 변환
+        
+        Args:
+            온보딩 데이터 파라미터들
+        
+        Returns:
+            엑셀 형식의 사용자 답변 딕셔너리
+        """
+        # Vibe 매핑
+        vibe_mapping = {
+            'modern': '모던 & 미니멀 (Modern & Minimal): 화이트/블랙 톤의 깔끔한 공간을 선호',
+            'cozy': '코지 & 네이처 (Cozy & Nature): 우드 톤 가구, 베이지색 벽지 등 따뜻하고 자연적인 공간을 선호',
+            'natural': '코지 & 네이처 (Cozy & Nature): 우드 톤 가구, 베이지색 벽지 등 따뜻하고 자연적인 공간을 선호',
+            'pop': '유니크 & 팝 (Unique & Pop): 컬러풀한 소품, 생동감 넘치는 개성 강한 공간을 선호',
+            'unique': '유니크 & 팝 (Unique & Pop): 컬러풀한 소품, 생동감 넘치는 개성 강한 공간을 선호',
+            'luxury': '럭셔리 & 아티스틱 (Luxury & Artistic): 대리석, 갤러리 같은 고급스러운 분위기를 선호'
+        }
+        
+        # 가족 구성원 매핑
+        mate_mapping = {
+            1: '1인 (혼자)',
+            2: '2인 (커플/부부)',
+            3: '3인',
+            4: '4인 이상 (패밀리)',
+            5: '4인 이상 (패밀리)'
+        }
+        
+        # 주거 형태 매핑
+        housing_mapping = {
+            'oneroom': '원룸',
+            'officetel': '오피스텔',
+            'apartment': '아파트',
+            'villa': '빌라',
+            'house': '단독주택'
+        }
+        
+        # 우선순위 매핑
+        priority_mapping = {
+            'design': '디자인',
+            'tech': 'AI/스마트 기능',
+            'energy': '에너지 효율',
+            'eco': '에너지 효율',
+            'value': '가성비'
+        }
+        
+        # 예산 매핑
+        budget_mapping = {
+            'low': '1000만원 이하',
+            'medium': '2000만원 ~ 3000만원',
+            'high': '5000만원 이상'
+        }
+        
+        user_answers = {
+            'q1_vibe': vibe_mapping.get(vibe, vibe_mapping['modern']),
+            'q2_mate': mate_mapping.get(household_size, '2인 (커플/부부)'),
+            'q2_1_pet': '예' if has_pet else '아니오',
+            'q3_housing': housing_mapping.get(housing_type, '아파트'),
+            'q4_priority': priority_mapping.get(priority, '가성비'),
+            'q5_budget': budget_mapping.get(budget_level, '2000만원 ~ 3000만원')
+        }
+        
+        # 주요 공간이 있으면 추가
+        if main_space:
+            space_mapping = {
+                'kitchen': '주방',
+                'dressing': '드레스룸',
+                'living': '거실',
+                'all': '전체'
+            }
+            if isinstance(main_space, list):
+                user_answers['q3_1_space'] = ', '.join([space_mapping.get(s, s) for s in main_space])
+            else:
+                user_answers['q3_1_space'] = space_mapping.get(main_space, main_space)
+        
+        # 평수 추가
+        if pyung:
+            user_answers['q3_2_size'] = f'{pyung}평'
+        
+        return user_answers
+    
+    @staticmethod
+    def _generate_title_fallback(
+        vibe: str,
+        household_size: int,
+        housing_type: str,
+        priority: str
+    ) -> str:
+        """타이틀 생성 (간단한 fallback)"""
+        # Vibe 기반 타이틀
+        vibe_titles = {
+            'modern': "모던 & 미니멀 라이프를 위한 오브제 스타일",
+            'cozy': "따뜻하고 자연스러운 코지 패밀리 스타일",
+            'natural': "자연을 닮은 내추럴 라이프스타일",
+            'pop': "나만의 컬러 플레이, 유니크 MoodUP 스타일",
+            'unique': "개성 넘치는 유니크 & 팝 감성 스타일",
+            'luxury': "프리미엄 감성의 럭셔리 & 아티스틱 스타일"
+        }
+        
+        # 고객 타입 기반 타이틀 우선 적용
+        if household_size == 1:
+            return "1인 라이프에 꼭 맞춘 컴팩트 & 스타일 패키지"
+        elif household_size == 2:
+            if vibe == 'modern':
+                return "둘만의 신혼 무드를 완성하는 오브제 스타일"
+            else:
+                return "둘만의 신혼 무드를 완성하는 스타일"
+        elif household_size >= 4:
+            return "패밀리 라이프를 위한 실속+대용량 프리미엄 스타일"
+        else:
+            return vibe_titles.get(vibe, "나에게 딱 맞는 스타일")
     
     @staticmethod
     def _generate_style_message_with_gpt(

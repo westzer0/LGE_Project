@@ -6,7 +6,7 @@ import json
 import random
 from typing import Dict, List, Optional
 from django.db.models import Q
-from api.models import Product, Portfolio, OnboardingSession
+from api.models import Product, PortfolioSession as Portfolio, OnboardingSession
 from .recommendation_engine import recommendation_engine
 from .style_analysis_service import style_analysis_service
 
@@ -126,13 +126,17 @@ class PortfolioService:
             
             # 포트폴리오 생성
             print(f"[Portfolio Service] 포트폴리오 생성 중: {len(final_recommendations)}개 제품, 총 가격={total_price}")
+            print(f"[Portfolio Service] 스타일 분석 결과: title={style_analysis.get('title')}, subtitle={style_analysis.get('subtitle', '')[:100]}, style_analysis_message={style_analysis.get('style_analysis_message', '')[:100] if style_analysis.get('style_analysis_message') else '없음'}")
             try:
+                # 엑셀 데이터의 메시지를 우선 사용 (style_analysis_message가 있으면 사용)
+                style_subtitle = style_analysis.get('style_analysis_message') or style_analysis.get('subtitle') or '당신의 라이프스타일에 맞춰 구성했어요.'
+                
                 portfolio = Portfolio.objects.create(
                     user_id=user_id,
                     onboarding_session=session,
                     style_type=style_analysis.get('style_type', 'modern'),
                     style_title=style_analysis.get('title', '나에게 딱 맞는 스타일'),
-                    style_subtitle=style_analysis.get('subtitle', '당신의 라이프스타일에 맞춰 구성했어요.'),
+                    style_subtitle=style_subtitle,
                     onboarding_data=onboarding_data,
                     products=final_recommendations,
                     total_original_price=total_price,

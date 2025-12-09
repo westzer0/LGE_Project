@@ -2237,6 +2237,7 @@
         let originalRecommendations = [];
         let displayedRecommendations = [];
         let originalProductModels = []; // 기존 추천 모델 저장
+        let currentStyleType = 'modern'; // 스타일 타입 (modern, cozy, pop, luxury)
 
         // 구매상담예약 모달 전역 변수
         let currentCalendarDate = new Date();
@@ -2244,8 +2245,57 @@
         let selectedTime = null;
         let selectedPurpose = null;
 
+        // URL 파라미터에서 스타일 타입 읽기
+        function getStyleTypeFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('style') || 'modern';
+        }
+
+        // 스타일 타입에 따라 카테고리 탭 생성
+        function initializeCategoryTabs() {
+            currentStyleType = getStyleTypeFromURL();
+            const categoryTabsContainer = document.querySelector('.category-tabs');
+            if (!categoryTabsContainer) return;
+
+            // 기존 탭 제거
+            categoryTabsContainer.innerHTML = '';
+
+            let categories = [];
+            if (currentStyleType === 'modern') {
+                // 모던&미니멀: 냉장고, 광파오븐, 식기세척기
+                categories = [
+                    { id: 'refrigerator', name: '냉장고' },
+                    { id: 'microwave', name: '광파오븐' },
+                    { id: 'dishwasher', name: '식기세척기' }
+                ];
+            } else {
+                // 코지&네이처, 컬러&팝, 럭셔리: 냉장고, 세탁기, TV
+                categories = [
+                    { id: 'refrigerator', name: '냉장고' },
+                    { id: 'washing', name: '세탁기' },
+                    { id: 'tv', name: 'TV' }
+                ];
+            }
+
+            // 카테고리 탭 생성
+            categories.forEach((category, index) => {
+                const tab = document.createElement('button');
+                tab.className = `category-tab ${index === 0 ? 'active' : ''}`;
+                tab.setAttribute('data-category', category.id);
+                tab.textContent = category.name;
+                tab.onclick = () => switchCategory(category.id);
+                categoryTabsContainer.appendChild(tab);
+            });
+
+            // 첫 번째 카테고리로 설정
+            if (categories.length > 0) {
+                currentCategory = categories[0].id;
+            }
+        }
+
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function () {
+            initializeCategoryTabs();
             loadOriginalRecommendations();
             loadRecommendations();
         });
@@ -2323,11 +2373,11 @@
 
                 // 세션이 없어도 대체 제품으로 표시
                 // 첫 번째 카테고리 제품 표시
-                displayProductsByCategory('refrigerator');
+                displayProductsByCategory(currentCategory);
             } catch (error) {
                 console.error('제품 로드 오류:', error);
                 // 에러가 발생해도 대체 제품으로 표시
-                displayProductsByCategory('refrigerator');
+                displayProductsByCategory(currentCategory);
             }
         }
 
@@ -2366,6 +2416,18 @@
                     categoryProducts = displayedRecommendations.filter(p => {
                         const name = (p.name || '').toLowerCase();
                         return name.includes('식기세척기');
+                    });
+                } else if (category === 'washing') {
+                    // 세탁기 카테고리: 세탁기, 워시콤보, 워시타워 제품만
+                    categoryProducts = displayedRecommendations.filter(p => {
+                        const name = (p.name || '').toLowerCase();
+                        return name.includes('세탁기') || name.includes('워시콤보') || name.includes('워시타워');
+                    });
+                } else if (category === 'tv') {
+                    // TV 카테고리: TV 제품만
+                    categoryProducts = displayedRecommendations.filter(p => {
+                        const name = (p.name || '').toLowerCase();
+                        return name.includes('tv') || name.includes('티비') || name.includes('텔레비전');
                     });
                 }
 
@@ -2459,11 +2521,50 @@
             const products = {
                 refrigerator: [
                     {
+                        name: 'LG 디오스 오브제컬렉션 노크온 매직스페이스 냉장고',
+                        model: 'T875MEE412',
+                        rating: 4.9,
+                        reviewCount: 520,
+                        reason: '기존 냉장고보다 훨씬 넓어진 공간과 뛰어난 디자인으로 다양한 용량의 수납 가능해요',
+                        specs: {
+                            capacity: '865',
+                            color: '오브제컬렉션 베이지',
+                            doorStyle: '메탈',
+                            coolingMethod: '멀티냉각방식',
+                            energyGrade: '2등급'
+                        },
+                        originalPrice: 2950000,
+                        salePrice: 2300000,
+                        benefitPrice: 2027400,
+                        image: 'https://www.lge.co.kr/kr/images/refrigerators/md10411852/gallery/medium01.jpg',
+                        isOriginal: false
+                    },
+                    {
+                        name: 'LG 디오스 AI 오브제컬렉션 STEM 얼음정수 냉장고 (노크온 매직스페이스)',
+                        model: 'STEM_MAGICSPACE',
+                        rating: 5.0,
+                        reviewCount: 640,
+                        reason: '넓은 공간, 자동 얼음 생성, 편리한 정수기 기능으로 쾌적하고 간편한 사용 경험을 제공합니다.',
+                        specs: {
+                            capacity: '817',
+                            color: '오브제컬렉션 베이지 / 에센스 화이트 / 실버 / 토프',
+                            doorStyle: '글라스 / 메탈 / 스테인리스',
+                            coolingMethod: '멀티냉각방식',
+                            energyGrade: '2등급'
+                        },
+                        originalPrice: 6383000,
+                        salePrice: 5750000,
+                        benefitPrice: 5180100,
+                        image: 'https://www.lge.co.kr/kr/images/refrigerators/md10604868/gallery/medium01.jpg',
+                        isOriginal: true,
+                        tag: 'Perfect Style'
+                    },
+                    {
                         name: 'LG 디오스 AI 오브제컬렉션 냉장고(더블매직스페이스)',
                         model: 'M876GGA231',
                         rating: 5.0,
                         reviewCount: 640,
-                        reason: '우리 아이에게 영화관 같은 기분을 선물할 수 있어요',
+                        reason: '똑똑! 노크만 하면 문을 열지 않고도 안이 훤히 보여서 냉기 손실도 줄고 전기료도 아끼는 기분이에요',
                         specs: {
                             capacity: '607',
                             color: '오브제컬렉션 토프/아몬드',
@@ -2473,54 +2574,36 @@
                         },
                         originalPrice: 4884000,
                         benefitPrice: 3924600,
-                        image: '/static/images/가전 카테고리/냉장고.png',
-                        isOriginal: false
-                    },
-                    {
-                        name: 'LG 디오스 AI 오브제컬렉션 냉장고 Fit & Max',
-                        model: 'M616GBB0M1',
-                        rating: 5.0,
-                        reviewCount: 640,
-                        reason: '우리 아이에게 영화관 같은 기분을 선물할 수 있어요',
-                        specs: {
-                            capacity: '871',
-                            color: '오브제컬렉션 토프/아몬드',
-                            doorStyle: '글라스',
-                            coolingMethod: '멀티냉각방식',
-                            energyGrade: '1등급'
-                        },
-                        originalPrice: 4884000,
-                        benefitPrice: 3924600,
-                        image: '/static/images/가전 카테고리/냉장고.png',
-                        isOriginal: true,
-                        tag: 'Perfect Style'
-                    },
-                    {
-                        name: 'LG 디오스 오브제컬렉션 매직스페이스 냉장고',
-                        model: 'OLED65B4NNA',
-                        rating: 5.0,
-                        reviewCount: 340,
-                        reason: '우리 아이에게 영화관 같은 기분을 선물할 수 있어요',
-                        specs: {
-                            capacity: '920',
-                            color: '오브제컬렉션 토프/아몬드',
-                            doorStyle: '글라스',
-                            coolingMethod: '멀티냉각방식',
-                            energyGrade: '1등급'
-                        },
-                        originalPrice: 4884000,
-                        benefitPrice: 3924600,
-                        image: '/static/images/가전 카테고리/냉장고.png',
+                        image: 'https://www.lge.co.kr/kr/images/refrigerators/md10604872/gallery/medium01.jpg',
                         isOriginal: false
                     }
                 ],
                 microwave: [
                     {
                         name: 'LG 디오스 오브제컬렉션 광파오븐',
-                        model: 'MLJ32ERS',
+                        model: 'MLJ39EW',
                         rating: 4.8,
                         reviewCount: 320,
-                        reason: '빠르고 균일한 조리로 맛있는 요리를 완성할 수 있어요',
+                        reason: '트리플 광파쿡 기술로 음식 속까지 골고루 익혀서 맛과 영양을 모두 잡을 수 있어요',
+                        specs: {
+                            capacity: '39L',
+                            color: '오브제컬렉션',
+                            doorStyle: '글라스',
+                            function: '광파오븐',
+                            energyGrade: '1등급'
+                        },
+                        originalPrice: 655000,
+                        salePrice: 590000,
+                        benefitPrice: 520800,
+                        image: 'https://www.lge.co.kr/kr/images/microwaves-and-ovens/md08980867/gallery/medium01.jpg',
+                        isOriginal: false
+                    },
+                    {
+                        name: 'LG 디오스 오브제컬렉션 광파오븐',
+                        model: 'MLJ32ERS',
+                        rating: 4.9,
+                        reviewCount: 280,
+                        reason: '다양한 기능(오븐,에어프라이어 등)과 뛰어난 디자인으로 최적의 선택',
                         specs: {
                             capacity: '32L',
                             color: '오브제컬렉션',
@@ -2528,35 +2611,19 @@
                             function: '광파오븐',
                             energyGrade: '1등급'
                         },
-                        originalPrice: 1200000,
-                        benefitPrice: 950000,
-                        image: '/static/images/가전 카테고리/광파오븐.png',
-                        isOriginal: false
-                    },
-                    {
-                        name: 'LG 디오스 오브제컬렉션 광파오븐 Pro',
-                        model: 'MLJ35ERS',
-                        rating: 4.9,
-                        reviewCount: 280,
-                        reason: '빠르고 균일한 조리로 맛있는 요리를 완성할 수 있어요',
-                        specs: {
-                            capacity: '35L',
-                            color: '오브제컬렉션',
-                            doorStyle: '글라스',
-                            function: '광파오븐',
-                            energyGrade: '1등급'
-                        },
-                        originalPrice: 1400000,
-                        benefitPrice: 1100000,
-                        image: '/static/images/가전 카테고리/광파오븐.png',
-                        isOriginal: false
+                        originalPrice: 1065000,
+                        salePrice: 950000,
+                        benefitPrice: 855600,
+                        image: 'https://www.lge.co.kr/kr/images/microwaves-and-ovens/md10200828/gallery/medium07.jpg',
+                        isOriginal: true,
+                        tag: 'Perfect Style'
                     },
                     {
                         name: 'LG 디오스 오브제컬렉션 광파오븐 Max',
                         model: 'MLJ40ERS',
                         rating: 5.0,
                         reviewCount: 420,
-                        reason: '빠르고 균일한 조리로 맛있는 요리를 완성할 수 있어요',
+                        reason: '대용량으로 가족 모임이나 손님 접대 때도 한 번에 조리할 수 있어서 시간과 에너지를 절약해요',
                         specs: {
                             capacity: '40L',
                             color: '오브제컬렉션',
@@ -2576,7 +2643,7 @@
                         model: 'DUE5BGHE',
                         rating: 4.9,
                         reviewCount: 450,
-                        reason: '깨끗하고 안전한 식기 관리로 건강한 식생활을 도와요',
+                        reason: '스팀 세척으로 기름기와 세균까지 완벽하게 제거해서 안심하고 사용할 수 있어요',
                         specs: {
                             capacity: '14인용',
                             color: '오브제컬렉션',
@@ -2585,32 +2652,34 @@
                         },
                         originalPrice: 1500000,
                         benefitPrice: 1200000,
-                        image: '/static/images/가전 카테고리/식기세척기.png',
+                        image: 'https://www.lge.co.kr/kr/images/dishwashers/md10539831/gallery/medium11.jpg',
                         isOriginal: false
                     },
                     {
-                        name: 'LG 디오스 오브제컬렉션 식기세척기 Pro',
-                        model: 'DUE6BGHE',
+                        name: 'LG 디오스 AI 오브제컬렉션 식기세척기',
+                        model: 'DUE5BGHE_AI',
                         rating: 5.0,
                         reviewCount: 380,
-                        reason: '깨끗하고 안전한 식기 관리로 건강한 식생활을 도와요',
+                        reason: '주방을 깔끔하게 유지 및 기름기 걱정 없이 식기 세척/건조 기능으로 편리',
                         specs: {
-                            capacity: '16인용',
+                            capacity: '14인용',
                             color: '오브제컬렉션',
                             function: '스팀세척',
                             energyGrade: '1등급'
                         },
-                        originalPrice: 1800000,
-                        benefitPrice: 1450000,
-                        image: '/static/images/가전 카테고리/식기세척기.png',
-                        isOriginal: false
+                        originalPrice: 2300000,
+                        salePrice: 2080000,
+                        benefitPrice: 1822800,
+                        image: 'https://www.lge.co.kr/kr/images/dishwashers/md10294858/gallery/medium01.jpg',
+                        isOriginal: true,
+                        tag: 'Perfect Style'
                     },
                     {
                         name: 'LG 디오스 오브제컬렉션 식기세척기 Max',
                         model: 'DUE7BGHE',
                         rating: 4.8,
                         reviewCount: 520,
-                        reason: '깨끗하고 안전한 식기 관리로 건강한 식생활을 도와요',
+                        reason: '대용량으로 큰 냄비나 팬까지 한 번에 세척할 수 있어서 주방 일이 훨씬 편해졌어요',
                         specs: {
                             capacity: '18인용',
                             color: '오브제컬렉션',
@@ -2620,6 +2689,121 @@
                         originalPrice: 2000000,
                         benefitPrice: 1600000,
                         image: '/static/images/가전 카테고리/식기세척기.png',
+                        isOriginal: false
+                    }
+                ],
+                washing: [
+                    {
+                        name: 'LG 트롬 오브제컬렉션 세탁기 + LG 트롬 미니워시',
+                        model: 'FX25WSQX',
+                        rating: 4.9,
+                        reviewCount: 580,
+                        reason: '소량빨래부터 대용량 이불까지 공간 효율적 분리세탁으로 시간과 에너지를 절약해요',
+                        specs: {
+                            capacity: '25kg',
+                            color: '화이트',
+                            function: '세탁',
+                            energyGrade: '1등급'
+                        },
+                        originalPrice: 2600000,
+                        salePrice: 1790000,
+                        benefitPrice: 1571700,
+                        image: '/static/images/가전 카테고리/세탁기.png',
+                        isOriginal: false
+                    },
+                    {
+                        name: 'LG 트롬 오브제컬렉션 세탁기',
+                        model: 'FG24KN',
+                        rating: 5.0,
+                        reviewCount: 640,
+                        reason: '넉넉한 용량과 뛰어난 세탁력으로 편안한 설치 서비스와 품질을 기대할수 있어요',
+                        specs: {
+                            capacity: '24kg',
+                            color: '스페이스 블랙',
+                            function: '세탁',
+                            energyGrade: '1등급'
+                        },
+                        originalPrice: 1943000,
+                        salePrice: 1750000,
+                        benefitPrice: 1534500,
+                        image: '/static/images/가전 카테고리/세탁기.png',
+                        isOriginal: true,
+                        tag: 'Perfect Style'
+                    },
+                    {
+                        name: 'LG 트롬 오브제컬렉션 워시콤보',
+                        model: 'FH25KA',
+                        rating: 5.0,
+                        reviewCount: 680,
+                        reason: '세탁과 건조를 한 번에 처리하는 스마트한 선택이에요',
+                        specs: {
+                            capacity: '25kg',
+                            color: '스페이스 블랙',
+                            function: '세탁+건조',
+                            energyGrade: '1등급'
+                        },
+                        originalPrice: 4440000,
+                        benefitPrice: 3300000,
+                        image: '/static/images/가전 카테고리/워시콤보.png',
+                        isOriginal: false
+                    }
+                ],
+                tv: [
+                    {
+                        name: 'LG 올레드 TV (벽걸이형)',
+                        model: 'OLED65B4NNA',
+                        rating: 4.9,
+                        reviewCount: 580,
+                        reason: '튀어나오는 부분 없이 벽에 슬림하게 밀착돼서 액자를 걸어둔 것처럼 깔끔해요',
+                        specs: {
+                            size: '163cm',
+                            resolution: '4K UHD (3,840 x 2,160)',
+                            display: 'OLED',
+                            speakerOutput: '20W',
+                            speakerChannel: '2.0ch'
+                        },
+                        originalPrice: 2890000,
+                        salePrice: 2290000,
+                        benefitPrice: 2018100,
+                        image: '/static/images/가전 카테고리/TV.png',
+                        isOriginal: false
+                    },
+                    {
+                        name: 'LG 나노셀 AI (스탠드형) 163cm',
+                        model: '65NANO80AEA',
+                        rating: 5.0,
+                        reviewCount: 640,
+                        reason: '나노셀 기술 덕분인지 색 표현이 정확하고, 측면에서 봐도 흐려짐 없이 선명해요',
+                        specs: {
+                            size: '163cm',
+                            resolution: '4K UHD (3,840 x 2,160)',
+                            display: '나노셀',
+                            speakerOutput: '20W',
+                            speakerChannel: '2.0ch'
+                        },
+                        originalPrice: 2090000,
+                        salePrice: 1120000,
+                        benefitPrice: 1013700,
+                        image: '/static/images/가전 카테고리/TV.png',
+                        isOriginal: true,
+                        tag: 'Perfect Style'
+                    },
+                    {
+                        name: 'LG QNED TV (벽걸이형)',
+                        model: '86QNED70TEA',
+                        rating: 4.9,
+                        reviewCount: 580,
+                        reason: '압도적인 화면 크기와 선명한 4K 화질로 몰입감 있는 시청을 즐길 수 있어요',
+                        specs: {
+                            size: '217cm',
+                            resolution: '4K UHD (3,840 x 2,160)',
+                            display: 'QNED',
+                            speakerOutput: '20W',
+                            speakerChannel: '2.0ch'
+                        },
+                        originalPrice: 3890000,
+                        benefitPrice: 2680000,
+                        image: '/static/images/가전 카테고리/TV.png',
                         isOriginal: false
                     }
                 ]
@@ -2688,7 +2872,7 @@
                         </div>
                         <div class="price-row">
                             <span class="price-label">판매가</span>
-                            <span class="price-value price-sale">${formatPrice(Math.round(product.originalPrice * 0.9))}원</span>
+                            <span class="price-value price-sale">${formatPrice(product.salePrice || Math.round(product.originalPrice * 0.9))}원</span>
                         </div>
                         <div class="price-row">
                             <div style="display: flex; align-items: center; gap: 4px;">
@@ -2741,8 +2925,17 @@
                 doorStyle: '도어스타일/재질',
                 coolingMethod: '냉각방식',
                 energyGrade: '에너지 소비효율등급',
-                function: '기능'
+                function: '기능',
+                size: '화면 사이즈 (베젤 미포함)',
+                resolution: '해상도',
+                display: '디스플레이 종류',
+                speakerOutput: '스피커 출력',
+                speakerChannel: '스피커 채널'
             };
+            // 세탁기 카테고리인 경우 capacity를 '세탁 용량 (kg)'으로 표시
+            if (key === 'capacity' && currentCategory === 'washing') {
+                return '세탁 용량 (kg)';
+            }
             return labels[key] || key;
         }
 
@@ -2951,8 +3144,27 @@
         // 제품 상세 페이지로 이동
         function goToProductPage(model) {
             // LG닷컴 제품 페이지 URL로 이동
-            // 실제 제품 모델명에 따라 URL 구성이 달라질 수 있음
-            const productUrl = `https://www.lge.co.kr/kr/search/${encodeURIComponent(model)}`;
+            // 제품 모델명에 따른 URL 매핑
+            const productUrlMap = {
+                // 냉장고
+                'T875MEE412': 'https://www.lge.co.kr/refrigerators/t875mee412?sKwd=T875MEE412&sTab=unit_product_list&sRank=1',
+                'STEM_MAGICSPACE': 'https://www.lge.co.kr/refrigerators/stem-magicspace?sKwd=STEM_MAGICSPACE&sTab=unit_product_list&sRank=1',
+                'M876GGA231': 'https://www.lge.co.kr/refrigerators/m876gga231?sKwd=M876GGA231&sTab=unit_product_list&sRank=1',
+                'S834MEE111': 'https://www.lge.co.kr/refrigerators/s834mee111?sKwd=S834MEE111&sTab=unit_product_list&sRank=1',
+                // 광파오븐
+                'MLJ32ERS': 'https://www.lge.co.kr/microwaves-and-ovens/mlj32ers?sKwd=MLJ32ERS&sTab=unit_product_list&sRank=1',
+                'MLJ39EW': 'https://www.lge.co.kr/microwaves-and-ovens/mlj39ew?sKwd=MLJ39EW&sTab=unit_product_list&sRank=1',
+                'MLJ35ERS': 'https://www.lge.co.kr/microwaves-and-ovens/mlj35ers?sKwd=MLJ35ERS&sTab=unit_product_list&sRank=1',
+                'MLJ40ERS': 'https://www.lge.co.kr/microwaves-and-ovens/mlj40ers?sKwd=MLJ40ERS&sTab=unit_product_list&sRank=1',
+                // 식기세척기
+                'DUE5BGHE': 'https://www.lge.co.kr/dishwashers/due5bghe?sKwd=DUE5BGHE&sTab=unit_product_list&sRank=1',
+                'DUE5BGHE_AI': 'https://www.lge.co.kr/dishwashers/due5bghe-ai?sKwd=DUE5BGHE_AI&sTab=unit_product_list&sRank=1',
+                'DUE6BGHE': 'https://www.lge.co.kr/dishwashers/due6bghe?sKwd=DUE6BGHE&sTab=unit_product_list&sRank=1',
+                'DUE7BGHE': 'https://www.lge.co.kr/dishwashers/due7bghe?sKwd=DUE7BGHE&sTab=unit_product_list&sRank=1',
+            };
+            
+            // 매핑된 URL이 있으면 사용, 없으면 기본 검색 URL 사용
+            const productUrl = productUrlMap[model] || `https://www.lge.co.kr/kr/search/${encodeURIComponent(model)}`;
             window.open(productUrl, '_blank');
         }
 

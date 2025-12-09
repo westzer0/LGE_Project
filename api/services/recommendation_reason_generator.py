@@ -7,7 +7,9 @@ import re
 from typing import Dict, List, Optional
 from collections import Counter
 from functools import lru_cache
-from ..models import Product, ProductReview, ProductRecommendReason
+from ..models import Product, ProductReview
+# ProductRecommendReason 모델이 없어서 주석 처리 (DB에 테이블이 없을 수 있음)
+# from ..models import ProductRecommendReason
 
 
 class RecommendationReasonGenerator:

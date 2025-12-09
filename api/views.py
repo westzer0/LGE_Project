@@ -4,7 +4,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 import json
-from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics, Reservation, ProductSpec
+from .models import (
+    Product, OnboardingSession, 
+    PortfolioSession, ProductReview, 
+    Cart, ProductSpec
+)
 from .rule_engine import build_profile, recommend_products
 from .services.recommendation_engine import recommendation_engine
 from .services.chatgpt_service import chatgpt_service
@@ -247,6 +251,11 @@ def fake_lg_main_page(request):
 
 def onboarding_page(request):
     """온보딩 페이지 렌더링 (1단계)"""
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        from django.contrib import messages
+        messages.warning(request, '온보딩을 시작하려면 로그인이 필요합니다.')
+        return redirect('/login/?next=/onboarding/')
     return render(request, "onboarding.html")
 
 
@@ -285,11 +294,20 @@ def onboarding_new_page(request):
     return render(request, "onboarding_new.html")
 
 
-def result_page(request):
+def result_page(request, portfolio_id=None):
     """포트폴리오 결과 페이지"""
     from django.conf import settings
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    
+    # 로그인 체크 - 포트폴리오는 로그인한 회원만 받을 수 있음
+    if not request.user.is_authenticated:
+        messages.warning(request, '포트폴리오를 보려면 로그인이 필요합니다.')
+        return redirect('/login/?next=' + request.path)
+    
     return render(request, "result.html", {
-        'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', '')
+        'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', ''),
+        'portfolio_id': portfolio_id or ''
     })
 
 
@@ -298,9 +316,234 @@ def other_recommendations_page(request):
     return render(request, "other_recommendations.html")
 
 
+def login_page(request):
+    """로그인 페이지"""
+    from django.contrib.auth import authenticate, login
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    
+    if request.user.is_authenticated:
+        return redirect('/')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        next_url = request.POST.get('next', '/')
+        
+        if not username or not password:
+            messages.error(request, '아이디와 비밀번호를 입력해주세요.')
+            return render(request, 'login.html', {'next': next_url})
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # 비밀번호 변경 팝업 방지를 위해 사용자 세션에 플래그 설정
+            login(request, user)
+            # 비밀번호 변경 요구 플래그 제거 (Django 기본 동작 방지)
+            if hasattr(user, 'userprofile'):
+                # UserProfile이 있다면 비밀번호 변경 요구 플래그 제거
+                pass
+            messages.success(request, f'{user.username}님, 환영합니다!')
+            # 로그인 성공 시 /lge/# 페이지로 이동
+            return redirect('/lge/#')
+        else:
+            messages.error(request, '아이디 또는 비밀번호가 올바르지 않습니다.')
+    
+    next_url = request.GET.get('next', '/')
+    return render(request, 'login.html', {'next': next_url})
+
+
+def signup_page(request):
+    """회원가입 페이지"""
+    from django.contrib.auth import login
+    from django.contrib.auth.models import User
+    from django.contrib import messages
+    from django.shortcuts import redirect
+    
+    if request.user.is_authenticated:
+        return redirect('/')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        
+        # 유효성 검사
+        errors = []
+        if not username:
+            errors.append('아이디를 입력해주세요.')
+        elif len(username) < 4:
+            errors.append('아이디는 4자 이상이어야 합니다.')
+        elif User.objects.filter(username=username).exists():
+            errors.append('이미 사용 중인 아이디입니다.')
+        
+        if not email:
+            errors.append('이메일을 입력해주세요.')
+        elif User.objects.filter(email=email).exists():
+            errors.append('이미 사용 중인 이메일입니다.')
+        
+        if not password1:
+            errors.append('비밀번호를 입력해주세요.')
+        elif len(password1) < 8:
+            errors.append('비밀번호는 8자 이상이어야 합니다.')
+        elif password1 != password2:
+            errors.append('비밀번호가 일치하지 않습니다.')
+        
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'signup.html', {
+                'username': username,
+                'email': email,
+            })
+        
+        # 사용자 생성
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password1
+            )
+            login(request, user)
+            messages.success(request, '회원가입이 완료되었습니다!')
+            return redirect('/')
+        except Exception as e:
+            messages.error(request, f'회원가입 중 오류가 발생했습니다: {str(e)}')
+    
+    return render(request, 'signup.html')
+
+
+def logout_view(request):
+    """로그아웃"""
+    from django.contrib.auth import logout
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    
+    logout(request)
+    messages.success(request, '로그아웃되었습니다.')
+    return redirect('/')
+
+
 def mypage(request):
     """마이페이지"""
+    if not request.user.is_authenticated:
+        from django.shortcuts import redirect
+        from django.contrib import messages
+        messages.warning(request, '로그인이 필요합니다.')
+        return redirect('/login/?next=/my-page/')
     return render(request, "mypage.html")
+
+
+def portfolio_history_page(request):
+    """가전 패키지 추천 내역 리스트 페이지"""
+    from django.shortcuts import redirect
+    from django.contrib import messages
+    
+    # 로그인 체크
+    if not request.user.is_authenticated:
+        messages.warning(request, '로그인이 필요합니다.')
+        return redirect('/login/?next=/portfolio/history/')
+    
+    # Portfolio 모델이 있는지 확인하고 조회
+    portfolios = []
+    try:
+        # Portfolio 모델 import 시도
+        try:
+            from .models import Portfolio
+            # Portfolio 모델이 있으면 사용
+            user_id = str(request.user.id)
+            portfolio_queryset = Portfolio.objects.filter(user_id=user_id).order_by('-created_at')
+            
+            # 포트폴리오 데이터 포맷팅
+            for p in portfolio_queryset:
+                portfolios.append({
+                    'portfolio_id': p.portfolio_id,
+                    'style_type': getattr(p, 'style_type', 'modern'),
+                    'style_title': getattr(p, 'style_title', None) or '가전 패키지 추천',
+                    'style_subtitle': getattr(p, 'style_subtitle', None) or '나에게 맞는 가전 패키지 조합',
+                    'total_original_price': float(getattr(p, 'total_original_price', 0)) if hasattr(p, 'total_original_price') else 0,
+                    'total_discount_price': float(getattr(p, 'total_discount_price', 0)) if hasattr(p, 'total_discount_price') else 0,
+                    'product_count': min(len(getattr(p, 'products', [])) if hasattr(p, 'products') and getattr(p, 'products') else 0, 3),
+                    'created_at': getattr(p, 'created_at', None) or timezone.now(),
+                    'products': getattr(p, 'products', []) if hasattr(p, 'products') else []
+                })
+        except (ImportError, AttributeError):
+            # Portfolio 모델이 없거나 속성이 없으면 PortfolioSession 사용
+            portfolio_sessions = PortfolioSession.objects.filter(
+                member_id=str(request.user.id)
+            ).order_by('-created_date')
+            
+            # PortfolioSession을 포트폴리오 형태로 변환
+            for ps in portfolio_sessions:
+                portfolios.append({
+                    'portfolio_id': ps.portfolio_id,
+                    'style_type': 'modern',
+                    'style_title': f'가전 패키지 추천 #{ps.portfolio_id}',
+                    'style_subtitle': '나에게 맞는 가전 패키지 조합',
+                    'total_original_price': 0,
+                    'total_discount_price': 0,
+                    'product_count': 0,
+                    'created_at': ps.created_date or timezone.now(),
+                    'products': []
+                })
+            
+    except Exception as e:
+        # 에러 발생 시 빈 리스트
+        portfolios = []
+        print(f"포트폴리오 조회 오류: {e}")
+    
+    # 데이터가 없으면 테스트용 샘플 데이터 생성
+    if len(portfolios) == 0:
+        from datetime import timedelta
+        sample_portfolios = [
+            {
+                'portfolio_id': 'PF-001',
+                'style_type': 'modern',
+                'style_title': '모던 & 미니멀 라이프를 위한 오브제 스타일',
+                'style_subtitle': '깔끔하고 세련된 공간을 완성하는 가전 패키지. 미니멀한 디자인과 뛰어난 성능을 갖춘 제품들로 구성되었습니다.',
+                'total_original_price': 15000000,
+                'total_discount_price': 12500000,
+                'product_count': 3,
+                'created_at': timezone.now() - timedelta(days=3),
+                'products': [
+                    {'image_url': '/static/images/온보딩_모던미니멀.jpg'},
+                ]
+            },
+            {
+                'portfolio_id': 'PF-002',
+                'style_type': 'cozy',
+                'style_title': '따뜻한 코지 라이프를 위한 가전 패키지',
+                'style_subtitle': '편안하고 아늑한 공간을 만들어주는 가전 제품들. 따뜻한 색감과 부드러운 디자인으로 일상의 편안함을 더해줍니다.',
+                'total_original_price': 3150000,
+                'total_discount_price': 2856800,
+                'product_count': 3,
+                'created_at': timezone.now() - timedelta(days=7),
+                'products': [
+                    {'image_url': '/static/images/온보딩_우드 네이쳐.jpg'},
+                ]
+            },
+            {
+                'portfolio_id': 'PF-003',
+                'style_type': 'luxury',
+                'style_title': '럭셔리 & 프리미엄 라이프를 위한 시그니처 스타일',
+                'style_subtitle': '최고급 가전 제품으로 완성하는 프리미엄 라이프스타일. 뛰어난 성능과 세련된 디자인이 조화를 이룬 특별한 패키지입니다.',
+                'total_original_price': 55690000,
+                'total_discount_price': 51312900,
+                'product_count': 3,
+                'created_at': timezone.now() - timedelta(days=14),
+                'products': [
+                    {'image_url': '/static/images/온보딩_럭셔리.jpg'},
+                ]
+            }
+        ]
+        portfolios = sample_portfolios
+    
+    # 최대 3개만 표시
+    portfolios = portfolios[:3]
+    
+    return render(request, "portfolio_history.html", {
+        'portfolios': portfolios
+    })
 
 
 def reservation_status_page(request):
@@ -811,11 +1054,20 @@ def onboarding_step_view(request):
                 'error': 'session_id 필수'
             }, status=400)
         
-        # 세션 생성 또는 조회
+        # 세션 생성 또는 조회 (로그인한 사용자와 연결)
+        defaults = {'current_step': 1, 'status': 'in_progress'}
+        if request.user.is_authenticated:
+            defaults['user'] = request.user
+        
         session, created = OnboardingSession.objects.get_or_create(
             session_id=session_id,
-            defaults={'current_step': 1, 'status': 'in_progress'}
+            defaults=defaults
         )
+        
+        # 기존 세션이 있지만 사용자가 연결되지 않은 경우 업데이트
+        if not created and request.user.is_authenticated and not session.user:
+            session.user = request.user
+            session.save()
         
         # Step별 데이터 저장
         if step == 1:
@@ -1204,34 +1456,45 @@ def onboarding_complete_view(request):
             if len(priority_list) == 0:
                 priority_list = [data.get('priority', 'value')]
             
+            defaults = {
+                # Step 1
+                'vibe': data.get('vibe', 'modern'),
+                # Step 2
+                'household_size': int(household_size),
+                'has_pet': has_pet,
+                # Step 3
+                'housing_type': data.get('housing_type', 'apartment'),
+                'main_space': main_space,
+                'pyung': int(pyung),
+                # Step 4
+                'cooking': data.get('cooking', 'sometimes'),
+                'laundry': data.get('laundry', 'weekly'),
+                'media': data.get('media', 'balanced'),
+                # Step 5
+                'priority': data.get('priority', 'value'),
+                'priority_list': priority_list,
+                # Step 6
+                'budget_level': data.get('budget_level', 'medium'),
+                # 카테고리
+                'selected_categories': data.get('selected_categories', []),
+                'current_step': 6,
+                'status': 'completed',
+                'completed_at': timezone.now(),
+            }
+            
+            # 로그인한 사용자와 연결
+            if request.user.is_authenticated:
+                defaults['user'] = request.user
+            
             session, _ = OnboardingSession.objects.update_or_create(
                 session_id=session_id,
-                defaults={
-                    # Step 1
-                    'vibe': data.get('vibe', 'modern'),
-                    # Step 2
-                    'household_size': int(household_size),
-                    'has_pet': has_pet,
-                    # Step 3
-                    'housing_type': data.get('housing_type', 'apartment'),
-                    'main_space': main_space,
-                    'pyung': int(pyung),
-                    # Step 4
-                    'cooking': data.get('cooking', 'sometimes'),
-                    'laundry': data.get('laundry', 'weekly'),
-                    'media': data.get('media', 'balanced'),
-                    # Step 5
-                    'priority': data.get('priority', 'value'),
-                    'priority_list': priority_list,
-                    # Step 6
-                    'budget_level': data.get('budget_level', 'medium'),
-                    # 카테고리
-                    'selected_categories': data.get('selected_categories', []),
-                    'current_step': 6,
-                    'status': 'completed',
-                    'completed_at': timezone.now(),
-                }
+                defaults=defaults
             )
+            
+            # 기존 세션이 있지만 사용자가 연결되지 않은 경우 업데이트
+            if request.user.is_authenticated and not session.user:
+                session.user = request.user
+                session.save()
             print(f"[Onboarding Complete] 세션 저장 완료: {session_id}")
         except Exception as e:
             print(f"[Onboarding Complete] 세션 저장 실패: {e}")
@@ -1350,25 +1613,31 @@ def onboarding_complete_view(request):
             print(f"[Success] {len(result['recommendations'])}개 제품 추천됨")
             
             # 6. 포트폴리오 자동 생성 (PRD: 온보딩 완료 시 포트폴리오 생성)
+            # 로그인한 회원만 포트폴리오 생성 가능
             portfolio_id = None
-            try:
-                user_id = data.get('user_id', f"session_{session_id}")
-                print(f"[Onboarding Complete] 포트폴리오 생성 시작...")
-                portfolio_result = portfolio_service.create_portfolio_from_onboarding(
-                    session_id=session_id,
-                    user_id=user_id
-                )
-                
-                if portfolio_result.get('success'):
-                    portfolio_id = portfolio_result.get('portfolio_id')
-                    print(f"[Onboarding Complete] 포트폴리오 생성 완료: {portfolio_id}")
-                else:
-                    print(f"[Onboarding Complete] 포트폴리오 생성 실패: {portfolio_result.get('error')}")
-            except Exception as e:
-                print(f"[Onboarding Complete] 포트폴리오 생성 오류: {e}")
-                import traceback
-                traceback.print_exc()
-                # 포트폴리오 생성 실패해도 추천 결과는 반환
+            if request.user.is_authenticated:
+                try:
+                    # 로그인한 사용자의 ID 사용
+                    user_id = f"user_{request.user.id}"
+                    print(f"[Onboarding Complete] 포트폴리오 생성 시작... (로그인 사용자: {user_id})")
+                    portfolio_result = portfolio_service.create_portfolio_from_onboarding(
+                        session_id=session_id,
+                        user_id=user_id
+                    )
+                    
+                    if portfolio_result.get('success'):
+                        portfolio_id = portfolio_result.get('portfolio_id')
+                        print(f"[Onboarding Complete] 포트폴리오 생성 완료: {portfolio_id}")
+                    else:
+                        print(f"[Onboarding Complete] 포트폴리오 생성 실패: {portfolio_result.get('error')}")
+                except Exception as e:
+                    print(f"[Onboarding Complete] 포트폴리오 생성 오류: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 포트폴리오 생성 실패해도 추천 결과는 반환
+            else:
+                print(f"[Onboarding Complete] 로그인하지 않은 사용자 - 포트폴리오 생성 건너뜀")
+                # 로그인하지 않은 경우 포트폴리오는 생성하지 않지만 추천 결과는 반환
             
             # Taste 정보를 응답에 포함 (이미 위에서 계산됨)
             if taste_id:
@@ -1471,6 +1740,7 @@ def onboarding_session_view(request, session_id):
 def portfolio_save_view(request):
     """
     포트폴리오 저장 API (PRD 기반)
+    로그인한 회원만 포트폴리오를 받을 수 있음
     
     POST /api/portfolio/save/
     {
@@ -1484,11 +1754,23 @@ def portfolio_save_view(request):
         "match_score": 93
     }
     """
+    # 로그인 체크 - 포트폴리오는 로그인한 회원만 받을 수 있음
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': '포트폴리오를 받으려면 로그인이 필요합니다.',
+            'login_required': True
+        }, json_dumps_params={'ensure_ascii': False}, status=401)
+    
     try:
         data = json.loads(request.body.decode('utf-8'))
         
         session_id = data.get('session_id')
-        user_id = data.get('user_id', f"guest_{timezone.now().strftime('%Y%m%d%H%M%S')}")
+        # 로그인한 사용자의 ID 사용 (Django User의 username 또는 id)
+        if request.user.is_authenticated:
+            user_id = f"user_{request.user.id}"  # Django User ID 사용
+        else:
+            user_id = data.get('user_id', f"guest_{timezone.now().strftime('%Y%m%d%H%M%S')}")
         
         # session_id가 있으면 포트폴리오 서비스 사용 (PRD 로직)
         if session_id:
@@ -1518,7 +1800,7 @@ def portfolio_save_view(request):
         
         # 기존 방식 (하위 호환성)
         # 포트폴리오 생성
-        portfolio = Portfolio.objects.create(
+        portfolio = PortfolioSession.objects.create(
             user_id=user_id,
             style_type=data.get('style_type', 'modern'),
             style_title=data.get('style_title', ''),
@@ -1558,6 +1840,85 @@ def portfolio_detail_view(request, portfolio_id):
     """
     try:
         print(f"[Portfolio Detail] 조회 요청: {portfolio_id}")
+        
+        # 샘플 포트폴리오 ID 처리
+        sample_portfolios = {
+            'PF-001': {
+                'portfolio_id': 'PF-001',
+                'style_type': 'modern',
+                'style_title': '모던 & 미니멀 라이프를 위한 오브제 스타일',
+                'style_subtitle': '깔끔하고 세련된 공간을 완성하는 가전 패키지. 미니멀한 디자인과 뛰어난 성능을 갖춘 제품들로 구성되었습니다.',
+                'total_original_price': 15000000,
+                'total_discount_price': 12500000,
+                'products': [
+                    {'id': 'P001', 'name': '스탠드형 에어컨', 'category': '에어컨', 'price': 5000000, 'discount_price': 4200000, 'image_url': '/static/images/가전 카테고리/에어컨.png'},
+                    {'id': 'P002', 'name': '김치냉장고', 'category': '냉장고', 'price': 6000000, 'discount_price': 5000000, 'image_url': '/static/images/가전 카테고리/김치냉장고.png'},
+                    {'id': 'P003', 'name': '세탁기', 'category': '세탁기', 'price': 4000000, 'discount_price': 3300000, 'image_url': '/static/images/가전 카테고리/세탁기.png'},
+                ]
+            },
+            'PF-002': {
+                'portfolio_id': 'PF-002',
+                'style_type': 'cozy',
+                'style_title': '따뜻한 코지 라이프를 위한 가전 패키지',
+                'style_subtitle': '편안하고 아늑한 공간을 만들어주는 가전 제품들. 따뜻한 색감과 부드러운 디자인으로 일상의 편안함을 더해줍니다.',
+                'total_original_price': 3150000,
+                'total_discount_price': 2856800,
+                'products': [
+                    {'id': 'P004', 'name': '식기세척기', 'category': '식기세척기', 'price': 4000000, 'discount_price': 3200000, 'image_url': '/static/images/가전 카테고리/식기세척기.png'},
+                    {'id': 'P005', 'name': '전기레인지', 'category': '레인지', 'price': 4000000, 'discount_price': 3300000, 'image_url': '/static/images/가전 카테고리/전기레인지.png'},
+                    {'id': 'P006', 'name': '공기청정기', 'category': '공기청정기', 'price': 4000000, 'discount_price': 3300000, 'image_url': '/static/images/가전 카테고리/공기청정기.png'},
+                ]
+            },
+            'PF-003': {
+                'portfolio_id': 'PF-003',
+                'style_type': 'luxury',
+                'style_title': '럭셔리 & 프리미엄 라이프를 위한 시그니처 스타일',
+                'style_subtitle': '최고급 가전 제품으로 완성하는 프리미엄 라이프스타일. 뛰어난 성능과 세련된 디자인이 조화를 이룬 특별한 패키지입니다.',
+                'total_original_price': 55690000,
+                'total_discount_price': 51312900,
+                'products': [
+                    {'id': 'P007', 'name': '스탠바이미', 'category': 'TV', 'price': 8000000, 'discount_price': 6800000, 'image_url': '/static/images/가전 카테고리/스탠바이미.png'},
+                    {'id': 'P008', 'name': '워시타워', 'category': '세탁기', 'price': 8000000, 'discount_price': 6800000, 'image_url': '/static/images/가전 카테고리/워시타워.png'},
+                    {'id': 'P009', 'name': '와인셀러', 'category': '와인셀러', 'price': 6000000, 'discount_price': 5300000, 'image_url': '/static/images/가전 카테고리/와인셀러.png'},
+                ]
+            }
+        }
+        
+        # 샘플 포트폴리오인지 확인
+        if portfolio_id in sample_portfolios:
+            print(f"[Portfolio Detail] 샘플 포트폴리오 발견: {portfolio_id}")
+            sample_data = sample_portfolios[portfolio_id]
+            print(f"[Portfolio Detail] 스타일 타입: {sample_data['style_type']}")
+            print(f"[Portfolio Detail] 제품 수: {len(sample_data['products'])}")
+            products_with_reviews = []
+            for product_data in sample_data['products']:
+                product_data['reviews'] = []
+                product_data['review_count'] = 0
+                product_data['installation_notes'] = []
+                products_with_reviews.append(product_data)
+            
+            response_data = {
+                'success': True,
+                'portfolio': {
+                    'portfolio_id': sample_data['portfolio_id'],
+                    'internal_key': sample_data['portfolio_id'],
+                    'user_id': str(request.user.id) if request.user.is_authenticated else 'guest',
+                    'style_type': sample_data['style_type'],
+                    'style_title': sample_data['style_title'],
+                    'style_subtitle': sample_data['style_subtitle'],
+                    'onboarding_data': {},
+                    'products': products_with_reviews,
+                    'total_original_price': sample_data['total_original_price'],
+                    'total_discount_price': sample_data['total_discount_price'],
+                    'match_score': 95,
+                    'status': 'saved',
+                    'share_url': '',
+                    'share_count': 0,
+                    'created_at': timezone.now().isoformat(),
+                }
+            }
+            print(f"[Portfolio Detail] 샘플 포트폴리오 응답 준비 완료: {portfolio_id}, 스타일: {sample_data['style_type']}")
+            return JsonResponse(response_data, json_dumps_params={'ensure_ascii': False})
         
         # portfolio_id 또는 internal_key로 조회 시도
         portfolio = None

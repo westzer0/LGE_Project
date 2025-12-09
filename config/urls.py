@@ -19,7 +19,8 @@ from api.views import (
     search_view, product_compare_view,
     wishlist_add_view, wishlist_remove_view, wishlist_list_view,
     reservation_list_view, reservation_detail_view, reservation_update_view, reservation_cancel_view,
-    other_recommendations_page, mypage, reservation_status_page,
+    other_recommendations_page, mypage, reservation_status_page, portfolio_history_page,
+    login_page, signup_page, logout_view,
     kakao_login_view, kakao_callback_view, kakao_logout_view, kakao_user_info_view, kakao_send_message_view,
 )
 from api.views_drf import convert_figma_to_code
@@ -57,7 +58,13 @@ urlpatterns = [
     
     # 결과 페이지
     path('result/', result_page, name='result'),
+    path('portfolio/history/', portfolio_history_page, name='portfolio_history'),
     path('portfolio/<str:portfolio_id>/', result_page, name='portfolio_detail_page'),
+    
+    # 인증 페이지
+    path('login/', login_page, name='login'),
+    path('signup/', signup_page, name='signup'),
+    path('logout/', logout_view, name='logout'),
     
     # 프론트엔드 페이지
     path('other-recommendations/', other_recommendations_page, name='other_recommendations'),

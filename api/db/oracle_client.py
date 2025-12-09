@@ -83,6 +83,7 @@ ORACLE_PASSWORD = os.getenv("ORACLE_PASSWORD")
 ORACLE_HOST = os.getenv("ORACLE_HOST")
 ORACLE_PORT = int(os.getenv("ORACLE_PORT", "1521"))
 ORACLE_SID = os.getenv("ORACLE_SID", "xe")
+ORACLE_SERVICE_NAME = os.getenv("ORACLE_SERVICE_NAME")  # MAPPP 등 Service Name 지원
 
 # 개발 환경에서만 기본값 허용 (DISABLE_DB가 아닌 경우)
 if not DISABLE_DB:
@@ -99,8 +100,15 @@ if not DISABLE_DB:
             "ORACLE_USER, ORACLE_PASSWORD, ORACLE_HOST를 설정하거나 "
             "DISABLE_DB=true로 설정하세요."
         )
-    # DSN은 DISABLE_DB가 false일 때만 생성
-    DSN = oracledb.makedsn(ORACLE_HOST, ORACLE_PORT, sid=ORACLE_SID)
+    # DSN 생성: Service Name이 있으면 Service Name 사용, 없으면 SID 사용
+    if ORACLE_SERVICE_NAME:
+        # Service Name 기반 연결 (MAPPP 등)
+        DSN = oracledb.makedsn(ORACLE_HOST, ORACLE_PORT, service_name=ORACLE_SERVICE_NAME)
+        print(f"[Oracle] Service Name 기반 연결: {ORACLE_SERVICE_NAME}")
+    else:
+        # SID 기반 연결 (기본값)
+        DSN = oracledb.makedsn(ORACLE_HOST, ORACLE_PORT, sid=ORACLE_SID)
+        print(f"[Oracle] SID 기반 연결: {ORACLE_SID}")
 else:
     # DISABLE_DB가 true일 때는 DSN을 None으로 설정
     DSN = None

@@ -55,6 +55,10 @@ except Exception as e:
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
+# SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG는 반드시 SECRET_KEY보다 먼저 정의되어야 합니다!
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() == 'true'  # 기본값: True (개발 환경)
+
 # SECURITY WARNING: keep the secret key used in production secret!
 # PRD 개선: 프로덕션에서는 환경 변수 필수
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
@@ -65,10 +69,6 @@ if not SECRET_KEY:
         print("[WARNING] SECRET_KEY 기본값 사용 중 (개발 환경). 프로덕션에서는 DJANGO_SECRET_KEY 환경 변수를 설정하세요.")
     else:
         raise ValueError("DJANGO_SECRET_KEY 환경 변수가 설정되지 않았습니다. 프로덕션에서는 필수입니다.")
-
-# SECURITY WARNING: don't run with debug turned on in production!
-# PRD 개선: 프로덕션에서는 기본값 False (보안 강화)
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
 # ALLOWED_HOSTS: 환경 변수로 제어 (쉼표로 구분, 기본값: localhost,127.0.0.1)
 # 프로덕션에서는 환경 변수에 도메인을 설정: ALLOWED_HOSTS=your-app.railway.app,yourdomain.com
@@ -144,6 +144,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',  # 숫자 포맷팅 (천 단위 구분 기호 등)
     'rest_framework',  # Django REST Framework
     'api',
 ]
@@ -198,62 +199,84 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # 데이터베이스 설정
 # USE_ORACLE 환경변수가 'true'이면 Oracle, 아니면 SQLite 사용
 # DISABLE_DB 환경변수가 'true'이면 DB 연결 없이 실행 (DB 사용 API는 에러 반환)
+# ============================================================
+# 데이터베이스 설정
+# ============================================================
+# 주의: 실제 Oracle DB 데이터는 oracle_client.py를 통해 직접 접근합니다.
+# Django ORM은 SQLite를 사용하지만, 실제 데이터 조회는 oracle_client를 사용해야 합니다.
+# Oracle 설정은 .env 파일에 보관되어 있으며, oracle_client.py를 통해 직접 연결합니다.
+
 USE_ORACLE = os.environ.get('USE_ORACLE', 'false').lower() == 'true'
 DISABLE_DB = os.environ.get('DISABLE_DB', 'false').lower() == 'true'
 
-if DISABLE_DB:
-    # DB 연결 비활성화 모드: SQLite를 설정하지만 실제로는 연결하지 않음
-    # Django 서버는 시작되지만 DB를 사용하는 API는 에러를 반환함
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': ':memory:',  # 메모리 DB로 설정 (실제 사용 안함)
-        }
+# Oracle 설정 (주석 처리 - oracle_client.py에서 직접 사용)
+# Django의 Oracle 백엔드는 Oracle 11g를 지원하지 않으므로 항상 SQLite를 사용합니다.
+# if DISABLE_DB:
+#     # DB 연결 비활성화 모드: SQLite를 설정하지만 실제로는 연결하지 않음
+#     # Django 서버는 시작되지만 DB를 사용하는 API는 에러를 반환함
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': ':memory:',  # 메모리 DB로 설정 (실제 사용 안함)
+#         }
+#     }
+#     print("⚠️ [DB] DB 연결이 비활성화되었습니다. (DISABLE_DB=true)")
+#     print("   DB를 사용하는 API는 에러를 반환할 수 있습니다.")
+# elif USE_ORACLE:
+#     # Oracle Instant Client 경로 설정
+#     ORACLE_INSTANT_CLIENT_PATH = os.environ.get(
+#         'ORACLE_INSTANT_CLIENT_PATH',
+#         r'C:\oracle\instantclient-basic-windows.x64-21.19.0.0.0dbru\instantclient_21_19'
+#     )
+#     
+#     # Oracle Thick 모드 초기화 (Oracle 11g XE는 Thick 모드 필수)
+#     import oracledb
+#     try:
+#         oracledb.init_oracle_client(lib_dir=ORACLE_INSTANT_CLIENT_PATH)
+#     except oracledb.ProgrammingError:
+#         # 이미 초기화된 경우 무시
+#         pass
+#     except Exception as e:
+#         print(f"⚠️ Oracle Instant Client 초기화 실패: {e}")
+#         print(f"   경로 확인: {ORACLE_INSTANT_CLIENT_PATH}")
+#     
+#     # Oracle Service Name 또는 SID 설정
+#     ORACLE_SERVICE_NAME = os.environ.get('ORACLE_SERVICE_NAME') or os.environ.get('DB_SERVICE_NAME')
+#     ORACLE_SID = os.environ.get('ORACLE_SID', 'xe')
+#     ORACLE_HOST = os.environ.get('ORACLE_HOST', 'localhost')
+#     ORACLE_PORT = os.environ.get('ORACLE_PORT', '1521')
+#     
+#     # Service Name이 있으면 Service Name 형식 사용, 없으면 SID 형식 사용
+#     if ORACLE_SERVICE_NAME and ORACLE_SERVICE_NAME.upper() != 'MAPPP':
+#         ORACLE_NAME = f"{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE_NAME}"
+#         print(f"[Django Oracle] Service Name 기반 연결: {ORACLE_SERVICE_NAME}")
+#         USE_SERVICE_NAME = True
+#     else:
+#         ORACLE_NAME = ORACLE_SID
+#         print(f"[Django Oracle] SID 기반 연결: {ORACLE_SID}")
+#         USE_SERVICE_NAME = False
+#     
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.oracle',
+#             'NAME': ORACLE_NAME,
+#             'USER': os.environ.get('ORACLE_USER', 'system'),
+#             'PASSWORD': os.environ.get('ORACLE_PASSWORD', ''),
+#             'HOST': ORACLE_HOST if not USE_SERVICE_NAME else '',
+#             'PORT': ORACLE_PORT if not USE_SERVICE_NAME else '',
+#             'OPTIONS': {
+#                 'tcp_connect_timeout': 5,
+#             },
+#         }
+#     }
+
+# Django는 항상 SQLite를 사용 (Oracle 데이터는 oracle_client.py로 직접 접근)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-    print("⚠️ [DB] DB 연결이 비활성화되었습니다. (DISABLE_DB=true)")
-    print("   DB를 사용하는 API는 에러를 반환할 수 있습니다.")
-elif USE_ORACLE:
-    # Oracle Instant Client 경로 설정
-    ORACLE_INSTANT_CLIENT_PATH = os.environ.get(
-        'ORACLE_INSTANT_CLIENT_PATH',
-        r'C:\oracle\instantclient-basic-windows.x64-21.19.0.0.0dbru\instantclient_21_19'
-    )
-    
-    # Oracle Thick 모드 초기화 (Oracle 11g XE는 Thick 모드 필수)
-    import oracledb
-    try:
-        oracledb.init_oracle_client(lib_dir=ORACLE_INSTANT_CLIENT_PATH)
-    except oracledb.ProgrammingError:
-        # 이미 초기화된 경우 무시
-        pass
-    except Exception as e:
-        print(f"⚠️ Oracle Instant Client 초기화 실패: {e}")
-        print(f"   경로 확인: {ORACLE_INSTANT_CLIENT_PATH}")
-    
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.oracle',
-            'NAME': os.environ.get('ORACLE_SID', 'xe'),  # Oracle SID
-            'USER': os.environ.get('ORACLE_USER', 'system'),
-            'PASSWORD': os.environ.get('ORACLE_PASSWORD', ''),
-            'HOST': os.environ.get('ORACLE_HOST', 'localhost'),
-            'PORT': os.environ.get('ORACLE_PORT', '1521'),
-            # DB 연결 실패 시에도 서버 시작 허용
-            'OPTIONS': {
-                'connect_timeout': 5,  # 연결 타임아웃 5초
-            },
-        }
-    }
-    # DB 연결 실패를 허용하는 설정 추가
-    # Django는 기본적으로 서버 시작 시 DB 연결을 확인하지 않음 (지연 연결)
-else:
-    # 개발용 SQLite (Oracle 없이 테스트 시 사용)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # Password validation
