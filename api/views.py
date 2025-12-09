@@ -1122,6 +1122,35 @@ def onboarding_step_view(request):
             print(f"[Onboarding Step] Oracle DB 세션 정보 - session_id={session_id}, step={step}, status={session_status}", flush=True)
             print(f"[Onboarding Step] Oracle DB 저장 데이터 - vibe={session.vibe}, household_size={session.household_size}, housing_type={session.housing_type}, pyung={session.pyung}", flush=True)
             
+            # main_space와 priority_list 추출 (recommendation_result에서 또는 step_data에서)
+            main_space_list = []
+            if step_data.get('main_space'):
+                main_space_list = step_data.get('main_space') if isinstance(step_data.get('main_space'), list) else [step_data.get('main_space')]
+            elif session.recommendation_result and session.recommendation_result.get('main_space'):
+                main_space_list = session.recommendation_result.get('main_space')
+                if not isinstance(main_space_list, list):
+                    main_space_list = [main_space_list]
+            
+            priority_list = []
+            if step_data.get('priority'):
+                priority_list = step_data.get('priority') if isinstance(step_data.get('priority'), list) else [step_data.get('priority')]
+            elif session.recommendation_result and session.recommendation_result.get('priority'):
+                priority_list = session.recommendation_result.get('priority')
+                if not isinstance(priority_list, list):
+                    priority_list = [priority_list]
+            
+            # has_pet 추출 (recommendation_result에서)
+            has_pet_value = None
+            if session.recommendation_result and 'has_pet' in session.recommendation_result:
+                has_pet_value = session.recommendation_result.get('has_pet')
+            elif step_data.get('pet'):
+                has_pet_value = (step_data.get('pet') == 'yes')
+            
+            # cooking, laundry, media 추출
+            cooking_value = session.recommendation_result.get('cooking') if session.recommendation_result else None
+            laundry_value = session.recommendation_result.get('laundry') if session.recommendation_result else None
+            media_value = session.recommendation_result.get('media') if session.recommendation_result else None
+            
             # Oracle DB 세션 저장/업데이트
             onboarding_db_service.create_or_update_session(
                 session_id=session_id,
@@ -1135,6 +1164,12 @@ def onboarding_step_view(request):
                 pyung=session.pyung,
                 priority=session.priority,
                 budget_level=session.budget_level,
+                has_pet=has_pet_value,  # 정규화 테이블에 저장하기 위해 추가
+                main_space=main_space_list,  # 정규화 테이블에 저장하기 위해 추가
+                priority_list=priority_list,  # 정규화 테이블에 저장하기 위해 추가
+                cooking=cooking_value,  # 생활 패턴 저장
+                laundry=laundry_value,
+                media=media_value,
                 selected_categories=getattr(session, 'selected_categories', []),
                 recommended_products=getattr(session, 'recommended_products', []),
                 recommendation_result=session.recommendation_result

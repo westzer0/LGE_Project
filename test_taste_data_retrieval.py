@@ -46,7 +46,8 @@ class TasteDataRetrievalValidator:
         self.results = {
             'test_sessions': [],
             'errors': [],
-            'warnings': []
+            'warnings': [],
+            'data_storage_ok': True  # 데이터 저장 상태 플래그
         }
     
     def validate_all(self):
@@ -83,15 +84,20 @@ class TasteDataRetrievalValidator:
             
             print()
             
-            # 3. 특수 케이스 검증 (NULL, 빈 배열 등)
+            # 3. 데이터 저장 상태 검증 (정규화 테이블에 실제 데이터가 있는지)
+            print("[데이터 저장 상태 검증]")
+            self._validate_data_storage()
+            print()
+            
+            # 4. 특수 케이스 검증 (NULL, 빈 배열 등)
             print("[특수 케이스 검증]")
             self._validate_edge_cases()
             print()
             
-            # 4. 결과 출력
+            # 5. 결과 출력
             self._print_results()
             
-            # 5. 시각화 생성
+            # 6. 시각화 생성
             if HAS_MATPLOTLIB:
                 self._create_visualizations()
             
@@ -455,6 +461,108 @@ class TasteDataRetrievalValidator:
         
         return check
     
+    def _validate_data_storage(self):
+        """데이터 저장 상태 검증 (정규화 테이블에 실제 데이터가 있는지)"""
+        try:
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    # 1. 정규화 테이블 데이터 수 확인
+                    cur.execute("SELECT COUNT(*) FROM ONBOARD_SESS_MAIN_SPACES")
+                    main_spaces_count = cur.fetchone()[0]
+                    
+                    cur.execute("SELECT COUNT(*) FROM ONBOARD_SESS_PRIORITIES")
+                    priorities_count = cur.fetchone()[0]
+                    
+                    # 2. 전체 세션 수
+                    cur.execute("SELECT COUNT(*) FROM ONBOARDING_SESSION")
+                    total_sessions = cur.fetchone()[0]
+                    
+                    # 3. MAIN_SPACE가 있는 세션 수
+                    cur.execute("""
+                        SELECT COUNT(DISTINCT SESSION_ID) 
+                        FROM ONBOARD_SESS_MAIN_SPACES
+                    """)
+                    sessions_with_main_space = cur.fetchone()[0]
+                    
+                    # 4. PRIORITY가 있는 세션 수
+                    cur.execute("""
+                        SELECT COUNT(DISTINCT SESSION_ID) 
+                        FROM ONBOARD_SESS_PRIORITIES
+                    """)
+                    sessions_with_priority = cur.fetchone()[0]
+                    
+                    print(f"  [정규화 테이블 데이터 현황]")
+                    print(f"    ONBOARD_SESS_MAIN_SPACES: {main_spaces_count}개 레코드")
+                    print(f"    ONBOARD_SESS_PRIORITIES: {priorities_count}개 레코드")
+                    print(f"    전체 세션 수: {total_sessions}개")
+                    print(f"    MAIN_SPACE가 있는 세션: {sessions_with_main_space}개 ({sessions_with_main_space/total_sessions*100:.1f}%)")
+                    print(f"    PRIORITY가 있는 세션: {sessions_with_priority}개 ({sessions_with_priority/total_sessions*100:.1f}%)")
+                    
+                    # 5. 문제 진단
+                    issues = []
+                    if main_spaces_count == 0:
+                        issues.append("⚠️ ONBOARD_SESS_MAIN_SPACES 테이블에 데이터가 없습니다!")
+                        issues.append("   → 가능한 원인:")
+                        issues.append("     1. 기존 세션들이 정규화 테이블로 마이그레이션되지 않았을 수 있습니다.")
+                        issues.append("        해결: python manage.py migrate_all_to_normalized 실행")
+                        issues.append("     2. 새로운 온보딩 세션에서 main_space가 저장되지 않고 있을 수 있습니다.")
+                        issues.append("        해결: onboarding_db_service.py의 저장 로직 확인 필요")
+                        issues.append("     3. 실제로 사용자가 main_space를 선택하지 않았을 수 있습니다.")
+                        issues.append("        해결: 프론트엔드에서 main_space 선택이 제대로 전달되는지 확인")
+                    
+                    if priorities_count == 0:
+                        issues.append("⚠️ ONBOARD_SESS_PRIORITIES 테이블에 데이터가 없습니다!")
+                        issues.append("   → PRIORITY 데이터도 저장되지 않고 있습니다.")
+                    
+                    # MAIN_SPACE는 선택 사항이므로 경고만 표시 (실패로 처리하지 않음)
+                    if sessions_with_main_space > 0 and sessions_with_main_space < total_sessions * 0.1:
+                        issues.append(f"⚠️ MAIN_SPACE 데이터가 있는 세션이 전체의 {sessions_with_main_space/total_sessions*100:.1f}%에 불과합니다.")
+                        issues.append("   → 대부분의 기존 세션에서 main_space가 저장되지 않았습니다.")
+                        issues.append("   → 새로운 세션에서는 수정된 코드로 정상 저장됩니다.")
+                        # MAIN_SPACE는 선택 사항이므로 실패로 처리하지 않음
+                        self.results['warnings'].append("MAIN_SPACE 데이터가 적지만, 새로운 세션에서는 정상 저장됩니다.")
+                    
+                    # PRIORITY가 없으면 실패, MAIN_SPACE는 선택 사항
+                    priority_ok = sessions_with_priority > 0
+                    main_space_ok = True  # MAIN_SPACE는 선택 사항이므로 항상 OK
+                    
+                    if not priority_ok:
+                        issues.append("❌ PRIORITY 데이터가 전혀 없습니다!")
+                        self.results['data_storage_ok'] = False
+                    elif sessions_with_priority < total_sessions * 0.5:
+                        issues.append(f"⚠️ PRIORITY 데이터가 있는 세션이 전체의 {sessions_with_priority/total_sessions*100:.1f}%에 불과합니다.")
+                        self.results['data_storage_ok'] = False
+                    
+                    if issues:
+                        print()
+                        print("  [문제 발견]")
+                        for issue in issues:
+                            print(f"    {issue}")
+                        self.results['warnings'].extend(issues)
+                        if not priority_ok or sessions_with_priority < total_sessions * 0.5:
+                            self.results['data_storage_ok'] = False  # PRIORITY 문제가 있으면 실패
+                    else:
+                        print()
+                        print("  ✅ 정규화 테이블에 데이터가 정상적으로 저장되어 있습니다.")
+                    
+                    # 6. 샘플 데이터 확인
+                    if main_spaces_count > 0:
+                        print()
+                        print("  [샘플 MAIN_SPACE 데이터]")
+                        cur.execute("""
+                            SELECT SESSION_ID, MAIN_SPACE 
+                            FROM ONBOARD_SESS_MAIN_SPACES 
+                            WHERE ROWNUM <= 5
+                        """)
+                        samples = cur.fetchall()
+                        for session_id, main_space in samples:
+                            print(f"    {session_id}: {main_space}")
+        except Exception as e:
+            print(f"  ❌ 데이터 저장 상태 검증 중 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            self.results['errors'].append(f"데이터 저장 상태 검증 실패: {str(e)}")
+    
     def _validate_edge_cases(self):
         """특수 케이스 검증 (NULL, 빈 배열 등)"""
         try:
@@ -564,6 +672,13 @@ class TasteDataRetrievalValidator:
             for warning in self.results['warnings']:
                 print(f"  ⚠️ {warning}")
         
+        # 데이터 저장 상태
+        if not self.results.get('data_storage_ok', True):
+            print("\n[중요]")
+            print("  ❌ 데이터 저장 문제가 발견되었습니다!")
+            print("  → Step 2 검증 실패: 정규화 테이블에 데이터가 없어 다음 단계로 진행할 수 없습니다.")
+            print("  → 위의 경고를 확인하고 문제를 해결한 후 다시 검증하세요.")
+        
         print()
     
     def _is_all_passed(self):
@@ -571,10 +686,17 @@ class TasteDataRetrievalValidator:
         if not self.results['test_sessions']:
             return False
         
-        return all(
+        # 세션 검증 통과 여부
+        sessions_passed = all(
             result.get('passed', False) 
             for result in self.results['test_sessions']
         )
+        
+        # 데이터 저장 상태 확인
+        data_storage_ok = self.results.get('data_storage_ok', True)
+        
+        # 둘 다 통과해야 Step 2 성공
+        return sessions_passed and data_storage_ok
     
     def _create_visualizations(self):
         """검증 결과 시각화"""
@@ -740,6 +862,15 @@ class TasteDataRetrievalValidator:
                 ax7.set_xlabel('세션 수')
                 ax7.set_title('PRIORITY 분포', fontsize=14, fontweight='bold')
                 ax7.grid(True, alpha=0.3, axis='x')
+            else:
+                # 데이터가 없을 때 메시지 표시
+                ax7.text(0.5, 0.5, 'PRIORITY 데이터 없음\n(정규화 테이블이 비어있음)', 
+                        ha='center', va='center', fontsize=12, 
+                        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
+                        transform=ax7.transAxes)
+                ax7.set_title('PRIORITY 분포', fontsize=14, fontweight='bold')
+                ax7.set_xticks([])
+                ax7.set_yticks([])
             
             # 8. MAIN_SPACE 분포
             ax8 = fig.add_subplot(gs[2, 1])
@@ -751,6 +882,15 @@ class TasteDataRetrievalValidator:
                 ax8.set_xlabel('세션 수')
                 ax8.set_title('MAIN_SPACE 분포', fontsize=14, fontweight='bold')
                 ax8.grid(True, alpha=0.3, axis='x')
+            else:
+                # 데이터가 없을 때 메시지 표시
+                ax8.text(0.5, 0.5, 'MAIN_SPACE 데이터 없음\n(정규화 테이블이 비어있음)', 
+                        ha='center', va='center', fontsize=12, 
+                        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5),
+                        transform=ax8.transAxes)
+                ax8.set_title('MAIN_SPACE 분포', fontsize=14, fontweight='bold')
+                ax8.set_xticks([])
+                ax8.set_yticks([])
             
             # 9. 반려동물 여부 분포
             ax9 = fig.add_subplot(gs[2, 2])
@@ -793,7 +933,10 @@ def main():
         return 0
     else:
         print("=" * 80)
-        print("❌ Step 2 검증 실패: 일부 데이터 조회 로직에 문제가 있습니다.")
+        print("❌ Step 2 검증 실패:")
+        print("   - 데이터 조회 로직에 문제가 있거나")
+        print("   - 정규화 테이블에 데이터가 저장되지 않았습니다.")
+        print("   - 위의 경고를 확인하고 문제를 해결한 후 다시 검증하세요.")
         print("=" * 80)
         return 1
 

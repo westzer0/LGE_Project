@@ -1,0 +1,450 @@
+Step 6: 엣지 케이스 검증 - GUEST 회원, 불완전한 데이터, 에러 처리 등
+
+
+
+현재 상황:
+
+- Step 1 완료: 모든 필수 인프라 준비됨 (테이블, 컬럼, 제약조건 확인 완료)
+- Step 2 완료: 온보딩 데이터 조회 로직 검증 완료 (_get_onboarding_data_from_session() 정상 작동 확인)
+- Step 3 완료: Taste 계산 로직 검증 완료 (TasteClassifier가 올바른 Taste ID 반환 확인)
+- Step 4 완료: MEMBER 테이블 저장 로직 검증 완료 (calculate_and_save_taste() 정상 작동 확인)
+- Step 5 완료: 온보딩 완료 시점 전체 플로우 통합 검증 완료
+- 실제 DB에 ONBOARDING_SESSION 레코드 1,056개 이상 존재
+- 정규화 테이블 (ONBOARD_SESS_MAIN_SPACES, ONBOARD_SESS_PRIORITIES) 데이터 저장 완료
+
+
+
+목표:
+
+실제 운영 환경에서 발생할 수 있는 다양한 엣지 케이스에 대해 시스템이 올바르게 처리하는지 검증
+- GUEST 회원 처리
+- NULL 값 처리
+- 불완전한 데이터 처리
+- 경계값 처리
+- 에러 처리 및 복구
+- 예외 상황 처리
+
+
+
+검증 항목:
+
+1. GUEST 회원 처리 검증
+   - STATUS='COMPLETED' && MEMBER_ID='GUEST'인 세션에서 Taste 계산이 건너뛰어지는지 확인
+   - GUEST 회원의 MEMBER 테이블에 TASTE 값이 저장되지 않는지 확인
+   - GUEST 회원으로 온보딩 데이터 조회는 가능한지 확인
+   - GUEST 회원으로 Taste 계산 시도 시 적절한 처리가 되는지 확인
+
+2. NULL 값 처리 검증
+   - 필수 필드가 NULL인 경우 처리 확인
+   - 선택 필드가 NULL인 경우 기본값 적용 확인
+   - MEMBER_ID가 NULL인 경우 처리 확인
+   - SESSION_ID가 NULL인 경우 처리 확인
+   - TASTE 값이 NULL인 MEMBER에 저장하는 경우 확인
+
+3. 불완전한 데이터 처리 검증
+   - 필수 필드가 누락된 온보딩 데이터로 Taste 계산 시도
+   - VIBE, HOUSEHOLD_SIZE, HOUSING_TYPE 등 필수 필드 NULL 처리
+   - MAIN_SPACE가 빈 배열인 경우 처리
+   - PRIORITY가 빈 배열인 경우 처리
+   - 정규화 테이블 데이터가 없는 경우 처리
+
+4. 경계값 처리 검증
+   - Taste ID가 1인 경우 (최소값)
+   - Taste ID가 120인 경우 (최대값)
+   - Taste ID가 0 이하인 경우 (범위 밖, 1로 보정되는지 확인)
+   - Taste ID가 121 이상인 경우 (범위 밖, 120으로 보정되는지 확인)
+   - HOUSEHOLD_SIZE 경계값 (1, 최대값 등)
+   - PYUNG 경계값 (최소값, 최대값 등)
+
+5. 에러 처리 및 복구 검증
+   - 존재하지 않는 SESSION_ID로 데이터 조회 시도
+   - 존재하지 않는 MEMBER_ID로 저장 시도
+   - DB 연결 실패 시 처리
+   - 트랜잭션 롤백 확인
+   - 에러 발생 시 다른 세션에 영향이 없는지 확인
+
+6. 잘못된 데이터 타입 처리 검증
+   - 문자열을 숫자로 변환해야 하는 필드에 잘못된 타입 전달
+   - 숫자를 문자열로 변환해야 하는 필드에 잘못된 타입 전달
+   - 리스트가 필요한 필드에 단일 값 전달
+   - 단일 값이 필요한 필드에 리스트 전달
+
+7. 빈 데이터 처리 검증
+   - 빈 딕셔너리로 Taste 계산 시도
+   - 빈 문자열 처리
+   - 빈 배열 처리
+   - 공백 문자열 처리
+
+8. 중복 실행 처리 검증
+   - 동일한 세션으로 여러 번 Taste 계산 실행
+   - 동일한 MEMBER_ID로 여러 번 저장 시도
+   - 동시에 같은 MEMBER_ID에 저장 시도 (동시성)
+
+9. 특수 문자 및 인코딩 처리 검증
+   - 특수 문자가 포함된 MEMBER_ID 처리
+   - 유니코드 문자가 포함된 데이터 처리
+   - SQL Injection 시도 방어 확인
+
+10. 메모리 및 성능 엣지 케이스
+    - 매우 큰 데이터셋 처리
+    - 매우 긴 SESSION_ID 처리
+    - 매우 긴 MEMBER_ID 처리
+
+
+
+관련 파일:
+
+- api/services/taste_calculation_service.py
+  - calculate_and_save_taste() 메서드
+  - _get_onboarding_data_from_session() 메서드
+  - get_taste_for_member() 메서드
+
+- api/services/onboarding_db_service.py (라인 1112~1149)
+  - create_or_update_session() 메서드 내 Taste 계산 로직
+  - 조건: status == 'COMPLETED' and final_member_id and final_member_id != 'GUEST'
+
+- api/utils/taste_classifier.py
+  - calculate_taste_from_onboarding() 메서드
+
+- api/db/oracle_client.py
+  - get_connection() 함수
+  - 트랜잭션 처리
+
+- api/views.py
+  - onboarding_complete_view() 함수
+  - 에러 처리 로직
+
+
+
+작업:
+
+1. test_taste_edge_cases.py 테스트 스크립트 작성
+
+2. 테스트 케이스 작성:
+   - GUEST 회원 처리 테스트
+   - NULL 값 처리 테스트
+   - 불완전한 데이터 처리 테스트
+   - 경계값 처리 테스트
+   - 에러 처리 테스트
+   - 잘못된 데이터 타입 처리 테스트
+   - 빈 데이터 처리 테스트
+   - 중복 실행 처리 테스트
+   - 특수 문자 처리 테스트
+   - 성능 엣지 케이스 테스트
+
+3. 실제 DB에서 엣지 케이스 데이터 찾기:
+   - NULL 값이 많은 세션 찾기
+   - 불완전한 데이터를 가진 세션 찾기
+   - GUEST 회원 세션 찾기
+   - 경계값에 해당하는 데이터 찾기
+
+4. 각 엣지 케이스별 검증:
+   - 예상되는 동작 정의
+   - 실제 동작 확인
+   - 예외 발생 시 적절한 에러 메시지 확인
+   - 시스템 안정성 확인
+
+5. 에러 복구 검증:
+   - 에러 발생 후 시스템이 정상 상태로 복구되는지 확인
+   - 에러 발생 시 다른 기능에 영향이 없는지 확인
+   - 로깅이 적절히 되는지 확인
+
+
+
+검증 방법:
+
+1. GUEST 회원 처리 검증:
+   ```python
+   # 1. GUEST 회원 세션 찾기
+   guest_sessions = DB에서 STATUS='COMPLETED' && MEMBER_ID='GUEST'인 세션 조회
+   
+   # 2. Taste 계산 시도
+   for session in guest_sessions:
+       try:
+           taste = calculate_and_save_taste('GUEST', session_id)
+           # 예외가 발생해야 함 또는 건너뛰어야 함
+       except Exception as e:
+           # 적절한 예외 처리 확인
+   
+   # 3. MEMBER 테이블 확인
+   # GUEST 회원의 TASTE 값이 변경되지 않았는지 확인
+   ```
+
+2. NULL 값 처리 검증:
+   ```python
+   # 1. NULL 값이 있는 세션 찾기
+   null_sessions = DB에서 필수 필드가 NULL인 세션 조회
+   
+   # 2. 각 NULL 케이스별 테스트
+   test_cases = [
+       {'vibe': None, 'household_size': 4, ...},  # VIBE NULL
+       {'vibe': 'modern', 'household_size': None, ...},  # HOUSEHOLD_SIZE NULL
+       # ... 기타 NULL 케이스
+   ]
+   
+   # 3. 기본값 적용 확인
+   for test_case in test_cases:
+       try:
+           taste = calculate_and_save_taste(member_id, onboarding_data=test_case)
+           # 기본값이 적용되어 계산되는지 확인
+       except Exception as e:
+           # NULL 값에 대한 적절한 처리 확인
+   ```
+
+3. 불완전한 데이터 처리 검증:
+   ```python
+   # 1. 필수 필드 누락 케이스
+   incomplete_data = {
+       # 필수 필드 일부 누락
+   }
+   
+   # 2. 빈 배열 케이스
+   empty_array_data = {
+       'main_space': [],
+       'priority': []
+   }
+   
+   # 3. 정규화 테이블 데이터 없음
+   # ONBOARD_SESS_MAIN_SPACES, ONBOARD_SESS_PRIORITIES에 데이터가 없는 세션
+   
+   # 각 케이스별로 Taste 계산 시도 및 결과 확인
+   ```
+
+4. 경계값 처리 검증:
+   ```python
+   # 1. Taste ID 경계값
+   # 계산 결과가 1 또는 120인 케이스 찾기
+   # 계산 결과가 0 이하 또는 121 이상인 경우 보정 확인
+   
+   # 2. 입력 데이터 경계값
+   boundary_cases = [
+       {'household_size': 1},  # 최소값
+       {'household_size': 999},  # 매우 큰 값
+       {'pyung': 1},  # 최소값
+       {'pyung': 999},  # 매우 큰 값
+   ]
+   
+   # 각 경계값으로 Taste 계산 및 결과 확인
+   ```
+
+5. 에러 처리 검증:
+   ```python
+   # 1. 존재하지 않는 SESSION_ID
+   try:
+       data = _get_onboarding_data_from_session('NON_EXISTENT_SESSION')
+       # ValueError 발생해야 함
+   except ValueError as e:
+       # 적절한 에러 메시지 확인
+   
+   # 2. 존재하지 않는 MEMBER_ID
+   try:
+       taste = calculate_and_save_taste('NON_EXISTENT_MEMBER', onboarding_data={...})
+       # 저장은 되지만 MEMBER 테이블에 영향 없음 확인
+   except Exception as e:
+       # 적절한 예외 처리 확인
+   
+   # 3. DB 연결 실패 시뮬레이션
+   # (실제로는 어렵지만, 에러 처리 로직 확인)
+   ```
+
+6. 잘못된 데이터 타입 처리 검증:
+   ```python
+   # 1. 타입 불일치 케이스
+   wrong_type_cases = [
+       {'household_size': 'four'},  # 문자열 대신 숫자 필요
+       {'pyung': '30평'},  # 문자열 대신 숫자 필요
+       {'priority': 'tech'},  # 리스트 대신 단일 값
+       {'main_space': 'kitchen'},  # 리스트 대신 단일 값
+   ]
+   
+   # 각 케이스별로 타입 변환 또는 에러 처리 확인
+   ```
+
+7. 빈 데이터 처리 검증:
+   ```python
+   # 1. 빈 딕셔너리
+   empty_dict = {}
+   
+   # 2. 빈 문자열
+   empty_string = {'vibe': ''}
+   
+   # 3. 빈 배열
+   empty_array = {'main_space': [], 'priority': []}
+   
+   # 각 케이스별로 기본값 적용 또는 에러 처리 확인
+   ```
+
+8. 중복 실행 처리 검증:
+   ```python
+   # 1. 동일한 세션으로 여러 번 실행
+   session_id = 'VALID_SESSION_ID'
+   member_id = 'VALID_MEMBER_ID'
+   
+   results = []
+   for _ in range(5):
+       taste = calculate_and_save_taste(member_id, session_id)
+       results.append(taste)
+   
+   # 모든 결과가 동일한지 확인
+   assert len(set(results)) == 1
+   
+   # 2. 동시 실행 시뮬레이션 (멀티스레드)
+   # 여러 스레드에서 동일한 MEMBER_ID로 동시에 저장 시도
+   # 마지막 값이 올바르게 저장되는지 확인
+   ```
+
+9. 특수 문자 처리 검증:
+   ```python
+   # 1. 특수 문자가 포함된 MEMBER_ID
+   special_member_ids = [
+       "user_123!@#",
+       "user'--",
+       "user; DROP TABLE",
+       "user<script>alert('xss')</script>",
+   ]
+   
+   # 각 케이스별로 SQL Injection 방어 확인
+   # 적절한 이스케이프 처리 확인
+   ```
+
+10. 성능 엣지 케이스 검증:
+    ```python
+    # 1. 매우 큰 데이터셋
+    # 많은 세션을 한 번에 처리하는 경우
+    
+    # 2. 매우 긴 ID
+    long_session_id = 'A' * 1000
+    long_member_id = 'B' * 1000
+    
+    # 각 케이스별로 처리 시간 및 메모리 사용량 확인
+    ```
+
+
+
+예상 결과:
+
+1. GUEST 회원 처리:
+   - Taste 계산이 건너뛰어짐
+   - MEMBER 테이블에 TASTE 값이 저장되지 않음
+   - 에러 없이 정상 처리됨
+
+2. NULL 값 처리:
+   - 필수 필드 NULL: 기본값 적용 또는 적절한 에러 처리
+   - 선택 필드 NULL: 기본값 적용
+   - MEMBER_ID NULL: 적절한 에러 처리
+
+3. 불완전한 데이터 처리:
+   - 필수 필드 누락: 기본값 적용 또는 적절한 에러 처리
+   - 빈 배열: 빈 배열로 처리
+   - 정규화 테이블 데이터 없음: 기본값 또는 빈 배열로 처리
+
+4. 경계값 처리:
+   - Taste ID 1~120 범위 유지
+   - 범위 밖 값은 자동 보정 (1 또는 120)
+   - 입력 데이터 경계값도 정상 처리
+
+5. 에러 처리:
+   - 존재하지 않는 데이터: 적절한 예외 발생
+   - DB 연결 실패: 적절한 에러 처리
+   - 다른 세션에 영향 없음
+
+6. 잘못된 데이터 타입:
+   - 타입 변환 시도 또는 적절한 에러 처리
+   - 시스템 크래시 없음
+
+7. 빈 데이터:
+   - 기본값 적용 또는 빈 값으로 처리
+   - 에러 없이 정상 처리
+
+8. 중복 실행:
+   - 동일한 결과 반환
+   - 데이터 일관성 유지
+
+9. 특수 문자:
+   - SQL Injection 방어
+   - 적절한 이스케이프 처리
+
+10. 성능:
+    - 큰 데이터셋도 정상 처리
+    - 메모리 누수 없음
+
+
+
+테스트 스크립트 구조:
+
+```python
+class TasteEdgeCasesValidator:
+    """엣지 케이스 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 엣지 케이스 검증 실행"""
+        # 1. GUEST 회원 처리 검증
+        # 2. NULL 값 처리 검증
+        # 3. 불완전한 데이터 처리 검증
+        # 4. 경계값 처리 검증
+        # 5. 에러 처리 검증
+        # 6. 잘못된 데이터 타입 처리 검증
+        # 7. 빈 데이터 처리 검증
+        # 8. 중복 실행 처리 검증
+        # 9. 특수 문자 처리 검증
+        # 10. 성능 엣지 케이스 검증
+    
+    def _validate_guest_member_handling(self):
+        """GUEST 회원 처리 검증"""
+    
+    def _validate_null_handling(self):
+        """NULL 값 처리 검증"""
+    
+    def _validate_incomplete_data_handling(self):
+        """불완전한 데이터 처리 검증"""
+    
+    def _validate_boundary_values(self):
+        """경계값 처리 검증"""
+    
+    def _validate_error_handling(self):
+        """에러 처리 검증"""
+    
+    def _validate_wrong_data_types(self):
+        """잘못된 데이터 타입 처리 검증"""
+    
+    def _validate_empty_data_handling(self):
+        """빈 데이터 처리 검증"""
+    
+    def _validate_duplicate_execution(self):
+        """중복 실행 처리 검증"""
+    
+    def _validate_special_characters(self):
+        """특수 문자 처리 검증"""
+    
+    def _validate_performance_edge_cases(self):
+        """성능 엣지 케이스 검증"""
+    
+    def _find_edge_case_sessions(self):
+        """실제 DB에서 엣지 케이스 세션 찾기"""
+    
+    def _create_test_data(self):
+        """테스트용 데이터 생성"""
+```
+
+
+
+시각화 항목:
+
+1. 엣지 케이스별 성공/실패 비율
+2. NULL 값 처리 결과 분포
+3. 경계값 처리 결과 분포
+4. 에러 발생 빈도 및 타입
+5. 성능 메트릭 (처리 시간, 메모리 사용량)
+6. 데이터 타입별 처리 결과
+
+
+
+참고:
+
+- Step 1~5에서 검증한 모든 로직이 엣지 케이스에서도 올바르게 작동하는지 확인
+- 실제 운영 환경에서 발생할 수 있는 모든 예외 상황을 고려
+- 각 엣지 케이스에서 시스템이 크래시하지 않고 적절히 처리하는지 확인
+- 에러 발생 시 적절한 로깅이 되는지 확인
+- test_taste_integration.py의 구조를 참고하여 작성
+- 실제 DB 데이터를 활용하여 현실적인 엣지 케이스 테스트
+

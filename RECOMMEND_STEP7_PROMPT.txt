@@ -1,0 +1,334 @@
+Step 7: 추천 엔진 엣지 케이스 검증 - 다양한 예외 상황 및 엣지 케이스 처리 검증
+
+
+현재 상황:
+
+- Step 1~6 완료: 추천 엔진 전체 플로우 구현 및 통합 검증 완료
+- 정상 케이스에 대한 검증 완료
+- 실제 운영 환경에서 발생할 수 있는 다양한 엣지 케이스 검증 필요
+
+
+목표:
+
+실제 운영 환경에서 발생할 수 있는 다양한 엣지 케이스에 대해 시스템이 올바르게 처리하는지 검증
+- 예외 상황 처리 검증
+- 경계값 처리 검증
+- 데이터 부족 상황 처리 검증
+- 에러 복구 검증
+
+
+검증 항목:
+
+1. TASTE 값이 없는 회원 처리 검증
+   - MEMBER 테이블에 TASTE 값이 NULL인 회원 처리
+   - TASTE 값이 없는 회원에 대한 기본 추천 또는 에러 처리 확인
+
+2. 온보딩 데이터가 없는 회원 처리 검증
+   - 온보딩 세션이 없는 회원 처리
+   - 온보딩 데이터가 불완전한 회원 처리
+   - 예산/조건 정보가 없는 경우 처리
+
+3. 카테고리에 제품이 없는 경우 처리 검증
+   - 선택된 카테고리에 제품이 0개인 경우 처리
+   - 모든 카테고리에 제품이 없는 경우 처리
+
+4. 필터링 후 제품이 없는 경우 처리 검증
+   - 예산이 너무 낮아 제품이 없는 경우 처리
+   - 조건이 너무 까다로워 제품이 없는 경우 처리
+   - 필터링 후 모든 제품이 제외된 경우 처리
+
+5. 경계값 처리 검증
+   - Taste ID = 1, 120에 대한 추천
+   - 최소 예산으로 필터링
+   - 최대 예산으로 필터링
+   - 경계값에서의 정상 작동 확인
+
+6. NULL 값 처리 검증
+   - 예산 정보가 NULL인 경우 처리
+   - 조건 정보가 NULL인 경우 처리
+   - 제품 정보의 필수 필드가 NULL인 경우 처리
+
+7. 잘못된 데이터 타입 처리 검증
+   - 잘못된 회원 ID 형식 처리
+   - 잘못된 Taste ID 값 처리
+   - 잘못된 예산 범위 처리
+
+8. 동시성 처리 검증
+   - 동일한 회원에 대한 동시 추천 요청 처리
+   - 데이터 일관성 유지 확인
+
+9. 대용량 데이터 처리 검증
+   - 매우 많은 제품이 있는 카테고리 처리
+   - 매우 많은 카테고리가 선택된 경우 처리
+
+10. 에러 복구 검증
+    - 에러 발생 후 시스템이 정상 상태로 복구되는지 확인
+    - 에러 발생 시 다른 요청에 영향이 없는지 확인
+    - 로깅이 적절히 되는지 확인
+
+
+관련 파일:
+
+- api/services/recommendation_service.py
+  - get_recommendations() 메서드
+  - 에러 처리 로직
+
+- api/services/taste_calculation_service.py
+  - get_taste_for_member() 메서드
+  - NULL 값 처리
+
+- api/views.py
+  - recommendation_view() 함수
+  - API 에러 처리
+
+
+작업:
+
+1. 엣지 케이스 테스트 케이스 작성:
+   - TASTE 값이 없는 회원 테스트
+   - 온보딩 데이터가 없는 회원 테스트
+   - 제품이 없는 카테고리 테스트
+   - 필터링 후 제품이 없는 경우 테스트
+   - 경계값 테스트
+   - NULL 값 테스트
+
+2. 실제 DB에서 엣지 케이스 데이터 찾기:
+   - TASTE 값이 NULL인 회원 찾기
+   - 온보딩 데이터가 없는 회원 찾기
+   - 제품이 없는 카테고리 찾기
+
+3. 각 엣지 케이스별 검증:
+   - 예상되는 동작 정의
+   - 실제 동작 확인
+   - 예외 발생 시 적절한 에러 메시지 확인
+
+4. 에러 복구 검증:
+   - 에러 발생 후 시스템이 정상 상태로 복구되는지 확인
+   - 에러 발생 시 다른 요청에 영향이 없는지 확인
+
+5. 시각화 생성:
+   - 엣지 케이스별 성공/실패 비율
+   - 에러 발생 빈도 및 타입
+   - 처리 시간 분포
+
+
+검증 방법:
+
+1. TASTE 값이 없는 회원 처리:
+   ```python
+   # TASTE 값이 NULL인 회원 찾기
+   members_no_taste = get_members_with_null_taste()
+   
+   for member in members_no_taste:
+       member_id = member['member_id']
+       try:
+           recommendations = get_recommendations(member_id)
+           # 기본 추천 또는 에러 처리 확인
+           # 예: 기본 카테고리로 추천 또는 적절한 에러 메시지
+       except Exception as e:
+           # 적절한 에러 메시지 확인
+           assert 'taste' in str(e).lower() or 'not found' in str(e).lower()
+   ```
+
+2. 온보딩 데이터가 없는 회원 처리:
+   ```python
+   # 온보딩 세션이 없는 회원 찾기
+   members_no_onboarding = get_members_without_onboarding()
+   
+   for member in members_no_onboarding:
+       member_id = member['member_id']
+       try:
+           recommendations = get_recommendations(member_id)
+           # 기본 예산/조건으로 필터링 또는 에러 처리 확인
+       except Exception as e:
+           # 적절한 에러 메시지 확인
+   ```
+
+3. 제품이 없는 카테고리 처리:
+   ```python
+   # 제품이 없는 카테고리 찾기
+   empty_categories = get_categories_without_products()
+   
+   for category in empty_categories:
+       # 해당 카테고리가 선택된 Taste ID 찾기
+       taste_ids = get_taste_ids_for_category(category['id'])
+       
+       for taste_id in taste_ids:
+           # 해당 Taste ID를 가진 회원으로 추천 시도
+           members = get_members_by_taste(taste_id, limit=1)
+           if members:
+               recommendations = get_recommendations(members[0]['member_id'])
+               # 빈 카테고리는 제외되거나 빈 결과 반환 확인
+               assert len(recommendations.get('categories', [])) >= 0
+   ```
+
+4. 필터링 후 제품이 없는 경우 처리:
+   ```python
+   # 매우 낮은 예산으로 필터링 테스트
+   very_low_budget = {'min': 0, 'max': 10000}
+   
+   # 모든 제품 가격 확인
+   all_products = get_all_products()
+   affordable_products = [p for p in all_products 
+                         if very_low_budget['min'] <= p['price'] <= very_low_budget['max']]
+   
+   if len(affordable_products) == 0:
+       # 제품이 없는 경우 처리 확인
+       # 예: 예산 범위 확대 또는 적절한 메시지 반환
+       pass
+   ```
+
+5. 경계값 처리:
+   ```python
+   # Taste ID 경계값 테스트
+   for taste_id in [1, 120]:
+       categories = get_categories_for_taste(taste_id)
+       assert len(categories) > 0
+       
+       # 해당 Taste ID를 가진 회원으로 추천 테스트
+       members = get_members_by_taste(taste_id, limit=5)
+       for member in members:
+           recommendations = get_recommendations(member['member_id'])
+           assert 'categories' in recommendations or 'products' in recommendations
+   ```
+
+6. NULL 값 처리:
+   ```python
+   # 예산 정보가 NULL인 온보딩 데이터 테스트
+   onboarding_data_null_budget = {
+       'budget_level': None,
+       'has_pet': True,
+       # ... 기타 필드
+   }
+   
+   # NULL 값에 대한 기본값 적용 확인
+   budget_range = calculate_budget_range(onboarding_data_null_budget.get('budget_level'))
+   # 기본 예산 범위 적용 또는 에러 처리 확인
+   ```
+
+7. 동시성 처리:
+   ```python
+   import threading
+   
+   member_id = 'user_123'
+   results = []
+   
+   def get_recommendation():
+       recommendations = get_recommendations(member_id)
+       results.append(recommendations)
+   
+   # 동시에 여러 요청 실행
+   threads = [threading.Thread(target=get_recommendation) for _ in range(10)]
+   for thread in threads:
+       thread.start()
+   for thread in threads:
+       thread.join()
+   
+   # 모든 결과가 일관된지 확인 (또는 적절히 처리되는지 확인)
+   assert len(results) == 10
+   ```
+
+
+예상 결과:
+
+1. TASTE 값이 없는 회원:
+   - 기본 추천 제공 또는 적절한 에러 메시지 반환
+   - 시스템 크래시 없음
+
+2. 온보딩 데이터가 없는 회원:
+   - 기본 예산/조건으로 필터링 또는 적절한 에러 메시지 반환
+   - 시스템 크래시 없음
+
+3. 제품이 없는 카테고리:
+   - 빈 카테고리는 제외되거나 빈 결과 반환
+   - 다른 카테고리의 제품은 정상 추천
+
+4. 필터링 후 제품이 없는 경우:
+   - 예산 범위 확대 또는 적절한 메시지 반환
+   - 빈 결과 반환 (정상 동작)
+
+5. 경계값:
+   - 모든 경계값에서 정상 작동
+   - 범위 밖 값에 대해 적절한 처리
+
+6. NULL 값:
+   - 기본값 적용 또는 적절한 에러 처리
+   - 시스템 크래시 없음
+
+7. 동시성:
+   - 동시 요청이 올바르게 처리됨
+   - 데이터 일관성 유지
+
+
+테스트 스크립트 구조:
+
+```python
+class RecommendationEdgeCasesValidator:
+    """추천 엔진 엣지 케이스 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 엣지 케이스 검증 실행"""
+        # 1. TASTE 값이 없는 회원 처리 검증
+        # 2. 온보딩 데이터가 없는 회원 처리 검증
+        # 3. 카테고리에 제품이 없는 경우 처리 검증
+        # 4. 필터링 후 제품이 없는 경우 처리 검증
+        # 5. 경계값 처리 검증
+        # 6. NULL 값 처리 검증
+        # 7. 잘못된 데이터 타입 처리 검증
+        # 8. 동시성 처리 검증
+        # 9. 대용량 데이터 처리 검증
+        # 10. 에러 복구 검증
+    
+    def _validate_no_taste_member(self):
+        """TASTE 값이 없는 회원 처리 검증"""
+    
+    def _validate_no_onboarding_data(self):
+        """온보딩 데이터가 없는 회원 처리 검증"""
+    
+    def _validate_empty_category(self):
+        """카테고리에 제품이 없는 경우 처리 검증"""
+    
+    def _validate_no_products_after_filtering(self):
+        """필터링 후 제품이 없는 경우 처리 검증"""
+    
+    def _validate_boundary_values(self):
+        """경계값 처리 검증"""
+    
+    def _validate_null_values(self):
+        """NULL 값 처리 검증"""
+    
+    def _validate_wrong_data_types(self):
+        """잘못된 데이터 타입 처리 검증"""
+    
+    def _validate_concurrency(self):
+        """동시성 처리 검증"""
+    
+    def _validate_large_data(self):
+        """대용량 데이터 처리 검증"""
+    
+    def _validate_error_recovery(self):
+        """에러 복구 검증"""
+    
+    def _find_edge_case_data(self):
+        """실제 DB에서 엣지 케이스 데이터 찾기"""
+```
+
+
+시각화 항목:
+
+1. 엣지 케이스별 성공/실패 비율
+2. 에러 발생 빈도 및 타입 분포
+3. 처리 시간 분포 (정상 vs 엣지 케이스)
+4. 에러 메시지 유형 분포
+5. 복구 시간 분포
+
+
+참고:
+
+- Step 1~6에서 검증한 모든 로직이 엣지 케이스에서도 올바르게 작동하는지 확인
+- 실제 운영 환경에서 발생할 수 있는 모든 예외 상황을 고려
+- 각 엣지 케이스에서 시스템이 크래시하지 않고 적절히 처리하는지 확인
+- 에러 발생 시 적절한 로깅이 되는지 확인
+- test_taste_edge_cases.py의 구조를 참고하여 작성
+- 실제 DB 데이터를 활용하여 현실적인 엣지 케이스 테스트
+

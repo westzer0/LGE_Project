@@ -1,0 +1,227 @@
+Step 2: Taste 기반 카테고리 선택 로직 검증 - Taste ID로 추천할 카테고리 선택하는 로직 검증
+
+
+현재 상황:
+
+- Step 1 완료: 추천 엔진 인프라 확인 완료 (제품 테이블, 카테고리 테이블, Taste-카테고리 매핑 확인 완료)
+- Taste 계산 완료: 사용자 Taste ID(1-120) 계산 및 MEMBER.TASTE 저장 완료
+- MEMBER 테이블에 TASTE 값이 저장된 회원 데이터 존재
+
+
+목표:
+
+Taste ID를 기반으로 추천할 카테고리를 선택하는 로직이 올바르게 작동하는지 검증
+- Taste ID → 카테고리 매핑 로직 검증
+- 각 Taste ID에 대해 적절한 카테고리가 선택되는지 확인
+- 여러 카테고리가 선택될 수 있는 경우 처리 확인
+
+
+검증 항목:
+
+1. Taste-카테고리 매핑 로직 검증
+   - Taste ID를 입력받아 카테고리 목록을 반환하는 함수 존재 여부 확인
+   - 매핑 로직이 올바르게 작동하는지 확인
+   - 모든 Taste ID(1-120)에 대해 매핑이 존재하는지 확인
+
+2. 카테고리 선택 결과 검증
+   - 각 Taste ID에 대해 선택된 카테고리가 적절한지 확인
+   - 선택된 카테고리에 제품이 존재하는지 확인
+   - 카테고리 선택 개수 확인 (1개 또는 여러 개)
+
+3. 일관성 검증
+   - 동일한 Taste ID에 대해 항상 동일한 카테고리가 선택되는지 확인
+   - 매핑 로직의 일관성 확인
+
+4. 실제 회원 데이터로 검증
+   - MEMBER 테이블에서 TASTE 값이 있는 회원 선택
+   - 각 회원의 Taste ID로 카테고리 선택 테스트
+   - 선택된 카테고리가 유효한지 확인
+
+5. 경계값 검증
+   - Taste ID = 1 (최소값)에 대한 카테고리 선택
+   - Taste ID = 120 (최대값)에 대한 카테고리 선택
+   - 범위 밖 Taste ID 처리 확인
+
+6. 빈 결과 처리 검증
+   - 특정 Taste ID에 매핑된 카테고리가 없는 경우 처리
+   - 선택된 카테고리에 제품이 없는 경우 처리
+
+
+관련 파일 (예상):
+
+- api/services/recommendation_service.py
+  - get_categories_for_taste() 메서드 (예상)
+  - Taste ID를 입력받아 카테고리 목록 반환
+
+- api/utils/taste_category_mapper.py (존재 여부 확인 필요)
+  - Taste-카테고리 매핑 로직
+
+- Taste-카테고리 매핑 테이블 또는 설정 파일
+  - TASTE_CATEGORY_MAPPING 테이블 또는
+  - taste_category_config.json 등
+
+
+작업:
+
+1. Taste-카테고리 매핑 로직 찾기:
+   - 코드베이스에서 매핑 로직 검색
+   - 매핑 테이블 또는 설정 파일 확인
+   - 매핑 함수/메서드 확인
+
+2. 매핑 로직 검증:
+   - 모든 Taste ID(1-120)에 대해 카테고리 선택 테스트
+   - 선택된 카테고리가 유효한지 확인
+   - 카테고리 선택 개수 확인
+
+3. 실제 회원 데이터로 검증:
+   - MEMBER 테이블에서 TASTE 값이 있는 회원 100명 이상 선택
+   - 각 회원의 Taste ID로 카테고리 선택
+   - 선택 결과 검증
+
+4. 일관성 테스트:
+   - 동일한 Taste ID로 여러 번 카테고리 선택
+   - 결과가 항상 동일한지 확인
+
+5. 경계값 테스트:
+   - Taste ID 1, 120에 대한 테스트
+   - 범위 밖 값에 대한 에러 처리 확인
+
+6. 시각화 생성:
+   - Taste ID별 선택된 카테고리 분포
+   - 카테고리별 선택 빈도
+   - 매핑 결과 요약
+
+
+검증 방법:
+
+1. 매핑 로직 테스트:
+   ```python
+   # 모든 Taste ID에 대해 카테고리 선택
+   for taste_id in range(1, 121):
+       categories = get_categories_for_taste(taste_id)
+       # 카테고리가 선택되었는지 확인
+       assert len(categories) > 0
+       # 선택된 카테고리가 유효한지 확인
+       for category in categories:
+           assert category_exists(category)
+   ```
+
+2. 실제 회원 데이터 테스트:
+   ```python
+   # MEMBER 테이블에서 TASTE 값이 있는 회원 조회
+   members = get_members_with_taste()
+   
+   for member in members:
+       taste_id = member['TASTE']
+       categories = get_categories_for_taste(taste_id)
+       # 카테고리가 선택되었는지 확인
+       assert len(categories) > 0
+   ```
+
+3. 일관성 테스트:
+   ```python
+   taste_id = 50
+   results = []
+   for _ in range(100):
+       categories = get_categories_for_taste(taste_id)
+       results.append(sorted(categories))
+   
+   # 모든 결과가 동일한지 확인
+   assert len(set(tuple(r) for r in results)) == 1
+   ```
+
+4. 경계값 테스트:
+   ```python
+   # 최소값
+   categories_1 = get_categories_for_taste(1)
+   assert len(categories_1) > 0
+   
+   # 최대값
+   categories_120 = get_categories_for_taste(120)
+   assert len(categories_120) > 0
+   
+   # 범위 밖 값
+   try:
+       categories = get_categories_for_taste(0)
+       # 에러가 발생해야 함 또는 기본값 처리
+   except ValueError:
+       pass
+   ```
+
+
+예상 결과:
+
+1. 매핑 로직:
+   - 모든 Taste ID(1-120)에 대해 카테고리가 선택됨
+   - 선택된 카테고리가 유효함 (DB에 존재)
+   - 각 Taste ID당 1개 이상의 카테고리가 선택됨
+
+2. 일관성:
+   - 동일한 Taste ID에 대해 항상 동일한 카테고리 선택
+   - 매핑 로직이 결정적(deterministic)임
+
+3. 실제 데이터:
+   - TASTE 값이 있는 모든 회원에 대해 카테고리 선택 성공
+   - 선택된 카테고리에 제품이 존재
+
+4. 경계값:
+   - Taste ID 1, 120에 대해 정상 작동
+   - 범위 밖 값에 대해 적절한 에러 처리
+
+
+테스트 스크립트 구조:
+
+```python
+class TasteCategorySelectionValidator:
+    """Taste 기반 카테고리 선택 로직 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 매핑 로직 검증
+        # 2. 카테고리 선택 결과 검증
+        # 3. 일관성 검증
+        # 4. 실제 회원 데이터로 검증
+        # 5. 경계값 검증
+        # 6. 빈 결과 처리 검증
+    
+    def _validate_mapping_logic(self):
+        """Taste-카테고리 매핑 로직 검증"""
+        # 모든 Taste ID(1-120)에 대해 테스트
+    
+    def _validate_category_selection(self):
+        """카테고리 선택 결과 검증"""
+    
+    def _validate_consistency(self):
+        """일관성 검증"""
+    
+    def _validate_with_real_members(self):
+        """실제 회원 데이터로 검증"""
+        # MEMBER 테이블에서 TASTE 값이 있는 회원 선택
+    
+    def _validate_boundary_values(self):
+        """경계값 검증"""
+    
+    def _validate_empty_results(self):
+        """빈 결과 처리 검증"""
+    
+    def _find_mapping_logic(self):
+        """매핑 로직 찾기"""
+```
+
+
+시각화 항목:
+
+1. Taste ID별 선택된 카테고리 분포 히트맵
+2. 카테고리별 선택 빈도 바 차트
+3. Taste ID 범위별 카테고리 선택 개수 분포
+4. 매핑 결과 요약 테이블
+5. 검증 성공/실패 비율 파이 차트
+
+
+참고:
+
+- Step 1에서 확인한 Taste-카테고리 매핑 구조 활용
+- MEMBER 테이블의 TASTE 값 활용
+- 매핑 로직이 없을 경우 구현 필요할 수 있음
+- 카테고리 선택 로직은 이후 단계에서 사용될 핵심 로직
+
