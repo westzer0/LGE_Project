@@ -1,0 +1,374 @@
+Step 3: PORTFOLIO/PORTFOLIO_PRODUCT/PORTFOLIO_SESSION 테이블 저장 로직 구현 - 변환된 포트폴리오 데이터를 Oracle DB에 저장
+
+현재 상황:
+
+- Step 2 완료: 추천 결과를 포트폴리오 형식으로 변환하는 로직 구현 완료
+- 포트폴리오 데이터 준비: 변환된 products, 스타일 정보, 가격 정보, 온보딩 데이터 준비됨
+- Oracle DB 테이블 확인: PORTFOLIO, PORTFOLIO_PRODUCT, PORTFOLIO_SESSION 테이블 구조 확인 완료
+
+
+목표:
+
+변환된 포트폴리오 데이터를 Oracle DB에 저장하는 로직 구현
+- PORTFOLIO 테이블에 포트폴리오 기본 정보 저장
+- PORTFOLIO_PRODUCT 테이블에 포트폴리오 제품 목록 저장
+- PORTFOLIO_SESSION 테이블에 포트폴리오-세션 연결 저장
+- 트랜잭션 처리 및 에러 처리
+- 기존 데이터 처리 (업데이트 또는 삭제 후 재삽입)
+
+
+검증 항목:
+
+1. PORTFOLIO 테이블 저장 로직
+   - 포트폴리오 기본 정보 저장
+   - PORTFOLIO_ID 생성 규칙 확인
+   - 필수 필드 저장 확인
+   - 가격 정보 저장 확인
+   - 스타일 정보 저장 확인
+   - 상태 정보 저장 확인
+
+2. PORTFOLIO_PRODUCT 테이블 저장 로직
+   - 포트폴리오 제품 목록 저장
+   - PORTFOLIO_ID 외래키 연결 확인
+   - PRODUCT_ID 외래키 연결 확인
+   - PRIORITY (순위) 저장 확인
+   - RECOMMEND_REASON 저장 확인
+   - 기존 데이터 처리 (삭제 후 재삽입 또는 업데이트)
+
+3. PORTFOLIO_SESSION 테이블 저장 로직
+   - 포트폴리오-세션 연결 저장
+   - PORTFOLIO_ID 외래키 연결 확인
+   - SESSION_ID 외래키 연결 확인
+   - MEMBER_ID 외래키 연결 확인
+   - 기존 데이터 처리 (MERGE 또는 UPSERT)
+
+4. 트랜잭션 처리
+   - 모든 테이블 저장을 하나의 트랜잭션으로 처리
+   - 저장 실패 시 롤백 처리
+   - 부분 실패 방지
+
+5. 에러 처리
+   - 저장 실패 시 에러 처리
+   - 에러 로깅
+   - 사용자에게 적절한 에러 메시지 반환
+
+6. 데이터 무결성 확인
+   - 외래키 제약조건 준수
+   - 필수 필드 NULL 체크
+   - 데이터 타입 검증
+
+
+관련 파일:
+
+- api/services/portfolio_service.py
+  - _save_portfolio_to_oracle() 함수
+  - 포트폴리오 Oracle DB 저장 로직
+
+- api/db/oracle_client.py
+  - Oracle DB 연결 및 쿼리 실행
+  - 트랜잭션 처리
+
+- PORTFOLIO 테이블
+  - PORTFOLIO_ID: 포트폴리오 ID (PRIMARY KEY)
+  - INTERNAL_KEY: 내부 키
+  - USER_ID: 사용자 ID
+  - STYLE_TYPE: 스타일 타입
+  - STYLE_TITLE: 스타일 타이틀
+  - STYLE_SUBTITLE: 스타일 서브타이틀
+  - TOTAL_ORIGINAL_PRICE: 정가 합계
+  - TOTAL_DISCOUNT_PRICE: 할인가 합계
+  - MATCH_SCORE: 매칭 점수
+  - STATUS: 상태
+  - CREATED_AT: 생성 일시
+
+- PORTFOLIO_PRODUCT 테이블
+  - ID: 포트폴리오 제품 ID (PRIMARY KEY)
+  - PORTFOLIO_ID: 포트폴리오 ID (FK)
+  - PRODUCT_ID: 제품 ID (FK)
+  - PRIORITY: 우선순위 (순위)
+  - RECOMMEND_REASON: 추천 이유
+
+- PORTFOLIO_SESSION 테이블
+  - PORTFOLIO_ID: 포트폴리오 ID (PRIMARY KEY, FK)
+  - SESSION_ID: 세션 ID (FK)
+  - MEMBER_ID: 회원 ID (FK)
+  - CREATED_AT: 생성 일시
+
+
+작업:
+
+1. PORTFOLIO 테이블 저장 함수 구현:
+   - save_portfolio_to_oracle() 함수 작성
+   - 포트폴리오 기본 정보 INSERT
+   - PORTFOLIO_ID 생성 (시퀀스 또는 UUID)
+   - 필수 필드 검증
+   - 가격 정보 저장
+   - 스타일 정보 저장
+
+2. PORTFOLIO_PRODUCT 테이블 저장 함수 구현:
+   - save_portfolio_products_to_oracle() 함수 작성
+   - 기존 데이터 삭제 (재추천 시)
+   - 포트폴리오 제품 목록 INSERT
+   - PRIORITY (순위) 저장
+   - RECOMMEND_REASON 저장 (선택적)
+
+3. PORTFOLIO_SESSION 테이블 저장 함수 구현:
+   - save_portfolio_session_to_oracle() 함수 작성
+   - MERGE 또는 UPSERT 사용
+   - 포트폴리오-세션 연결 저장
+   - MEMBER_ID 저장
+
+4. 통합 저장 함수 구현:
+   - _save_portfolio_to_oracle() 함수 작성
+   - 모든 테이블 저장을 하나의 트랜잭션으로 처리
+   - 에러 처리 및 롤백
+   - 저장 성공/실패 반환
+
+5. 에러 처리 추가:
+   - 저장 실패 시 에러 처리
+   - 로깅 추가
+   - 사용자에게 적절한 에러 메시지 반환
+
+
+검증 방법:
+
+1. PORTFOLIO 테이블 저장 테스트:
+   ```python
+   def test_save_portfolio():
+       """PORTFOLIO 테이블 저장 테스트"""
+       portfolio_data = {
+           'portfolio_id': 'PF-TEST01',
+           'internal_key': 'PF-TEST01',
+           'user_id': 'user_123',
+           'style_type': 'modern',
+           'style_title': '모던 & 미니멀 스타일',
+           'style_subtitle': '당신의 라이프스타일에 맞춰 구성했어요.',
+           'total_original_price': 5000000,
+           'total_discount_price': 4500000,
+           'match_score': 85,
+           'status': 'draft'
+       }
+       
+       try:
+           save_portfolio_to_oracle(portfolio_data)
+           print("✅ PORTFOLIO 테이블 저장 성공")
+           
+           # 저장 확인
+           portfolio = get_portfolio_from_oracle('PF-TEST01')
+           assert portfolio is not None
+           assert portfolio['style_type'] == 'modern'
+           
+       except Exception as e:
+           print(f"❌ PORTFOLIO 테이블 저장 실패: {e}")
+           raise
+   ```
+
+2. PORTFOLIO_PRODUCT 테이블 저장 테스트:
+   ```python
+   def test_save_portfolio_products():
+       """PORTFOLIO_PRODUCT 테이블 저장 테스트"""
+       portfolio_id = 'PF-TEST01'
+       products = [
+           {'product_id': 101, 'priority': 1, 'recommend_reason': '추천 이유 1'},
+           {'product_id': 102, 'priority': 2, 'recommend_reason': '추천 이유 2'},
+           {'product_id': 103, 'priority': 3, 'recommend_reason': '추천 이유 3'},
+       ]
+       
+       try:
+           save_portfolio_products_to_oracle(portfolio_id, products)
+           print("✅ PORTFOLIO_PRODUCT 테이블 저장 성공")
+           
+           # 저장 확인
+           saved_products = get_portfolio_products_from_oracle(portfolio_id)
+           assert len(saved_products) == 3
+           assert saved_products[0]['product_id'] == 101
+           assert saved_products[0]['priority'] == 1
+           
+       except Exception as e:
+           print(f"❌ PORTFOLIO_PRODUCT 테이블 저장 실패: {e}")
+           raise
+   ```
+
+3. PORTFOLIO_SESSION 테이블 저장 테스트:
+   ```python
+   def test_save_portfolio_session():
+       """PORTFOLIO_SESSION 테이블 저장 테스트"""
+       portfolio_id = 'PF-TEST01'
+       session_id = 'session_123'
+       member_id = 'member_456'
+       
+       try:
+           save_portfolio_session_to_oracle(portfolio_id, session_id, member_id)
+           print("✅ PORTFOLIO_SESSION 테이블 저장 성공")
+           
+           # 저장 확인
+           portfolio_session = get_portfolio_session_from_oracle(portfolio_id)
+           assert portfolio_session is not None
+           assert portfolio_session['session_id'] == session_id
+           assert portfolio_session['member_id'] == member_id
+           
+       except Exception as e:
+           print(f"❌ PORTFOLIO_SESSION 테이블 저장 실패: {e}")
+           raise
+   ```
+
+4. 통합 저장 테스트:
+   ```python
+   def test_save_portfolio_integration():
+       """포트폴리오 통합 저장 테스트"""
+       portfolio = {
+           'portfolio_id': 'PF-TEST02',
+           'internal_key': 'PF-TEST02',
+           'user_id': 'user_123',
+           'style_type': 'modern',
+           'style_title': '모던 & 미니멀 스타일',
+           'style_subtitle': '당신의 라이프스타일에 맞춰 구성했어요.',
+           'total_original_price': 5000000,
+           'total_discount_price': 4500000,
+           'match_score': 85,
+           'status': 'draft'
+       }
+       
+       products = [
+           {'product_id': 101, 'priority': 1, 'recommend_reason': '추천 이유 1'},
+           {'product_id': 102, 'priority': 2, 'recommend_reason': '추천 이유 2'},
+       ]
+       
+       session_id = 'session_123'
+       member_id = 'member_456'
+       
+       try:
+           result = _save_portfolio_to_oracle(
+               portfolio=portfolio,
+               session_id=session_id,
+               member_id=member_id,
+               products=products
+           )
+           
+           assert result['success'] == True
+           print("✅ 포트폴리오 통합 저장 성공")
+           
+           # 모든 테이블 저장 확인
+           portfolio_data = get_portfolio_from_oracle('PF-TEST02')
+           assert portfolio_data is not None
+           
+           products_data = get_portfolio_products_from_oracle('PF-TEST02')
+           assert len(products_data) == 2
+           
+           session_data = get_portfolio_session_from_oracle('PF-TEST02')
+           assert session_data is not None
+           
+       except Exception as e:
+           print(f"❌ 포트폴리오 통합 저장 실패: {e}")
+           raise
+   ```
+
+5. 트랜잭션 롤백 테스트:
+   ```python
+   def test_transaction_rollback():
+       """트랜잭션 롤백 테스트"""
+       # 잘못된 데이터로 저장 시도 (외래키 제약조건 위반)
+       portfolio = {
+           'portfolio_id': 'PF-TEST03',
+           'user_id': 'user_123',
+           'style_type': 'invalid_style',  # 잘못된 값
+       }
+       
+       try:
+           result = _save_portfolio_to_oracle(
+               portfolio=portfolio,
+               session_id='invalid_session',  # 존재하지 않는 세션
+               member_id='member_456',
+               products=[]
+           )
+           
+           # 저장 실패해야 함
+           assert result['success'] == False
+           print("✅ 트랜잭션 롤백 정상 작동")
+           
+           # 데이터가 저장되지 않았는지 확인
+           portfolio_data = get_portfolio_from_oracle('PF-TEST03')
+           assert portfolio_data is None
+           
+       except Exception as e:
+           print(f"트랜잭션 롤백 테스트: {e}")
+   ```
+
+
+예상 결과:
+
+1. PORTFOLIO 테이블 저장:
+   - 포트폴리오 기본 정보 정상 저장
+   - 모든 필수 필드 저장 확인
+   - 가격 정보 정상 저장
+   - 스타일 정보 정상 저장
+
+2. PORTFOLIO_PRODUCT 테이블 저장:
+   - 포트폴리오 제품 목록 정상 저장
+   - 모든 제품의 PRIORITY 저장 확인
+   - 외래키 연결 정상
+
+3. PORTFOLIO_SESSION 테이블 저장:
+   - 포트폴리오-세션 연결 정상 저장
+   - MEMBER_ID 저장 확인
+   - 외래키 연결 정상
+
+4. 트랜잭션 처리:
+   - 모든 테이블 저장이 하나의 트랜잭션으로 처리
+   - 저장 실패 시 롤백 정상 작동
+   - 부분 실패 방지
+
+5. 에러 처리:
+   - 저장 실패 시 적절한 에러 처리
+   - 에러 로깅 정상
+   - 사용자에게 적절한 에러 메시지 반환
+
+
+테스트 스크립트 구조:
+
+```python
+class PortfolioStorageValidator:
+    """포트폴리오 저장 로직 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. PORTFOLIO 테이블 저장
+        # 2. PORTFOLIO_PRODUCT 테이블 저장
+        # 3. PORTFOLIO_SESSION 테이블 저장
+        # 4. 통합 저장
+        # 5. 트랜잭션 롤백
+    
+    def _test_save_portfolio(self):
+        """PORTFOLIO 테이블 저장 테스트"""
+    
+    def _test_save_portfolio_products(self):
+        """PORTFOLIO_PRODUCT 테이블 저장 테스트"""
+    
+    def _test_save_portfolio_session(self):
+        """PORTFOLIO_SESSION 테이블 저장 테스트"""
+    
+    def _test_save_portfolio_integration(self):
+        """포트폴리오 통합 저장 테스트"""
+    
+    def _test_transaction_rollback(self):
+        """트랜잭션 롤백 테스트"""
+```
+
+
+시각화 항목:
+
+1. 포트폴리오 저장 플로우 다이어그램
+2. PORTFOLIO-PORTFOLIO_PRODUCT-PORTFOLIO_SESSION 관계 다이어그램
+3. 저장 성공/실패 비율
+4. 저장 시간 분포
+5. 트랜잭션 롤백 발생 빈도
+
+
+참고:
+
+- Step 2에서 변환된 포트폴리오 데이터를 사용
+- 모든 테이블 저장을 하나의 트랜잭션으로 처리하여 데이터 무결성 보장
+- 기존 데이터가 있는 경우 삭제 후 재삽입 또는 업데이트 처리
+- PORTFOLIO_SESSION은 MERGE 또는 UPSERT 사용 권장
+- Step 4에서 포트폴리오 생성 API를 구현할 예정
+

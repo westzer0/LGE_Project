@@ -367,6 +367,17 @@ const Onboarding = () => {
     const hasMedia = mainSpaces.includes('living') || mainSpaces.includes('bedroom') ||
       mainSpaces.includes('study') || mainSpaces.includes('all')
 
+    // 디버깅 로그 추가
+    console.log('[Step 4 Render]', {
+      housing_type: formData.housing_type,
+      isStudio,
+      mainSpaces,
+      formData_main_space: formData.main_space,
+      hasKitchen,
+      hasDressing,
+      hasMedia
+    })
+
     // PRD: 주방만 선택된 경우 미디어 소비 비활성화
     const onlyKitchen = hasKitchen && !hasDressing && !hasMedia && !mainSpaces.includes('all')
     // PRD: 드레스룸만 선택된 경우 미디어 소비 비활성화
@@ -542,10 +553,27 @@ const Onboarding = () => {
       case 3: return formData.housing_type !== '' && formData.main_space.length > 0
       case 4: {
         // 조건부 질문이므로 선택된 공간에 따라 검증
-        const hasKitchen = formData.main_space.includes('kitchen') || formData.main_space.includes('all')
-        const hasDressing = formData.main_space.includes('dressing') || formData.main_space.includes('all')
-        const hasMedia = formData.main_space.includes('living') || formData.main_space.includes('bedroom') ||
-          formData.main_space.includes('study') || formData.main_space.includes('all')
+        // renderStep4와 동일한 로직 사용 (원룸 케이스 고려)
+        const isStudio = formData.housing_type === 'studio'
+        const mainSpaces = isStudio ? ['all'] : formData.main_space
+        
+        const hasKitchen = mainSpaces.includes('kitchen') || mainSpaces.includes('all')
+        const hasDressing = mainSpaces.includes('dressing') || mainSpaces.includes('all')
+        const hasMedia = mainSpaces.includes('living') || mainSpaces.includes('bedroom') ||
+          mainSpaces.includes('study') || mainSpaces.includes('all')
+
+        // 디버깅 로그 추가
+        console.log('[Step 4 Validation]', {
+          housing_type: formData.housing_type,
+          isStudio,
+          mainSpaces,
+          hasKitchen,
+          hasDressing,
+          hasMedia,
+          cooking: formData.cooking,
+          laundry: formData.laundry,
+          media: formData.media
+        })
 
         // 선택된 공간에 해당하는 질문이 모두 답변되었는지 확인
         if (hasKitchen && !formData.cooking) return false

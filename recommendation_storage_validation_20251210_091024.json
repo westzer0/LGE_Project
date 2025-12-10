@@ -1,0 +1,17 @@
+{
+  "storage_execution_tests": [],
+  "table_storage_tests": [],
+  "record_count_tests": [],
+  "duplicate_prevention_tests": [],
+  "success_rate_tests": [],
+  "errors": [],
+  "warnings": [
+    "TASTE 값이 있는 회원 없음"
+  ],
+  "statistics": {
+    "total_tested": 0,
+    "successful": 0,
+    "failed": 0,
+    "errors": 0
+  }
+}

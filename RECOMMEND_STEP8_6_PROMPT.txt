@@ -1,0 +1,436 @@
+Step 8-6: 재추천 지원 검증 - 동일 세션에 대한 재추천 시 기존 데이터 처리 및 재추천 이력 관리 검증
+
+
+현재 상황:
+
+- Step 8-1 완료: 추천 결과 저장 로직 찾기 및 구현 완료
+- Step 8-2 완료: 테이블 저장 여부 검증 완료
+- Step 8-3 완료: 카테고리/순위/점수 포함 여부 검증 완료
+- Step 8-4 완료: 외래키 관계 및 데이터 무결성 검증 완료
+- Step 8-5 완료: 실제 추천 결과로 통합 검증 완료
+- 동일 세션에 대한 재추천 시 기존 데이터 처리 및 재추천 이력 관리 검증 필요
+
+
+목표:
+
+동일 세션에 대한 재추천 시 기존 데이터가 올바르게 처리되고 재추천 이력이 관리되는지 검증
+- 동일 세션에 대한 재추천 시 기존 데이터 처리 확인
+- 업데이트 또는 삭제 후 재삽입 로직 확인
+- 재추천 이력 관리 확인
+- 재추천 시나리오별 검증
+
+
+검증 항목:
+
+1. 재추천 시 기존 데이터 처리 검증
+   - 동일 세션에 대한 재추천 시 기존 데이터 처리 방식 확인
+   - 기존 데이터 삭제 후 재삽입 확인
+   - 또는 기존 데이터 업데이트 확인
+   - 중복 레코드 방지 확인
+
+2. 재추천 데이터 정확성 검증
+   - 재추천 후 저장된 데이터가 새로운 추천 결과와 일치하는지 확인
+   - 카테고리/순위/점수가 올바르게 업데이트되는지 확인
+   - 이전 추천 결과가 완전히 대체되는지 확인
+
+3. 재추천 이력 관리 검증
+   - 재추천 시 이전 추천 결과가 보존되는지 확인 (이력 테이블)
+   - 또는 재추천 시 이전 추천 결과가 삭제되는지 확인
+   - CREATED_AT 필드가 올바르게 업데이트되는지 확인
+   - 재추천 횟수 추적 가능 여부 확인
+
+4. 재추천 시나리오별 검증
+   - 동일 조건으로 재추천 시나리오
+   - 다른 조건으로 재추천 시나리오
+   - 여러 번 재추천 시나리오
+   - 재추천 실패 시나리오
+
+5. 재추천 성능 검증
+   - 재추천 시 처리 시간 측정
+   - 기존 데이터 삭제/업데이트 성능 확인
+   - 재추천 성능이 첫 추천과 유사한지 확인
+
+
+관련 파일:
+
+- Step 8-1에서 구현한 저장 함수
+  - save_recommendation_results() 함수
+  - 기존 데이터 삭제 로직
+
+- Step 8-2에서 구현한 조회 함수
+  - get_saved_recommendation_products() 함수
+
+- 추천 엔진
+  - get_recommendations() 함수
+  - 동일 세션에 대한 재추천 지원
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - SESSION_ID, PRODUCT_ID (PRIMARY KEY)
+  - CREATED_AT: 생성 일시
+
+
+작업:
+
+1. 재추천 시 기존 데이터 처리 검증:
+   - 동일 세션에 대한 재추천 테스트
+   - 기존 데이터 처리 방식 확인
+   - 중복 레코드 확인
+
+2. 재추천 데이터 정확성 검증:
+   - 재추천 후 저장된 데이터 조회
+   - 새로운 추천 결과와 비교
+   - 모든 필드 정확성 확인
+
+3. 재추천 이력 관리 검증:
+   - 재추천 전후 데이터 비교
+   - CREATED_AT 필드 확인
+   - 이력 보존 여부 확인
+
+4. 재추천 시나리오별 검증:
+   - 다양한 재추천 시나리오 테스트
+   - 각 시나리오별 검증
+
+5. 재추천 성능 검증:
+   - 재추천 처리 시간 측정
+   - 성능 비교
+
+
+검증 방법:
+
+1. 재추천 시 기존 데이터 처리 검증:
+   ```python
+   def test_re_recommendation_data_handling():
+       """재추천 시 기존 데이터 처리 검증"""
+       member_id = 'user_123'
+       session = get_latest_completed_session(member_id)
+       session_id = session['session_id']
+       
+       # 첫 번째 추천 및 저장
+       recommendations1 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations1)
+       
+       # 첫 번째 추천 결과 확인
+       saved_before = get_saved_recommendation_products(session_id)
+       saved_count_before = len(saved_before)
+       print(f"첫 번째 추천 저장된 제품 수: {saved_count_before}")
+       
+       # 두 번째 추천 및 저장 (재추천)
+       recommendations2 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations2)
+       
+       # 두 번째 추천 결과 확인
+       saved_after = get_saved_recommendation_products(session_id)
+       saved_count_after = len(saved_after)
+       print(f"재추천 후 저장된 제품 수: {saved_count_after}")
+       
+       # 기존 데이터 처리 확인
+       expected_count_after = count_total_recommended_products(recommendations2)
+       assert saved_count_after == expected_count_after, \
+           f"재추천 후 제품 수 불일치: 예상 {expected_count_after}개, 실제 {saved_count_after}개"
+       
+       # 중복 레코드 확인
+       cur.execute("""
+           SELECT SESSION_ID, PRODUCT_ID, COUNT(*)
+           FROM ONBOARD_SESS_REC_PRODUCTS
+           WHERE SESSION_ID = :p_session_id
+           GROUP BY SESSION_ID, PRODUCT_ID
+           HAVING COUNT(*) > 1
+       """, {'p_session_id': session_id})
+       duplicates = cur.fetchall()
+       assert len(duplicates) == 0, f"중복 레코드 발견: {duplicates}"
+       
+       print("✅ 재추천 시 기존 데이터 처리 확인: 기존 데이터 삭제 후 재삽입")
+   ```
+
+2. 재추천 데이터 정확성 검증:
+   ```python
+   def test_re_recommendation_data_accuracy():
+       """재추천 데이터 정확성 검증"""
+       member_id = 'user_123'
+       session = get_latest_completed_session(member_id)
+       session_id = session['session_id']
+       
+       # 첫 번째 추천 및 저장
+       recommendations1 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations1)
+       
+       # 두 번째 추천 및 저장 (재추천)
+       recommendations2 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations2)
+       
+       # 재추천 후 저장된 데이터 조회
+       saved_after = get_saved_recommendation_products(session_id)
+       
+       # 재추천 결과와 저장된 데이터 일치 확인
+       validate_stored_vs_recommendations(session_id, recommendations2)
+       
+       # 첫 번째 추천 결과와 다른지 확인 (일반적으로 다를 수 있음)
+       # 하지만 저장된 데이터는 두 번째 추천 결과와 일치해야 함
+       print("✅ 재추천 데이터 정확성 확인: 저장된 데이터가 새로운 추천 결과와 일치")
+   ```
+
+3. 재추천 이력 관리 검증:
+   ```python
+   def test_re_recommendation_history():
+       """재추천 이력 관리 검증"""
+       member_id = 'user_123'
+       session = get_latest_completed_session(member_id)
+       session_id = session['session_id']
+       
+       # 첫 번째 추천 및 저장
+       recommendations1 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations1)
+       
+       # 첫 번째 추천의 CREATED_AT 확인
+       saved_before = get_saved_recommendation_products(session_id)
+       created_at_before = saved_before[0]['created_at'] if saved_before else None
+       print(f"첫 번째 추천 CREATED_AT: {created_at_before}")
+       
+       import time
+       time.sleep(1)  # 시간 차이를 위해 대기
+       
+       # 두 번째 추천 및 저장 (재추천)
+       recommendations2 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations2)
+       
+       # 재추천 후 CREATED_AT 확인
+       saved_after = get_saved_recommendation_products(session_id)
+       created_at_after = saved_after[0]['created_at'] if saved_after else None
+       print(f"재추천 후 CREATED_AT: {created_at_after}")
+       
+       # CREATED_AT이 업데이트되었는지 확인
+       # (기존 데이터 삭제 후 재삽입 시 새로운 CREATED_AT)
+       if created_at_before and created_at_after:
+           # 재삽입된 경우 CREATED_AT이 더 최신이어야 함
+           assert created_at_after >= created_at_before, \
+               "재추천 후 CREATED_AT이 이전보다 이전임"
+       
+       print("✅ 재추천 이력 관리 확인: CREATED_AT이 올바르게 업데이트됨")
+   ```
+
+4. 재추천 시나리오별 검증:
+   ```python
+   def test_re_recommendation_scenarios():
+       """재추천 시나리오별 검증"""
+       member_id = 'user_123'
+       session = get_latest_completed_session(member_id)
+       session_id = session['session_id']
+       
+       scenarios = [
+           {
+               'name': '동일 조건 재추천',
+               'description': '동일한 조건으로 여러 번 재추천'
+           },
+           {
+               'name': '여러 번 재추천',
+               'description': '3번 이상 재추천'
+           }
+       ]
+       
+       for scenario in scenarios:
+           print(f"\n[시나리오] {scenario['name']}: {scenario['description']}")
+           
+           # 첫 번째 추천
+           recommendations1 = get_recommendations(member_id)
+           save_recommendation_results(session_id, recommendations1)
+           saved_count1 = len(get_saved_recommendation_products(session_id))
+           
+           # 두 번째 추천 (재추천)
+           recommendations2 = get_recommendations(member_id)
+           save_recommendation_results(session_id, recommendations2)
+           saved_count2 = len(get_saved_recommendation_products(session_id))
+           
+           # 세 번째 추천 (재추천)
+           recommendations3 = get_recommendations(member_id)
+           save_recommendation_results(session_id, recommendations3)
+           saved_count3 = len(get_saved_recommendation_products(session_id))
+           
+           # 각 재추천마다 데이터가 올바르게 업데이트되는지 확인
+           assert saved_count2 == count_total_recommended_products(recommendations2)
+           assert saved_count3 == count_total_recommended_products(recommendations3)
+           
+           # 최종 저장된 데이터가 마지막 추천 결과와 일치하는지 확인
+           validate_stored_vs_recommendations(session_id, recommendations3)
+           
+           print(f"  ✅ {scenario['name']} 검증 완료")
+   ```
+
+5. 재추천 성능 검증:
+   ```python
+   def test_re_recommendation_performance():
+       """재추천 성능 검증"""
+       import time
+       
+       member_id = 'user_123'
+       session = get_latest_completed_session(member_id)
+       session_id = session['session_id']
+       
+       # 첫 번째 추천 성능 측정
+       start_time1 = time.time()
+       recommendations1 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations1)
+       end_time1 = time.time()
+       first_time = end_time1 - start_time1
+       
+       # 두 번째 추천 성능 측정 (재추천)
+       start_time2 = time.time()
+       recommendations2 = get_recommendations(member_id)
+       save_recommendation_results(session_id, recommendations2)
+       end_time2 = time.time()
+       second_time = end_time2 - start_time2
+       
+       print(f"\n{'='*60}")
+       print(f"재추천 성능 비교:")
+       print(f"  첫 번째 추천 시간: {first_time:.2f}초")
+       print(f"  재추천 시간: {second_time:.2f}초")
+       print(f"  시간 차이: {abs(second_time - first_time):.2f}초")
+       print(f"{'='*60}")
+       
+       # 재추천 성능이 첫 추천과 유사한지 확인 (2배 이내)
+       assert second_time <= first_time * 2, \
+           f"재추천 성능이 첫 추천보다 2배 이상 느림: {second_time:.2f}초 vs {first_time:.2f}초"
+       
+       print("✅ 재추천 성능 확인: 재추천 성능이 첫 추천과 유사함")
+   ```
+
+6. 실제 데이터로 재추천 검증:
+   ```python
+   def test_real_re_recommendation():
+       """실제 데이터로 재추천 검증"""
+       members = get_members_with_taste(limit=20)
+       
+       success_count = 0
+       error_count = 0
+       
+       for member in members:
+           member_id = member['member_id']
+           try:
+               session = get_latest_completed_session(member_id)
+               if not session:
+                   continue
+               
+               session_id = session['session_id']
+               
+               # 첫 번째 추천 및 저장
+               recommendations1 = get_recommendations(member_id)
+               save_recommendation_results(session_id, recommendations1)
+               
+               # 두 번째 추천 및 저장 (재추천)
+               recommendations2 = get_recommendations(member_id)
+               save_recommendation_results(session_id, recommendations2)
+               
+               # 재추천 후 데이터 검증
+               validate_stored_vs_recommendations(session_id, recommendations2)
+               
+               success_count += 1
+               
+           except Exception as e:
+               error_count += 1
+               print(f"❌ 재추천 검증 실패: {member_id}, 에러: {e}")
+       
+       # 성공률 계산
+       total = success_count + error_count
+       success_rate = success_count / total if total > 0 else 0
+       
+       print(f"\n{'='*60}")
+       print(f"실제 데이터 재추천 검증 결과:")
+       print(f"  성공: {success_count}개")
+       print(f"  실패: {error_count}개")
+       print(f"  성공률: {success_rate:.2%}")
+       print(f"{'='*60}")
+       
+       assert success_rate >= 0.9, f"재추천 검증 성공률이 90% 미만: {success_rate:.2%}"
+   ```
+
+
+예상 결과:
+
+1. 재추천 시 기존 데이터 처리:
+   - 동일 세션에 대한 재추천 시 기존 데이터가 삭제되고 새 데이터가 저장됨
+   - 또는 기존 데이터가 업데이트됨
+   - 중복 레코드 없음
+
+2. 재추천 데이터 정확성:
+   - 재추천 후 저장된 데이터가 새로운 추천 결과와 일치함
+   - 카테고리/순위/점수가 올바르게 업데이트됨
+   - 이전 추천 결과가 완전히 대체됨
+
+3. 재추천 이력 관리:
+   - 재추천 시 CREATED_AT이 올바르게 업데이트됨
+   - 재추천 횟수 추적 가능 (필요한 경우)
+   - 이력 관리가 올바르게 작동함
+
+4. 재추천 시나리오:
+   - 다양한 재추천 시나리오에서 정상 작동
+   - 각 시나리오별 검증 통과
+
+5. 재추천 성능:
+   - 재추천 처리 시간이 첫 추천과 유사함
+   - 성능 저하 없음
+
+
+테스트 스크립트 구조:
+
+```python
+class ReRecommendationValidator:
+    """재추천 지원 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 재추천 시 기존 데이터 처리 검증
+        # 2. 재추천 데이터 정확성 검증
+        # 3. 재추천 이력 관리 검증
+        # 4. 재추천 시나리오별 검증
+        # 5. 재추천 성능 검증
+        # 6. 실제 데이터로 재추천 검증
+    
+    def _test_re_recommendation_data_handling(self):
+        """재추천 시 기존 데이터 처리 검증"""
+        # 동일 세션에 대한 재추천 테스트
+        # 기존 데이터 처리 방식 확인
+    
+    def _test_re_recommendation_data_accuracy(self):
+        """재추천 데이터 정확성 검증"""
+        # 재추천 후 저장된 데이터 검증
+        # 새로운 추천 결과와 비교
+    
+    def _test_re_recommendation_history(self):
+        """재추천 이력 관리 검증"""
+        # CREATED_AT 필드 확인
+        # 이력 보존 여부 확인
+    
+    def _test_re_recommendation_scenarios(self):
+        """재추천 시나리오별 검증"""
+        # 다양한 재추천 시나리오 테스트
+    
+    def _test_re_recommendation_performance(self):
+        """재추천 성능 검증"""
+        # 재추천 처리 시간 측정
+        # 성능 비교
+    
+    def _test_real_re_recommendation(self):
+        """실제 데이터로 재추천 검증"""
+        # 실제 회원 데이터로 재추천 테스트
+```
+
+
+시각화 항목:
+
+1. 재추천 성공/실패 비율 파이 차트
+2. 재추천 전후 제품 수 비교 바 차트
+3. 재추천 처리 시간 분포 히스토그램
+4. 재추천 횟수 분포 히스토그램
+5. 재추천 시나리오별 성공률 바 차트
+
+
+참고:
+
+- 재추천은 사용자가 동일한 세션에서 다시 추천을 요청하는 경우를 의미
+- 기존 데이터 처리 방식은 비즈니스 요구사항에 따라 다를 수 있음
+  - 옵션 1: 기존 데이터 삭제 후 재삽입 (일반적)
+  - 옵션 2: 기존 데이터 업데이트
+  - 옵션 3: 이력 테이블에 보존 후 새 데이터 삽입
+- 재추천 성능은 첫 추천과 유사해야 함
+- 재추천 검증 성공률 90% 이상 목표
+- Step 8-1~8-5에서 검증한 모든 항목이 재추천 시에도 작동하는지 확인
+

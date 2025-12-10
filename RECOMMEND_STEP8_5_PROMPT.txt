@@ -1,0 +1,435 @@
+Step 8-5: 실제 추천 결과로 통합 검증 - 실제 회원 데이터로 추천 결과 생성, 저장 및 검증
+
+
+현재 상황:
+
+- Step 8-1 완료: 추천 결과 저장 로직 찾기 및 구현 완료
+- Step 8-2 완료: 테이블 저장 여부 검증 완료
+- Step 8-3 완료: 카테고리/순위/점수 포함 여부 검증 완료
+- Step 8-4 완료: 외래키 관계 및 데이터 무결성 검증 완료
+- 실제 운영 환경과 유사한 조건으로 통합 검증 필요
+
+
+목표:
+
+실제 회원 데이터로 추천 결과를 생성하고 저장한 후, 모든 검증 항목을 통합하여 검증
+- 실제 회원의 추천 결과 생성 및 저장
+- 저장된 데이터와 추천 결과 일치 확인
+- 여러 세션에 대한 저장 검증
+- 전체 플로우 통합 검증
+
+
+검증 항목:
+
+1. 실제 추천 결과 생성 및 저장
+   - 실제 회원 데이터로 추천 결과 생성
+   - 추천 결과 저장 실행
+   - 저장 성공 여부 확인
+
+2. 저장된 데이터와 추천 결과 일치 확인
+   - 저장된 데이터 조회
+   - 추천 결과와 저장된 데이터 비교
+   - 카테고리/순위/점수 일치 확인
+
+3. 여러 세션에 대한 저장 검증
+   - 다양한 회원의 추천 결과 생성 및 저장
+   - 각 세션별 저장 검증
+   - 저장 성공률 확인
+
+4. 전체 플로우 통합 검증
+   - Taste ID 조회 → 추천 결과 생성 → 저장 → 검증 전체 플로우
+   - 각 단계별 성공 여부 확인
+   - 전체 플로우 성공률 확인
+
+5. 성능 검증
+   - 추천 결과 생성 및 저장 시간 측정
+   - 평균 처리 시간 확인
+   - 병목 구간 식별
+
+
+관련 파일:
+
+- 추천 엔진 전체 플로우
+  - get_taste_for_member() - Taste ID 조회
+  - get_recommendations() - 추천 결과 생성
+  - save_recommendation_results() - 추천 결과 저장
+
+- Step 8-1~8-4에서 구현한 검증 함수
+  - get_saved_recommendation_products() - 저장된 데이터 조회
+  - validate_stored_data_accuracy() - 데이터 일치성 검증
+  - validate_data_integrity() - 데이터 무결성 검증
+
+- 실제 회원 데이터
+  - MEMBER 테이블
+  - ONBOARDING_SESSION 테이블
+
+
+작업:
+
+1. 실제 추천 결과 생성 및 저장:
+   - 실제 회원 데이터로 추천 결과 생성
+   - 추천 결과 저장 실행
+   - 저장 성공 여부 확인
+
+2. 저장된 데이터와 추천 결과 일치 확인:
+   - 저장된 데이터 조회
+   - 추천 결과와 저장된 데이터 비교
+   - 모든 필드 일치 확인
+
+3. 여러 세션에 대한 저장 검증:
+   - 다양한 회원의 추천 결과 생성 및 저장
+   - 각 세션별 검증
+   - 저장 성공률 계산
+
+4. 전체 플로우 통합 검증:
+   - 전체 플로우 실행
+   - 각 단계별 성공 여부 확인
+   - 전체 성공률 계산
+
+5. 성능 측정:
+   - 처리 시간 측정
+   - 평균 처리 시간 계산
+   - 병목 구간 식별
+
+
+검증 방법:
+
+1. 실제 추천 결과 생성 및 저장:
+   ```python
+   def test_real_recommendation_storage():
+       """실제 회원 데이터로 추천 결과 생성 및 저장"""
+       # 실제 회원 데이터 조회
+       members = get_members_with_taste(limit=10)
+       
+       for member in members:
+           member_id = member['member_id']
+           print(f"\n[회원 {member_id}] 추천 결과 생성 및 저장 시작...")
+           
+           try:
+               # 1. Taste ID 조회
+               taste_id = get_taste_for_member(member_id)
+               print(f"  Taste ID: {taste_id}")
+               
+               # 2. 추천 결과 생성
+               recommendations = get_recommendations(member_id)
+               print(f"  추천 결과 생성 완료: {len(recommendations.get('categories', []))}개 카테고리")
+               
+               # 3. 세션 조회
+               session = get_latest_completed_session(member_id)
+               if not session:
+                   print(f"  ⚠️ 완료된 세션이 없음")
+                   continue
+               
+               session_id = session['session_id']
+               print(f"  세션 ID: {session_id}")
+               
+               # 4. 추천 결과 저장
+               save_recommendation_results(session_id, recommendations)
+               print(f"  ✅ 저장 완료")
+               
+           except Exception as e:
+               print(f"  ❌ 오류 발생: {e}")
+               import traceback
+               traceback.print_exc()
+   ```
+
+2. 저장된 데이터와 추천 결과 일치 확인:
+   ```python
+   def validate_stored_vs_recommendations(session_id: str, recommendations: dict):
+       """저장된 데이터와 추천 결과 일치 확인"""
+       # 저장된 데이터 조회
+       saved_products = get_saved_recommendation_products(session_id)
+       
+       print(f"\n[세션 {session_id}] 데이터 일치성 검증...")
+       print(f"  추천 결과 제품 수: {count_total_recommended_products(recommendations)}")
+       print(f"  저장된 제품 수: {len(saved_products)}")
+       
+       # 제품 수 일치 확인
+       expected_count = count_total_recommended_products(recommendations)
+       assert len(saved_products) == expected_count, \
+           f"제품 수 불일치: 예상 {expected_count}개, 실제 {len(saved_products)}개"
+       
+       # 카테고리별 검증
+       for category in recommendations.get('categories', []):
+           category_name = category['category_name']
+           category_products = [p for p in saved_products if p['category_name'] == category_name]
+           
+           # 제품 수 확인
+           assert len(category_products) == len(category['products']), \
+               f"카테고리 {category_name}의 제품 수 불일치"
+           
+           # 각 제품 검증
+           for idx, product in enumerate(category['products'], start=1):
+               saved_product = next((p for p in category_products if p['product_id'] == product['product_id']), None)
+               assert saved_product is not None, \
+                   f"제품 {product['product_id']}가 저장되지 않음"
+               assert saved_product['rank_order'] == idx, \
+                   f"제품 {product['product_id']}의 순위 불일치"
+               
+               # 점수 확인
+               expected_score = product.get('recommendation_score')
+               if expected_score is not None:
+                   assert saved_product['score'] is not None, \
+                       f"제품 {product['product_id']}의 점수가 저장되지 않음"
+                   assert abs(saved_product['score'] - expected_score) < 0.01, \
+                       f"제품 {product['product_id']}의 점수 불일치"
+           
+           print(f"  ✅ 카테고리 {category_name}: {len(category_products)}개 제품 검증 완료")
+       
+       print(f"  ✅ 모든 데이터 일치성 검증 통과")
+   ```
+
+3. 여러 세션에 대한 저장 검증:
+   ```python
+   def validate_multiple_sessions():
+       """여러 세션에 대한 저장 검증"""
+       # 실제 회원 데이터 조회
+       members = get_members_with_taste(limit=50)
+       
+       success_count = 0
+       error_count = 0
+       errors = []
+       
+       for member in members:
+           member_id = member['member_id']
+           try:
+               # 추천 결과 생성 및 저장
+               recommendations = get_recommendations(member_id)
+               session = get_latest_completed_session(member_id)
+               
+               if not session:
+                   continue
+               
+               session_id = session['session_id']
+               save_recommendation_results(session_id, recommendations)
+               
+               # 저장된 데이터와 추천 결과 일치 확인
+               validate_stored_vs_recommendations(session_id, recommendations)
+               
+               success_count += 1
+               
+           except Exception as e:
+               error_count += 1
+               errors.append({
+                   'member_id': member_id,
+                   'error': str(e)
+               })
+               print(f"❌ 검증 실패: {member_id}, 에러: {e}")
+       
+       # 성공률 계산
+       total = success_count + error_count
+       success_rate = success_count / total if total > 0 else 0
+       
+       print(f"\n{'='*60}")
+       print(f"여러 세션 저장 검증 결과:")
+       print(f"  성공: {success_count}개")
+       print(f"  실패: {error_count}개")
+       print(f"  성공률: {success_rate:.2%}")
+       print(f"{'='*60}")
+       
+       # 실패 원인 분석
+       if errors:
+           print("\n실패 원인 분석 (최대 10개):")
+           for error in errors[:10]:
+               print(f"  - {error['member_id']}: {error['error']}")
+       
+       assert success_rate >= 0.9, f"저장 검증 성공률이 90% 미만: {success_rate:.2%}"
+   ```
+
+4. 전체 플로우 통합 검증:
+   ```python
+   def validate_full_flow():
+       """전체 플로우 통합 검증"""
+       # 실제 회원 데이터 조회
+       members = get_members_with_taste(limit=30)
+       
+       flow_success_count = 0
+       flow_error_count = 0
+       
+       for member in members:
+           member_id = member['member_id']
+           print(f"\n[회원 {member_id}] 전체 플로우 실행...")
+           
+           try:
+               # 1. Taste ID 조회
+               taste_id = get_taste_for_member(member_id)
+               assert taste_id is not None, "Taste ID 조회 실패"
+               assert 1 <= taste_id <= 120, f"Taste ID 범위 오류: {taste_id}"
+               print(f"  ✅ Step 1: Taste ID 조회 성공 ({taste_id})")
+               
+               # 2. 추천 결과 생성
+               recommendations = get_recommendations(member_id)
+               assert 'categories' in recommendations or 'products' in recommendations, \
+                   "추천 결과 형식 오류"
+               print(f"  ✅ Step 2: 추천 결과 생성 성공")
+               
+               # 3. 세션 조회
+               session = get_latest_completed_session(member_id)
+               if not session:
+                   print(f"  ⚠️ 완료된 세션이 없음 - 저장 건너뜀")
+                   continue
+               
+               session_id = session['session_id']
+               print(f"  ✅ Step 3: 세션 조회 성공 ({session_id})")
+               
+               # 4. 추천 결과 저장
+               save_recommendation_results(session_id, recommendations)
+               print(f"  ✅ Step 4: 추천 결과 저장 성공")
+               
+               # 5. 저장된 데이터 검증
+               saved_products = get_saved_recommendation_products(session_id)
+               assert len(saved_products) > 0, "저장된 제품이 없음"
+               print(f"  ✅ Step 5: 저장된 데이터 검증 성공 ({len(saved_products)}개 제품)")
+               
+               # 6. 데이터 일치성 검증
+               validate_stored_vs_recommendations(session_id, recommendations)
+               print(f"  ✅ Step 6: 데이터 일치성 검증 성공")
+               
+               flow_success_count += 1
+               print(f"  ✅ 전체 플로우 성공")
+               
+           except Exception as e:
+               flow_error_count += 1
+               print(f"  ❌ 전체 플로우 실패: {e}")
+               import traceback
+               traceback.print_exc()
+       
+       # 전체 플로우 성공률 계산
+       total = flow_success_count + flow_error_count
+       flow_success_rate = flow_success_count / total if total > 0 else 0
+       
+       print(f"\n{'='*60}")
+       print(f"전체 플로우 통합 검증 결과:")
+       print(f"  성공: {flow_success_count}개")
+       print(f"  실패: {flow_error_count}개")
+       print(f"  성공률: {flow_success_rate:.2%}")
+       print(f"{'='*60}")
+       
+       assert flow_success_rate >= 0.85, \
+           f"전체 플로우 성공률이 85% 미만: {flow_success_rate:.2%}"
+   ```
+
+5. 성능 측정:
+   ```python
+   def measure_performance():
+       """성능 측정"""
+       import time
+       
+       members = get_members_with_taste(limit=20)
+       execution_times = []
+       
+       for member in members:
+           member_id = member['member_id']
+           
+           start_time = time.time()
+           
+           try:
+               # 전체 플로우 실행
+               recommendations = get_recommendations(member_id)
+               session = get_latest_completed_session(member_id)
+               
+               if session:
+                   save_recommendation_results(session['session_id'], recommendations)
+               
+               end_time = time.time()
+               execution_time = end_time - start_time
+               execution_times.append(execution_time)
+               
+           except Exception as e:
+               print(f"성능 측정 중 오류: {member_id}, {e}")
+       
+       # 성능 통계 계산
+       if execution_times:
+           avg_time = sum(execution_times) / len(execution_times)
+           max_time = max(execution_times)
+           min_time = min(execution_times)
+           
+           print(f"\n{'='*60}")
+           print(f"성능 측정 결과:")
+           print(f"  평균 처리 시간: {avg_time:.2f}초")
+           print(f"  최대 처리 시간: {max_time:.2f}초")
+           print(f"  최소 처리 시간: {min_time:.2f}초")
+           print(f"{'='*60}")
+           
+           assert avg_time < 3.0, f"평균 처리 시간이 3초를 초과: {avg_time:.2f}초"
+           assert max_time < 10.0, f"최대 처리 시간이 10초를 초과: {max_time:.2f}초"
+   ```
+
+
+예상 결과:
+
+1. 실제 추천 결과 생성 및 저장:
+   - 실제 회원 데이터로 추천 결과 생성 성공
+   - 추천 결과 저장 성공
+   - 저장 성공률 90% 이상
+
+2. 저장된 데이터와 추천 결과 일치:
+   - 저장된 데이터와 추천 결과가 일치함
+   - 카테고리/순위/점수가 모두 일치함
+   - 데이터 일치성 검증 성공률 95% 이상
+
+3. 여러 세션에 대한 저장 검증:
+   - 다양한 회원의 추천 결과 저장 성공
+   - 각 세션별 검증 통과
+   - 저장 검증 성공률 90% 이상
+
+4. 전체 플로우 통합 검증:
+   - 전체 플로우가 정상 작동함
+   - 각 단계별 성공 여부 확인
+   - 전체 플로우 성공률 85% 이상
+
+5. 성능:
+   - 평균 처리 시간 3초 이내
+   - 최대 처리 시간 10초 이내
+   - 대부분의 요청이 빠르게 처리됨
+
+
+테스트 스크립트 구조:
+
+```python
+class RecommendationIntegrationValidator:
+    """실제 추천 결과로 통합 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 실제 추천 결과 생성 및 저장
+        # 2. 저장된 데이터와 추천 결과 일치 확인
+        # 3. 여러 세션에 대한 저장 검증
+        # 4. 전체 플로우 통합 검증
+        # 5. 성능 측정
+    
+    def _test_real_recommendation_storage(self):
+        """실제 추천 결과 생성 및 저장"""
+    
+    def _validate_stored_vs_recommendations(self):
+        """저장된 데이터와 추천 결과 일치 확인"""
+    
+    def _validate_multiple_sessions(self):
+        """여러 세션에 대한 저장 검증"""
+    
+    def _validate_full_flow(self):
+        """전체 플로우 통합 검증"""
+    
+    def _measure_performance(self):
+        """성능 측정"""
+```
+
+
+시각화 항목:
+
+1. 전체 플로우 성공/실패 비율 파이 차트
+2. 단계별 성공률 바 차트
+3. 저장 검증 성공률 추이 라인 차트
+4. 처리 시간 분포 히스토그램
+5. 세션별 저장된 제품 수 분포 바 차트
+6. 카테고리별 저장된 제품 수 분포 바 차트
+
+
+참고:
+
+- Step 8-1~8-4에서 검증한 모든 항목을 실제 데이터로 통합 검증
+- 실제 운영 환경과 유사한 조건으로 테스트
+- 전체 플로우가 정상 작동하는지 최종 확인
+- 성능은 사용자 경험에 직접적인 영향이 있으므로 중요
+- Step 8-6에서 재추천 지원을 검증할 예정
+

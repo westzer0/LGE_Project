@@ -1,0 +1,55 @@
+{
+  "storage_logic": {
+    "checks": {
+      "ONBOARD_SESS_REC_PRODUCTS 테이블 저장 로직": true,
+      "INSERT 문 존재": true,
+      "기존 데이터 삭제 로직": true,
+      "카테고리명 필드": true,
+      "순위 필드": true,
+      "점수 필드": true,
+      "추천 상세 정보 생성": true
+    },
+    "found": true,
+    "timing": "with_recommendation",
+    "error_handling": {
+      "try:": "try-except 블록",
+      "except": "예외 처리",
+      "conn.commit()": "커밋 로직",
+      "false": "롤백 로직",
+      "true": "로깅"
+    }
+  },
+  "table_storage": {},
+  "category_info": {
+    "success": false
+  },
+  "rank_info": {
+    "success": false
+  },
+  "score_info": {
+    "success": false
+  },
+  "foreign_keys": {
+    "session_valid": false,
+    "success": false
+  },
+  "real_recommendations": {
+    "success_rate": 0.0,
+    "success_count": 0,
+    "total": 3,
+    "success": true
+  },
+  "re_recommendation": {
+    "success": false
+  },
+  "statistics": {},
+  "errors": [
+    "Storage failed: Step 6에서는 INSERT가 불가능합니다. Step 1에서 생성된 세션을 찾을 수 없습니다. (session_id: test_storage_1765325465)",
+    "Category info validation error: ORA-00942: table or view does not exist",
+    "Rank info validation error: ORA-00942: table or view does not exist",
+    "Score info validation error: ORA-00942: table or view does not exist",
+    "Foreign key validation error: ORA-00942: table or view does not exist",
+    "Re-recommendation validation error: Step 6에서는 INSERT가 불가능합니다. Step 1에서 생성된 세션을 찾을 수 없습니다. (session_id: test_rerec_1765325468)",
+    "Statistics generation error: ORA-00942: table or view does not exist"
+  ]
+}

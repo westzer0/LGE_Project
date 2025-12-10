@@ -1,0 +1,256 @@
+{
+  "timestamp": "2025-12-10T10:01:21.836490",
+  "findings": {
+    "portfolio_model": {
+      "exists": true,
+      "fields": [
+        "reservations",
+        "portfolio_session",
+        "portfolio_products",
+        "estimates",
+        "consultations",
+        "id",
+        "portfolio_id",
+        "internal_key",
+        "user_id",
+        "onboarding_session",
+        "style_type",
+        "style_title",
+        "style_subtitle",
+        "onboarding_data",
+        "products",
+        "total_original_price",
+        "total_discount_price",
+        "match_score",
+        "status",
+        "share_url",
+        "share_count",
+        "created_at",
+        "updated_at"
+      ],
+      "field_details": {
+        "portfolio_id": {
+          "type": "CharField",
+          "null": false,
+          "blank": false,
+          "default": "<class 'django.db.models.fields.NOT_PROVIDED'>"
+        },
+        "internal_key": {
+          "type": "CharField",
+          "null": true,
+          "blank": true,
+          "default": "<class 'django.db.models.fields.NOT_PROVIDED'>"
+        },
+        "user_id": {
+          "type": "CharField",
+          "null": false,
+          "blank": false,
+          "default": "<class 'django.db.models.fields.NOT_PROVIDED'>"
+        },
+        "onboarding_session": {
+          "type": "ForeignKey",
+          "null": true,
+          "blank": true,
+          "default": "<class 'django.db.models.fields.NOT_PROVIDED'>"
+        },
+        "products": {
+          "type": "JSONField",
+          "null": false,
+          "blank": false,
+          "default": "<class 'list'>"
+        },
+        "total_original_price": {
+          "type": "DecimalField",
+          "null": false,
+          "blank": false,
+          "default": 0
+        },
+        "total_discount_price": {
+          "type": "DecimalField",
+          "null": false,
+          "blank": false,
+          "default": 0
+        },
+        "status": {
+          "type": "CharField",
+          "null": false,
+          "blank": false,
+          "default": "draft"
+        }
+      },
+      "missing_fields": [],
+      "products_field": {
+        "type": "JSONField",
+        "is_jsonfield": true
+      },
+      "onboarding_session": {
+        "type": "ForeignKey",
+        "related_model": "<class 'api.models.OnboardingSession'>"
+      },
+      "portfolio_product_model": {
+        "exists": true,
+        "fields": [
+          "id",
+          "portfolio",
+          "product",
+          "recommend_reason",
+          "priority"
+        ]
+      },
+      "portfolio_session_model": {
+        "exists": true,
+        "fields": [
+          "sharelink",
+          "portfolioversion",
+          "portfolio",
+          "member",
+          "session",
+          "created_at"
+        ]
+      }
+    },
+    "portfolio_table": {
+      "exists": false
+    },
+    "portfolio_product_table": {
+      "exists": false
+    },
+    "portfolio_session_table": {
+      "exists": false
+    },
+    "recommendation_connection": {
+      "onboard_sess_rec_products_exists": false,
+      "portfolio_service_exists": true,
+      "has_convert_function": false,
+      "onboarding_session_model_exists": true,
+      "onboarding_session_fields": [
+        "portfolios",
+        "user_responses",
+        "session_categories",
+        "session_main_spaces",
+        "session_priorities",
+        "onboard_sess_categories",
+        "onboard_sess_main_spaces",
+        "onboard_sess_priorities",
+        "onboard_sess_rec_products",
+        "portfolio_sessions",
+        "session_id",
+        "session_uuid",
+        "member",
+        "vibe",
+        "household_size",
+        "has_pet",
+        "housing_type",
+        "pyung",
+        "cooking",
+        "laundry",
+        "media",
+        "priority",
+        "budget_level",
+        "recommendation_result",
+        "current_step",
+        "status",
+        "created_at",
+        "updated_at",
+        "completed_at"
+      ],
+      "has_session_id": true
+    },
+    "existing_logic": {
+      "portfolio_service_file_exists": true,
+      "portfolio_service_importable": true,
+      "existing_functions": [],
+      "existing_views": [
+        "portfolio_save_view",
+        "portfolio_detail_view",
+        "onboarding_complete_view"
+      ]
+    },
+    "data_existence": {
+      "portfolio_count": null,
+      "portfolio_product_count": 0,
+      "portfolio_session_count": 0,
+      "portfolio_product_distribution": []
+    },
+    "relationships": {
+      "portfolio_onboarding": {
+        "has_foreign_key": true,
+        "portfolio_fields": [
+          "reservations",
+          "portfolio_session",
+          "portfolio_products",
+          "estimates",
+          "consultations",
+          "id",
+          "portfolio_id",
+          "internal_key",
+          "user_id",
+          "onboarding_session",
+          "style_type",
+          "style_title",
+          "style_subtitle",
+          "onboarding_data",
+          "products",
+          "total_original_price",
+          "total_discount_price",
+          "match_score",
+          "status",
+          "share_url",
+          "share_count",
+          "created_at",
+          "updated_at"
+        ],
+        "onboarding_fields": [
+          "portfolios",
+          "user_responses",
+          "session_categories",
+          "session_main_spaces",
+          "session_priorities",
+          "onboard_sess_categories",
+          "onboard_sess_main_spaces",
+          "onboard_sess_priorities",
+          "onboard_sess_rec_products",
+          "portfolio_sessions",
+          "session_id",
+          "session_uuid",
+          "member",
+          "vibe",
+          "household_size",
+          "has_pet",
+          "housing_type",
+          "pyung",
+          "cooking",
+          "laundry",
+          "media",
+          "priority",
+          "budget_level",
+          "recommendation_result",
+          "current_step",
+          "status",
+          "created_at",
+          "updated_at",
+          "completed_at"
+        ]
+      },
+      "portfolio_product_relations": [],
+      "portfolio_session_relations": []
+    }
+  },
+  "errors": [],
+  "warnings": [
+    "PORTFOLIO 테이블이 존재하지 않습니다.",
+    "PORTFOLIO_PRODUCT 테이블이 존재하지 않습니다.",
+    "PORTFOLIO_SESSION 테이블이 존재하지 않습니다.",
+    "ONBOARD_SESS_REC_PRODUCTS 테이블이 존재하지 않습니다.",
+    "추천 결과를 포트폴리오로 변환하는 함수가 없습니다.",
+    "PORTFOLIO 테이블 레코드 수 조회 실패: no such table: PORTFOLIO"
+  ],
+  "summary": {
+    "total_errors": 0,
+    "total_warnings": 6,
+    "portfolio_model_exists": true,
+    "portfolio_table_exists": false,
+    "portfolio_product_table_exists": false,
+    "portfolio_session_table_exists": false
+  }
+}

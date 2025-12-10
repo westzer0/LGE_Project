@@ -19,7 +19,7 @@ Taste ID별 제품 Scoring 서비스
    - SPEC_TYPE: 'common' 타입만 사용 (공통 스펙, 모든 variant에 공통으로 적용되는 스펙)
 
 3. TASTE_CONFIG 테이블:
-   - TASTE_ID: Taste ID (1-120)
+   - TASTE_ID: Taste ID (1-1920)
    - REPRESENTATIVE_VIBE: 대표 무드 (modern/cozy/pop/luxury)
    - REPRESENTATIVE_HOUSEHOLD_SIZE: 대표 가구 수
    - REPRESENTATIVE_PRIORITY: 대표 우선순위 (design/tech/eco/value)
@@ -66,7 +66,7 @@ class TasteBasedProductScorer:
         특정 taste_id와 category에 대해 제품을 scoring하여 상위 N개 반환
         
         Args:
-            taste_id: Taste ID (1-120)
+            taste_id: Taste ID (1-1920)
             category: MAIN_CATEGORY (예: 'TV', '냉장고')
             limit: 반환할 제품 수 (기본 3개)
             
@@ -148,6 +148,7 @@ class TasteBasedProductScorer:
                             REPRESENTATIVE_HAS_PET,
                             REPRESENTATIVE_PRIORITY,
                             REPRESENTATIVE_BUDGET_LEVEL,
+                            RECOMMENDED_CATEGORIES,
                             RECOMMENDED_PRODUCTS,
                             RECOMMENDED_PRODUCT_SCORES
                         FROM TASTE_CONFIG
@@ -158,27 +159,37 @@ class TasteBasedProductScorer:
                     if not row:
                         return None
                     
-                    # 2. RECOMMENDED_PRODUCTS 파싱
-                    recommended_products = {}
-                    if row[7]:  # RECOMMENDED_PRODUCTS CLOB
+                    # 2. RECOMMENDED_CATEGORIES 파싱 (CLOB에서 먼저 읽기)
+                    recommended_categories_from_clob = []
+                    if row[7]:  # RECOMMENDED_CATEGORIES CLOB
                         try:
-                            products_json = row[7].read() if hasattr(row[7], 'read') else str(row[7])
+                            cats_json = row[7].read() if hasattr(row[7], 'read') else str(row[7])
+                            if cats_json:
+                                recommended_categories_from_clob = json.loads(cats_json)
+                        except (json.JSONDecodeError, AttributeError) as e:
+                            logger.warning(f"Failed to parse RECOMMENDED_CATEGORIES for taste_id={taste_id}: {e}")
+                    
+                    # 3. RECOMMENDED_PRODUCTS 파싱
+                    recommended_products = {}
+                    if row[8]:  # RECOMMENDED_PRODUCTS CLOB
+                        try:
+                            products_json = row[8].read() if hasattr(row[8], 'read') else str(row[8])
                             if products_json:
                                 recommended_products = json.loads(products_json)
                         except (json.JSONDecodeError, AttributeError) as e:
                             logger.warning(f"Failed to parse RECOMMENDED_PRODUCTS for taste_id={taste_id}: {e}")
                     
-                    # 3. RECOMMENDED_PRODUCT_SCORES 파싱
+                    # 4. RECOMMENDED_PRODUCT_SCORES 파싱
                     recommended_product_scores = {}
-                    if row[8]:  # RECOMMENDED_PRODUCT_SCORES CLOB
+                    if row[9]:  # RECOMMENDED_PRODUCT_SCORES CLOB
                         try:
-                            scores_json = row[8].read() if hasattr(row[8], 'read') else str(row[8])
+                            scores_json = row[9].read() if hasattr(row[9], 'read') else str(row[9])
                             if scores_json:
                                 recommended_product_scores = json.loads(scores_json)
                         except (json.JSONDecodeError, AttributeError) as e:
                             logger.warning(f"Failed to parse RECOMMENDED_PRODUCT_SCORES for taste_id={taste_id}: {e}")
                     
-                    # 3. 정규화된 TASTE_CATEGORY_SCORES 테이블에서 카테고리 점수 조회
+                    # 5. 정규화된 TASTE_CATEGORY_SCORES 테이블에서 카테고리 점수 조회
                     cur.execute("""
                         SELECT 
                             CATEGORY_NAME,
@@ -192,8 +203,8 @@ class TasteBasedProductScorer:
                     
                     category_rows = cur.fetchall()
                     
-                    # 4. 카테고리 데이터 구성
-                    recommended_categories = []
+                    # 6. 카테고리 데이터 구성
+                    recommended_categories = recommended_categories_from_clob.copy() if recommended_categories_from_clob else []
                     category_scores = {}
                     ill_suited_categories = []
                     
@@ -206,7 +217,7 @@ class TasteBasedProductScorer:
                         if score is not None:
                             category_scores[category_name] = score
                         
-                        if is_recommended:
+                        if is_recommended and category_name not in recommended_categories:
                             recommended_categories.append(category_name)
                         
                         if is_ill_suited:

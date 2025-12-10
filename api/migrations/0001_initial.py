@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('contact', models.CharField(blank=True, max_length=20, null=True, verbose_name='연락처')),
                 ('point', models.IntegerField(blank=True, default=0, null=True, verbose_name='포인트')),
                 ('created_at', models.DateTimeField(auto_now_add=True, db_column='created_at', verbose_name='가입 일시')),
-                ('taste', models.IntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(120)], verbose_name='할당된 Taste ID')),
+                ('taste', models.IntegerField(blank=True, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(1920)], verbose_name='할당된 Taste ID')),
             ],
             options={
                 'verbose_name': '회원',
@@ -174,7 +174,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TasteConfig',
             fields=[
-                ('taste_id', models.IntegerField(help_text='Taste ID (1-120)', primary_key=True, serialize=False, unique=True)),
+                ('taste_id', models.IntegerField(help_text='Taste ID (1-1920)', primary_key=True, serialize=False, unique=True)),
                 ('description', models.CharField(blank=True, help_text='Taste 설명', max_length=500)),
                 ('representative_vibe', models.CharField(blank=True, max_length=20)),
                 ('representative_household_size', models.IntegerField(blank=True, null=True)),

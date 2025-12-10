@@ -292,9 +292,199 @@ def onboarding_new_page(request):
 def result_page(request):
     """포트폴리오 결과 페이지"""
     from django.conf import settings
-    return render(request, "result.html", {
-        'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', '')
-    })
+    import json
+    from api.models import TasteConfig, OnboardingSession, Portfolio
+    from api.db.oracle_client import get_connection
+    
+    # 기본 컨텍스트
+    context = {
+        'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', ''),
+        'taste_config_data': None,
+        'style_analysis_message': None
+    }
+    
+    try:
+        # session_id 또는 portfolio_id로 온보딩 세션 정보 가져오기
+        session_id = request.GET.get('session_id')
+        portfolio_id = request.GET.get('portfolio_id')
+        
+        onboarding_session = None
+        
+        if portfolio_id:
+            # portfolio_id로 포트폴리오 조회 후 onboarding_session 가져오기
+            try:
+                portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+                if portfolio.onboarding_session:
+                    onboarding_session = portfolio.onboarding_session
+            except Portfolio.DoesNotExist:
+                try:
+                    portfolio = Portfolio.objects.get(internal_key=portfolio_id)
+                    if portfolio.onboarding_session:
+                        onboarding_session = portfolio.onboarding_session
+                except Portfolio.DoesNotExist:
+                    pass
+        
+        if not onboarding_session and session_id:
+            # session_id로 직접 조회
+            try:
+                onboarding_session = OnboardingSession.objects.get(session_id=session_id)
+            except OnboardingSession.DoesNotExist:
+                pass
+        
+        if onboarding_session:
+            # result 페이지 접속 시 completed_at 설정
+            if onboarding_session.status == 'completed' and not onboarding_session.completed_at:
+                onboarding_session.completed_at = timezone.now()
+                onboarding_session.save()
+                print(f"[result_page] ✅ completed_at 설정: {onboarding_session.completed_at}", flush=True)
+            
+            # 먼저 recommendation_result에서 taste_config 데이터 확인 (온보딩 완료 시 저장된 데이터)
+            taste_config_data_from_result = None
+            if onboarding_session.recommendation_result and isinstance(onboarding_session.recommendation_result, dict):
+                taste_config_data_from_result = onboarding_session.recommendation_result.get('taste_config')
+                if taste_config_data_from_result:
+                    print(f"[result_page] recommendation_result에서 taste_config 데이터 발견", flush=True)
+                    # taste_config 데이터를 JSON 문자열로 변환하여 템플릿에 전달
+                    recommended_categories = taste_config_data_from_result.get('recommended_categories', [])
+                    recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False) if isinstance(recommended_categories, list) else str(recommended_categories)
+                    
+                    context['taste_config_data'] = json.dumps({
+                        'description': taste_config_data_from_result.get('description', ''),
+                        'recommended_categories_text': recommended_categories_text,
+                        'recommended_categories': recommended_categories,  # 파싱된 리스트도 함께 전달
+                        'recommended_products': taste_config_data_from_result.get('recommended_products', {}),
+                        'recommended_product_scores': taste_config_data_from_result.get('recommended_product_scores', {})
+                    }, ensure_ascii=False)
+                    
+                    print(f"[result_page] TasteConfig 데이터 로드 완료 (from recommendation_result): taste_id={taste_config_data_from_result.get('taste_id')}", flush=True)
+            
+            # recommendation_result에 taste_config가 없으면 기존 방식으로 조회
+            if not taste_config_data_from_result:
+                # member_id로 taste_id 추출
+                taste_id = None
+                member_id = None
+                
+                # onboarding_session.taste_id 확인 (온보딩 완료 시 저장된 taste_id)
+                if onboarding_session.taste_id:
+                    taste_id = onboarding_session.taste_id
+                    print(f"[result_page] onboarding_session.taste_id 사용: {taste_id}", flush=True)
+                else:
+                    # onboarding_session에서 member_id 가져오기
+                    # Django 모델에는 member_id 필드가 없을 수 있으므로 Oracle DB에서 조회
+                    try:
+                        with get_connection() as conn:
+                            with conn.cursor() as cur:
+                                cur.execute("""
+                                    SELECT MEMBER_ID, TASTE
+                                    FROM ONBOARDING_SESSION
+                                    WHERE SESSION_ID = :session_id
+                                """, {'session_id': onboarding_session.session_id})
+                                
+                                row = cur.fetchone()
+                                if row:
+                                    member_id = row[0]
+                                    taste_id = row[1] if row[1] is not None else None
+                                    
+                                    # MEMBER 테이블에서도 taste_id 조회 시도
+                                    if not taste_id and member_id:
+                                        from api.services.taste_calculation_service import taste_calculation_service
+                                        taste_id = taste_calculation_service.get_taste_for_member(member_id)
+                                        
+                    except Exception as e:
+                        print(f"[result_page] member_id/taste_id 조회 실패: {e}", flush=True)
+                
+                # taste_id로 TasteConfig 조회
+            taste_config = None
+            if taste_id:
+                try:
+                    taste_config = TasteConfig.objects.get(taste_id=taste_id)
+                    print(f"[result_page] taste_id={taste_id}로 TasteConfig 조회 성공", flush=True)
+                except TasteConfig.DoesNotExist:
+                    print(f"[result_page] taste_id={taste_id}에 해당하는 TasteConfig를 찾을 수 없음", flush=True)
+                except Exception as e:
+                    print(f"[result_page] TasteConfig 조회 오류: {e}", flush=True)
+            
+            if taste_config:
+                # recommended_categories를 텍스트로 그대로 가져오기 (JSON 파싱 없이)
+                recommended_categories_text = ""
+                try:
+                    # Oracle DB에서 직접 CLOB로 조회
+                    with get_connection() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute("""
+                                SELECT RECOMMENDED_CATEGORIES
+                                FROM TASTE_CONFIG
+                                WHERE TASTE_ID = :taste_id
+                            """, {'taste_id': taste_config.taste_id})
+                            
+                            row = cur.fetchone()
+                            if row and row[0]:
+                                # CLOB 읽기
+                                clob_data = row[0]
+                                if hasattr(clob_data, 'read'):
+                                    recommended_categories_text = clob_data.read()
+                                else:
+                                    recommended_categories_text = str(clob_data)
+                except Exception as e:
+                    print(f"[result_page] RECOMMENDED_CATEGORIES 조회 실패: {e}", flush=True)
+                    # Fallback: Django 모델에서 가져오기
+                    recommended_categories = taste_config.recommended_categories
+                    if isinstance(recommended_categories, str):
+                        recommended_categories_text = recommended_categories
+                    elif isinstance(recommended_categories, list):
+                        recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False)
+                
+                # recommended_products 파싱 (필요시)
+                recommended_products = taste_config.recommended_products
+                if isinstance(recommended_products, str):
+                    try:
+                        recommended_products = json.loads(recommended_products)
+                    except:
+                        recommended_products = {}
+                
+                # Oracle DB에서 RECOMMENDED_PRODUCT_SCORES 가져오기
+                recommended_product_scores = {}
+                try:
+                    with get_connection() as conn:
+                        with conn.cursor() as cur:
+                            cur.execute("""
+                                SELECT RECOMMENDED_PRODUCT_SCORES
+                                FROM TASTE_CONFIG
+                                WHERE TASTE_ID = :taste_id
+                            """, {'taste_id': taste_config.taste_id})
+                            
+                            row = cur.fetchone()
+                            if row and row[0]:
+                                scores_json = row[0].read() if hasattr(row[0], 'read') else str(row[0])
+                                if scores_json:
+                                    recommended_product_scores = json.loads(scores_json)
+                except Exception as e:
+                    print(f"[result_page] RECOMMENDED_PRODUCT_SCORES 조회 실패: {e}", flush=True)
+                
+                # description 파싱
+                description = taste_config.description or ""
+                
+                # 데이터를 JSON 문자열로 변환하여 템플릿에 전달
+                # recommended_categories는 텍스트로 그대로 전달
+                context['taste_config_data'] = json.dumps({
+                    'description': description,
+                    'recommended_categories_text': recommended_categories_text,  # 텍스트로 그대로
+                    'recommended_products': recommended_products,
+                    'recommended_product_scores': recommended_product_scores
+                }, ensure_ascii=False)
+                
+                print(f"[result_page] TasteConfig 데이터 로드 완료: taste_id={taste_config.taste_id}", flush=True)
+            else:
+                print(f"[result_page] 매칭되는 TasteConfig를 찾을 수 없음: vibe={vibe}, household_size={household_size}, has_pet={has_pet}, priority={priority}, budget_level={budget_level}", flush=True)
+        else:
+            print(f"[result_page] 온보딩 세션을 찾을 수 없음: session_id={session_id}, portfolio_id={portfolio_id}", flush=True)
+    
+    except Exception as e:
+        print(f"[result_page] 오류 발생: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+    
+    return render(request, "result.html", context)
 
 
 def other_recommendations_page(request):
@@ -817,6 +1007,24 @@ def onboarding_step_view(request):
         
         print(f"[Onboarding Step] 파싱 완료 - session_id={session_id}, step={step}, step_data={step_data}", flush=True)
         
+        # Step 4인 경우 laundry, media 값 상세 확인
+        if step == 4:
+            print(f"\n{'='*80}", flush=True)
+            print(f"[DEBUG] Step 4 데이터 상세 확인", flush=True)
+            print(f"{'='*80}", flush=True)
+            print(f"  전체 step_data: {step_data}", flush=True)
+            print(f"  step_data 타입: {type(step_data).__name__}", flush=True)
+            print(f"  step_data.keys(): {list(step_data.keys()) if isinstance(step_data, dict) else 'N/A'}", flush=True)
+            print(f"  step_data.get('laundry'): {step_data.get('laundry')} (타입: {type(step_data.get('laundry')).__name__})", flush=True)
+            print(f"  step_data.get('media'): {step_data.get('media')} (타입: {type(step_data.get('media')).__name__})", flush=True)
+            print(f"  step_data.get('cooking'): {step_data.get('cooking')} (타입: {type(step_data.get('cooking')).__name__})", flush=True)
+            print(f"  'laundry' in step_data: {'laundry' in step_data if isinstance(step_data, dict) else False}", flush=True)
+            print(f"  'media' in step_data: {'media' in step_data if isinstance(step_data, dict) else False}", flush=True)
+            if isinstance(step_data, dict):
+                for key, value in step_data.items():
+                    print(f"    step_data['{key}'] = {value} (타입: {type(value).__name__})", flush=True)
+            print(f"{'='*80}\n", flush=True)
+        
         # 세션 ID 처리
         if not session_id:
             if step == 1:
@@ -951,14 +1159,17 @@ def onboarding_step_view(request):
                 session.household_size = mate_to_size.get(mate, 2)
                 print(f"    mate에서 변환한 household_size: {session.household_size} (mate={mate})", flush=True)
             
-            # 반려동물 정보를 recommendation_result에 저장 (임시)
+            # 반려동물 정보 저장 (recommendation_result와 session.has_pet 모두에 저장)
             if pet:
                 if not session.recommendation_result:
                     session.recommendation_result = {}
-                session.recommendation_result['has_pet'] = (pet == 'yes')
+                has_pet_bool = (pet == 'yes')
+                session.recommendation_result['has_pet'] = has_pet_bool
                 session.recommendation_result['pet'] = pet
-                print(f"    pet 정보 저장: has_pet={session.recommendation_result['has_pet']}, pet={pet}", flush=True)
-            print(f"  [Step 2] 저장 완료 - household_size={session.household_size}, pet={pet}", flush=True)
+                # session.has_pet 필드에도 저장 (TasteConfig 매칭 시 필요)
+                session.has_pet = has_pet_bool
+                print(f"    pet 정보 저장: has_pet={has_pet_bool}, pet={pet}", flush=True)
+            print(f"  [Step 2] 저장 완료 - household_size={session.household_size}, pet={pet}, session.has_pet={session.has_pet}", flush=True)
         elif step == 3:
             print(f"  [Step 3] 주거 정보 저장 시작", flush=True)
             housing_type = step_data.get('housing_type')
@@ -982,32 +1193,47 @@ def onboarding_step_view(request):
                 print(f"    main_space 저장: {session.recommendation_result['main_space']}", flush=True)
             print(f"  [Step 3] 저장 완료 - housing_type={session.housing_type}, pyung={session.pyung}, main_space={main_space}", flush=True)
         elif step == 4:
+            print(f"\n{'='*80}", flush=True)
             print(f"  [Step 4] 생활 패턴 정보 저장 시작", flush=True)
+            print(f"{'='*80}", flush=True)
             # 생활 패턴 정보 저장 (요리, 세탁, 미디어)
             cooking = step_data.get('cooking')
             laundry = step_data.get('laundry')
             media = step_data.get('media')
             main_space = step_data.get('main_space')  # 3단계에서 선택한 주요 공간
             
-            print(f"    step_data에서 가져온 cooking: {cooking}", flush=True)
-            print(f"    step_data에서 가져온 laundry: {laundry}", flush=True)
-            print(f"    step_data에서 가져온 media: {media}", flush=True)
-            print(f"    step_data에서 가져온 main_space: {main_space}", flush=True)
+            print(f"    [DEBUG] step_data에서 직접 추출:", flush=True)
+            print(f"      cooking = {cooking} (타입: {type(cooking).__name__}, None 여부: {cooking is None})", flush=True)
+            print(f"      laundry = {laundry} (타입: {type(laundry).__name__}, None 여부: {laundry is None})", flush=True)
+            print(f"      media = {media} (타입: {type(media).__name__}, None 여부: {media is None})", flush=True)
+            print(f"      main_space = {main_space} (타입: {type(main_space).__name__})", flush=True)
+            
+            # 빈 문자열 체크
+            if laundry == '':
+                print(f"      ⚠️ WARNING: laundry가 빈 문자열('')입니다!", flush=True)
+            if media == '':
+                print(f"      ⚠️ WARNING: media가 빈 문자열('')입니다!", flush=True)
             
             # recommendation_result에 저장
             if not session.recommendation_result:
                 session.recommendation_result = {}
             
-            # 생활 패턴 데이터 저장
-            if cooking:
+            # 생활 패턴 데이터 저장 (None이 아니고 빈 문자열이 아닌 경우만 저장)
+            if cooking is not None and cooking != '':
                 session.recommendation_result['cooking'] = cooking
                 print(f"    cooking 저장: {cooking}", flush=True)
-            if laundry:
+            else:
+                print(f"    ⚠️ cooking 저장 안됨: cooking={cooking} (None 또는 빈 문자열)", flush=True)
+            if laundry is not None and laundry != '':
                 session.recommendation_result['laundry'] = laundry
                 print(f"    laundry 저장: {laundry}", flush=True)
-            if media:
+            else:
+                print(f"    ⚠️ laundry 저장 안됨: laundry={laundry} (None 또는 빈 문자열)", flush=True)
+            if media is not None and media != '':
                 session.recommendation_result['media'] = media
                 print(f"    media 저장: {media}", flush=True)
+            else:
+                print(f"    ⚠️ media 저장 안됨: media={media} (None 또는 빈 문자열)", flush=True)
             if main_space:
                 session.recommendation_result['main_space'] = main_space
                 print(f"    main_space 저장: {main_space}", flush=True)
@@ -1086,6 +1312,58 @@ def onboarding_step_view(request):
             session.is_completed = True
             print(f"  [Step 6] 저장 완료 - budget_level={session.budget_level}, is_completed={session.is_completed}", flush=True)
             print(f"    최종 recommendation_result['priority']: {session.recommendation_result.get('priority')}", flush=True)
+        elif step == 7:
+            # Step 7: 제품 라인업 선택 (온보딩 최종 완료)
+            print(f"  [Step 7] 제품 라인업 정보 저장 시작", flush=True)
+            lineup = step_data.get('lineup')
+            
+            if lineup:
+                if not session.recommendation_result:
+                    session.recommendation_result = {}
+                session.recommendation_result['lineup'] = lineup
+                print(f"    lineup 저장: {lineup}", flush=True)
+            
+            # 온보딩 최종 완료 처리 및 taste_id 매칭
+            session.is_completed = True
+            session.status = 'completed'
+            
+            # Taste Config 매칭 전에 필수 필드 확인 및 보정
+            print(f"  [Step 7] Taste Config 매칭 전 필드 확인...", flush=True)
+            print(f"    session.vibe: {session.vibe}", flush=True)
+            print(f"    session.household_size: {session.household_size}", flush=True)
+            print(f"    session.has_pet: {session.has_pet}", flush=True)
+            print(f"    session.priority: {session.priority}", flush=True)
+            print(f"    session.budget_level: {session.budget_level}", flush=True)
+            
+            # has_pet이 None이면 recommendation_result에서 가져오기
+            if session.has_pet is None:
+                if session.recommendation_result and 'has_pet' in session.recommendation_result:
+                    session.has_pet = session.recommendation_result['has_pet']
+                    print(f"    ⚠️ session.has_pet이 None이어서 recommendation_result에서 복원: {session.has_pet}", flush=True)
+                elif session.recommendation_result and 'pet' in session.recommendation_result:
+                    pet_value = session.recommendation_result['pet']
+                    session.has_pet = (pet_value == 'yes')
+                    print(f"    ⚠️ session.has_pet이 None이어서 recommendation_result['pet']에서 복원: {session.has_pet}", flush=True)
+            
+            # Taste Config 매칭 및 taste_id 저장
+            try:
+                from api.services.taste_config_matching_service import TasteConfigMatchingService
+                print(f"  [Step 7] Taste Config 매칭 시작...", flush=True)
+                print(f"    매칭 조건: vibe={session.vibe}, household_size={session.household_size}, has_pet={session.has_pet}, priority={session.priority}, budget_level={session.budget_level}", flush=True)
+                taste_config_data = TasteConfigMatchingService.get_taste_config_by_onboarding(session)
+                
+                if taste_config_data and taste_config_data.get('taste_id'):
+                    session.taste_id = taste_config_data['taste_id']
+                    print(f"  [Step 7] ✅ taste_id 저장: {session.taste_id}", flush=True)
+                else:
+                    print(f"  [Step 7] ⚠️ Taste Config 매칭 실패 또는 taste_id 없음", flush=True)
+                    print(f"    taste_config_data: {taste_config_data}", flush=True)
+            except Exception as taste_config_error:
+                print(f"  [Step 7] ⚠️ Taste Config 매칭 중 오류 발생: {taste_config_error}", flush=True)
+                import traceback
+                traceback.print_exc()
+            
+            print(f"  [Step 7] 저장 완료 - lineup={lineup}, is_completed={session.is_completed}, taste_id={session.taste_id}", flush=True)
         
         # 진행 상태 업데이트
         print(f"\n{'='*80}", flush=True)
@@ -1114,7 +1392,7 @@ def onboarding_step_view(request):
             print(f"[Onboarding Step] Oracle DB 저장 시작...", flush=True)
             # 세션 정보 준비
             session_status = 'IN_PROGRESS'
-            if step == 6:
+            if step == 6 or step == 7:
                 session_status = 'COMPLETED'
             elif session.status == 'abandoned':
                 session_status = 'ABANDONED'
@@ -1147,11 +1425,126 @@ def onboarding_step_view(request):
                 has_pet_value = (step_data.get('pet') == 'yes')
             
             # cooking, laundry, media 추출
-            cooking_value = session.recommendation_result.get('cooking') if session.recommendation_result else None
-            laundry_value = session.recommendation_result.get('laundry') if session.recommendation_result else None
-            media_value = session.recommendation_result.get('media') if session.recommendation_result else None
+            # Step 4에서 직접 전달된 값을 우선 사용, 없으면 recommendation_result에서 가져옴
+            print(f"\n{'='*80}", flush=True)
+            print(f"[Oracle DB 저장] Step {step} - cooking, laundry, media 추출 시작", flush=True)
+            print(f"{'='*80}", flush=True)
+            
+            # 모든 step에서 step_data와 recommendation_result 확인
+            print(f"  [전체 확인] step_data와 recommendation_result 상태:", flush=True)
+            print(f"    step_data 타입: {type(step_data).__name__}, 내용: {step_data}", flush=True)
+            print(f"    step_data.get('cooking'): {step_data.get('cooking')}", flush=True)
+            print(f"    step_data.get('laundry'): {step_data.get('laundry')}", flush=True)
+            print(f"    step_data.get('media'): {step_data.get('media')}", flush=True)
+            print(f"    session.recommendation_result 존재: {session.recommendation_result is not None}", flush=True)
+            if session.recommendation_result:
+                print(f"    recommendation_result.get('cooking'): {session.recommendation_result.get('cooking')}", flush=True)
+                print(f"    recommendation_result.get('laundry'): {session.recommendation_result.get('laundry')}", flush=True)
+                print(f"    recommendation_result.get('media'): {session.recommendation_result.get('media')}", flush=True)
+            
+            if step == 4:
+                # Step 4: step_data에서 직접 가져오고, 없으면 recommendation_result에서 가져옴
+                print(f"  [1단계] step_data에서 직접 추출:", flush=True)
+                cooking_value = step_data.get('cooking')
+                print(f"    step_data.get('cooking') = {cooking_value} (타입: {type(cooking_value).__name__}, is None: {cooking_value is None})", flush=True)
+                
+                laundry_value = step_data.get('laundry')
+                print(f"    step_data.get('laundry') = {laundry_value} (타입: {type(laundry_value).__name__}, is None: {laundry_value is None})", flush=True)
+                
+                media_value = step_data.get('media')
+                print(f"    step_data.get('media') = {media_value} (타입: {type(media_value).__name__}, is None: {media_value is None})", flush=True)
+                
+                print(f"  [2단계] recommendation_result에서 fallback 확인:", flush=True)
+                print(f"    session.recommendation_result 존재 여부: {session.recommendation_result is not None}", flush=True)
+                if session.recommendation_result:
+                    print(f"    recommendation_result 내용: {session.recommendation_result}", flush=True)
+                    print(f"    recommendation_result.get('cooking'): {session.recommendation_result.get('cooking')}", flush=True)
+                    print(f"    recommendation_result.get('laundry'): {session.recommendation_result.get('laundry')}", flush=True)
+                    print(f"    recommendation_result.get('media'): {session.recommendation_result.get('media')}", flush=True)
+                
+                # Step 4: step_data에서 None이거나 빈 문자열이면 recommendation_result에서 가져옴
+                if (cooking_value is None or (isinstance(cooking_value, str) and cooking_value.strip() == '')) and session.recommendation_result:
+                    cooking_value = session.recommendation_result.get('cooking')
+                    print(f"    cooking_value를 recommendation_result에서 가져옴: {cooking_value}", flush=True)
+                
+                if (laundry_value is None or (isinstance(laundry_value, str) and laundry_value.strip() == '')) and session.recommendation_result:
+                    laundry_value = session.recommendation_result.get('laundry')
+                    print(f"    laundry_value를 recommendation_result에서 가져옴: {laundry_value}", flush=True)
+                
+                if (media_value is None or (isinstance(media_value, str) and media_value.strip() == '')) and session.recommendation_result:
+                    media_value = session.recommendation_result.get('media')
+                    print(f"    media_value를 recommendation_result에서 가져옴: {media_value}", flush=True)
+                
+                print(f"  [3단계] 최종 추출된 값:", flush=True)
+                print(f"    cooking_value = {cooking_value} (타입: {type(cooking_value).__name__})", flush=True)
+                print(f"    laundry_value = {laundry_value} (타입: {type(laundry_value).__name__})", flush=True)
+                print(f"    media_value = {media_value} (타입: {type(media_value).__name__})", flush=True)
+                
+                if laundry_value is None:
+                    print(f"    ⚠️ ERROR: laundry_value가 None입니다! step_data와 recommendation_result 모두 확인했지만 값이 없습니다.", flush=True)
+                if media_value is None:
+                    print(f"    ⚠️ ERROR: media_value가 None입니다! step_data와 recommendation_result 모두 확인했지만 값이 없습니다.", flush=True)
+            else:
+                # Step 4가 아닌 경우: step_data에서 유효한 값이 있으면 사용, 없으면 recommendation_result에서 가져옴
+                # 빈 문자열은 무시하고 이전에 저장된 값을 유지
+                print(f"  [Step {step}] step_data와 recommendation_result에서 추출:", flush=True)
+                
+                # step_data에서 빈 문자열이 아닌 유효한 값 확인
+                cooking_from_step_data = step_data.get('cooking')
+                if cooking_from_step_data and cooking_from_step_data.strip() != '':
+                    cooking_value = cooking_from_step_data
+                    print(f"    cooking을 step_data에서 가져옴: {cooking_value}", flush=True)
+                else:
+                    # step_data에 값이 없거나 빈 문자열이면 recommendation_result에서 가져옴
+                    cooking_value = session.recommendation_result.get('cooking') if session.recommendation_result else None
+                    print(f"    cooking을 recommendation_result에서 가져옴: {cooking_value}", flush=True)
+                
+                laundry_from_step_data = step_data.get('laundry')
+                if laundry_from_step_data and laundry_from_step_data.strip() != '':
+                    laundry_value = laundry_from_step_data
+                    print(f"    laundry를 step_data에서 가져옴: {laundry_value}", flush=True)
+                else:
+                    # step_data에 값이 없거나 빈 문자열이면 recommendation_result에서 가져옴
+                    laundry_value = session.recommendation_result.get('laundry') if session.recommendation_result else None
+                    print(f"    laundry를 recommendation_result에서 가져옴: {laundry_value}", flush=True)
+                
+                media_from_step_data = step_data.get('media')
+                if media_from_step_data and media_from_step_data.strip() != '':
+                    media_value = media_from_step_data
+                    print(f"    media를 step_data에서 가져옴: {media_value}", flush=True)
+                else:
+                    # step_data에 값이 없거나 빈 문자열이면 recommendation_result에서 가져옴
+                    media_value = session.recommendation_result.get('media') if session.recommendation_result else None
+                    print(f"    media를 recommendation_result에서 가져옴: {media_value}", flush=True)
+                
+                print(f"  [Step {step}] 최종 추출된 값:", flush=True)
+                print(f"    cooking_value = {cooking_value} (타입: {type(cooking_value).__name__})", flush=True)
+                print(f"    laundry_value = {laundry_value} (타입: {type(laundry_value).__name__})", flush=True)
+                print(f"    media_value = {media_value} (타입: {type(media_value).__name__})", flush=True)
+                if laundry_value is None:
+                    print(f"    ⚠️ WARNING: laundry_value가 None입니다! step_data와 recommendation_result 모두에 값이 없습니다.", flush=True)
+                if media_value is None:
+                    print(f"    ⚠️ WARNING: media_value가 None입니다! step_data와 recommendation_result 모두에 값이 없습니다.", flush=True)
+            
+            # 모든 step에서 최종 값 출력
+            print(f"  [최종 추출 결과] Step {step}:", flush=True)
+            print(f"    cooking_value = {cooking_value} (타입: {type(cooking_value).__name__})", flush=True)
+            print(f"    laundry_value = {laundry_value} (타입: {type(laundry_value).__name__})", flush=True)
+            print(f"    media_value = {media_value} (타입: {type(media_value).__name__})", flush=True)
+            print(f"{'='*80}\n", flush=True)
             
             # Oracle DB 세션 저장/업데이트
+            print(f"\n{'='*80}", flush=True)
+            print(f"[Oracle DB 저장] create_or_update_session 호출 전 최종 확인", flush=True)
+            print(f"{'='*80}", flush=True)
+            print(f"  전달할 파라미터:", flush=True)
+            print(f"    session_id = {session_id}", flush=True)
+            print(f"    current_step = {step}", flush=True)
+            print(f"    cooking = {cooking_value} (타입: {type(cooking_value).__name__})", flush=True)
+            print(f"    laundry = {laundry_value} (타입: {type(laundry_value).__name__})", flush=True)
+            print(f"    media = {media_value} (타입: {type(media_value).__name__})", flush=True)
+            print(f"{'='*80}\n", flush=True)
+            
             onboarding_db_service.create_or_update_session(
                 session_id=session_id,
                 user_id=data.get('user_id'),
@@ -1172,7 +1565,8 @@ def onboarding_step_view(request):
                 media=media_value,
                 selected_categories=getattr(session, 'selected_categories', []),
                 recommended_products=getattr(session, 'recommended_products', []),
-                recommendation_result=session.recommendation_result
+                recommendation_result=session.recommendation_result,
+                taste_id=session.taste_id  # Step 7에서 매칭된 taste_id 저장
             )
             
             # Step별 사용자 응답 저장
@@ -1512,6 +1906,36 @@ def onboarding_complete_view(request):
                 traceback.print_exc()
                 # ERD 저장 실패해도 계속 진행 (하위 호환성)
             
+            # Taste Config 매칭 및 데이터 조회
+            taste_config_data = None
+            try:
+                from api.services.taste_config_matching_service import TasteConfigMatchingService
+                print(f"[Onboarding Complete] Taste Config 매칭 시작...", flush=True)
+                taste_config_data = TasteConfigMatchingService.get_taste_config_by_onboarding(session)
+                
+                if taste_config_data:
+                    # taste_id를 session에 저장
+                    if taste_config_data.get('taste_id'):
+                        session.taste_id = taste_config_data['taste_id']
+                        print(f"[Onboarding Complete] ✅ taste_id 저장: {session.taste_id}", flush=True)
+                    
+                    # 조회된 데이터를 session의 recommendation_result에 저장
+                    if not session.recommendation_result:
+                        session.recommendation_result = {}
+                    session.recommendation_result['taste_config'] = taste_config_data
+                    session.save()
+                    
+                    print(f"[Onboarding Complete] ✅ Taste Config 매칭 완료: taste_id={taste_config_data.get('taste_id')}", flush=True)
+                    print(f"  - categories: {len(taste_config_data.get('recommended_categories', []))}개", flush=True)
+                    print(f"  - products: {len(taste_config_data.get('recommended_products', {}))}개 카테고리", flush=True)
+                else:
+                    print(f"[Onboarding Complete] ⚠️ Taste Config 매칭 실패 (매칭되는 데이터 없음)", flush=True)
+            except Exception as taste_config_error:
+                print(f"[Onboarding Complete] ⚠️ Taste Config 매칭 중 오류 발생 (계속 진행): {taste_config_error}", flush=True)
+                import traceback
+                traceback.print_exc()
+                # 실패해도 계속 진행
+            
             # Oracle DB에도 저장 (기본 정보)
             try:
                 print(f"[Onboarding Complete] Oracle DB 저장 시작 (기본 정보)...", flush=True)
@@ -1545,6 +1969,7 @@ def onboarding_complete_view(request):
                 
                 print(f"[Oracle DB] main_space={main_space_list}, priority_list={priority_list_data}, categories={selected_categories_list}", flush=True)
                 print(f"[Oracle DB] selected_categories 전달값: {selected_categories_list} (타입: {type(selected_categories_list).__name__}, 길이: {len(selected_categories_list)})", flush=True)
+                print(f"[Oracle DB] taste_id 전달값: {session.taste_id}", flush=True)
                 
                 onboarding_db_service.create_or_update_session(
                     session_id=session_id,
@@ -1565,6 +1990,7 @@ def onboarding_complete_view(request):
                     priority_list=priority_list_data,
                     budget_level=session.budget_level,
                     selected_categories=selected_categories_list,
+                    taste_id=session.taste_id,  # Taste Config 매칭 결과 저장
                 )
                 print(f"\n{'='*80}", flush=True)
                 print(f"[Onboarding Complete] ✅ Oracle DB 저장 성공 (기본 정보)", flush=True)
@@ -1635,11 +2061,11 @@ def onboarding_complete_view(request):
         print(f"\n[Onboarding Complete] Session: {session_id}")
         print(f"[Profile] {user_profile}")
         
-        # 3. Taste 계산 (추천 전에 먼저 수행) - PRD 플로우
+        # 3. Taste ID 가져오기 (우선순위: TASTE_CONFIG 매칭 > 계산 fallback)
         member_id = data.get('member_id')
-        taste_id = None
+        taste_id = session.taste_id  # TasteConfig 매칭으로 이미 가져온 값 사용
         
-        # 온보딩 데이터 준비 (Taste 계산용)
+        # 온보딩 데이터 준비 (Taste 계산용 및 추천 엔진용)
         onboarding_data_for_taste = {
             'vibe': session.vibe,
             'household_size': session.household_size,
@@ -1654,31 +2080,43 @@ def onboarding_complete_view(request):
             'media': onboarding_data.get('media', 'balanced'),
         }
         
-        # Taste 계산 (member_id가 있으면 저장, 없으면 계산만)
-        if member_id:
-            try:
-                taste_id = taste_calculation_service.calculate_and_save_taste(
-                    member_id=member_id,
-                    onboarding_data=onboarding_data_for_taste
-                )
-                print(f"[Taste 계산 완료] Member: {member_id}, Taste ID: {taste_id}")
-            except Exception as taste_error:
-                print(f"[Taste 계산 실패] {str(taste_error)}")
-                # 계산 실패 시 온보딩 데이터로 직접 계산
+        # TasteConfig 매칭이 실패했거나 taste_id가 없는 경우에만 계산 (fallback)
+        if not taste_id:
+            print(f"[Onboarding Complete] ⚠️ TasteConfig 매칭 실패, 계산 방식으로 fallback...", flush=True)
+            
+            # Taste 계산 (member_id가 있으면 저장, 없으면 계산만)
+            if member_id:
+                try:
+                    taste_id = taste_calculation_service.calculate_and_save_taste(
+                        member_id=member_id,
+                        onboarding_data=onboarding_data_for_taste
+                    )
+                    print(f"[Taste 계산 완료 (fallback)] Member: {member_id}, Taste ID: {taste_id}")
+                except Exception as taste_error:
+                    print(f"[Taste 계산 실패] {str(taste_error)}")
+                    # 계산 실패 시 온보딩 데이터로 직접 계산
+                    try:
+                        from api.utils.taste_classifier import taste_classifier
+                        taste_id = taste_classifier.calculate_taste_from_onboarding(onboarding_data_for_taste)
+                        print(f"[Taste 계산 (fallback)] Taste ID: {taste_id}")
+                    except:
+                        pass
+            else:
+                # member_id가 없어도 taste 계산 (세션 기반)
                 try:
                     from api.utils.taste_classifier import taste_classifier
                     taste_id = taste_classifier.calculate_taste_from_onboarding(onboarding_data_for_taste)
-                    print(f"[Taste 계산 (fallback)] Taste ID: {taste_id}")
-                except:
-                    pass
+                    print(f"[Taste 계산 (fallback, 세션 기반)] Taste ID: {taste_id}")
+                except Exception as taste_error:
+                    print(f"[Taste 계산 실패] {str(taste_error)}")
+            
+            # Fallback으로 계산된 taste_id를 session에 저장
+            if taste_id:
+                session.taste_id = taste_id
+                session.save()
+                print(f"[Onboarding Complete] ✅ Fallback 계산 taste_id를 세션에 저장: {taste_id}", flush=True)
         else:
-            # member_id가 없어도 taste 계산 (세션 기반)
-            try:
-                from api.utils.taste_classifier import taste_classifier
-                taste_id = taste_classifier.calculate_taste_from_onboarding(onboarding_data_for_taste)
-                print(f"[Taste 계산 (세션 기반)] Taste ID: {taste_id}")
-            except Exception as taste_error:
-                print(f"[Taste 계산 실패] {str(taste_error)}")
+            print(f"[Onboarding Complete] ✅ Taste ID (TASTE_CONFIG 매칭): {taste_id}", flush=True)
         
         # 4. 추천 엔진 호출 (taste_id 기반으로 category 선택 및 제품 추천)
         try:
@@ -1760,6 +2198,7 @@ def onboarding_complete_view(request):
                 
                 print(f"[Oracle DB] 추천 제품 ID 목록: {recommended_products_list[:5]}..." if len(recommended_products_list) > 5 else f"[Oracle DB] 추천 제품 ID 목록: {recommended_products_list}")
                 print(f"[Oracle DB] recommended_products 전달값: {recommended_products_list[:10]} (타입: {type(recommended_products_list).__name__}, 길이: {len(recommended_products_list)})", flush=True)
+                print(f"[Oracle DB] taste_id 전달값: {session.taste_id}", flush=True)
                 
                 onboarding_db_service.create_or_update_session(
                     session_id=session_id,
@@ -1781,6 +2220,7 @@ def onboarding_complete_view(request):
                     selected_categories=selected_categories_list,
                     recommended_products=recommended_products_list,
                     recommendation_result=session.recommendation_result if session.recommendation_result else {},
+                    taste_id=session.taste_id,  # Taste Config 매칭 결과 저장
                 )
                 print(f"\n{'='*80}", flush=True)
                 print(f"[Onboarding Complete] ✅ Oracle DB 저장 성공 (추천 결과 포함)", flush=True)

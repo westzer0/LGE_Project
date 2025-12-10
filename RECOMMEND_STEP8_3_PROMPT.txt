@@ -1,0 +1,349 @@
+Step 8-3: 카테고리/순위/점수 포함 여부 검증 - 저장된 데이터에 카테고리명, 순위, 점수가 올바르게 포함되는지 검증
+
+
+현재 상황:
+
+- Step 8-1 완료: 추천 결과 저장 로직 찾기 및 구현 완료
+- Step 8-2 완료: 테이블 저장 여부 검증 완료
+- 추천 제품이 테이블에 저장됨
+- 저장된 데이터에 카테고리명, 순위, 점수가 올바르게 포함되는지 검증 필요
+
+
+목표:
+
+저장된 데이터에 카테고리명, 순위, 점수가 올바르게 포함되는지 검증
+- CATEGORY_NAME 필드에 카테고리명이 올바르게 저장되는지 확인
+- RANK_ORDER 필드에 카테고리 내 순위가 올바르게 저장되는지 확인
+- SCORE 필드에 추천 점수가 올바르게 저장되는지 확인
+- 각 필드의 데이터 정확성 확인
+
+
+검증 항목:
+
+1. 카테고리 정보 포함 여부 검증
+   - CATEGORY_NAME 필드에 카테고리명이 올바르게 저장되는지 확인
+   - 각 제품이 올바른 카테고리에 매핑되는지 확인
+   - 카테고리명 형식 확인 (예: "TV", "냉장고", "세탁기")
+
+2. 순위 정보 포함 여부 검증
+   - RANK_ORDER 필드에 카테고리 내 순위가 올바르게 저장되는지 확인
+   - 순위가 1부터 시작하는지 확인
+   - 동일 카테고리 내 순위 중복 확인
+   - 순위가 추천 결과의 순서와 일치하는지 확인
+
+3. 점수 정보 포함 여부 검증
+   - SCORE 필드에 추천 점수가 올바르게 저장되는지 확인
+   - 점수 범위 확인 (0~100점, NUMBER(5,2))
+   - NULL 값 처리 확인
+   - 점수가 추천 결과의 recommendation_score와 일치하는지 확인
+
+4. 데이터 일치성 검증
+   - 저장된 데이터와 추천 결과의 일치성 확인
+   - 카테고리별 제품 매핑 정확성 확인
+   - 순위 정확성 확인
+   - 점수 정확성 확인
+
+
+관련 파일:
+
+- Step 8-1에서 구현한 저장 함수
+  - save_recommendation_results() 함수
+
+- Step 8-2에서 구현한 조회 함수
+  - get_saved_recommendation_products() 함수
+
+- 추천 결과 생성 로직
+  - get_recommendations() 함수
+  - 추천 결과에 카테고리명, 순위, 점수 포함
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - CATEGORY_NAME: 카테고리명
+  - RANK_ORDER: 카테고리 내 순위
+  - SCORE: 해당 제품의 점수 (0~100점, NUMBER(5,2))
+
+
+작업:
+
+1. 카테고리 정보 검증:
+   - 저장된 데이터의 CATEGORY_NAME 필드 확인
+   - 추천 결과의 카테고리명과 비교
+   - 카테고리별 제품 매핑 확인
+
+2. 순위 정보 검증:
+   - 저장된 데이터의 RANK_ORDER 필드 확인
+   - 순위가 1부터 시작하는지 확인
+   - 동일 카테고리 내 순위 중복 확인
+   - 추천 결과의 순서와 일치하는지 확인
+
+3. 점수 정보 검증:
+   - 저장된 데이터의 SCORE 필드 확인
+   - 점수 범위 확인 (0~100점)
+   - NULL 값 처리 확인
+   - 추천 결과의 recommendation_score와 일치하는지 확인
+
+4. 데이터 일치성 검증:
+   - 저장된 데이터와 추천 결과 비교
+   - 카테고리별 제품 매핑 정확성 확인
+   - 순위 정확성 확인
+   - 점수 정확성 확인
+
+
+검증 방법:
+
+1. 카테고리 정보 검증:
+   ```python
+   # 추천 결과 생성 및 저장
+   recommendations = get_recommendations(member_id)
+   save_recommendation_results(session_id, recommendations)
+   
+   # 저장된 데이터 조회
+   saved_products = get_saved_recommendation_products(session_id)
+   
+   # 카테고리별로 그룹화
+   for category in recommendations.get('categories', []):
+       category_name = category['category_name']
+       category_products = [p for p in saved_products if p['category_name'] == category_name]
+       
+       # 카테고리명 확인
+       for saved_product in category_products:
+           assert saved_product['category_name'] == category_name, \
+               f"카테고리명 불일치: 예상 {category_name}, 실제 {saved_product['category_name']}"
+       
+       # 카테고리별 제품 수 확인
+       assert len(category_products) == len(category['products']), \
+           f"카테고리 {category_name}의 제품 수 불일치: 예상 {len(category['products'])}개, 실제 {len(category_products)}개"
+       
+       print(f"✅ 카테고리 {category_name}: {len(category_products)}개 제품 저장됨")
+   ```
+
+2. 순위 정보 검증:
+   ```python
+   # 카테고리별 순위 검증
+   for category in recommendations.get('categories', []):
+       category_name = category['category_name']
+       category_products = [p for p in saved_products if p['category_name'] == category_name]
+       
+       # 순위 정렬
+       category_products.sort(key=lambda x: x['rank_order'])
+       
+       # 순위가 1부터 시작하는지 확인
+       assert category_products[0]['rank_order'] == 1, \
+           f"카테고리 {category_name}의 첫 번째 순위가 1이 아님: {category_products[0]['rank_order']}"
+       
+       # 순위 중복 확인
+       rank_orders = [p['rank_order'] for p in category_products]
+       assert len(rank_orders) == len(set(rank_orders)), \
+           f"카테고리 {category_name}에 순위 중복 발견: {rank_orders}"
+       
+       # 순위가 연속적인지 확인 (1, 2, 3, ...)
+       expected_ranks = list(range(1, len(category_products) + 1))
+       assert rank_orders == expected_ranks, \
+           f"카테고리 {category_name}의 순위가 연속적이지 않음: 예상 {expected_ranks}, 실제 {rank_orders}"
+       
+       # 추천 결과의 순서와 일치하는지 확인
+       for idx, product in enumerate(category['products'], start=1):
+           saved_product = next((p for p in category_products if p['product_id'] == product['product_id']), None)
+           assert saved_product is not None, \
+               f"제품 {product['product_id']}가 저장되지 않음"
+           assert saved_product['rank_order'] == idx, \
+               f"제품 {product['product_id']}의 순위 불일치: 예상 {idx}, 실제 {saved_product['rank_order']}"
+       
+       print(f"✅ 카테고리 {category_name}: 순위 정보 정확")
+   ```
+
+3. 점수 정보 검증:
+   ```python
+   # 점수 정보 검증
+   for category in recommendations.get('categories', []):
+       category_name = category['category_name']
+       category_products = [p for p in saved_products if p['category_name'] == category_name]
+       
+       for product in category['products']:
+           saved_product = next((p for p in category_products if p['product_id'] == product['product_id']), None)
+           assert saved_product is not None
+           
+           # 점수 확인
+           expected_score = product.get('recommendation_score')
+           
+           if expected_score is not None:
+               # 점수가 저장되었는지 확인
+               assert saved_product['score'] is not None, \
+                   f"제품 {product['product_id']}의 점수가 저장되지 않음"
+               
+               # 점수 범위 확인 (0~100점)
+               assert 0 <= saved_product['score'] <= 100, \
+                   f"제품 {product['product_id']}의 점수가 범위를 벗어남: {saved_product['score']}"
+               
+               # 점수 정확성 확인 (소수점 2자리까지)
+               assert abs(saved_product['score'] - expected_score) < 0.01, \
+                   f"제품 {product['product_id']}의 점수 불일치: 예상 {expected_score}, 실제 {saved_product['score']}"
+           else:
+               # 점수가 없는 경우 NULL 허용
+               # (점수가 없어도 저장은 가능)
+               pass
+       
+       print(f"✅ 카테고리 {category_name}: 점수 정보 정확")
+   ```
+
+4. 데이터 일치성 종합 검증:
+   ```python
+   def validate_stored_data_accuracy(session_id: str, recommendations: dict):
+       """저장된 데이터와 추천 결과의 일치성 종합 검증"""
+       saved_products = get_saved_recommendation_products(session_id)
+       
+       errors = []
+       
+       # 카테고리별 검증
+       for category in recommendations.get('categories', []):
+           category_name = category['category_name']
+           category_products = [p for p in saved_products if p['category_name'] == category_name]
+           
+           # 제품 수 확인
+           if len(category_products) != len(category['products']):
+               errors.append(f"카테고리 {category_name}: 제품 수 불일치")
+           
+           # 각 제품 검증
+           for idx, product in enumerate(category['products'], start=1):
+               saved_product = next((p for p in category_products if p['product_id'] == product['product_id']), None)
+               
+               if saved_product is None:
+                   errors.append(f"카테고리 {category_name}: 제품 {product['product_id']} 누락")
+                   continue
+               
+               # 순위 확인
+               if saved_product['rank_order'] != idx:
+                   errors.append(f"카테고리 {category_name}, 제품 {product['product_id']}: 순위 불일치 (예상 {idx}, 실제 {saved_product['rank_order']})")
+               
+               # 점수 확인
+               expected_score = product.get('recommendation_score')
+               if expected_score is not None:
+                   if saved_product['score'] is None:
+                       errors.append(f"카테고리 {category_name}, 제품 {product['product_id']}: 점수 누락")
+                   elif abs(saved_product['score'] - expected_score) >= 0.01:
+                       errors.append(f"카테고리 {category_name}, 제품 {product['product_id']}: 점수 불일치 (예상 {expected_score}, 실제 {saved_product['score']})")
+       
+       if errors:
+           print("❌ 데이터 일치성 검증 실패:")
+           for error in errors:
+               print(f"  - {error}")
+           assert False, f"{len(errors)}개 오류 발견"
+       else:
+           print("✅ 모든 데이터 일치성 검증 통과")
+   
+   # 종합 검증 실행
+   validate_stored_data_accuracy(session_id, recommendations)
+   ```
+
+5. 실제 데이터로 검증:
+   ```python
+   # 여러 세션에 대한 검증
+   members = get_members_with_taste(limit=50)
+   
+   success_count = 0
+   error_count = 0
+   
+   for member in members:
+       member_id = member['member_id']
+       try:
+           # 추천 결과 생성 및 저장
+           recommendations = get_recommendations(member_id)
+           session = get_latest_completed_session(member_id)
+           if not session:
+               continue
+           
+           session_id = session['session_id']
+           save_recommendation_results(session_id, recommendations)
+           
+           # 데이터 일치성 검증
+           validate_stored_data_accuracy(session_id, recommendations)
+           
+           success_count += 1
+       except Exception as e:
+           error_count += 1
+           print(f"❌ 검증 실패: {member_id}, 에러: {e}")
+   
+   # 성공률 확인
+   success_rate = success_count / (success_count + error_count)
+   print(f"\n데이터 일치성 검증 성공률: {success_rate:.2%} ({success_count}/{success_count + error_count})")
+   assert success_rate >= 0.95, f"데이터 일치성 검증 성공률이 95% 미만: {success_rate:.2%}"
+   ```
+
+
+예상 결과:
+
+1. 카테고리 정보:
+   - CATEGORY_NAME 필드에 카테고리명이 올바르게 저장됨
+   - 각 제품이 올바른 카테고리에 매핑됨
+   - 카테고리명 형식이 올바름
+
+2. 순위 정보:
+   - RANK_ORDER 필드에 카테고리 내 순위가 올바르게 저장됨
+   - 순위가 1부터 시작하고 연속적임
+   - 동일 카테고리 내 순위 중복 없음
+   - 순위가 추천 결과의 순서와 일치함
+
+3. 점수 정보:
+   - SCORE 필드에 추천 점수가 올바르게 저장됨
+   - 점수 범위가 0~100점 내에 있음
+   - NULL 값이 적절히 처리됨
+   - 점수가 추천 결과의 recommendation_score와 일치함
+
+4. 데이터 일치성:
+   - 저장된 데이터와 추천 결과가 일치함
+   - 카테고리별 제품 매핑이 정확함
+   - 순위와 점수가 정확함
+
+
+테스트 스크립트 구조:
+
+```python
+class RecommendationDataAccuracyValidator:
+    """카테고리/순위/점수 포함 여부 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 카테고리 정보 검증
+        # 2. 순위 정보 검증
+        # 3. 점수 정보 검증
+        # 4. 데이터 일치성 종합 검증
+    
+    def _validate_category_info(self):
+        """카테고리 정보 검증"""
+        # CATEGORY_NAME 필드 확인
+        # 카테고리별 제품 매핑 확인
+    
+    def _validate_rank_info(self):
+        """순위 정보 검증"""
+        # RANK_ORDER 필드 확인
+        # 순위 중복 확인
+        # 순위 연속성 확인
+    
+    def _validate_score_info(self):
+        """점수 정보 검증"""
+        # SCORE 필드 확인
+        # 점수 범위 확인
+        # 점수 정확성 확인
+    
+    def _validate_data_consistency(self):
+        """데이터 일치성 종합 검증"""
+        # 저장된 데이터와 추천 결과 비교
+        # 모든 필드 정확성 확인
+```
+
+
+시각화 항목:
+
+1. 카테고리별 저장된 제품 수 분포 바 차트
+2. 순위 분포 히스토그램
+3. 점수 분포 히스토그램
+4. 카테고리별 평균 점수 바 차트
+5. 데이터 일치성 검증 결과 (성공/실패 비율)
+
+
+참고:
+
+- Step 8-2에서 저장 여부를 확인했으므로, 이 단계에서는 저장된 데이터의 정확성에 집중
+- 카테고리명, 순위, 점수가 모두 올바르게 저장되어야 재추천 시 활용 가능
+- 데이터 일치성 검증 성공률 95% 이상 목표
+- Step 8-4에서 외래키 관계를 검증할 예정
+

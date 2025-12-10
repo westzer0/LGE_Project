@@ -1,0 +1,503 @@
+Step 8: 포트폴리오 생성 통합 검증 - 실제 데이터로 포트폴리오 생성, 저장 및 검증
+
+현재 상황:
+
+- Step 1~7 완료: 포트폴리오 생성 전체 플로우 구현 완료
+- 포트폴리오 생성 API 구현 완료
+- 포트폴리오 조회/관리 API 구현 완료
+- 포트폴리오 공유 기능 구현 완료
+- 상담 예약 연동 기능 구현 완료
+- 실제 운영 환경과 유사한 조건으로 통합 검증 필요
+
+
+목표:
+
+실제 데이터로 포트폴리오 생성, 저장 및 검증
+- 실제 온보딩 세션 데이터로 포트폴리오 생성
+- Django DB와 Oracle DB 모두 저장 확인
+- 저장된 데이터와 생성된 포트폴리오 일치 확인
+- 여러 세션에 대한 포트폴리오 생성 검증
+- 전체 플로우 통합 검증
+- 성능 검증
+
+
+검증 항목:
+
+1. 실제 포트폴리오 생성 및 저장
+   - 실제 온보딩 세션 데이터로 포트폴리오 생성
+   - 포트폴리오 생성 실행
+   - Django DB 저장 확인
+   - Oracle DB 저장 확인
+   - 저장 성공 여부 확인
+
+2. 저장된 데이터와 생성된 포트폴리오 일치 확인
+   - Django DB에서 저장된 데이터 조회
+   - Oracle DB에서 저장된 데이터 조회
+   - 생성된 포트폴리오와 저장된 데이터 비교
+   - 제품 목록 일치 확인
+   - 가격 정보 일치 확인
+   - 스타일 정보 일치 확인
+
+3. 여러 세션에 대한 포트폴리오 생성 검증
+   - 다양한 온보딩 세션의 포트폴리오 생성 및 저장
+   - 각 세션별 저장 검증
+   - 저장 성공률 확인
+
+4. 전체 플로우 통합 검증
+   - 온보딩 완료 → 추천 결과 조회 → 포트폴리오 생성 → 저장 → 조회 전체 플로우
+   - 각 단계별 성공 여부 확인
+   - 전체 플로우 성공률 확인
+
+5. 포트폴리오 조회/관리 검증
+   - 포트폴리오 상세 조회 검증
+   - 포트폴리오 목록 조회 검증
+   - 포트폴리오 수정 검증
+   - 포트폴리오 삭제 검증
+
+6. 포트폴리오 공유 기능 검증
+   - 포트폴리오 공유 검증
+   - 공유 통계 관리 검증
+   - 공유된 포트폴리오 조회 검증
+
+7. 상담 예약 연동 검증
+   - 포트폴리오에서 상담 예약 검증
+   - 예약 정보에 포트폴리오 포함 검증
+   - 포트폴리오별 예약 조회 검증
+
+8. 성능 검증
+   - 포트폴리오 생성 및 저장 시간 측정
+   - 평균 처리 시간 확인
+   - 병목 구간 식별
+
+
+관련 파일:
+
+- 포트폴리오 생성 전체 플로우
+  - onboarding_complete_view() - 온보딩 완료
+  - get_recommendations() - 추천 결과 조회
+  - create_portfolio_from_onboarding() - 포트폴리오 생성
+  - _save_portfolio_to_oracle() - Oracle DB 저장
+
+- Step 1~7에서 구현한 모든 기능
+  - 포트폴리오 조회/관리 API
+  - 포트폴리오 공유 기능
+  - 상담 예약 연동 기능
+
+- 실제 온보딩 세션 데이터
+  - OnboardingSession 테이블
+  - ONBOARD_SESS_REC_PRODUCTS 테이블
+
+
+작업:
+
+1. 실제 포트폴리오 생성 및 저장:
+   - 실제 온보딩 세션 데이터로 포트폴리오 생성
+   - 포트폴리오 생성 실행
+   - Django DB 저장 확인
+   - Oracle DB 저장 확인
+   - 저장 성공 여부 확인
+
+2. 저장된 데이터와 생성된 포트폴리오 일치 확인:
+   - Django DB에서 저장된 데이터 조회
+   - Oracle DB에서 저장된 데이터 조회
+   - 생성된 포트폴리오와 저장된 데이터 비교
+   - 모든 필드 일치 확인
+
+3. 여러 세션에 대한 포트폴리오 생성 검증:
+   - 다양한 온보딩 세션의 포트폴리오 생성 및 저장
+   - 각 세션별 검증
+   - 저장 성공률 계산
+
+4. 전체 플로우 통합 검증:
+   - 전체 플로우 실행
+   - 각 단계별 성공 여부 확인
+   - 전체 성공률 계산
+
+5. 포트폴리오 조회/관리 검증:
+   - 포트폴리오 상세 조회 검증
+   - 포트폴리오 목록 조회 검증
+   - 포트폴리오 수정 검증
+   - 포트폴리오 삭제 검증
+
+6. 포트폴리오 공유 기능 검증:
+   - 포트폴리오 공유 검증
+   - 공유 통계 관리 검증
+   - 공유된 포트폴리오 조회 검증
+
+7. 상담 예약 연동 검증:
+   - 포트폴리오에서 상담 예약 검증
+   - 예약 정보에 포트폴리오 포함 검증
+   - 포트폴리오별 예약 조회 검증
+
+8. 성능 측정:
+   - 처리 시간 측정
+   - 평균 처리 시간 계산
+   - 병목 구간 식별
+
+
+검증 방법:
+
+1. 실제 포트폴리오 생성 및 저장:
+   ```python
+   def test_real_portfolio_creation():
+       """실제 온보딩 세션 데이터로 포트폴리오 생성 및 저장"""
+       # 실제 온보딩 세션 데이터 조회
+       sessions = get_completed_onboarding_sessions(limit=10)
+       
+       for session in sessions:
+           session_id = session['session_id']
+           user_id = session.get('user_id', session_id)
+           print(f"\n[세션 {session_id}] 포트폴리오 생성 및 저장 시작...")
+           
+           try:
+               # 포트폴리오 생성
+               result = portfolio_service.create_portfolio_from_onboarding(
+                   session_id=session_id,
+                   user_id=user_id
+               )
+               
+               if result.get('success'):
+                   portfolio_id = result.get('portfolio_id')
+                   print(f"  ✅ 포트폴리오 생성 성공: {portfolio_id}")
+                   
+                   # Django DB 저장 확인
+                   portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+                   assert portfolio is not None
+                   print(f"  ✅ Django DB 저장 확인")
+                   
+                   # Oracle DB 저장 확인
+                   oracle_portfolio = get_portfolio_from_oracle(portfolio_id)
+                   if oracle_portfolio:
+                       print(f"  ✅ Oracle DB 저장 확인")
+                   else:
+                       print(f"  ⚠️ Oracle DB 저장 확인 실패 (하위 호환성)")
+               else:
+                   print(f"  ❌ 포트폴리오 생성 실패: {result.get('error')}")
+                   
+           except Exception as e:
+               print(f"  ❌ 오류 발생: {e}")
+               import traceback
+               traceback.print_exc()
+   ```
+
+2. 저장된 데이터와 생성된 포트폴리오 일치 확인:
+   ```python
+   def validate_stored_vs_created(portfolio_id: str, created_portfolio: dict):
+       """저장된 데이터와 생성된 포트폴리오 일치 확인"""
+       print(f"\n[포트폴리오 {portfolio_id}] 데이터 일치성 검증...")
+       
+       # Django DB에서 조회
+       django_portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+       
+       # 생성된 포트폴리오와 Django DB 데이터 비교
+       assert django_portfolio.portfolio_id == created_portfolio['portfolio_id']
+       assert django_portfolio.style_type == created_portfolio.get('style_type')
+       assert len(django_portfolio.products) == len(created_portfolio.get('products', []))
+       
+       print(f"  ✅ Django DB 데이터 일치 확인")
+       
+       # Oracle DB에서 조회
+       oracle_portfolio = get_portfolio_from_oracle(portfolio_id)
+       if oracle_portfolio:
+           assert oracle_portfolio['portfolio_id'] == portfolio_id
+           assert len(oracle_portfolio['products']) == len(created_portfolio.get('products', []))
+           print(f"  ✅ Oracle DB 데이터 일치 확인")
+       else:
+           print(f"  ⚠️ Oracle DB 데이터 확인 건너뜀")
+       
+       # 제품 목록 일치 확인
+       created_product_ids = [p.get('product_id') for p in created_portfolio.get('products', [])]
+       django_product_ids = [p.get('product_id') for p in django_portfolio.products]
+       assert set(created_product_ids) == set(django_product_ids)
+       print(f"  ✅ 제품 목록 일치 확인")
+       
+       print(f"  ✅ 모든 데이터 일치성 검증 통과")
+   ```
+
+3. 여러 세션에 대한 포트폴리오 생성 검증:
+   ```python
+   def validate_multiple_sessions():
+       """여러 세션에 대한 포트폴리오 생성 검증"""
+       sessions = get_completed_onboarding_sessions(limit=50)
+       
+       success_count = 0
+       error_count = 0
+       errors = []
+       
+       for session in sessions:
+           session_id = session['session_id']
+           user_id = session.get('user_id', session_id)
+           
+           try:
+               # 포트폴리오 생성
+               result = portfolio_service.create_portfolio_from_onboarding(
+                   session_id=session_id,
+                   user_id=user_id
+               )
+               
+               if result.get('success'):
+                   portfolio_id = result.get('portfolio_id')
+                   
+                   # 저장 확인
+                   portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+                   assert portfolio is not None
+                   
+                   # 데이터 일치 확인
+                   validate_stored_vs_created(portfolio_id, result)
+                   
+                   success_count += 1
+               else:
+                   error_count += 1
+                   errors.append({
+                       'session_id': session_id,
+                       'error': result.get('error')
+                   })
+                   
+           except Exception as e:
+               error_count += 1
+               errors.append({
+                   'session_id': session_id,
+                   'error': str(e)
+               })
+               print(f"❌ 검증 실패: {session_id}, 에러: {e}")
+       
+       # 성공률 계산
+       total = success_count + error_count
+       success_rate = success_count / total if total > 0 else 0
+       
+       print(f"\n{'='*60}")
+       print(f"여러 세션 포트폴리오 생성 검증 결과:")
+       print(f"  성공: {success_count}개")
+       print(f"  실패: {error_count}개")
+       print(f"  성공률: {success_rate:.2%}")
+       print(f"{'='*60}")
+       
+       # 실패 원인 분석
+       if errors:
+           print("\n실패 원인 분석 (최대 10개):")
+           for error in errors[:10]:
+               print(f"  - {error['session_id']}: {error['error']}")
+       
+       assert success_rate >= 0.85, f"포트폴리오 생성 성공률이 85% 미만: {success_rate:.2%}"
+   ```
+
+4. 전체 플로우 통합 검증:
+   ```python
+   def validate_full_flow():
+       """전체 플로우 통합 검증"""
+       sessions = get_completed_onboarding_sessions(limit=30)
+       
+       flow_success_count = 0
+       flow_error_count = 0
+       
+       for session in sessions:
+           session_id = session['session_id']
+           user_id = session.get('user_id', session_id)
+           print(f"\n[세션 {session_id}] 전체 플로우 실행...")
+           
+           try:
+               # 1. 추천 결과 확인
+               recommendations = get_recommendations_for_session(session_id)
+               if not recommendations:
+                   print(f"  ⚠️ 추천 결과 없음 - 건너뜀")
+                   continue
+               print(f"  ✅ Step 1: 추천 결과 확인 ({len(recommendations.get('categories', []))}개 카테고리)")
+               
+               # 2. 포트폴리오 생성
+               result = portfolio_service.create_portfolio_from_onboarding(
+                   session_id=session_id,
+                   user_id=user_id
+               )
+               if not result.get('success'):
+                   print(f"  ❌ Step 2: 포트폴리오 생성 실패")
+                   flow_error_count += 1
+                   continue
+               portfolio_id = result.get('portfolio_id')
+               print(f"  ✅ Step 2: 포트폴리오 생성 성공 ({portfolio_id})")
+               
+               # 3. 포트폴리오 조회
+               portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
+               assert portfolio is not None
+               print(f"  ✅ Step 3: 포트폴리오 조회 성공")
+               
+               # 4. 포트폴리오 공유
+               share_result = client.post(f'/api/portfolio/{portfolio_id}/share/')
+               assert share_result.status_code == 200
+               print(f"  ✅ Step 4: 포트폴리오 공유 성공")
+               
+               # 5. 상담 예약
+               reserve_result = client.post(f'/api/portfolio/{portfolio_id}/reserve/', {
+                   'name': '테스트',
+                   'phone': '010-1234-5678',
+                   'preferred_date': '2024-01-15',
+                   'preferred_time': '14:00'
+               })
+               assert reserve_result.status_code == 200
+               print(f"  ✅ Step 5: 상담 예약 성공")
+               
+               flow_success_count += 1
+               print(f"  ✅ 전체 플로우 성공")
+               
+           except Exception as e:
+               flow_error_count += 1
+               print(f"  ❌ 전체 플로우 실패: {e}")
+               import traceback
+               traceback.print_exc()
+       
+       # 전체 플로우 성공률 계산
+       total = flow_success_count + flow_error_count
+       flow_success_rate = flow_success_count / total if total > 0 else 0
+       
+       print(f"\n{'='*60}")
+       print(f"전체 플로우 통합 검증 결과:")
+       print(f"  성공: {flow_success_count}개")
+       print(f"  실패: {flow_error_count}개")
+       print(f"  성공률: {flow_success_rate:.2%}")
+       print(f"{'='*60}")
+       
+       assert flow_success_rate >= 0.80, \
+           f"전체 플로우 성공률이 80% 미만: {flow_success_rate:.2%}"
+   ```
+
+5. 성능 측정:
+   ```python
+   def measure_performance():
+       """성능 측정"""
+       import time
+       
+       sessions = get_completed_onboarding_sessions(limit=20)
+       execution_times = []
+       
+       for session in sessions:
+           session_id = session['session_id']
+           user_id = session.get('user_id', session_id)
+           
+           start_time = time.time()
+           
+           try:
+               # 전체 플로우 실행
+               result = portfolio_service.create_portfolio_from_onboarding(
+                   session_id=session_id,
+                   user_id=user_id
+               )
+               
+               if result.get('success'):
+                   end_time = time.time()
+                   execution_time = end_time - start_time
+                   execution_times.append(execution_time)
+                   
+           except Exception as e:
+               print(f"성능 측정 중 오류: {session_id}, {e}")
+       
+       # 성능 통계 계산
+       if execution_times:
+           avg_time = sum(execution_times) / len(execution_times)
+           max_time = max(execution_times)
+           min_time = min(execution_times)
+           
+           print(f"\n{'='*60}")
+           print(f"성능 측정 결과:")
+           print(f"  평균 처리 시간: {avg_time:.2f}초")
+           print(f"  최대 처리 시간: {max_time:.2f}초")
+           print(f"  최소 처리 시간: {min_time:.2f}초")
+           print(f"{'='*60}")
+           
+           assert avg_time < 5.0, f"평균 처리 시간이 5초를 초과: {avg_time:.2f}초"
+           assert max_time < 15.0, f"최대 처리 시간이 15초를 초과: {max_time:.2f}초"
+   ```
+
+
+예상 결과:
+
+1. 실제 포트폴리오 생성 및 저장:
+   - 실제 온보딩 세션 데이터로 포트폴리오 생성 성공
+   - Django DB 저장 성공
+   - Oracle DB 저장 성공 (또는 하위 호환성)
+   - 저장 성공률 85% 이상
+
+2. 저장된 데이터와 생성된 포트폴리오 일치:
+   - 저장된 데이터와 생성된 포트폴리오가 일치함
+   - 제품 목록 일치
+   - 가격 정보 일치
+   - 스타일 정보 일치
+   - 데이터 일치성 검증 성공률 95% 이상
+
+3. 여러 세션에 대한 포트폴리오 생성 검증:
+   - 다양한 온보딩 세션의 포트폴리오 생성 성공
+   - 각 세션별 검증 통과
+   - 저장 검증 성공률 85% 이상
+
+4. 전체 플로우 통합 검증:
+   - 전체 플로우가 정상 작동함
+   - 각 단계별 성공 여부 확인
+   - 전체 플로우 성공률 80% 이상
+
+5. 성능:
+   - 평균 처리 시간 5초 이내
+   - 최대 처리 시간 15초 이내
+   - 대부분의 요청이 빠르게 처리됨
+
+
+테스트 스크립트 구조:
+
+```python
+class PortfolioIntegrationValidator:
+    """포트폴리오 생성 통합 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 실제 포트폴리오 생성 및 저장
+        # 2. 저장된 데이터와 생성된 포트폴리오 일치 확인
+        # 3. 여러 세션에 대한 포트폴리오 생성 검증
+        # 4. 전체 플로우 통합 검증
+        # 5. 포트폴리오 조회/관리 검증
+        # 6. 포트폴리오 공유 기능 검증
+        # 7. 상담 예약 연동 검증
+        # 8. 성능 측정
+    
+    def _test_real_portfolio_creation(self):
+        """실제 포트폴리오 생성 및 저장"""
+    
+    def _validate_stored_vs_created(self):
+        """저장된 데이터와 생성된 포트폴리오 일치 확인"""
+    
+    def _validate_multiple_sessions(self):
+        """여러 세션에 대한 포트폴리오 생성 검증"""
+    
+    def _validate_full_flow(self):
+        """전체 플로우 통합 검증"""
+    
+    def _validate_portfolio_management(self):
+        """포트폴리오 조회/관리 검증"""
+    
+    def _validate_portfolio_share(self):
+        """포트폴리오 공유 기능 검증"""
+    
+    def _validate_portfolio_reservation(self):
+        """상담 예약 연동 검증"""
+    
+    def _measure_performance(self):
+        """성능 측정"""
+```
+
+
+시각화 항목:
+
+1. 전체 플로우 성공/실패 비율 파이 차트
+2. 단계별 성공률 바 차트
+3. 포트폴리오 생성 성공률 추이 라인 차트
+4. 처리 시간 분포 히스토그램
+5. 세션별 생성된 포트폴리오 수 분포 바 차트
+6. 포트폴리오별 제품 수 분포 바 차트
+7. 포트폴리오별 가격 분포 히스토그램
+8. 스타일 타입 분포 파이 차트
+
+
+참고:
+
+- Step 1~7에서 구현한 모든 기능을 실제 데이터로 통합 검증
+- 실제 운영 환경과 유사한 조건으로 테스트
+- 전체 플로우가 정상 작동하는지 최종 확인
+- 성능은 사용자 경험에 직접적인 영향이 있으므로 중요
+- Django DB와 Oracle DB 모두 저장하되, Oracle DB 저장 실패 시에도 Django DB 저장은 유지 (하위 호환성)
+

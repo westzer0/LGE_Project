@@ -1,0 +1,216 @@
+{
+  "real_recommendation_storage_tests": [],
+  "stored_vs_recommendations_tests": [],
+  "multiple_sessions_tests": {
+    "total": 50,
+    "success_count": 0,
+    "error_count": 50,
+    "success_rate": 0.0,
+    "errors": [
+      {
+        "member_id": "user_1",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_10",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_100",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_1000",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_101",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_102",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_103",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_104",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_105",
+        "error": "추천 결과 생성 실패"
+      },
+      {
+        "member_id": "user_106",
+        "error": "추천 결과 생성 실패"
+      }
+    ]
+  },
+  "full_flow_tests": [
+    {
+      "member_id": "user_1",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_10",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_100",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_1000",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_101",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_102",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_103",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_104",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_105",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_106",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_107",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_108",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_109",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_11",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_110",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_111",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_112",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_113",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_114",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_115",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_116",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_117",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_118",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_119",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_12",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_120",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_121",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_122",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_123",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    },
+    {
+      "member_id": "user_124",
+      "success": false,
+      "error": "ORA-00942: table or view does not exist"
+    }
+  ],
+  "performance_metrics": {},
+  "errors": [],
+  "warnings": [
+    "저장 검증 성공률이 90% 미만: 0.00%",
+    "전체 플로우 성공률이 85% 미만: 0.00%"
+  ],
+  "statistics": {
+    "total_tested": 10,
+    "successful": 0,
+    "failed": 10,
+    "errors": 0
+  }
+}

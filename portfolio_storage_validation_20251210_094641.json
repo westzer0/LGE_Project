@@ -1,0 +1,32 @@
+{
+  "total_tests": 5,
+  "passed_tests": 1,
+  "failed_tests": 4,
+  "test_details": [
+    {
+      "test": "PORTFOLIO 테이블 저장",
+      "status": "FAILED",
+      "details": "ORA-00942: table or view does not exist"
+    },
+    {
+      "test": "PORTFOLIO_PRODUCT 테이블 저장",
+      "status": "FAILED",
+      "details": "ORA-02291: integrity constraint (CAMPUS_24K_LG3_DX7_P3_4.SYS_C0032988) violated - parent key not found"
+    },
+    {
+      "test": "PORTFOLIO_SESSION 테이블 저장",
+      "status": "FAILED",
+      "details": "ORA-01722: invalid number"
+    },
+    {
+      "test": "포트폴리오 통합 저장",
+      "status": "FAILED",
+      "details": "ORA-00942: table or view does not exist"
+    },
+    {
+      "test": "트랜잭션 롤백",
+      "status": "PASSED",
+      "details": "저장 실패 시 롤백 확인"
+    }
+  ]
+}

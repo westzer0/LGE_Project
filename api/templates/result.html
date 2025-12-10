@@ -3879,6 +3879,10 @@
                 console.error('제품 이미지 로드 실패:', err);
             });
 
+            // TasteConfig 데이터 로드 및 적용 (먼저 실행)
+            console.log('[initPage] TasteConfig 데이터 로드 시작');
+            loadTasteConfigData();
+
             // sessionStorage에서 vibe 값 가져오기
             const vibe = sessionStorage.getItem('step1_vibe');
 
@@ -4008,6 +4012,181 @@
         }
 
         // 배너의 가전 아이콘 클릭 시에도 스크롤
+        // 카테고리명과 이미지/데이터 매핑
+        const categoryMapping = {
+            'TV': { image: '{% static "images/가전 카테고리/TV.png" %}', dataAppliance: 'tv' },
+            '에어컨': { image: '{% static "images/가전 카테고리/에어컨.png" %}', dataAppliance: 'airconditioner' },
+            '냉장고': { image: '{% static "images/가전 카테고리/냉장고.png" %}', dataAppliance: 'refrigerator' },
+            '세탁': { image: '{% static "images/가전 카테고리/세탁기.png" %}', dataAppliance: 'washer' },
+            '세탁기': { image: '{% static "images/가전 카테고리/세탁기.png" %}', dataAppliance: 'washer' },
+            '청소기': { image: '{% static "images/가전 카테고리/청소기.png" %}', dataAppliance: 'vacuum' },
+            '공기청정기': { image: '{% static "images/가전 카테고리/공기청정기.png" %}', dataAppliance: 'airpurifier' },
+            '전기레인지': { image: '{% static "images/가전 카테고리/전자레인지.png" %}', dataAppliance: 'microwave' },
+            '전자레인지': { image: '{% static "images/가전 카테고리/전자레인지.png" %}', dataAppliance: 'microwave' },
+            '광파오븐': { image: '{% static "images/가전 카테고리/광파오븐.png" %}', dataAppliance: 'microwave' },
+            '식기세척기': { image: '{% static "images/가전 카테고리/식기세척기.png" %}', dataAppliance: 'dishwasher' },
+            '건조기': { image: '{% static "images/가전 카테고리/건조기.png" %}', dataAppliance: 'dryer' },
+            '의류건조기': { image: '{% static "images/가전 카테고리/건조기.png" %}', dataAppliance: 'dryer' },
+            '정수기': { image: '{% static "images/가전 카테고리/정수기.png" %}', dataAppliance: 'waterpurifier' },
+            '김치냉장고': { image: '{% static "images/가전 카테고리/김치냉장고.png" %}', dataAppliance: 'kimchirefrigerator' },
+            '프로젝터': { image: '{% static "images/가전 카테고리/프로젝터.png" %}', dataAppliance: 'projector' },
+            '스탠바이미': { image: '{% static "images/가전 카테고리/스탠바이미.png" %}', dataAppliance: 'standbyme' },
+            '사운드바': { image: '{% static "images/가전 카테고리/사운드바.png" %}', dataAppliance: 'soundbar' },
+            '오디오': { image: '{% static "images/가전 카테고리/사운드바.png" %}', dataAppliance: 'soundbar' },
+            '가습기': { image: '{% static "images/가전 카테고리/가습기.png" %}', dataAppliance: 'humidifier' },
+            '제습기': { image: '{% static "images/가전 카테고리/제습기.png" %}', dataAppliance: 'dehumidifier' },
+            '와인셀러': { image: '{% static "images/가전 카테고리/와인셀러.png" %}', dataAppliance: 'winecellar' },
+            '로봇청소기': { image: '{% static "images/가전 카테고리/청소기.png" %}', dataAppliance: 'vacuum' },
+            '워시타워': { image: '{% static "images/가전 카테고리/세탁기.png" %}', dataAppliance: 'washer' },
+            '워시콤보': { image: '{% static "images/가전 카테고리/세탁기.png" %}', dataAppliance: 'washer' }
+        };
+
+        // TasteConfig 데이터 (Django 템플릿에서 전달)
+        var TASTE_CONFIG_DATA_JSON = {% if taste_config_data %}{ { taste_config_data | safe } } {% else %} null{% endif %};
+
+        // TasteConfig 데이터 로드 및 적용
+        function loadTasteConfigData() {
+            if (!TASTE_CONFIG_DATA_JSON) {
+                console.log('[loadTasteConfigData] TasteConfig 데이터가 없습니다. 기본값 사용.');
+                return;
+            }
+
+            try {
+                const tasteConfigData = typeof TASTE_CONFIG_DATA_JSON === 'string'
+                    ? JSON.parse(TASTE_CONFIG_DATA_JSON)
+                    : TASTE_CONFIG_DATA_JSON;
+
+                console.log('[loadTasteConfigData] TasteConfig 데이터 로드 완료:', tasteConfigData);
+
+                // recommended_categories_text를 그대로 appliance-icons-container에 표시
+                if (tasteConfigData.recommended_categories_text) {
+                    renderApplianceIconsFromText(tasteConfigData.recommended_categories_text);
+                } else {
+                    console.log('[loadTasteConfigData] recommended_categories_text가 없습니다. 기본값 유지.');
+                }
+
+                // banner-overlay에 스타일 분석 메시지 추가 (나중에 엑셀 파일 처리)
+                if (tasteConfigData.description) {
+                    // description은 나중에 엑셀 파일의 스타일 분석 메시지로 대체될 예정
+                    console.log('[loadTasteConfigData] Description:', tasteConfigData.description);
+                }
+
+            } catch (error) {
+                console.error('[loadTasteConfigData] 데이터 파싱 오류:', error);
+                console.log('[loadTasteConfigData] 오류 발생으로 기본값 사용.');
+            }
+        }
+
+        // recommended_categories 텍스트를 그대로 표시
+        function renderApplianceIconsFromText(categoriesText) {
+            console.log('[renderApplianceIconsFromText] 시작, categoriesText:', categoriesText);
+            const container = document.getElementById('applianceIconsContainer');
+            if (!container) {
+                console.error('[renderApplianceIconsFromText] appliance-icons-container를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 텍스트를 그대로 표시 (HTML로 렌더링)
+            try {
+                // JSON 배열 문자열인 경우 파싱
+                let categories = [];
+                try {
+                    categories = JSON.parse(categoriesText);
+                } catch (e) {
+                    // JSON이 아니면 그대로 텍스트로 표시
+                    container.innerHTML = '<div class="appliance-categories-text">' + categoriesText + '</div>';
+                    console.log('[renderApplianceIconsFromText] 텍스트로 표시:', categoriesText);
+                    return;
+                }
+
+                // 배열인 경우 각 카테고리를 아이콘으로 표시
+                if (Array.isArray(categories) && categories.length > 0) {
+                    container.innerHTML = '';
+                    categories.forEach(category => {
+                        const mapping = categoryMapping[category];
+                        if (mapping) {
+                            const iconDiv = document.createElement('div');
+                            iconDiv.className = 'appliance-icon';
+                            iconDiv.setAttribute('data-appliance', mapping.dataAppliance);
+
+                            iconDiv.innerHTML = `
+                                <div class="appliance-icon-circle">
+                                    <img src="${mapping.image}" alt="${category}">
+                                </div>
+                                <span class="appliance-icon-label">${category}</span>
+                            `;
+
+                            iconDiv.addEventListener('click', function () {
+                                scrollToProduct(mapping.dataAppliance);
+                            });
+
+                            container.appendChild(iconDiv);
+                        } else {
+                            // 매핑이 없는 경우 텍스트로만 표시
+                            const textDiv = document.createElement('div');
+                            textDiv.className = 'appliance-category-text';
+                            textDiv.textContent = category;
+                            container.appendChild(textDiv);
+                        }
+                    });
+                    console.log(`[renderApplianceIconsFromText] ${categories.length}개 카테고리 표시 완료`);
+                } else {
+                    // 배열이 아니거나 비어있으면 텍스트로 표시
+                    container.innerHTML = '<div class="appliance-categories-text">' + categoriesText + '</div>';
+                }
+            } catch (error) {
+                console.error('[renderApplianceIconsFromText] 오류:', error);
+                // 오류 발생 시 텍스트로 그대로 표시
+                container.innerHTML = '<div class="appliance-categories-text">' + categoriesText + '</div>';
+            }
+        }
+
+        // appliance-icons-container 동적 생성
+        function renderApplianceIcons(categories) {
+            console.log('[renderApplianceIcons] 시작, categories:', categories);
+            const container = document.getElementById('applianceIconsContainer');
+            if (!container) {
+                console.error('[renderApplianceIcons] appliance-icons-container를 찾을 수 없습니다.');
+                return;
+            }
+
+            console.log('[renderApplianceIcons] 컨테이너 찾음, 기존 아이콘 제거');
+            // 기존 아이콘 제거
+            container.innerHTML = '';
+
+            // 카테고리별로 아이콘 생성
+            let createdCount = 0;
+            categories.forEach(category => {
+                const mapping = categoryMapping[category];
+                if (!mapping) {
+                    console.warn(`[renderApplianceIcons] 카테고리 매핑 없음: ${category}`);
+                    return;
+                }
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'appliance-icon';
+                iconDiv.setAttribute('data-appliance', mapping.dataAppliance);
+
+                iconDiv.innerHTML = `
+                    <div class="appliance-icon-circle">
+                        <img src="${mapping.image}" alt="${category}">
+                    </div>
+                    <span class="appliance-icon-label">${category}</span>
+                `;
+
+                // 클릭 이벤트 추가
+                iconDiv.addEventListener('click', function () {
+                    scrollToProduct(mapping.dataAppliance);
+                });
+
+                container.appendChild(iconDiv);
+                createdCount++;
+                console.log(`[renderApplianceIcons] ${category} 아이콘 생성 완료`);
+            });
+
+            console.log(`[renderApplianceIcons] 총 ${createdCount}개 카테고리 아이콘 생성 완료`);
+        }
+
         function initApplianceIcons() {
             document.querySelectorAll('.appliance-icon').forEach(icon => {
                 icon.addEventListener('click', function () {

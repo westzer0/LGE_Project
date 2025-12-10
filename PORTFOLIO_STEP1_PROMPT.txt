@@ -1,0 +1,287 @@
+Step 1: 포트폴리오 인프라 확인 - 모델, 테이블 구조, 추천 결과 연동 확인
+
+현재 상황:
+
+- 추천 엔진 완료: 추천 결과 생성 및 ONBOARD_SESS_REC_PRODUCTS 테이블 저장 완료
+- 온보딩 데이터 정규화 완료: ONBOARD_SESS_MAIN_SPACES, ONBOARD_SESS_PRIORITIES 테이블 준비됨
+- 포트폴리오 모델 존재: Portfolio 모델이 Django에 정의되어 있음
+
+
+목표:
+
+포트폴리오 생성에 필요한 모든 인프라가 준비되어 있는지 확인
+- Portfolio 모델 구조 확인
+- PORTFOLIO 테이블 구조 확인 (Oracle DB)
+- PORTFOLIO_PRODUCT 테이블 구조 확인 (Oracle DB)
+- PORTFOLIO_SESSION 테이블 구조 확인 (Oracle DB)
+- 추천 결과와 포트폴리오 연결 구조 확인
+- 기존 포트폴리오 생성 로직 존재 여부 확인
+
+
+검증 항목:
+
+1. Portfolio 모델 확인
+   - Portfolio 모델 필드 구조 확인
+   - portfolio_id, internal_key, user_id 등 필수 필드 확인
+   - onboarding_session 외래키 관계 확인
+   - products JSONField 구조 확인
+   - 가격 정보 필드 (total_original_price, total_discount_price) 확인
+   - 상태 필드 (status) 확인
+
+2. PORTFOLIO 테이블 확인 (Oracle DB)
+   - PORTFOLIO 테이블 존재 여부 확인
+   - 테이블 컬럼 구조 확인
+   - PORTFOLIO_ID 생성 규칙 확인
+   - 필수 필드 존재 여부 확인
+   - 인덱스 존재 여부 확인
+
+3. PORTFOLIO_PRODUCT 테이블 확인 (Oracle DB)
+   - PORTFOLIO_PRODUCT 테이블 존재 여부 확인
+   - 테이블 컬럼 구조 확인
+   - PORTFOLIO_ID 외래키 관계 확인
+   - PRODUCT_ID 외래키 관계 확인
+   - PRIORITY, RECOMMEND_REASON 필드 확인
+   - 인덱스 존재 여부 확인
+
+4. PORTFOLIO_SESSION 테이블 확인 (Oracle DB)
+   - PORTFOLIO_SESSION 테이블 존재 여부 확인
+   - 테이블 컬럼 구조 확인
+   - PORTFOLIO_ID 외래키 관계 확인
+   - SESSION_ID 외래키 관계 확인
+   - MEMBER_ID 외래키 관계 확인
+   - 인덱스 존재 여부 확인
+
+5. 추천 결과와 포트폴리오 연결 확인
+   - ONBOARD_SESS_REC_PRODUCTS와 PORTFOLIO_PRODUCT 연결 방법 확인
+   - 추천 결과를 포트폴리오로 변환하는 로직 존재 여부 확인
+   - 세션과 포트폴리오 연결 방법 확인
+
+6. 기존 포트폴리오 생성 로직 확인
+   - portfolio_service.py 존재 여부 확인
+   - create_portfolio_from_onboarding() 함수 존재 여부 확인
+   - _save_portfolio_to_oracle() 함수 존재 여부 확인
+   - 포트폴리오 생성 API 엔드포인트 확인
+
+
+관련 파일 (예상):
+
+- api/models.py
+  - Portfolio 모델 정의
+  - PortfolioProduct 모델 정의 (Django ORM)
+  - PortfolioSession 모델 정의 (Django ORM)
+
+- api/services/portfolio_service.py
+  - 포트폴리오 생성 서비스
+  - create_portfolio_from_onboarding() 함수
+  - _save_portfolio_to_oracle() 함수
+
+- api/views.py
+  - portfolio_save_view() 함수
+  - portfolio_detail_view() 함수
+  - onboarding_complete_view() 함수 (포트폴리오 생성 호출)
+
+- Oracle DB 테이블
+  - PORTFOLIO 테이블
+  - PORTFOLIO_PRODUCT 테이블
+  - PORTFOLIO_SESSION 테이블
+
+- ERD.mmd
+  - ERD 다이어그램에서 테이블 관계 확인
+
+
+작업:
+
+1. Django 모델 조사:
+   - Portfolio 모델 필드 구조 확인
+   - PortfolioProduct 모델 확인 (존재 여부)
+   - PortfolioSession 모델 확인 (존재 여부)
+   - 모델 간 관계 확인
+
+2. Oracle DB 테이블 조사:
+   - PORTFOLIO 테이블 구조 조회
+   - PORTFOLIO_PRODUCT 테이블 구조 조회
+   - PORTFOLIO_SESSION 테이블 구조 조회
+   - 각 테이블의 컬럼 및 제약조건 확인
+
+3. 기존 로직 확인:
+   - portfolio_service.py 파일 확인
+   - 포트폴리오 생성 함수 확인
+   - Oracle DB 저장 함수 확인
+   - API 엔드포인트 확인
+
+4. 데이터 존재 여부 확인:
+   - 기존 포트폴리오 데이터 확인
+   - PORTFOLIO 테이블 레코드 수 확인
+   - PORTFOLIO_PRODUCT 테이블 레코드 수 확인
+   - PORTFOLIO_SESSION 테이블 레코드 수 확인
+
+5. 관계 확인:
+   - Portfolio ↔ OnboardingSession 관계 확인
+   - Portfolio ↔ Product 관계 확인 (PORTFOLIO_PRODUCT)
+   - Portfolio ↔ Member 관계 확인 (PORTFOLIO_SESSION)
+   - 추천 결과와 포트폴리오 연결 방법 확인
+
+
+검증 방법:
+
+1. Django 모델 확인:
+   ```python
+   from api.models import Portfolio, PortfolioProduct, PortfolioSession
+   
+   # Portfolio 모델 필드 확인
+   print(Portfolio._meta.get_fields())
+   
+   # PortfolioProduct 모델 확인
+   try:
+       print(PortfolioProduct._meta.get_fields())
+   except:
+       print("PortfolioProduct 모델 없음")
+   
+   # PortfolioSession 모델 확인
+   try:
+       print(PortfolioSession._meta.get_fields())
+   except:
+       print("PortfolioSession 모델 없음")
+   ```
+
+2. Oracle DB 테이블 구조 조회:
+   ```sql
+   -- PORTFOLIO 테이블 구조 확인
+   SELECT COLUMN_NAME, DATA_TYPE, NULLABLE, DATA_DEFAULT
+   FROM USER_TAB_COLUMNS
+   WHERE TABLE_NAME = 'PORTFOLIO'
+   ORDER BY COLUMN_ID;
+   
+   -- PORTFOLIO_PRODUCT 테이블 구조 확인
+   SELECT COLUMN_NAME, DATA_TYPE, NULLABLE, DATA_DEFAULT
+   FROM USER_TAB_COLUMNS
+   WHERE TABLE_NAME = 'PORTFOLIO_PRODUCT'
+   ORDER BY COLUMN_ID;
+   
+   -- PORTFOLIO_SESSION 테이블 구조 확인
+   SELECT COLUMN_NAME, DATA_TYPE, NULLABLE, DATA_DEFAULT
+   FROM USER_TAB_COLUMNS
+   WHERE TABLE_NAME = 'PORTFOLIO_SESSION'
+   ORDER BY COLUMN_ID;
+   
+   -- 외래키 제약조건 확인
+   SELECT CONSTRAINT_NAME, TABLE_NAME, R_CONSTRAINT_NAME
+   FROM USER_CONSTRAINTS
+   WHERE CONSTRAINT_TYPE = 'R'
+   AND TABLE_NAME IN ('PORTFOLIO', 'PORTFOLIO_PRODUCT', 'PORTFOLIO_SESSION');
+   ```
+
+3. 기존 로직 확인:
+   ```python
+   # portfolio_service.py 확인
+   from api.services.portfolio_service import portfolio_service
+   
+   # create_portfolio_from_onboarding 함수 확인
+   if hasattr(portfolio_service, 'create_portfolio_from_onboarding'):
+       print("create_portfolio_from_onboarding 함수 존재")
+   else:
+       print("create_portfolio_from_onboarding 함수 없음")
+   
+   # _save_portfolio_to_oracle 함수 확인
+   if hasattr(portfolio_service, '_save_portfolio_to_oracle'):
+       print("_save_portfolio_to_oracle 함수 존재")
+   else:
+       print("_save_portfolio_to_oracle 함수 없음")
+   ```
+
+4. 데이터 존재 확인:
+   ```sql
+   -- PORTFOLIO 테이블 레코드 수
+   SELECT COUNT(*) FROM PORTFOLIO;
+   
+   -- PORTFOLIO_PRODUCT 테이블 레코드 수
+   SELECT COUNT(*) FROM PORTFOLIO_PRODUCT;
+   
+   -- PORTFOLIO_SESSION 테이블 레코드 수
+   SELECT COUNT(*) FROM PORTFOLIO_SESSION;
+   
+   -- 포트폴리오별 제품 수
+   SELECT PORTFOLIO_ID, COUNT(*) as PRODUCT_COUNT
+   FROM PORTFOLIO_PRODUCT
+   GROUP BY PORTFOLIO_ID;
+   ```
+
+
+예상 결과:
+
+1. Portfolio 모델:
+   - Portfolio 모델 존재 확인
+   - 필수 필드 모두 존재
+   - products JSONField 구조 확인
+
+2. Oracle DB 테이블:
+   - PORTFOLIO 테이블 존재 확인
+   - PORTFOLIO_PRODUCT 테이블 존재 확인
+   - PORTFOLIO_SESSION 테이블 존재 확인
+   - 모든 외래키 관계 정상
+
+3. 기존 로직:
+   - portfolio_service.py 존재 확인
+   - 포트폴리오 생성 함수 존재 여부 확인
+   - Oracle DB 저장 함수 존재 여부 확인
+
+4. 관계 구조:
+   - 모든 관계 구조 명확히 확인
+   - 추천 결과와 포트폴리오 연결 방법 확인
+
+
+테스트 스크립트 구조:
+
+```python
+class PortfolioInfrastructureValidator:
+    """포트폴리오 인프라 확인 클래스"""
+    
+    def validate_all(self):
+        """모든 인프라 확인 실행"""
+        # 1. Portfolio 모델 확인
+        # 2. PORTFOLIO 테이블 확인
+        # 3. PORTFOLIO_PRODUCT 테이블 확인
+        # 4. PORTFOLIO_SESSION 테이블 확인
+        # 5. 추천 결과와 포트폴리오 연결 확인
+        # 6. 기존 포트폴리오 생성 로직 확인
+    
+    def _validate_portfolio_model(self):
+        """Portfolio 모델 확인"""
+    
+    def _validate_portfolio_table(self):
+        """PORTFOLIO 테이블 확인"""
+    
+    def _validate_portfolio_product_table(self):
+        """PORTFOLIO_PRODUCT 테이블 확인"""
+    
+    def _validate_portfolio_session_table(self):
+        """PORTFOLIO_SESSION 테이블 확인"""
+    
+    def _validate_recommendation_connection(self):
+        """추천 결과와 포트폴리오 연결 확인"""
+    
+    def _check_existing_logic(self):
+        """기존 포트폴리오 생성 로직 확인"""
+    
+    def _document_findings(self):
+        """발견 사항 문서화"""
+```
+
+
+시각화 항목:
+
+1. 테이블 구조 다이어그램
+2. Portfolio 모델 필드 구조
+3. PORTFOLIO-PORTFOLIO_PRODUCT-PORTFOLIO_SESSION 관계 다이어그램
+4. 추천 결과 → 포트폴리오 변환 플로우
+5. 기존 포트폴리오 데이터 분포
+
+
+참고:
+
+- 추천 결과가 ONBOARD_SESS_REC_PRODUCTS에 저장되어 있으므로 이를 활용
+- 온보딩 세션 정보가 있으므로 PORTFOLIO_SESSION 연결 가능
+- 기존 포트폴리오 생성 로직이 있다면 재사용 고려
+- Step 2에서 추천 결과를 포트폴리오로 변환하는 로직을 구현할 예정
+- Step 3에서 PORTFOLIO/PORTFOLIO_PRODUCT/PORTFOLIO_SESSION 저장 로직을 구현할 예정
+

@@ -59,7 +59,7 @@ def update_member_taste_column():
                 """)
                 if cursor.fetchone()[0] == 0:
                     print("[INFO] TASTE 칼럼 추가 중...")
-                    cursor.execute("ALTER TABLE MEMBER ADD (TASTE NUMBER(3))")
+                    cursor.execute("ALTER TABLE MEMBER ADD (TASTE NUMBER(4))")
                     print("[OK] TASTE 칼럼 추가 완료")
                 else:
                     print("[INFO] TASTE 칼럼이 이미 존재합니다.")
@@ -96,7 +96,7 @@ def update_member_taste_column():
             cursor.execute("""
                 UPDATE MEMBER 
                 SET TASTE = NULL 
-                WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120)
+                WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 1920)
             """)
             affected = cursor.rowcount
             if affected > 0:
@@ -113,13 +113,13 @@ def update_member_taste_column():
             null_count = cursor.fetchone()[0]
             
             if null_count > 0:
-                # 각 행에 대해 1~120 범위의 난수 할당
+                # 각 행에 대해 1~1920 범위의 난수 할당
                 cursor.execute("SELECT ROWID FROM MEMBER WHERE TASTE IS NULL")
                 rows = cursor.fetchall()
                 
                 updated = 0
                 for row in rows:
-                    taste_value = random.randint(1, 120)
+                    taste_value = random.randint(1, 1920)
                     if db_backend == 'sqlite':
                         cursor.execute(
                             "UPDATE MEMBER SET TASTE = ? WHERE ROWID = ?",
@@ -153,7 +153,7 @@ def update_member_taste_column():
                 elif db_backend == 'oracle':
                     cursor.execute("""
                         UPDATE MEMBER 
-                        SET TASTE = TRUNC(DBMS_RANDOM.VALUE(1, 121))
+                        SET TASTE = TRUNC(DBMS_RANDOM.VALUE(1, 1921))
                         WHERE TASTE IS NULL
                     """)
                     print(f"[OK] {cursor.rowcount}개의 NULL 값에 난수가 할당되었습니다.")
@@ -185,8 +185,8 @@ def update_member_taste_column():
                     CASE 
                         WHEN TASTE IS NULL THEN 'NULL'
                         WHEN TASTE < 1 THEN '범위 밖 (< 1)'
-                        WHEN TASTE > 120 THEN '범위 밖 (> 120)'
-                        ELSE '정상 (1~120)'
+                        WHEN TASTE > 1920 THEN '범위 밖 (> 1920)'
+                        ELSE '정상 (1~1920)'
                     END as status,
                     COUNT(*) as count
                 FROM MEMBER

@@ -209,6 +209,7 @@ class OnboardingDBService:
                 ('MEDIA', 'VARCHAR2(20)', None),
                 ('PRIORITY', 'VARCHAR2(20)', None),
                 ('BUDGET_LEVEL', 'VARCHAR2(20)', None),
+                ('TASTE_ID', 'NUMBER(4)', None),
                 ('COMPLETED_AT', 'DATE', None),
                 ('USER_ID', 'VARCHAR2(100)', None),
             ]
@@ -593,13 +594,36 @@ class OnboardingDBService:
                     laundry = kwargs.get('laundry')
                     media = kwargs.get('media')
                     
+                    # 디버깅: 전달된 값 확인
+                    print(f"\n{'='*80}", flush=True)
+                    print(f"[create_or_update_session] 생활 패턴 데이터 수신 확인", flush=True)
+                    print(f"{'='*80}", flush=True)
+                    print(f"  kwargs 전체 키 목록: {list(kwargs.keys())}", flush=True)
+                    print(f"  kwargs.get('cooking') = {kwargs.get('cooking')} (타입: {type(kwargs.get('cooking')).__name__})", flush=True)
+                    print(f"  kwargs.get('laundry') = {kwargs.get('laundry')} (타입: {type(kwargs.get('laundry')).__name__})", flush=True)
+                    print(f"  kwargs.get('media') = {kwargs.get('media')} (타입: {type(kwargs.get('media')).__name__})", flush=True)
+                    print(f"  'cooking' in kwargs: {'cooking' in kwargs}", flush=True)
+                    print(f"  'laundry' in kwargs: {'laundry' in kwargs}", flush=True)
+                    print(f"  'media' in kwargs: {'media' in kwargs}", flush=True)
+                    print(f"  최종 변수:", flush=True)
+                    print(f"    cooking = {cooking} (타입: {type(cooking).__name__}, is None: {cooking is None})", flush=True)
+                    print(f"    laundry = {laundry} (타입: {type(laundry).__name__}, is None: {laundry is None})", flush=True)
+                    print(f"    media = {media} (타입: {type(media).__name__}, is None: {media is None})", flush=True)
+                    if laundry is None:
+                        print(f"    ⚠️ ERROR: laundry가 None입니다! kwargs에서 값을 가져오지 못했습니다.", flush=True)
+                    if media is None:
+                        print(f"    ⚠️ ERROR: media가 None입니다! kwargs에서 값을 가져오지 못했습니다.", flush=True)
+                    print(f"{'='*80}\n", flush=True)
+                    
                     # 숫자 필드 변환 (Oracle NUMBER 타입 호환성)
                     household_size = OnboardingDBService._convert_to_numeric(kwargs.get('household_size'))
                     pyung = OnboardingDBService._convert_to_numeric(kwargs.get('pyung'))
+                    taste_id = OnboardingDBService._convert_to_numeric(kwargs.get('taste_id'))
                     
                     print(f"[create_or_update_session] 숫자 필드 변환 결과:", flush=True)
                     print(f"  household_size: {kwargs.get('household_size')} → {household_size} (타입: {type(household_size).__name__})", flush=True)
                     print(f"  pyung: {kwargs.get('pyung')} → {pyung} (타입: {type(pyung).__name__})", flush=True)
+                    print(f"  taste_id: {kwargs.get('taste_id')} → {taste_id} (타입: {type(taste_id).__name__})", flush=True)
                     
                     # 업데이트
                     rows_updated = 0  # 초기화
@@ -662,6 +686,36 @@ class OnboardingDBService:
                     
                     # UPDATE 실행 (session_id_for_update가 None이 아니고 exists가 True일 때만)
                     if session_id_for_update is not None and exists is True:
+                        print(f"\n{'='*80}", flush=True)
+                        print(f"[UPDATE SQL 실행 전] 최종 바인딩 값 확인", flush=True)
+                        print(f"{'='*80}", flush=True)
+                        update_params = {
+                            'session_id': session_id_for_update,
+                            'member_id': final_member_id,
+                            'current_step': current_step,
+                            'status': status,
+                            'vibe': kwargs.get('vibe'),
+                            'household_size': household_size,
+                            'has_pet': has_pet,
+                            'housing_type': kwargs.get('housing_type'),
+                            'pyung': pyung,
+                            'cooking': cooking,
+                            'laundry': laundry,
+                            'media': media,
+                            'priority': kwargs.get('priority'),
+                            'budget_level': kwargs.get('budget_level'),
+                            'taste_id': taste_id,
+                        }
+                        print(f"  UPDATE 파라미터:", flush=True)
+                        for key, value in update_params.items():
+                            print(f"    {key} = {value} (타입: {type(value).__name__})", flush=True)
+                        print(f"  ⚠️ 중요: laundry = {laundry}, media = {media}", flush=True)
+                        if laundry is None:
+                            print(f"    ⚠️ ERROR: laundry가 None이므로 NULL로 저장됩니다!", flush=True)
+                        if media is None:
+                            print(f"    ⚠️ ERROR: media가 None이므로 NULL로 저장됩니다!", flush=True)
+                        print(f"{'='*80}\n", flush=True)
+                        
                         try:
                             cur.execute("""
                                 UPDATE ONBOARDING_SESSION SET
@@ -678,25 +732,11 @@ class OnboardingDBService:
                                     MEDIA = :media,
                                     PRIORITY = :priority,
                                     BUDGET_LEVEL = :budget_level,
+                                    TASTE_ID = :taste_id,
                                     UPDATED_AT = SYSDATE,
                                     COMPLETED_AT = CASE WHEN :status = 'COMPLETED' THEN SYSDATE ELSE COMPLETED_AT END
                                 WHERE SESSION_ID = :session_id
-                            """, {
-                                'session_id': session_id_for_update,
-                                'member_id': final_member_id,
-                                'current_step': current_step,
-                                'status': status,
-                                'vibe': kwargs.get('vibe'),
-                                'household_size': household_size,
-                                'has_pet': has_pet,
-                                'housing_type': kwargs.get('housing_type'),
-                                'pyung': pyung,
-                                'cooking': cooking,
-                                'laundry': laundry,
-                                'media': media,
-                                'priority': kwargs.get('priority'),
-                                'budget_level': kwargs.get('budget_level'),
-                            })
+                            """, update_params)
                             rows_updated = cur.rowcount
                             print(f"  [UPDATE 실행 완료]", flush=True)
                             print(f"    rows_updated = {rows_updated} (타입: {type(rows_updated).__name__})", flush=True)
@@ -918,38 +958,53 @@ class OnboardingDBService:
                             print(f"  ⚠️ SESSION_ID 타입 확인 실패: {type_check_error}. 기존 로직대로 진행합니다.", flush=True)
                             session_id_for_insert = session_id
                         
+                        print(f"\n{'='*80}", flush=True)
+                        print(f"[INSERT SQL 실행 전] 최종 바인딩 값 확인", flush=True)
+                        print(f"{'='*80}", flush=True)
+                        insert_params = {
+                            'session_id': session_id_for_insert,
+                            'member_id': final_member_id,
+                            'current_step': current_step,
+                            'status': status,
+                            'vibe': kwargs.get('vibe'),
+                            'household_size': household_size,
+                            'has_pet': has_pet,
+                            'housing_type': kwargs.get('housing_type'),
+                            'pyung': pyung,
+                            'cooking': cooking,
+                            'laundry': laundry,
+                            'media': media,
+                            'priority': kwargs.get('priority'),
+                            'budget_level': kwargs.get('budget_level'),
+                            'taste_id': taste_id,
+                        }
+                        print(f"  INSERT 파라미터:", flush=True)
+                        for key, value in insert_params.items():
+                            print(f"    {key} = {value} (타입: {type(value).__name__})", flush=True)
+                        print(f"  ⚠️ 중요: laundry = {laundry}, media = {media}", flush=True)
+                        if laundry is None:
+                            print(f"    ⚠️ ERROR: laundry가 None이므로 NULL로 저장됩니다!", flush=True)
+                        if media is None:
+                            print(f"    ⚠️ ERROR: media가 None이므로 NULL로 저장됩니다!", flush=True)
+                        print(f"{'='*80}\n", flush=True)
+                        
                         try:
                             cur.execute("""
                                 INSERT INTO ONBOARDING_SESSION (
                                     SESSION_ID, MEMBER_ID, CURRENT_STEP, STATUS,
                                     VIBE, HOUSEHOLD_SIZE, HAS_PET, HOUSING_TYPE, PYUNG,
                                     COOKING, LAUNDRY, MEDIA,
-                                    PRIORITY, BUDGET_LEVEL,
+                                    PRIORITY, BUDGET_LEVEL, TASTE_ID,
                                     CREATED_AT, UPDATED_AT, COMPLETED_AT
                                 ) VALUES (
                                     :session_id, :member_id, :current_step, :status,
                                     :vibe, :household_size, :has_pet, :housing_type, :pyung,
                                     :cooking, :laundry, :media,
-                                    :priority, :budget_level,
+                                    :priority, :budget_level, :taste_id,
                                     SYSDATE, SYSDATE,
                                     CASE WHEN :status = 'COMPLETED' THEN SYSDATE ELSE NULL END
                                 )
-                            """, {
-                                'session_id': session_id_for_insert,
-                                'member_id': final_member_id,
-                                'current_step': current_step,
-                                'status': status,
-                                'vibe': kwargs.get('vibe'),
-                                'household_size': household_size,
-                                'has_pet': has_pet,
-                                'housing_type': kwargs.get('housing_type'),
-                                'pyung': pyung,
-                                'cooking': cooking,
-                                'laundry': laundry,
-                                'media': media,
-                                'priority': kwargs.get('priority'),
-                                'budget_level': kwargs.get('budget_level'),
-                            })
+                            """, insert_params)
                             rows_inserted = cur.rowcount
                             print(f"  [INSERT 실행 완료]", flush=True)
                             print(f"    rows_inserted = {rows_inserted} (타입: {type(rows_inserted).__name__})", flush=True)
@@ -1125,7 +1180,7 @@ class OnboardingDBService:
                             )
                             
                             print(f"  ✅ Taste 계산 및 저장 성공!", flush=True)
-                            print(f"    계산된 TASTE_ID: {taste_id} (1~120 범위)", flush=True)
+                            print(f"    계산된 TASTE_ID: {taste_id} (1~1920 범위)", flush=True)
                             print(f"    MEMBER 테이블 업데이트 완료", flush=True)
                             print(f"{'='*80}\n", flush=True)
                         except Exception as taste_error:

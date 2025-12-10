@@ -47,7 +47,7 @@ erDiagram
         VARCHAR2(20) CONTACT "회원 연락처" nullable
         NUMBER POINT "회원 포인트" nullable
         DATE CREATED_DATE "회원 가입 일시"
-        NUMBER(3) TASTE "할당된 Taste ID (1-120 범위, NULL 가능)" nullable
+        NUMBER(4) TASTE "할당된 Taste ID (1-1920 범위, NULL 가능)" nullable
     }
 
     ONBOARDING_ANSWER {
@@ -264,7 +264,7 @@ erDiagram
 
     TASTE_CONFIG {
         "Taste별 추천 설정 관리 테이블"
-        NUMBER TASTE_ID PK "Taste ID (1-120 범위, PRIMARY KEY)"
+        NUMBER TASTE_ID PK "Taste ID (1-1920 범위, PRIMARY KEY)"
         VARCHAR2(500) DESCRIPTION "Taste에 대한 설명 (예: "모던 스타일, 1인 가구")" nullable
         VARCHAR2(20) REPRESENTATIVE_VIBE "대표 인테리어 무드 (modern/cozy/pop/luxury)" nullable
         NUMBER REPRESENTATIVE_HOUSEHOLD_SIZE "대표 가구 인원수 (1-5인)" nullable

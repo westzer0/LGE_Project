@@ -1,0 +1,304 @@
+Step 7: 상담 예약 연동 기능 구현 - 포트폴리오 기반 상담 예약 API 구현
+
+현재 상황:
+
+- Step 6 완료: 포트폴리오 공유 기능 구현 완료
+- 포트폴리오 데이터 준비: 포트폴리오 생성, 조회, 공유 가능
+- 상담 예약 기능 필요: 포트폴리오를 기반으로 상담 예약을 할 수 있는 기능 필요
+
+
+목표:
+
+포트폴리오 기반 상담 예약 연동 기능 구현
+- 포트폴리오에서 상담 예약 API 호출
+- 상담 예약 시 포트폴리오 정보 포함
+- 상담 예약 조회 시 포트폴리오 정보 포함
+- 포트폴리오와 상담 예약 연결 관리
+
+
+검증 항목:
+
+1. 포트폴리오에서 상담 예약 API
+   - POST /api/portfolio/<portfolio_id>/reserve/ 엔드포인트 확인/구현
+   - 상담 예약 요청 시 포트폴리오 정보 포함
+   - 예약 정보 저장 (Reservation 모델)
+   - 포트폴리오와 예약 연결
+
+2. 상담 예약 정보에 포트폴리오 포함
+   - Reservation 모델에 portfolio 외래키 확인
+   - 예약 생성 시 portfolio 연결
+   - 예약 조회 시 portfolio 정보 포함
+
+3. 상담 예약 조회 시 포트폴리오 정보 포함
+   - GET /api/reservation/<reservation_id>/ 엔드포인트 확인
+   - 예약 조회 시 포트폴리오 정보 포함
+   - 포트폴리오 제품 목록 포함 (선택적)
+
+4. 포트폴리오별 상담 예약 조회
+   - GET /api/portfolio/<portfolio_id>/reservations/ 엔드포인트 구현
+   - 포트폴리오에 연결된 모든 예약 조회
+   - 예약 상태별 필터링 (선택적)
+
+5. 상담 예약 연동 플로우
+   - 포트폴리오 생성 → 상담 예약 → 예약 확인 전체 플로우
+   - 각 단계별 에러 처리
+   - 예약 완료 시 포트폴리오 상태 업데이트 (선택적)
+
+
+관련 파일:
+
+- api/views.py
+  - portfolio_reserve_view() 함수 (구현 필요)
+  - reservation_detail_view() 함수
+  - portfolio_reservations_view() 함수 (구현 필요)
+
+- api/models.py
+  - Reservation 모델
+  - Portfolio 모델
+  - portfolio 외래키 관계 확인
+
+- api/services/portfolio_service.py
+  - create_reservation_from_portfolio() 함수 (구현 필요)
+
+
+작업:
+
+1. 포트폴리오에서 상담 예약 API 구현:
+   - portfolio_reserve_view() 함수 작성
+   - 상담 예약 요청 파라미터 검증
+   - 포트폴리오 정보 포함하여 예약 생성
+   - Reservation 모델에 portfolio 연결
+
+2. 상담 예약 정보에 포트폴리오 포함 확인:
+   - Reservation 모델에 portfolio 외래키 확인
+   - 예약 생성 시 portfolio 연결 확인
+   - 예약 조회 시 portfolio 정보 포함 확인
+
+3. 상담 예약 조회 시 포트폴리오 정보 포함 확인:
+   - reservation_detail_view() 함수 확인
+   - 예약 조회 시 portfolio 정보 포함 확인
+   - 포트폴리오 제품 목록 포함 (선택적)
+
+4. 포트폴리오별 상담 예약 조회 구현:
+   - portfolio_reservations_view() 함수 작성
+   - 포트폴리오에 연결된 모든 예약 조회
+   - 예약 상태별 필터링 (선택적)
+
+5. 상담 예약 연동 플로우 통합:
+   - 포트폴리오 생성 → 상담 예약 → 예약 확인 전체 플로우 확인
+   - 각 단계별 에러 처리 추가
+   - 예약 완료 시 포트폴리오 상태 업데이트 (선택적)
+
+
+검증 방법:
+
+1. 포트폴리오에서 상담 예약 테스트:
+   ```python
+   def test_portfolio_reserve():
+       """포트폴리오에서 상담 예약 테스트"""
+       portfolio_id = "PF-TEST01"
+       
+       # 상담 예약
+       response = client.post(f'/api/portfolio/{portfolio_id}/reserve/', {
+           'name': '홍길동',
+           'phone': '010-1234-5678',
+           'preferred_date': '2024-01-15',
+           'preferred_time': '14:00',
+           'message': '포트폴리오 기반 상담 예약'
+       })
+       
+       assert response.status_code == 200
+       data = response.json()
+       
+       assert data['success'] == True
+       assert 'reservation_id' in data
+       
+       # 예약 확인
+       reservation = Reservation.objects.get(reservation_id=data['reservation_id'])
+       assert reservation.portfolio.portfolio_id == portfolio_id
+       
+       print(f"✅ 포트폴리오에서 상담 예약 성공: {data['reservation_id']}")
+   ```
+
+2. 상담 예약 정보에 포트폴리오 포함 테스트:
+   ```python
+   def test_reservation_with_portfolio():
+       """상담 예약 정보에 포트폴리오 포함 테스트"""
+       portfolio_id = "PF-TEST01"
+       
+       # 예약 생성
+       reservation = Reservation.objects.create(
+           portfolio_id=portfolio_id,
+           name='홍길동',
+           phone='010-1234-5678',
+           # ... 기타 필드 ...
+       )
+       
+       # 예약에 포트폴리오 연결 확인
+       assert reservation.portfolio is not None
+       assert reservation.portfolio.portfolio_id == portfolio_id
+       
+       print("✅ 상담 예약 정보에 포트폴리오 포함 확인")
+   ```
+
+3. 상담 예약 조회 시 포트폴리오 정보 포함 테스트:
+   ```python
+   def test_reservation_detail_with_portfolio():
+       """상담 예약 조회 시 포트폴리오 정보 포함 테스트"""
+       portfolio_id = "PF-TEST01"
+       
+       # 예약 생성
+       reservation = Reservation.objects.create(
+           portfolio_id=portfolio_id,
+           name='홍길동',
+           phone='010-1234-5678',
+           # ... 기타 필드 ...
+       )
+       
+       # 예약 조회
+       response = client.get(f'/api/reservation/{reservation.reservation_id}/')
+       assert response.status_code == 200
+       data = response.json()
+       
+       assert 'portfolio' in data
+       assert data['portfolio']['portfolio_id'] == portfolio_id
+       
+       print("✅ 상담 예약 조회 시 포트폴리오 정보 포함 확인")
+   ```
+
+4. 포트폴리오별 상담 예약 조회 테스트:
+   ```python
+   def test_portfolio_reservations():
+       """포트폴리오별 상담 예약 조회 테스트"""
+       portfolio_id = "PF-TEST01"
+       
+       # 여러 예약 생성
+       for i in range(3):
+           Reservation.objects.create(
+               portfolio_id=portfolio_id,
+               name=f'홍길동{i}',
+               phone=f'010-1234-567{i}',
+               # ... 기타 필드 ...
+           )
+       
+       # 포트폴리오별 예약 조회
+       response = client.get(f'/api/portfolio/{portfolio_id}/reservations/')
+       assert response.status_code == 200
+       data = response.json()
+       
+       assert 'reservations' in data
+       assert len(data['reservations']) == 3
+       
+       print(f"✅ 포트폴리오별 상담 예약 조회 성공: {len(data['reservations'])}개")
+   ```
+
+5. 상담 예약 연동 플로우 테스트:
+   ```python
+   def test_portfolio_reservation_flow():
+       """상담 예약 연동 플로우 테스트"""
+       # 1. 포트폴리오 생성
+       session_id = "test_session_123"
+       user_id = "user_123"
+       
+       portfolio_result = portfolio_service.create_portfolio_from_onboarding(
+           session_id=session_id,
+           user_id=user_id
+       )
+       assert portfolio_result['success'] == True
+       portfolio_id = portfolio_result['portfolio_id']
+       print(f"✅ Step 1: 포트폴리오 생성 성공 ({portfolio_id})")
+       
+       # 2. 상담 예약
+       reservation_response = client.post(f'/api/portfolio/{portfolio_id}/reserve/', {
+           'name': '홍길동',
+           'phone': '010-1234-5678',
+           'preferred_date': '2024-01-15',
+           'preferred_time': '14:00'
+       })
+       assert reservation_response.status_code == 200
+       reservation_data = reservation_response.json()
+       assert reservation_data['success'] == True
+       reservation_id = reservation_data['reservation_id']
+       print(f"✅ Step 2: 상담 예약 성공 ({reservation_id})")
+       
+       # 3. 예약 확인
+       reservation = Reservation.objects.get(reservation_id=reservation_id)
+       assert reservation.portfolio.portfolio_id == portfolio_id
+       print("✅ Step 3: 예약 확인 성공")
+   ```
+
+
+예상 결과:
+
+1. 포트폴리오에서 상담 예약:
+   - 상담 예약 API 정상 작동
+   - 포트폴리오 정보 정상 포함
+   - 예약 생성 정상
+   - 포트폴리오와 예약 연결 정상
+
+2. 상담 예약 정보에 포트폴리오 포함:
+   - Reservation 모델에 portfolio 외래키 정상
+   - 예약 생성 시 portfolio 연결 정상
+   - 예약 조회 시 portfolio 정보 포함 정상
+
+3. 상담 예약 조회 시 포트폴리오 정보 포함:
+   - 예약 조회 시 portfolio 정보 정상 포함
+   - 포트폴리오 제품 목록 포함 (선택적)
+
+4. 포트폴리오별 상담 예약 조회:
+   - 포트폴리오에 연결된 모든 예약 정상 조회
+   - 예약 상태별 필터링 정상 (선택적)
+
+5. 상담 예약 연동 플로우:
+   - 전체 플로우 정상 작동
+   - 각 단계별 에러 처리 정상
+   - 예약 완료 시 포트폴리오 상태 업데이트 정상 (선택적)
+
+
+테스트 스크립트 구조:
+
+```python
+class PortfolioReservationValidator:
+    """포트폴리오 상담 예약 연동 기능 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 포트폴리오에서 상담 예약
+        # 2. 상담 예약 정보에 포트폴리오 포함
+        # 3. 상담 예약 조회 시 포트폴리오 정보 포함
+        # 4. 포트폴리오별 상담 예약 조회
+        # 5. 상담 예약 연동 플로우
+    
+    def _test_portfolio_reserve(self):
+        """포트폴리오에서 상담 예약 테스트"""
+    
+    def _test_reservation_with_portfolio(self):
+        """상담 예약 정보에 포트폴리오 포함 테스트"""
+    
+    def _test_reservation_detail_with_portfolio(self):
+        """상담 예약 조회 시 포트폴리오 정보 포함 테스트"""
+    
+    def _test_portfolio_reservations(self):
+        """포트폴리오별 상담 예약 조회 테스트"""
+    
+    def _test_portfolio_reservation_flow(self):
+        """상담 예약 연동 플로우 테스트"""
+```
+
+
+시각화 항목:
+
+1. 포트폴리오 상담 예약 플로우 다이어그램
+2. 포트폴리오별 예약 수 분포
+3. 예약 상태 분포
+4. 예약 완료율
+5. 포트폴리오 생성 → 예약 전환율
+
+
+참고:
+
+- 포트폴리오와 상담 예약은 1:N 관계 (한 포트폴리오에 여러 예약 가능)
+- 예약 생성 시 포트폴리오 정보를 포함하여 상담사가 포트폴리오를 확인할 수 있도록 함
+- 예약 완료 시 포트폴리오 상태를 'purchased'로 업데이트할 수 있음 (선택적)
+- Step 8에서 전체 통합 검증을 수행할 예정
+

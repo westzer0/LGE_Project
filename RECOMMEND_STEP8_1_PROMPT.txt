@@ -1,0 +1,282 @@
+Step 8-1: 추천 결과 저장 로직 찾기 및 구현 - ONBOARD_SESS_REC_PRODUCTS 테이블 저장 로직 확인 및 구현
+
+
+현재 상황:
+
+- Step 1~7 완료: 추천 엔진 전체 플로우 구현 및 통합 검증 완료
+- 추천 결과가 API 응답으로 반환됨
+- 추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장하는 로직 필요
+- 저장 로직이 이미 존재하는지 확인 필요
+
+
+목표:
+
+추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장하는 로직을 찾고, 없으면 구현
+- 기존 저장 로직 존재 여부 확인
+- 저장 함수/메서드 위치 파악
+- 저장 로직 구현 (없는 경우)
+- 저장 시점 확인 (추천 생성 직후 또는 온보딩 완료 시)
+
+
+검증 항목:
+
+1. 기존 저장 로직 찾기
+   - 코드베이스에서 ONBOARD_SESS_REC_PRODUCTS 저장 로직 검색
+   - 저장 함수/메서드 확인
+   - 저장 호출 위치 확인
+
+2. 저장 로직 구현 (없는 경우)
+   - 추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장하는 함수 작성
+   - 카테고리별 제품 순위 및 점수 포함
+   - 기존 데이터 처리 (업데이트 또는 삭제 후 재삽입)
+
+3. 저장 시점 확인
+   - 추천 결과 생성 직후 저장되는지 확인
+   - 온보딩 완료 시 저장되는지 확인
+   - API 응답 전/후 저장 시점 확인
+
+4. 에러 처리 확인
+   - 저장 실패 시 에러 처리 로직 확인
+   - 에러 로깅 확인
+   - 트랜잭션 처리 확인
+
+
+관련 파일:
+
+- api/services/recommendation_service.py (예상)
+  - get_recommendations() 메서드
+  - 추천 결과 생성 및 반환
+
+- api/services/taste_based_recommendation_engine.py
+  - 추천 엔진 로직
+
+- api/views.py 또는 api/views_recommendations.py
+  - 추천 API 엔드포인트
+  - 추천 결과 저장 호출 위치
+
+- api/services/onboarding_db_service.py
+  - Oracle DB 저장 서비스
+  - ONBOARD_SESS_REC_PRODUCTS 테이블 저장 로직 (추가 필요)
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - SESSION_ID: 세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)
+  - PRODUCT_ID: 제품 ID
+  - CATEGORY_NAME: 카테고리명 (예: "TV", "냉장고")
+  - RANK_ORDER: 카테고리 내 순위 (1, 2, 3...)
+  - SCORE: 해당 제품의 점수 (0~100점, NUMBER(5,2))
+  - CREATED_AT: 생성 일시 (기본값: SYSDATE)
+
+
+작업:
+
+1. 기존 저장 로직 찾기:
+   - 코드베이스에서 "ONBOARD_SESS_REC_PRODUCTS" 검색
+   - "save_recommendation" 또는 "insert_recommendation" 검색
+   - 추천 결과 저장 관련 함수/메서드 확인
+
+2. 저장 로직 구현 (없는 경우):
+   - save_recommendation_results() 함수 작성
+   - insert_recommendation_product() 함수 작성
+   - 기존 데이터 삭제 함수 작성 (재추천 시)
+
+3. 저장 시점 통합:
+   - 추천 결과 생성 후 저장 호출 추가
+   - 또는 온보딩 완료 시 저장 호출 추가
+
+4. 에러 처리 추가:
+   - 저장 실패 시 에러 처리
+   - 로깅 추가
+   - 트랜잭션 처리
+
+
+검증 방법:
+
+1. 기존 저장 로직 찾기:
+   ```python
+   # 코드베이스 검색
+   # grep 또는 codebase_search로 다음 키워드 검색:
+   # - "ONBOARD_SESS_REC_PRODUCTS"
+   # - "save_recommendation"
+   # - "insert_recommendation"
+   # - "recommendation_result 저장"
+   
+   # 저장 함수/메서드 확인
+   if exists_save_function():
+       print("기존 저장 로직 발견")
+       print(f"위치: {get_save_function_location()}")
+   else:
+       print("저장 로직 없음 - 구현 필요")
+   ```
+
+2. 저장 로직 구현:
+   ```python
+   def save_recommendation_results(session_id: str, recommendations: dict):
+       """
+       추천 결과를 ONBOARD_SESS_REC_PRODUCTS 테이블에 저장
+       
+       Args:
+           session_id: 온보딩 세션 ID
+           recommendations: 추천 결과 딕셔너리
+               {
+                   'categories': [
+                       {
+                           'category_id': 1,
+                           'category_name': 'TV',
+                           'products': [
+                               {
+                                   'product_id': 101,
+                                   'recommendation_score': 95.5,
+                                   ...
+                               },
+                               ...
+                           ]
+                       },
+                       ...
+                   ]
+               }
+       """
+       from api.services.onboarding_db_service import onboarding_db_service
+       
+       conn = onboarding_db_service.get_connection()
+       cur = conn.cursor()
+       
+       try:
+           # 기존 데이터 삭제 (재추천 시)
+           cur.execute("""
+               DELETE FROM ONBOARD_SESS_REC_PRODUCTS
+               WHERE SESSION_ID = :p_session_id
+           """, {'p_session_id': session_id})
+           
+           # 카테고리별 제품 저장
+           for category in recommendations.get('categories', []):
+               category_name = category['category_name']
+               
+               for rank, product in enumerate(category['products'], start=1):
+                   product_id = product['product_id']
+                   score = product.get('recommendation_score')
+                   
+                   # ONBOARD_SESS_REC_PRODUCTS 테이블에 저장
+                   cur.execute("""
+                       INSERT INTO ONBOARD_SESS_REC_PRODUCTS
+                       (SESSION_ID, PRODUCT_ID, CATEGORY_NAME, RANK_ORDER, SCORE, CREATED_AT)
+                       VALUES (:p_session_id, :p_product_id, :p_category_name, :p_rank_order, :p_score, SYSDATE)
+                   """, {
+                       'p_session_id': session_id,
+                       'p_product_id': product_id,
+                       'p_category_name': category_name,
+                       'p_rank_order': rank,
+                       'p_score': float(score) if score is not None else None
+                   })
+           
+           conn.commit()
+           print(f"[저장 완료] 세션 {session_id}에 {count_total_products(recommendations)}개 제품 저장")
+           
+       except Exception as e:
+           conn.rollback()
+           print(f"[저장 실패] 세션 {session_id}: {str(e)}")
+           raise e
+       finally:
+           cur.close()
+   ```
+
+3. 저장 시점 통합:
+   ```python
+   # 추천 결과 생성 후 저장
+   def get_recommendations(member_id: str):
+       # ... 추천 결과 생성 로직 ...
+       
+       recommendations = {
+           'categories': [...],
+           ...
+       }
+       
+       # 저장 로직 호출 (추가)
+       session = get_latest_completed_session(member_id)
+       if session:
+           save_recommendation_results(session['session_id'], recommendations)
+       
+       return recommendations
+   ```
+
+4. 저장 로직 테스트:
+   ```python
+   # 테스트 코드
+   member_id = 'user_123'
+   recommendations = get_recommendations(member_id)
+   
+   session = get_latest_completed_session(member_id)
+   session_id = session['session_id']
+   
+   # 저장 실행
+   try:
+       save_recommendation_results(session_id, recommendations)
+       print("✅ 저장 성공")
+   except Exception as e:
+       print(f"❌ 저장 실패: {e}")
+   ```
+
+
+예상 결과:
+
+1. 기존 저장 로직:
+   - 저장 로직이 이미 존재하는 경우: 위치 파악 및 검증
+   - 저장 로직이 없는 경우: 새로 구현
+
+2. 저장 로직 구현:
+   - save_recommendation_results() 함수 구현 완료
+   - 카테고리별 제품 순위 및 점수 포함
+   - 기존 데이터 처리 로직 포함
+
+3. 저장 시점:
+   - 추천 결과 생성 후 또는 온보딩 완료 시 저장 호출 추가
+   - 저장 시점 명확히 정의
+
+4. 에러 처리:
+   - 저장 실패 시 적절한 에러 처리
+   - 로깅 추가
+   - 트랜잭션 처리
+
+
+테스트 스크립트 구조:
+
+```python
+class RecommendationStorageLogicValidator:
+    """추천 결과 저장 로직 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 기존 저장 로직 찾기
+        # 2. 저장 로직 구현 (없는 경우)
+        # 3. 저장 시점 확인
+        # 4. 에러 처리 확인
+    
+    def _find_existing_storage_logic(self):
+        """기존 저장 로직 찾기"""
+        # 코드베이스 검색
+        # 저장 함수/메서드 확인
+    
+    def _implement_storage_logic(self):
+        """저장 로직 구현 (없는 경우)"""
+        # save_recommendation_results() 함수 작성
+        # insert_recommendation_product() 함수 작성
+    
+    def _check_storage_timing(self):
+        """저장 시점 확인"""
+        # 추천 결과 생성 후 저장 호출 확인
+        # 또는 온보딩 완료 시 저장 호출 확인
+    
+    def _validate_error_handling(self):
+        """에러 처리 확인"""
+        # 저장 실패 시 에러 처리 확인
+        # 로깅 확인
+```
+
+
+참고:
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블 구조 확인 필요
+- 기존 저장 로직이 있다면 재사용 고려
+- 저장 로직은 추천 결과 생성 후 자동으로 호출되도록 통합
+- 에러 발생 시에도 추천 결과는 반환되어야 함 (저장 실패는 로그만 남김)
+- Step 8-2에서 저장 여부를 검증할 예정이므로, 이 단계에서는 로직 구현에 집중
+

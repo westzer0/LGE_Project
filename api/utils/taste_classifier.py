@@ -18,8 +18,8 @@ class TasteClassifier:
     3. 약 100-150개의 taste로 구분
     """
     
-    # Taste 개수 설정 (100-150개 범위)
-    TASTE_COUNT = 120  # 10,000개 조합 / 120개 taste = 평균 83개 조합 per taste
+    # Taste 개수 설정
+    TASTE_COUNT = 1920  # 1920개 taste로 확장
     
     @staticmethod
     def calculate_taste_from_onboarding(onboarding_data: Dict) -> int:
@@ -95,7 +95,7 @@ class TasteClassifier:
         taste_hash = int(hashlib.md5(taste_key.encode('utf-8')).hexdigest(), 16)
         taste_id = (taste_hash % TasteClassifier.TASTE_COUNT) + 1
         
-        # 6. 검증: 1~120 범위의 정수로 보장
+        # 6. 검증: 1~1920 범위의 정수로 보장
         taste_id = int(taste_id)
         if taste_id < 1:
             taste_id = 1

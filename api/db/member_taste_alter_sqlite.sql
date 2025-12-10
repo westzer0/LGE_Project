@@ -1,6 +1,6 @@
 -- ============================================================
 -- MEMBER 테이블 TASTE 칼럼 수정 (SQLite 호환)
--- TASTE를 1~120 범위의 정수(INTEGER)로 보장
+-- TASTE를 1~1920 범위의 정수(INTEGER)로 보장
 -- ============================================================
 
 -- SQLite는 ALTER TABLE이 제한적이므로 다음 단계로 진행:
@@ -25,7 +25,7 @@
 -- 기존 TASTE 값이 범위를 벗어나면 NULL로 설정
 UPDATE MEMBER 
 SET TASTE = NULL 
-WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120);
+WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 1920);
 
 -- ============================================================
 -- 방법 2: 완전한 재생성 (TASTE 칼럼 타입 변경이 필요한 경우)
@@ -41,7 +41,7 @@ WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120);
 --     -- ID INTEGER PRIMARY KEY,
 --     -- USERNAME TEXT,
 --     -- EMAIL TEXT,
---     -- TASTE INTEGER CHECK(TASTE IS NULL OR (TASTE >= 1 AND TASTE <= 120)),
+     --     -- TASTE INTEGER CHECK(TASTE IS NULL OR (TASTE >= 1 AND TASTE <= 1920)),
 --     -- ... 기타 칼럼들
 -- );
 
@@ -51,7 +51,7 @@ WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120);
 --     *,
 --     CASE 
 --         WHEN TASTE IS NULL THEN NULL
---         WHEN TASTE < 1 OR TASTE > 120 THEN NULL
+     --         WHEN TASTE < 1 OR TASTE > 1920 THEN NULL
 --         ELSE TASTE
 --     END AS TASTE
 -- FROM MEMBER_BACKUP;
@@ -76,8 +76,8 @@ SELECT
     CASE 
         WHEN TASTE IS NULL THEN 'NULL'
         WHEN TASTE < 1 THEN '범위 밖 (< 1)'
-        WHEN TASTE > 120 THEN '범위 밖 (> 120)'
-        ELSE '정상 (1~120)'
+        WHEN TASTE > 1920 THEN '범위 밖 (> 1920)'
+        ELSE '정상 (1~1920)'
     END as taste_status,
     COUNT(*) as count
 FROM MEMBER

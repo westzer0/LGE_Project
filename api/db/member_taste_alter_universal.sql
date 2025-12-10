@@ -1,6 +1,6 @@
 -- ============================================================
 -- MEMBER 테이블 TASTE 칼럼 수정 (범용 SQL - SQLite/Oracle/PostgreSQL 호환)
--- TASTE를 1~120 범위의 정수로 보장
+-- TASTE를 1~1920 범위의 정수로 보장
 -- ============================================================
 -- 이 파일은 표준 SQL을 사용하여 여러 데이터베이스에서 동작합니다.
 -- 데이터베이스별 특수 기능은 사용하지 않습니다.
@@ -24,12 +24,12 @@
 -- 범위를 벗어난 값은 NULL로 설정
 UPDATE MEMBER 
 SET TASTE = NULL 
-WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120);
+WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 1920);
 
 -- 또는 범위 내 값으로 변환 (나머지 연산 사용)
 -- UPDATE MEMBER 
--- SET TASTE = (ABS(TASTE) % 120) + 1
--- WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120);
+-- SET TASTE = (ABS(TASTE) % 1920) + 1
+-- WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 1920);
 
 -- ============================================================
 -- 3. 제약조건 추가 (데이터베이스별로 다름)
@@ -41,11 +41,11 @@ WHERE TASTE IS NOT NULL AND (TASTE < 1 OR TASTE > 120);
 
 -- Oracle: CHECK 제약조건 추가 가능
 -- ALTER TABLE MEMBER ADD CONSTRAINT CHK_TASTE_RANGE 
--- CHECK (TASTE IS NULL OR (TASTE >= 1 AND TASTE <= 120));
+-- CHECK (TASTE IS NULL OR (TASTE >= 1 AND TASTE <= 1920));
 
 -- PostgreSQL: CHECK 제약조건 추가 가능
 -- ALTER TABLE MEMBER ADD CONSTRAINT CHK_TASTE_RANGE 
--- CHECK (TASTE IS NULL OR (TASTE >= 1 AND TASTE <= 120));
+-- CHECK (TASTE IS NULL OR (TASTE >= 1 AND TASTE <= 1920));
 
 -- ============================================================
 -- 4. 데이터 확인
@@ -56,8 +56,8 @@ SELECT
     CASE 
         WHEN TASTE IS NULL THEN 'NULL'
         WHEN TASTE < 1 THEN '범위 밖 (< 1)'
-        WHEN TASTE > 120 THEN '범위 밖 (> 120)'
-        ELSE '정상 (1~120)'
+        WHEN TASTE > 1920 THEN '범위 밖 (> 1920)'
+        ELSE '정상 (1~1920)'
     END as taste_status,
     COUNT(*) as count
 FROM MEMBER
@@ -65,8 +65,8 @@ GROUP BY
     CASE 
         WHEN TASTE IS NULL THEN 'NULL'
         WHEN TASTE < 1 THEN '범위 밖 (< 1)'
-        WHEN TASTE > 120 THEN '범위 밖 (> 120)'
-        ELSE '정상 (1~120)'
+        WHEN TASTE > 1920 THEN '범위 밖 (> 1920)'
+        ELSE '정상 (1~1920)'
     END
 ORDER BY taste_status;
 

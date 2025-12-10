@@ -1,0 +1,416 @@
+Step 8-4: 외래키 관계 및 데이터 무결성 검증 - ONBOARD_SESS_REC_PRODUCTS 테이블의 외래키 관계 및 데이터 무결성 검증
+
+
+현재 상황:
+
+- Step 8-1 완료: 추천 결과 저장 로직 찾기 및 구현 완료
+- Step 8-2 완료: 테이블 저장 여부 검증 완료
+- Step 8-3 완료: 카테고리/순위/점수 포함 여부 검증 완료
+- 저장된 데이터의 외래키 관계 및 데이터 무결성 검증 필요
+
+
+목표:
+
+ONBOARD_SESS_REC_PRODUCTS 테이블의 외래키 관계 및 데이터 무결성을 검증
+- SESSION_ID가 ONBOARDING_SESSION 테이블의 유효한 세션인지 확인
+- PRODUCT_ID가 PRODUCT 테이블의 유효한 제품인지 확인
+- 외래키 제약조건 위반 시 에러 처리 확인
+- 데이터 무결성 확인
+
+
+검증 항목:
+
+1. SESSION_ID 외래키 관계 검증
+   - SESSION_ID가 ONBOARDING_SESSION 테이블에 존재하는지 확인
+   - 존재하지 않는 SESSION_ID로 저장 시도 시 에러 처리 확인
+   - 세션 삭제 시 CASCADE 동작 확인
+
+2. PRODUCT_ID 유효성 검증
+   - PRODUCT_ID가 PRODUCT 테이블에 존재하는지 확인
+   - 존재하지 않는 PRODUCT_ID로 저장 시도 시 에러 처리 확인
+   - 제품 정보 조회 가능 여부 확인
+
+3. 외래키 제약조건 위반 검증
+   - 유효하지 않은 SESSION_ID로 저장 시도
+   - 유효하지 않은 PRODUCT_ID로 저장 시도
+   - 외래키 제약조건 위반 시 에러 처리 확인
+
+4. 데이터 무결성 검증
+   - 저장된 모든 레코드의 SESSION_ID가 유효한지 확인
+   - 저장된 모든 레코드의 PRODUCT_ID가 유효한지 확인
+   - NULL 값 처리 확인
+   - 중복 레코드 확인 (PRIMARY KEY 제약조건)
+
+5. CASCADE 동작 검증
+   - 세션 삭제 시 추천 제품 레코드 삭제 확인
+   - CASCADE 설정 확인
+
+
+관련 파일:
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - SESSION_ID: 세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)
+  - PRODUCT_ID: 제품 ID
+  - PRIMARY KEY: (SESSION_ID, PRODUCT_ID)
+  - FOREIGN KEY: SESSION_ID → ONBOARDING_SESSION.SESSION_ID
+
+- ONBOARDING_SESSION 테이블
+  - SESSION_ID: 세션 ID (PRIMARY KEY)
+
+- PRODUCT 테이블
+  - PRODUCT_ID: 제품 ID (PRIMARY KEY)
+
+- Step 8-1에서 구현한 저장 함수
+  - save_recommendation_results() 함수
+
+
+작업:
+
+1. SESSION_ID 외래키 관계 검증:
+   - 저장된 레코드의 SESSION_ID가 ONBOARDING_SESSION 테이블에 존재하는지 확인
+   - 존재하지 않는 SESSION_ID로 저장 시도
+   - 세션 삭제 시 CASCADE 동작 확인
+
+2. PRODUCT_ID 유효성 검증:
+   - 저장된 레코드의 PRODUCT_ID가 PRODUCT 테이블에 존재하는지 확인
+   - 존재하지 않는 PRODUCT_ID로 저장 시도
+   - 제품 정보 조회 가능 여부 확인
+
+3. 외래키 제약조건 위반 검증:
+   - 유효하지 않은 SESSION_ID로 저장 시도
+   - 유효하지 않은 PRODUCT_ID로 저장 시도
+   - 에러 처리 확인
+
+4. 데이터 무결성 종합 검증:
+   - 모든 저장된 레코드의 외래키 관계 확인
+   - NULL 값 확인
+   - 중복 레코드 확인
+
+5. CASCADE 동작 검증:
+   - 세션 삭제 테스트
+   - 추천 제품 레코드 삭제 확인
+
+
+검증 방법:
+
+1. SESSION_ID 외래키 관계 검증:
+   ```python
+   def validate_session_id_foreign_key(session_id: str):
+       """SESSION_ID 외래키 관계 검증"""
+       from api.services.onboarding_db_service import onboarding_db_service
+       
+       conn = onboarding_db_service.get_connection()
+       cur = conn.cursor()
+       
+       try:
+           # SESSION_ID가 ONBOARDING_SESSION 테이블에 존재하는지 확인
+           cur.execute("""
+               SELECT COUNT(*)
+               FROM ONBOARDING_SESSION
+               WHERE SESSION_ID = :p_session_id
+           """, {'p_session_id': session_id})
+           
+           exists = cur.fetchone()[0] > 0
+           assert exists, f"SESSION_ID {session_id}가 ONBOARDING_SESSION 테이블에 존재하지 않음"
+           
+           print(f"✅ SESSION_ID {session_id} 외래키 관계 정상")
+       finally:
+           cur.close()
+   
+   # 저장된 모든 레코드의 SESSION_ID 검증
+   saved_products = get_saved_recommendation_products(session_id)
+   unique_session_ids = set(p['session_id'] for p in saved_products)
+   
+   for session_id in unique_session_ids:
+       validate_session_id_foreign_key(session_id)
+   ```
+
+2. PRODUCT_ID 유효성 검증:
+   ```python
+   def validate_product_id_exists(product_id: int):
+       """PRODUCT_ID 유효성 검증"""
+       from api.services.onboarding_db_service import onboarding_db_service
+       
+       conn = onboarding_db_service.get_connection()
+       cur = conn.cursor()
+       
+       try:
+           # PRODUCT_ID가 PRODUCT 테이블에 존재하는지 확인
+           cur.execute("""
+               SELECT COUNT(*)
+               FROM PRODUCT
+               WHERE PRODUCT_ID = :p_product_id
+           """, {'p_product_id': product_id})
+           
+           exists = cur.fetchone()[0] > 0
+           assert exists, f"PRODUCT_ID {product_id}가 PRODUCT 테이블에 존재하지 않음"
+           
+           print(f"✅ PRODUCT_ID {product_id} 유효성 확인")
+       finally:
+           cur.close()
+   
+   # 저장된 모든 레코드의 PRODUCT_ID 검증
+   saved_products = get_saved_recommendation_products(session_id)
+   unique_product_ids = set(p['product_id'] for p in saved_products)
+   
+   for product_id in unique_product_ids:
+       validate_product_id_exists(product_id)
+   ```
+
+3. 외래키 제약조건 위반 검증:
+   ```python
+   def test_invalid_session_id():
+       """유효하지 않은 SESSION_ID로 저장 시도"""
+       invalid_session_id = 'INVALID_SESSION_12345'
+       
+       recommendations = {
+           'categories': [
+               {
+                   'category_name': 'TV',
+                   'products': [
+                       {'product_id': 1, 'recommendation_score': 95.5}
+                   ]
+               }
+           ]
+       }
+       
+       try:
+           save_recommendation_results(invalid_session_id, recommendations)
+           assert False, "유효하지 않은 SESSION_ID로 저장이 성공함 (에러가 발생해야 함)"
+       except Exception as e:
+           # 외래키 제약조건 위반 에러 확인
+           assert 'foreign key' in str(e).lower() or 'constraint' in str(e).lower(), \
+               f"예상된 외래키 에러가 아님: {e}"
+           print(f"✅ 유효하지 않은 SESSION_ID 에러 처리 확인: {e}")
+   
+   def test_invalid_product_id():
+       """유효하지 않은 PRODUCT_ID로 저장 시도"""
+       session_id = 'valid_session_id'
+       invalid_product_id = 999999  # 존재하지 않는 제품 ID
+       
+       recommendations = {
+           'categories': [
+               {
+                   'category_name': 'TV',
+                   'products': [
+                       {'product_id': invalid_product_id, 'recommendation_score': 95.5}
+                   ]
+               }
+           ]
+       }
+       
+       try:
+           save_recommendation_results(session_id, recommendations)
+           # 제품 ID는 외래키가 아닐 수 있으므로 저장은 성공할 수 있음
+           # 하지만 제품 정보 조회 시 문제가 있을 수 있음
+           print("⚠️ PRODUCT_ID는 외래키가 아닐 수 있음")
+       except Exception as e:
+           print(f"✅ 유효하지 않은 PRODUCT_ID 에러 처리 확인: {e}")
+   ```
+
+4. 데이터 무결성 종합 검증:
+   ```python
+   def validate_data_integrity():
+       """데이터 무결성 종합 검증"""
+       from api.services.onboarding_db_service import onboarding_db_service
+       
+       conn = onboarding_db_service.get_connection()
+       cur = conn.cursor()
+       
+       try:
+           # 모든 저장된 레코드 조회
+           cur.execute("""
+               SELECT SESSION_ID, PRODUCT_ID, CATEGORY_NAME, RANK_ORDER, SCORE
+               FROM ONBOARD_SESS_REC_PRODUCTS
+           """)
+           
+           all_records = cur.fetchall()
+           errors = []
+           
+           for record in all_records:
+               session_id, product_id, category_name, rank_order, score = record
+               
+               # SESSION_ID 유효성 확인
+               cur.execute("""
+                   SELECT COUNT(*)
+                   FROM ONBOARDING_SESSION
+                   WHERE SESSION_ID = :p_session_id
+               """, {'p_session_id': session_id})
+               if cur.fetchone()[0] == 0:
+                   errors.append(f"SESSION_ID {session_id}가 ONBOARDING_SESSION 테이블에 존재하지 않음")
+               
+               # PRODUCT_ID 유효성 확인
+               cur.execute("""
+                   SELECT COUNT(*)
+                   FROM PRODUCT
+                   WHERE PRODUCT_ID = :p_product_id
+               """, {'p_product_id': product_id})
+               if cur.fetchone()[0] == 0:
+                   errors.append(f"PRODUCT_ID {product_id}가 PRODUCT 테이블에 존재하지 않음")
+               
+               # NULL 값 확인 (SESSION_ID, PRODUCT_ID는 NOT NULL)
+               if session_id is None:
+                   errors.append("SESSION_ID가 NULL임")
+               if product_id is None:
+                   errors.append("PRODUCT_ID가 NULL임")
+           
+           # 중복 레코드 확인 (PRIMARY KEY 제약조건)
+           cur.execute("""
+               SELECT SESSION_ID, PRODUCT_ID, COUNT(*)
+               FROM ONBOARD_SESS_REC_PRODUCTS
+               GROUP BY SESSION_ID, PRODUCT_ID
+               HAVING COUNT(*) > 1
+           """)
+           duplicates = cur.fetchall()
+           if duplicates:
+               for dup in duplicates:
+                   errors.append(f"중복 레코드 발견: SESSION_ID={dup[0]}, PRODUCT_ID={dup[1]}")
+           
+           if errors:
+               print("❌ 데이터 무결성 검증 실패:")
+               for error in errors:
+                   print(f"  - {error}")
+               assert False, f"{len(errors)}개 오류 발견"
+           else:
+               print(f"✅ 데이터 무결성 검증 통과: {len(all_records)}개 레코드 검증 완료")
+       finally:
+           cur.close()
+   
+   # 데이터 무결성 검증 실행
+   validate_data_integrity()
+   ```
+
+5. CASCADE 동작 검증:
+   ```python
+   def test_cascade_delete():
+       """세션 삭제 시 CASCADE 동작 검증"""
+       from api.services.onboarding_db_service import onboarding_db_service
+       
+       # 테스트용 세션 생성 및 추천 제품 저장
+       test_session_id = 'test_cascade_session'
+       recommendations = {
+           'categories': [
+               {
+                   'category_name': 'TV',
+                   'products': [
+                       {'product_id': 1, 'recommendation_score': 95.5}
+                   ]
+               }
+           ]
+       }
+       
+       # 추천 제품 저장
+       save_recommendation_results(test_session_id, recommendations)
+       
+       # 저장 확인
+       saved_before = get_saved_recommendation_products(test_session_id)
+       assert len(saved_before) > 0, "저장된 제품이 없음"
+       
+       # 세션 삭제
+       conn = onboarding_db_service.get_connection()
+       cur = conn.cursor()
+       
+       try:
+           cur.execute("""
+               DELETE FROM ONBOARDING_SESSION
+               WHERE SESSION_ID = :p_session_id
+           """, {'p_session_id': test_session_id})
+           conn.commit()
+           
+           # CASCADE로 추천 제품 레코드도 삭제되었는지 확인
+           saved_after = get_saved_recommendation_products(test_session_id)
+           assert len(saved_after) == 0, \
+               f"CASCADE 동작 실패: 세션 삭제 후에도 {len(saved_after)}개 레코드가 남아있음"
+           
+           print("✅ CASCADE 동작 확인: 세션 삭제 시 추천 제품 레코드도 삭제됨")
+       except Exception as e:
+           conn.rollback()
+           print(f"⚠️ CASCADE 테스트 중 오류: {e}")
+       finally:
+           cur.close()
+   ```
+
+
+예상 결과:
+
+1. SESSION_ID 외래키 관계:
+   - 저장된 모든 레코드의 SESSION_ID가 ONBOARDING_SESSION 테이블에 존재함
+   - 유효하지 않은 SESSION_ID로 저장 시도 시 에러 발생
+
+2. PRODUCT_ID 유효성:
+   - 저장된 모든 레코드의 PRODUCT_ID가 PRODUCT 테이블에 존재함
+   - 제품 정보 조회 가능
+
+3. 외래키 제약조건:
+   - 유효하지 않은 SESSION_ID로 저장 시도 시 외래키 제약조건 위반 에러 발생
+   - 에러 처리가 적절함
+
+4. 데이터 무결성:
+   - 모든 저장된 레코드의 외래키 관계가 유효함
+   - NULL 값이 적절히 처리됨
+   - 중복 레코드 없음
+
+5. CASCADE 동작:
+   - 세션 삭제 시 추천 제품 레코드도 자동 삭제됨
+   - CASCADE 설정이 올바르게 작동함
+
+
+테스트 스크립트 구조:
+
+```python
+class ForeignKeyIntegrityValidator:
+    """외래키 관계 및 데이터 무결성 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. SESSION_ID 외래키 관계 검증
+        # 2. PRODUCT_ID 유효성 검증
+        # 3. 외래키 제약조건 위반 검증
+        # 4. 데이터 무결성 종합 검증
+        # 5. CASCADE 동작 검증
+    
+    def _validate_session_id_foreign_key(self):
+        """SESSION_ID 외래키 관계 검증"""
+        # 저장된 레코드의 SESSION_ID 검증
+        # 유효하지 않은 SESSION_ID 테스트
+    
+    def _validate_product_id_exists(self):
+        """PRODUCT_ID 유효성 검증"""
+        # 저장된 레코드의 PRODUCT_ID 검증
+        # 제품 정보 조회 가능 여부 확인
+    
+    def _test_foreign_key_constraints(self):
+        """외래키 제약조건 위반 검증"""
+        # 유효하지 않은 SESSION_ID로 저장 시도
+        # 유효하지 않은 PRODUCT_ID로 저장 시도
+    
+    def _validate_data_integrity(self):
+        """데이터 무결성 종합 검증"""
+        # 모든 저장된 레코드의 외래키 관계 확인
+        # NULL 값 확인
+        # 중복 레코드 확인
+    
+    def _test_cascade_delete(self):
+        """CASCADE 동작 검증"""
+        # 세션 삭제 테스트
+        # 추천 제품 레코드 삭제 확인
+```
+
+
+시각화 항목:
+
+1. 외래키 관계 검증 결과 (성공/실패 비율)
+2. 데이터 무결성 검증 결과 (오류 유형별 분포)
+3. CASCADE 동작 검증 결과
+4. 외래키 제약조건 위반 빈도
+
+
+참고:
+
+- 외래키 관계는 데이터 무결성을 보장하는 중요한 요소
+- SESSION_ID는 반드시 ONBOARDING_SESSION 테이블에 존재해야 함
+- PRODUCT_ID도 PRODUCT 테이블에 존재해야 제품 정보 조회 가능
+- CASCADE 설정으로 세션 삭제 시 관련 데이터도 자동 삭제
+- 데이터 무결성 검증은 모든 저장된 레코드에 대해 수행
+- Step 8-5에서 실제 추천 결과로 통합 검증 예정
+

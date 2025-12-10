@@ -1,0 +1,314 @@
+Step 2: 추천 결과를 포트폴리오로 변환하는 로직 구현 - 추천 결과 데이터를 포트폴리오 형식으로 변환
+
+현재 상황:
+
+- Step 1 완료: 포트폴리오 인프라 확인 완료
+- 추천 결과 저장 완료: ONBOARD_SESS_REC_PRODUCTS 테이블에 추천 결과 저장됨
+- 추천 결과 형식: 카테고리별 제품 목록, 순위, 점수 포함
+- 포트폴리오 모델 준비: Portfolio 모델 구조 확인 완료
+
+
+목표:
+
+추천 결과를 포트폴리오 형식으로 변환하는 로직 구현
+- ONBOARD_SESS_REC_PRODUCTS에서 추천 결과 조회
+- 추천 결과를 포트폴리오 products 형식으로 변환
+- 스타일 정보 추출 및 생성
+- 가격 정보 계산
+- 매칭 점수 계산
+- 온보딩 데이터 정규화 테이블에서 정보 조회
+
+
+검증 항목:
+
+1. 추천 결과 조회 로직
+   - ONBOARD_SESS_REC_PRODUCTS에서 세션별 추천 결과 조회
+   - 카테고리별 제품 목록 조회
+   - 제품 순위 및 점수 조회
+   - 제품 상세 정보 조회 (PRODUCT 테이블)
+
+2. 추천 결과 변환 로직
+   - 추천 결과를 포트폴리오 products JSON 형식으로 변환
+   - 제품 ID, 이름, 가격, 이미지 등 필수 정보 포함
+   - 카테고리 정보 포함
+   - 순위 정보 포함
+   - 추천 점수 포함
+
+3. 스타일 정보 생성
+   - 온보딩 세션의 vibe 정보로 style_type 결정
+   - style_title 생성 (ChatGPT 또는 템플릿 기반)
+   - style_subtitle 생성 (ChatGPT 또는 템플릿 기반)
+   - 스타일 분석 서비스 활용 가능 여부 확인
+
+4. 가격 정보 계산
+   - 각 제품의 가격 조회
+   - 정가 합계 계산 (total_original_price)
+   - 할인가 합계 계산 (total_discount_price)
+   - 제품별 가격 정보 포함
+
+5. 매칭 점수 계산
+   - 추천 점수 기반 매칭 점수 계산
+   - 평균 추천 점수를 매칭 점수로 변환
+   - 또는 별도 매칭 점수 계산 로직
+
+6. 온보딩 데이터 조회
+   - ONBOARD_SESS_MAIN_SPACES에서 main_space 조회
+   - ONBOARD_SESS_PRIORITIES에서 priority_list 조회
+   - ONBOARD_SESS_CATEGORIES에서 selected_categories 조회
+   - 온보딩 데이터를 onboarding_data JSON으로 구성
+
+
+관련 파일:
+
+- api/services/portfolio_service.py
+  - create_portfolio_from_onboarding() 함수
+  - 추천 결과 변환 로직
+
+- api/services/recommendation_service.py
+  - get_recommendations() 함수
+  - 추천 결과 형식 확인
+
+- api/services/style_analysis_service.py
+  - 스타일 분석 서비스 (존재 여부 확인)
+
+- api/db/oracle_client.py
+  - Oracle DB 연결 및 쿼리 실행
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - SESSION_ID: 세션 ID
+  - PRODUCT_ID: 제품 ID
+  - CATEGORY_NAME: 카테고리명
+  - RANK_ORDER: 순위
+  - SCORE: 추천 점수
+
+- PRODUCT 테이블
+  - 제품 상세 정보 (이름, 가격, 이미지 등)
+
+
+작업:
+
+1. 추천 결과 조회 함수 구현:
+   - get_recommendation_results_from_session() 함수 작성
+   - ONBOARD_SESS_REC_PRODUCTS에서 세션별 추천 결과 조회
+   - 카테고리별로 그룹화
+   - 제품 상세 정보 조회 (PRODUCT 테이블)
+
+2. 추천 결과 변환 함수 구현:
+   - convert_recommendations_to_portfolio_products() 함수 작성
+   - 추천 결과를 포트폴리오 products 형식으로 변환
+   - 제품 정보 보강 (이름, 가격, 이미지 등)
+   - 카테고리 정보 포함
+
+3. 스타일 정보 생성 함수 구현:
+   - generate_style_info() 함수 작성
+   - vibe 정보로 style_type 결정
+   - style_title 생성
+   - style_subtitle 생성
+   - style_analysis_service 활용 (존재하는 경우)
+
+4. 가격 정보 계산 함수 구현:
+   - calculate_portfolio_prices() 함수 작성
+   - 정가 합계 계산
+   - 할인가 합계 계산
+   - 제품별 가격 정보 포함
+
+5. 매칭 점수 계산 함수 구현:
+   - calculate_match_score() 함수 작성
+   - 추천 점수 기반 매칭 점수 계산
+   - 평균 점수 또는 가중 평균 점수 계산
+
+6. 온보딩 데이터 조회 함수 구현:
+   - get_onboarding_data_for_portfolio() 함수 작성
+   - 정규화 테이블에서 데이터 조회
+   - onboarding_data JSON 구성
+
+
+검증 방법:
+
+1. 추천 결과 조회 테스트:
+   ```python
+   def test_get_recommendation_results():
+       """추천 결과 조회 테스트"""
+       session_id = "test_session_123"
+       
+       # 추천 결과 조회
+       recommendations = get_recommendation_results_from_session(session_id)
+       
+       print(f"추천 결과 카테고리 수: {len(recommendations.get('categories', []))}")
+       
+       for category in recommendations.get('categories', []):
+           print(f"  카테고리: {category['category_name']}, 제품 수: {len(category['products'])}")
+           for product in category['products']:
+               print(f"    - 제품 ID: {product['product_id']}, 순위: {product['rank_order']}, 점수: {product['score']}")
+   ```
+
+2. 추천 결과 변환 테스트:
+   ```python
+   def test_convert_recommendations():
+       """추천 결과 변환 테스트"""
+       session_id = "test_session_123"
+       
+       # 추천 결과 조회
+       recommendations = get_recommendation_results_from_session(session_id)
+       
+       # 포트폴리오 products 형식으로 변환
+       portfolio_products = convert_recommendations_to_portfolio_products(recommendations)
+       
+       print(f"포트폴리오 제품 수: {len(portfolio_products)}")
+       
+       for product in portfolio_products[:5]:
+           print(f"  - 제품 ID: {product.get('product_id')}")
+           print(f"    이름: {product.get('name')}")
+           print(f"    가격: {product.get('price')}")
+           print(f"    카테고리: {product.get('category_name')}")
+           print(f"    순위: {product.get('rank_order')}")
+           print(f"    점수: {product.get('recommendation_score')}")
+   ```
+
+3. 스타일 정보 생성 테스트:
+   ```python
+   def test_generate_style_info():
+       """스타일 정보 생성 테스트"""
+       session_id = "test_session_123"
+       session = OnboardingSession.objects.get(session_id=session_id)
+       
+       # 스타일 정보 생성
+       style_info = generate_style_info(session)
+       
+       print(f"스타일 타입: {style_info['style_type']}")
+       print(f"스타일 타이틀: {style_info['style_title']}")
+       print(f"스타일 서브타이틀: {style_info['style_subtitle']}")
+   ```
+
+4. 가격 정보 계산 테스트:
+   ```python
+   def test_calculate_prices():
+       """가격 정보 계산 테스트"""
+       portfolio_products = [
+           {'product_id': 1, 'price': 1000000, 'discount_price': 900000},
+           {'product_id': 2, 'price': 2000000, 'discount_price': 1800000},
+       ]
+       
+       prices = calculate_portfolio_prices(portfolio_products)
+       
+       print(f"정가 합계: {prices['total_original_price']}")
+       print(f"할인가 합계: {prices['total_discount_price']}")
+       assert prices['total_original_price'] == 3000000
+       assert prices['total_discount_price'] == 2700000
+   ```
+
+5. 매칭 점수 계산 테스트:
+   ```python
+   def test_calculate_match_score():
+       """매칭 점수 계산 테스트"""
+       portfolio_products = [
+           {'recommendation_score': 95.5},
+           {'recommendation_score': 88.2},
+           {'recommendation_score': 92.1},
+       ]
+       
+       match_score = calculate_match_score(portfolio_products)
+       
+       print(f"매칭 점수: {match_score}")
+       assert 0 <= match_score <= 100
+   ```
+
+6. 온보딩 데이터 조회 테스트:
+   ```python
+   def test_get_onboarding_data():
+       """온보딩 데이터 조회 테스트"""
+       session_id = "test_session_123"
+       
+       onboarding_data = get_onboarding_data_for_portfolio(session_id)
+       
+       print(f"온보딩 데이터: {onboarding_data}")
+       assert 'main_space' in onboarding_data
+       assert 'priority_list' in onboarding_data
+       assert 'selected_categories' in onboarding_data
+   ```
+
+
+예상 결과:
+
+1. 추천 결과 조회:
+   - ONBOARD_SESS_REC_PRODUCTS에서 추천 결과 정상 조회
+   - 카테고리별 제품 목록 정상 조회
+   - 제품 상세 정보 정상 조회
+
+2. 추천 결과 변환:
+   - 포트폴리오 products 형식으로 정상 변환
+   - 모든 필수 정보 포함
+   - 카테고리, 순위, 점수 정보 포함
+
+3. 스타일 정보 생성:
+   - style_type 정상 결정
+   - style_title 정상 생성
+   - style_subtitle 정상 생성
+
+4. 가격 정보 계산:
+   - 정가 합계 정상 계산
+   - 할인가 합계 정상 계산
+   - 제품별 가격 정보 포함
+
+5. 매칭 점수 계산:
+   - 매칭 점수 정상 계산 (0-100 범위)
+   - 추천 점수 기반 계산 정상
+
+6. 온보딩 데이터 조회:
+   - 정규화 테이블에서 데이터 정상 조회
+   - onboarding_data JSON 정상 구성
+
+
+테스트 스크립트 구조:
+
+```python
+class PortfolioConversionValidator:
+    """추천 결과를 포트폴리오로 변환하는 로직 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 추천 결과 조회 로직
+        # 2. 추천 결과 변환 로직
+        # 3. 스타일 정보 생성
+        # 4. 가격 정보 계산
+        # 5. 매칭 점수 계산
+        # 6. 온보딩 데이터 조회
+    
+    def _test_get_recommendation_results(self):
+        """추천 결과 조회 테스트"""
+    
+    def _test_convert_recommendations(self):
+        """추천 결과 변환 테스트"""
+    
+    def _test_generate_style_info(self):
+        """스타일 정보 생성 테스트"""
+    
+    def _test_calculate_prices(self):
+        """가격 정보 계산 테스트"""
+    
+    def _test_calculate_match_score(self):
+        """매칭 점수 계산 테스트"""
+    
+    def _test_get_onboarding_data(self):
+        """온보딩 데이터 조회 테스트"""
+```
+
+
+시각화 항목:
+
+1. 추천 결과 조회 플로우 다이어그램
+2. 추천 결과 → 포트폴리오 변환 플로우
+3. 카테고리별 제품 수 분포
+4. 추천 점수 분포
+5. 가격 분포
+6. 스타일 타입 분포
+
+
+참고:
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블에 이미 추천 결과가 저장되어 있음
+- 추천 결과 형식: 카테고리별 제품 목록, 순위, 점수 포함
+- Step 3에서 변환된 데이터를 PORTFOLIO/PORTFOLIO_PRODUCT/PORTFOLIO_SESSION 테이블에 저장할 예정
+- 스타일 정보는 style_analysis_service가 있다면 활용, 없으면 템플릿 기반 생성
+- 가격 정보는 PRODUCT 테이블에서 조회
+

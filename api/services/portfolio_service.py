@@ -789,114 +789,226 @@ class PortfolioService:
             }
     
     @staticmethod
-    def _save_portfolio_to_oracle(portfolio, session_id: str, member_id: str = None, recommendations: list = None):
+    def _convert_portfolio_id_to_num(portfolio_id_str: str) -> int:
         """
-        포트폴리오를 Oracle DB에 저장 (PORTFOLIO, PORTFOLIO_PRODUCT, PORTFOLIO_SESSION 테이블)
+        포트폴리오 ID 문자열을 숫자로 변환
         
         Args:
-            portfolio: Portfolio Django 모델 인스턴스
-            session_id: 온보딩 세션 ID
-            member_id: 회원 ID (선택적)
-            recommendations: 추천 제품 리스트
+            portfolio_id_str: 포트폴리오 ID 문자열 (예: "PF-001", "PF-TEST01")
+            
+        Returns:
+            숫자로 변환된 포트폴리오 ID
+        """
+        try:
+            # "PF-001" -> 1 또는 직접 숫자 추출
+            if portfolio_id_str.startswith('PF-'):
+                portfolio_id_num = int(portfolio_id_str.replace('PF-', ''))
+            else:
+                # 숫자만 추출 시도
+                import re
+                numbers = re.findall(r'\d+', portfolio_id_str)
+                portfolio_id_num = int(numbers[0]) if numbers else abs(hash(portfolio_id_str)) % 1000000
+            return portfolio_id_num
+        except:
+            # 실패 시 해시값 사용
+            return abs(hash(portfolio_id_str)) % 1000000
+
+    @staticmethod
+    def save_portfolio_to_oracle(portfolio_data: dict) -> dict:
+        """
+        PORTFOLIO 테이블에 포트폴리오 기본 정보 저장
+        
+        Args:
+            portfolio_data: 포트폴리오 데이터 딕셔너리
+                {
+                    'portfolio_id': 'PF-001',
+                    'internal_key': 'PF-001',
+                    'user_id': 'user_123',
+                    'style_type': 'modern',
+                    'style_title': '모던 & 미니멀 스타일',
+                    'style_subtitle': '당신의 라이프스타일에 맞춰 구성했어요.',
+                    'total_original_price': 5000000,
+                    'total_discount_price': 4500000,
+                    'match_score': 85,
+                    'status': 'draft'
+                }
+                
+        Returns:
+            {
+                'success': True/False,
+                'portfolio_id': 숫자 ID,
+                'error': 에러 메시지 (실패 시)
+            }
         """
         from api.db.oracle_client import get_connection
         
         try:
+            portfolio_id_str = portfolio_data.get('portfolio_id') or portfolio_data.get('internal_key')
+            if not portfolio_id_str:
+                return {
+                    'success': False,
+                    'error': 'portfolio_id 또는 internal_key가 필요합니다.'
+                }
+            
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id_str)
+            
             with get_connection() as conn:
                 with conn.cursor() as cur:
-                    # PORTFOLIO 테이블에 저장
-                    # PORTFOLIO_ID는 시퀀스나 자동 증가를 사용하거나, portfolio_id를 숫자로 변환
-                    # portfolio_id가 "PF-001" 형식이면 숫자 부분만 추출
-                    portfolio_id_str = portfolio.portfolio_id
-                    try:
-                        # "PF-001" -> 1 또는 직접 숫자 추출
-                        if portfolio_id_str.startswith('PF-'):
-                            portfolio_id_num = int(portfolio_id_str.replace('PF-', ''))
-                        else:
-                            # 숫자만 추출 시도
-                            import re
-                            numbers = re.findall(r'\d+', portfolio_id_str)
-                            portfolio_id_num = int(numbers[0]) if numbers else abs(hash(portfolio_id_str)) % 1000000
-                    except:
-                        # 실패 시 해시값 사용
-                        portfolio_id_num = abs(hash(portfolio_id_str)) % 1000000
-                    
-                    print(f"[Oracle DB] PORTFOLIO 저장: portfolio_id={portfolio_id_num}, portfolio_key={portfolio_id_str}")
-                    
-                    # PORTFOLIO 테이블 INSERT 또는 UPDATE
+                    # PORTFOLIO 테이블 MERGE (INSERT 또는 UPDATE)
                     cur.execute("""
                         MERGE INTO PORTFOLIO p
                         USING (SELECT :portfolio_id AS PORTFOLIO_ID FROM DUAL) d
                         ON (p.PORTFOLIO_ID = d.PORTFOLIO_ID)
                         WHEN MATCHED THEN
                             UPDATE SET
-                                PORTFOLIO_KEY = :portfolio_key,
+                                INTERNAL_KEY = :internal_key,
                                 USER_ID = :user_id,
                                 STYLE_TYPE = :style_type,
                                 STYLE_TITLE = :style_title,
                                 STYLE_SUBTITLE = :style_subtitle,
-                                TOTAL_PRICE = :total_price,
-                                DISCOUNT_PRICE = :discount_price,
+                                TOTAL_ORIGINAL_PRICE = :total_original_price,
+                                TOTAL_DISCOUNT_PRICE = :total_discount_price,
                                 MATCH_SCORE = :match_score,
                                 STATUS = :status,
                                 UPDATED_AT = SYSDATE
                         WHEN NOT MATCHED THEN
                             INSERT (
-                                PORTFOLIO_ID, PORTFOLIO_KEY, USER_ID, STYLE_TYPE, STYLE_TITLE, STYLE_SUBTITLE,
-                                TOTAL_PRICE, DISCOUNT_PRICE, MATCH_SCORE, STATUS, CREATED_AT, UPDATED_AT
+                                PORTFOLIO_ID, INTERNAL_KEY, USER_ID, STYLE_TYPE, STYLE_TITLE, STYLE_SUBTITLE,
+                                TOTAL_ORIGINAL_PRICE, TOTAL_DISCOUNT_PRICE, MATCH_SCORE, STATUS, CREATED_AT, UPDATED_AT
                             ) VALUES (
-                                :portfolio_id, :portfolio_key, :user_id, :style_type, :style_title, :style_subtitle,
-                                :total_price, :discount_price, :match_score, :status, SYSDATE, SYSDATE
+                                :portfolio_id, :internal_key, :user_id, :style_type, :style_title, :style_subtitle,
+                                :total_original_price, :total_discount_price, :match_score, :status, SYSDATE, SYSDATE
                             )
                     """, {
                         'portfolio_id': portfolio_id_num,
-                        'portfolio_key': portfolio_id_str,
-                        'user_id': portfolio.user_id,
-                        'style_type': portfolio.style_type,
-                        'style_title': portfolio.style_title or '',
-                        'style_subtitle': portfolio.style_subtitle or '',
-                        'total_price': int(portfolio.total_original_price or 0),
-                        'discount_price': int(portfolio.total_discount_price or 0),
-                        'match_score': portfolio.match_score or 0,
-                        'status': portfolio.status or 'draft'
+                        'internal_key': portfolio_data.get('internal_key') or portfolio_id_str,
+                        'user_id': portfolio_data.get('user_id'),
+                        'style_type': portfolio_data.get('style_type', 'modern'),
+                        'style_title': portfolio_data.get('style_title') or '',
+                        'style_subtitle': portfolio_data.get('style_subtitle') or '',
+                        'total_original_price': int(portfolio_data.get('total_original_price', 0)),
+                        'total_discount_price': int(portfolio_data.get('total_discount_price', 0)),
+                        'match_score': portfolio_data.get('match_score', 0),
+                        'status': portfolio_data.get('status', 'draft')
                     })
                     
-                    # PORTFOLIO_PRODUCT 테이블에 제품 저장
-                    if recommendations:
-                        print(f"[Oracle DB] PORTFOLIO_PRODUCT 저장: {len(recommendations)}개 제품")
-                        # 기존 제품 삭제
-                        cur.execute("DELETE FROM PORTFOLIO_PRODUCT WHERE PORTFOLIO_ID = :portfolio_id", {
-                            'portfolio_id': portfolio_id_num
+                    conn.commit()
+                    
+                    return {
+                        'success': True,
+                        'portfolio_id': portfolio_id_num
+                    }
+                    
+        except Exception as e:
+            print(f"[save_portfolio_to_oracle] 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @staticmethod
+    def save_portfolio_products_to_oracle(portfolio_id: str, products: list) -> dict:
+        """
+        PORTFOLIO_PRODUCT 테이블에 포트폴리오 제품 목록 저장
+        
+        Args:
+            portfolio_id: 포트폴리오 ID 문자열 (예: "PF-001")
+            products: 제품 리스트
+                [
+                    {'product_id': 101, 'priority': 1, 'recommend_reason': '추천 이유 1'},
+                    {'product_id': 102, 'priority': 2, 'recommend_reason': '추천 이유 2'},
+                ]
+                
+        Returns:
+            {
+                'success': True/False,
+                'saved_count': 저장된 제품 수,
+                'error': 에러 메시지 (실패 시)
+            }
+        """
+        from api.db.oracle_client import get_connection
+        
+        try:
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id)
+            
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    # 기존 제품 삭제 (재추천 시)
+                    cur.execute("DELETE FROM PORTFOLIO_PRODUCT WHERE PORTFOLIO_ID = :portfolio_id", {
+                        'portfolio_id': portfolio_id_num
+                    })
+                    
+                    saved_count = 0
+                    # 제품별로 저장
+                    for product in products:
+                        product_id = product.get('product_id') or product.get('id')
+                        if not product_id:
+                            continue
+                        
+                        # ID 시퀀스 조회 또는 자동 생성
+                        cur.execute("""
+                            SELECT NVL(MAX(ID), 0) + 1 FROM PORTFOLIO_PRODUCT
+                        """)
+                        next_id = cur.fetchone()[0]
+                        
+                        cur.execute("""
+                            INSERT INTO PORTFOLIO_PRODUCT (
+                                ID, PORTFOLIO_ID, PRODUCT_ID, PRIORITY, RECOMMEND_REASON
+                            ) VALUES (
+                                :id, :portfolio_id, :product_id, :priority, :recommend_reason
+                            )
+                        """, {
+                            'id': next_id,
+                            'portfolio_id': portfolio_id_num,
+                            'product_id': int(product_id),
+                            'priority': product.get('priority', saved_count + 1),
+                            'recommend_reason': product.get('recommend_reason') or product.get('reason') or ''
                         })
                         
-                        # 제품별로 저장
-                        for idx, rec in enumerate(recommendations, start=1):
-                            product_id = rec.get('product_id') or rec.get('id')
-                            if not product_id:
-                                continue
-                            
-                            # ID 시퀀스 조회 또는 자동 생성
-                            cur.execute("""
-                                SELECT NVL(MAX(ID), 0) + 1 FROM PORTFOLIO_PRODUCT
-                            """)
-                            next_id = cur.fetchone()[0]
-                            
-                            cur.execute("""
-                                INSERT INTO PORTFOLIO_PRODUCT (
-                                    ID, PORTFOLIO_ID, PRODUCT_ID, RECOMMEND_REASON, PRIORITY
-                                ) VALUES (
-                                    :id, :portfolio_id, :product_id, :recommend_reason, :priority
-                                )
-                            """, {
-                                'id': next_id,
-                                'portfolio_id': portfolio_id_num,
-                                'product_id': int(product_id),
-                                'recommend_reason': rec.get('reason') or rec.get('recommend_reason') or '',
-                                'priority': idx
-                            })
+                        saved_count += 1
                     
-                    # PORTFOLIO_SESSION 테이블에 세션 연결
-                    print(f"[Oracle DB] PORTFOLIO_SESSION 저장: portfolio_id={portfolio_id_num}, session_id={session_id}")
+                    conn.commit()
+                    
+                    return {
+                        'success': True,
+                        'saved_count': saved_count
+                    }
+                    
+        except Exception as e:
+            print(f"[save_portfolio_products_to_oracle] 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @staticmethod
+    def save_portfolio_session_to_oracle(portfolio_id: str, session_id: str, member_id: str = None) -> dict:
+        """
+        PORTFOLIO_SESSION 테이블에 포트폴리오-세션 연결 저장
+        
+        Args:
+            portfolio_id: 포트폴리오 ID 문자열 (예: "PF-001")
+            session_id: 세션 ID
+            member_id: 회원 ID (선택적)
+                
+        Returns:
+            {
+                'success': True/False,
+                'error': 에러 메시지 (실패 시)
+            }
+        """
+        from api.db.oracle_client import get_connection
+        
+        try:
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id)
+            
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    # PORTFOLIO_SESSION 테이블 MERGE (UPSERT)
                     cur.execute("""
                         MERGE INTO PORTFOLIO_SESSION ps
                         USING (SELECT :portfolio_id AS PORTFOLIO_ID FROM DUAL) d
@@ -916,13 +1028,314 @@ class PortfolioService:
                     })
                     
                     conn.commit()
-                    print(f"[Oracle DB] 포트폴리오 저장 완료: portfolio_id={portfolio_id_num}")
+                    
+                    return {
+                        'success': True
+                    }
                     
         except Exception as e:
-            print(f"[Oracle DB] 포트폴리오 저장 오류: {e}")
+            print(f"[save_portfolio_session_to_oracle] 오류: {e}")
             import traceback
             traceback.print_exc()
-            raise
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    @staticmethod
+    def _save_portfolio_to_oracle(portfolio, session_id: str, member_id: str = None, recommendations: list = None):
+        """
+        포트폴리오를 Oracle DB에 저장 (통합 함수 - 모든 테이블을 하나의 트랜잭션으로 처리)
+        
+        Args:
+            portfolio: Portfolio Django 모델 인스턴스 또는 포트폴리오 데이터 딕셔너리
+            session_id: 온보딩 세션 ID
+            member_id: 회원 ID (선택적)
+            recommendations: 추천 제품 리스트
+            
+        Returns:
+            {
+                'success': True/False,
+                'portfolio_id': 숫자 ID,
+                'error': 에러 메시지 (실패 시)
+            }
+        """
+        from api.db.oracle_client import get_connection
+        
+        try:
+            # Django 모델 인스턴스인 경우 딕셔너리로 변환
+            if hasattr(portfolio, 'portfolio_id'):
+                portfolio_data = {
+                    'portfolio_id': portfolio.portfolio_id,
+                    'internal_key': portfolio.internal_key or portfolio.portfolio_id,
+                    'user_id': portfolio.user_id,
+                    'style_type': portfolio.style_type,
+                    'style_title': portfolio.style_title,
+                    'style_subtitle': portfolio.style_subtitle,
+                    'total_original_price': portfolio.total_original_price,
+                    'total_discount_price': portfolio.total_discount_price,
+                    'match_score': portfolio.match_score,
+                    'status': portfolio.status
+                }
+                products = recommendations or portfolio.products or []
+            else:
+                portfolio_data = portfolio
+                products = recommendations or portfolio_data.get('products', [])
+            
+            portfolio_id_str = portfolio_data.get('portfolio_id') or portfolio_data.get('internal_key')
+            if not portfolio_id_str:
+                return {
+                    'success': False,
+                    'error': 'portfolio_id 또는 internal_key가 필요합니다.'
+                }
+            
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id_str)
+            
+            # 모든 테이블 저장을 하나의 트랜잭션으로 처리
+            with get_connection() as conn:
+                try:
+                    with conn.cursor() as cur:
+                        # 1. PORTFOLIO 테이블 저장
+                        cur.execute("""
+                            MERGE INTO PORTFOLIO p
+                            USING (SELECT :portfolio_id AS PORTFOLIO_ID FROM DUAL) d
+                            ON (p.PORTFOLIO_ID = d.PORTFOLIO_ID)
+                            WHEN MATCHED THEN
+                                UPDATE SET
+                                    INTERNAL_KEY = :internal_key,
+                                    USER_ID = :user_id,
+                                    STYLE_TYPE = :style_type,
+                                    STYLE_TITLE = :style_title,
+                                    STYLE_SUBTITLE = :style_subtitle,
+                                    TOTAL_ORIGINAL_PRICE = :total_original_price,
+                                    TOTAL_DISCOUNT_PRICE = :total_discount_price,
+                                    MATCH_SCORE = :match_score,
+                                    STATUS = :status,
+                                    UPDATED_AT = SYSDATE
+                            WHEN NOT MATCHED THEN
+                                INSERT (
+                                    PORTFOLIO_ID, INTERNAL_KEY, USER_ID, STYLE_TYPE, STYLE_TITLE, STYLE_SUBTITLE,
+                                    TOTAL_ORIGINAL_PRICE, TOTAL_DISCOUNT_PRICE, MATCH_SCORE, STATUS, CREATED_AT, UPDATED_AT
+                                ) VALUES (
+                                    :portfolio_id, :internal_key, :user_id, :style_type, :style_title, :style_subtitle,
+                                    :total_original_price, :total_discount_price, :match_score, :status, SYSDATE, SYSDATE
+                                )
+                        """, {
+                            'portfolio_id': portfolio_id_num,
+                            'internal_key': portfolio_data.get('internal_key') or portfolio_id_str,
+                            'user_id': portfolio_data.get('user_id'),
+                            'style_type': portfolio_data.get('style_type', 'modern'),
+                            'style_title': portfolio_data.get('style_title') or '',
+                            'style_subtitle': portfolio_data.get('style_subtitle') or '',
+                            'total_original_price': int(portfolio_data.get('total_original_price', 0)),
+                            'total_discount_price': int(portfolio_data.get('total_discount_price', 0)),
+                            'match_score': portfolio_data.get('match_score', 0),
+                            'status': portfolio_data.get('status', 'draft')
+                        })
+                        
+                        # 2. PORTFOLIO_PRODUCT 테이블 저장
+                        if products:
+                            # 기존 제품 삭제
+                            cur.execute("DELETE FROM PORTFOLIO_PRODUCT WHERE PORTFOLIO_ID = :portfolio_id", {
+                                'portfolio_id': portfolio_id_num
+                            })
+                            
+                            # 제품별로 저장
+                            for idx, product in enumerate(products, start=1):
+                                product_id = product.get('product_id') or product.get('id')
+                                if not product_id:
+                                    continue
+                                
+                                # ID 시퀀스 조회 또는 자동 생성
+                                cur.execute("""
+                                    SELECT NVL(MAX(ID), 0) + 1 FROM PORTFOLIO_PRODUCT
+                                """)
+                                next_id = cur.fetchone()[0]
+                                
+                                cur.execute("""
+                                    INSERT INTO PORTFOLIO_PRODUCT (
+                                        ID, PORTFOLIO_ID, PRODUCT_ID, PRIORITY, RECOMMEND_REASON
+                                    ) VALUES (
+                                        :id, :portfolio_id, :product_id, :priority, :recommend_reason
+                                    )
+                                """, {
+                                    'id': next_id,
+                                    'portfolio_id': portfolio_id_num,
+                                    'product_id': int(product_id),
+                                    'priority': product.get('priority', idx),
+                                    'recommend_reason': product.get('recommend_reason') or product.get('reason') or ''
+                                })
+                        
+                        # 3. PORTFOLIO_SESSION 테이블 저장
+                        cur.execute("""
+                            MERGE INTO PORTFOLIO_SESSION ps
+                            USING (SELECT :portfolio_id AS PORTFOLIO_ID FROM DUAL) d
+                            ON (ps.PORTFOLIO_ID = d.PORTFOLIO_ID)
+                            WHEN MATCHED THEN
+                                UPDATE SET
+                                    MEMBER_ID = :member_id,
+                                    SESSION_ID = :session_id,
+                                    CREATED_AT = SYSDATE
+                            WHEN NOT MATCHED THEN
+                                INSERT (PORTFOLIO_ID, MEMBER_ID, SESSION_ID, CREATED_AT)
+                                VALUES (:portfolio_id, :member_id, :session_id, SYSDATE)
+                        """, {
+                            'portfolio_id': portfolio_id_num,
+                            'member_id': member_id,
+                            'session_id': session_id
+                        })
+                    
+                    # 모든 작업 성공 시 커밋
+                    conn.commit()
+                    
+                    return {
+                        'success': True,
+                        'portfolio_id': portfolio_id_num
+                    }
+                    
+                except Exception as e:
+                    # 에러 발생 시 롤백
+                    conn.rollback()
+                    raise e
+                    
+        except Exception as e:
+            print(f"[_save_portfolio_to_oracle] 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+
+    @staticmethod
+    def get_portfolio_from_oracle(portfolio_id: str) -> Optional[dict]:
+        """
+        Oracle DB에서 포트폴리오 조회
+        
+        Args:
+            portfolio_id: 포트폴리오 ID 문자열 (예: "PF-001")
+            
+        Returns:
+            포트폴리오 데이터 딕셔너리 또는 None
+        """
+        from api.db.oracle_client import fetch_one, get_connection
+        
+        try:
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id)
+            
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT 
+                            PORTFOLIO_ID, INTERNAL_KEY, USER_ID, STYLE_TYPE, 
+                            STYLE_TITLE, STYLE_SUBTITLE, TOTAL_ORIGINAL_PRICE, 
+                            TOTAL_DISCOUNT_PRICE, MATCH_SCORE, STATUS, CREATED_AT, UPDATED_AT
+                        FROM PORTFOLIO
+                        WHERE PORTFOLIO_ID = :portfolio_id
+                    """, {'portfolio_id': portfolio_id_num})
+                    
+                    row = cur.fetchone()
+                    if not row:
+                        return None
+                    
+                    return {
+                        'portfolio_id': row[0],
+                        'internal_key': row[1],
+                        'user_id': row[2],
+                        'style_type': row[3],
+                        'style_title': row[4],
+                        'style_subtitle': row[5],
+                        'total_original_price': row[6],
+                        'total_discount_price': row[7],
+                        'match_score': row[8],
+                        'status': row[9],
+                        'created_at': row[10],
+                        'updated_at': row[11]
+                    }
+        except Exception as e:
+            print(f"[get_portfolio_from_oracle] 오류: {e}")
+            return None
+
+    @staticmethod
+    def get_portfolio_products_from_oracle(portfolio_id: str) -> List[dict]:
+        """
+        Oracle DB에서 포트폴리오 제품 목록 조회
+        
+        Args:
+            portfolio_id: 포트폴리오 ID 문자열 (예: "PF-001")
+            
+        Returns:
+            제품 목록 리스트
+        """
+        from api.db.oracle_client import get_connection
+        
+        try:
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id)
+            
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT 
+                            ID, PORTFOLIO_ID, PRODUCT_ID, PRIORITY, RECOMMEND_REASON
+                        FROM PORTFOLIO_PRODUCT
+                        WHERE PORTFOLIO_ID = :portfolio_id
+                        ORDER BY PRIORITY
+                    """, {'portfolio_id': portfolio_id_num})
+                    
+                    products = []
+                    for row in cur.fetchall():
+                        products.append({
+                            'id': row[0],
+                            'portfolio_id': row[1],
+                            'product_id': row[2],
+                            'priority': row[3],
+                            'recommend_reason': row[4]
+                        })
+                    
+                    return products
+        except Exception as e:
+            print(f"[get_portfolio_products_from_oracle] 오류: {e}")
+            return []
+
+    @staticmethod
+    def get_portfolio_session_from_oracle(portfolio_id: str) -> Optional[dict]:
+        """
+        Oracle DB에서 포트폴리오-세션 연결 조회
+        
+        Args:
+            portfolio_id: 포트폴리오 ID 문자열 (예: "PF-001")
+            
+        Returns:
+            세션 연결 데이터 딕셔너리 또는 None
+        """
+        from api.db.oracle_client import get_connection
+        
+        try:
+            portfolio_id_num = PortfolioService._convert_portfolio_id_to_num(portfolio_id)
+            
+            with get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT 
+                            PORTFOLIO_ID, SESSION_ID, MEMBER_ID, CREATED_AT
+                        FROM PORTFOLIO_SESSION
+                        WHERE PORTFOLIO_ID = :portfolio_id
+                    """, {'portfolio_id': portfolio_id_num})
+                    
+                    row = cur.fetchone()
+                    if not row:
+                        return None
+                    
+                    return {
+                        'portfolio_id': row[0],
+                        'session_id': row[1],
+                        'member_id': row[2],
+                        'created_at': row[3]
+                    }
+        except Exception as e:
+            print(f"[get_portfolio_session_from_oracle] 오류: {e}")
+            return None
 
 
 # Singleton 인스턴스

@@ -1,0 +1,344 @@
+Step 8-2: 테이블 저장 여부 검증 - ONBOARD_SESS_REC_PRODUCTS 테이블에 추천 제품이 올바르게 저장되는지 검증
+
+
+현재 상황:
+
+- Step 8-1 완료: 추천 결과 저장 로직 찾기 및 구현 완료
+- 저장 로직이 구현되어 있음
+- 실제로 테이블에 저장되는지 검증 필요
+
+
+목표:
+
+추천 결과가 ONBOARD_SESS_REC_PRODUCTS 테이블에 올바르게 저장되는지 검증
+- SESSION_ID별로 추천 제품이 저장되는지 확인
+- 저장된 레코드 수가 추천 결과와 일치하는지 확인
+- 중복 저장 방지 로직 확인
+- 저장 성공/실패 비율 확인
+
+
+검증 항목:
+
+1. 저장 실행 검증
+   - 추천 결과 생성 후 저장 함수 호출 확인
+   - 저장 함수 실행 성공 여부 확인
+   - 저장 실패 시 에러 메시지 확인
+
+2. 테이블 저장 여부 검증
+   - SESSION_ID별로 추천 제품이 저장되는지 확인
+   - 저장된 레코드 수 확인
+   - 저장된 데이터 존재 여부 확인
+
+3. 저장된 레코드 수 일치 검증
+   - 저장된 레코드 수가 추천 결과의 제품 수와 일치하는지 확인
+   - 카테고리별 저장된 제품 수 확인
+   - 누락된 제품이 없는지 확인
+
+4. 중복 저장 방지 검증
+   - 동일 세션에 대한 재저장 시 중복 방지 확인
+   - 기존 데이터 삭제 후 재삽입 확인
+   - PRIMARY KEY 제약조건 위반 확인
+
+5. 저장 성공률 검증
+   - 여러 세션에 대한 저장 성공률 확인
+   - 저장 실패 원인 분석
+   - 성공률 90% 이상 목표
+
+
+관련 파일:
+
+- api/services/onboarding_db_service.py
+  - Oracle DB 저장 서비스
+  - ONBOARD_SESS_REC_PRODUCTS 테이블 저장 로직
+
+- Step 8-1에서 구현한 저장 함수
+  - save_recommendation_results() 함수
+
+- ONBOARD_SESS_REC_PRODUCTS 테이블
+  - SESSION_ID: 세션 ID (FK, ONBOARDING_SESSION.SESSION_ID 참조)
+  - PRODUCT_ID: 제품 ID
+  - CATEGORY_NAME: 카테고리명
+  - RANK_ORDER: 카테고리 내 순위
+  - SCORE: 해당 제품의 점수
+  - CREATED_AT: 생성 일시
+
+
+작업:
+
+1. 저장 실행 테스트:
+   - 추천 결과 생성 후 저장 함수 호출
+   - 저장 함수 실행 성공 여부 확인
+   - 저장 실패 시 에러 메시지 확인
+
+2. 테이블 조회 검증:
+   - 저장된 레코드 조회 함수 작성
+   - SESSION_ID별로 저장된 제품 조회
+   - 저장된 레코드 수 확인
+
+3. 저장된 레코드 수 일치 검증:
+   - 추천 결과의 제품 수 계산
+   - 저장된 레코드 수와 비교
+   - 카테고리별 제품 수 비교
+
+4. 중복 저장 방지 검증:
+   - 동일 세션에 대한 재저장 테스트
+   - 기존 데이터 삭제 확인
+   - 중복 레코드 확인
+
+5. 저장 성공률 측정:
+   - 여러 세션에 대한 저장 테스트
+   - 성공/실패 비율 계산
+   - 실패 원인 분석
+
+
+검증 방법:
+
+1. 저장 실행 테스트:
+   ```python
+   # 추천 결과 생성
+   member_id = 'user_123'
+   recommendations = get_recommendations(member_id)
+   
+   # 세션 ID 조회
+   session = get_latest_completed_session(member_id)
+   session_id = session['session_id']
+   
+   # 저장 실행
+   try:
+       save_recommendation_results(session_id, recommendations)
+       print(f"✅ 저장 성공: 세션 {session_id}")
+   except Exception as e:
+       print(f"❌ 저장 실패: 세션 {session_id}, 에러: {e}")
+   ```
+
+2. 테이블 조회 검증:
+   ```python
+   def get_saved_recommendation_products(session_id: str):
+       """저장된 추천 제품 조회"""
+       from api.services.onboarding_db_service import onboarding_db_service
+       
+       conn = onboarding_db_service.get_connection()
+       cur = conn.cursor()
+       
+       try:
+           cur.execute("""
+               SELECT SESSION_ID, PRODUCT_ID, CATEGORY_NAME, RANK_ORDER, SCORE, CREATED_AT
+               FROM ONBOARD_SESS_REC_PRODUCTS
+               WHERE SESSION_ID = :p_session_id
+               ORDER BY CATEGORY_NAME, RANK_ORDER
+           """, {'p_session_id': session_id})
+           
+           rows = cur.fetchall()
+           products = []
+           for row in rows:
+               products.append({
+                   'session_id': row[0],
+                   'product_id': row[1],
+                   'category_name': row[2],
+                   'rank_order': row[3],
+                   'score': row[4],
+                   'created_at': row[5]
+               })
+           
+           return products
+       finally:
+           cur.close()
+   
+   # 저장된 데이터 조회
+   saved_products = get_saved_recommendation_products(session_id)
+   
+   # 검증
+   assert len(saved_products) > 0, "저장된 제품이 없습니다"
+   print(f"저장된 제품 수: {len(saved_products)}")
+   ```
+
+3. 저장된 레코드 수 일치 검증:
+   ```python
+   def count_total_recommended_products(recommendations: dict):
+       """추천 결과의 총 제품 수 계산"""
+       total = 0
+       for category in recommendations.get('categories', []):
+           total += len(category.get('products', []))
+       return total
+   
+   # 추천 결과의 제품 수
+   expected_count = count_total_recommended_products(recommendations)
+   
+   # 저장된 레코드 수
+   saved_products = get_saved_recommendation_products(session_id)
+   actual_count = len(saved_products)
+   
+   # 검증
+   assert actual_count == expected_count, \
+       f"저장된 제품 수 불일치: 예상 {expected_count}개, 실제 {actual_count}개"
+   print(f"✅ 저장된 제품 수 일치: {actual_count}개")
+   ```
+
+4. 중복 저장 방지 검증:
+   ```python
+   # 첫 번째 저장
+   save_recommendation_results(session_id, recommendations1)
+   saved_count1 = len(get_saved_recommendation_products(session_id))
+   
+   # 두 번째 저장 (재저장)
+   save_recommendation_results(session_id, recommendations2)
+   saved_count2 = len(get_saved_recommendation_products(session_id))
+   
+   # 검증: 기존 데이터가 삭제되고 새 데이터가 저장되었는지 확인
+   expected_count2 = count_total_recommended_products(recommendations2)
+   assert saved_count2 == expected_count2, \
+       f"재저장 후 제품 수 불일치: 예상 {expected_count2}개, 실제 {saved_count2}개"
+   
+   # 중복 레코드 확인
+   cur.execute("""
+       SELECT SESSION_ID, PRODUCT_ID, COUNT(*)
+       FROM ONBOARD_SESS_REC_PRODUCTS
+       WHERE SESSION_ID = :p_session_id
+       GROUP BY SESSION_ID, PRODUCT_ID
+       HAVING COUNT(*) > 1
+   """, {'p_session_id': session_id})
+   duplicates = cur.fetchall()
+   assert len(duplicates) == 0, f"중복 레코드 발견: {duplicates}"
+   print("✅ 중복 저장 방지 확인")
+   ```
+
+5. 저장 성공률 측정:
+   ```python
+   # 여러 세션에 대한 저장 테스트
+   members = get_members_with_taste(limit=50)
+   
+   success_count = 0
+   error_count = 0
+   errors = []
+   
+   for member in members:
+       member_id = member['member_id']
+       try:
+           # 추천 결과 생성
+           recommendations = get_recommendations(member_id)
+           
+           # 세션 조회
+           session = get_latest_completed_session(member_id)
+           if not session:
+               continue
+           
+           session_id = session['session_id']
+           
+           # 저장 실행
+           save_recommendation_results(session_id, recommendations)
+           
+           # 저장 검증
+           saved_products = get_saved_recommendation_products(session_id)
+           assert len(saved_products) > 0
+           
+           success_count += 1
+       except Exception as e:
+           error_count += 1
+           errors.append({
+               'member_id': member_id,
+               'error': str(e)
+           })
+           print(f"❌ 저장 실패: {member_id}, 에러: {e}")
+   
+   # 성공률 계산
+   total = success_count + error_count
+   success_rate = success_count / total if total > 0 else 0
+   
+   print(f"\n저장 성공률: {success_rate:.2%} ({success_count}/{total})")
+   assert success_rate >= 0.9, f"저장 성공률이 90% 미만: {success_rate:.2%}"
+   
+   # 실패 원인 분석
+   if errors:
+       print("\n실패 원인 분석:")
+       for error in errors[:10]:  # 최대 10개만 출력
+           print(f"  - {error['member_id']}: {error['error']}")
+   ```
+
+
+예상 결과:
+
+1. 저장 실행:
+   - 저장 함수가 정상적으로 실행됨
+   - 저장 실패 시 적절한 에러 메시지 반환
+
+2. 테이블 저장:
+   - SESSION_ID별로 추천 제품이 올바르게 저장됨
+   - 저장된 레코드가 테이블에 존재함
+
+3. 저장된 레코드 수 일치:
+   - 저장된 레코드 수가 추천 결과의 제품 수와 일치함
+   - 카테고리별 제품 수가 일치함
+   - 누락된 제품 없음
+
+4. 중복 저장 방지:
+   - 동일 세션에 대한 재저장 시 기존 데이터가 삭제되고 새 데이터가 저장됨
+   - 중복 레코드 없음
+
+5. 저장 성공률:
+   - 저장 성공률 90% 이상
+   - 실패 원인 분석 완료
+
+
+테스트 스크립트 구조:
+
+```python
+class RecommendationStorageValidator:
+    """추천 결과 저장 여부 검증 클래스"""
+    
+    def validate_all(self):
+        """모든 검증 실행"""
+        # 1. 저장 실행 검증
+        # 2. 테이블 저장 여부 검증
+        # 3. 저장된 레코드 수 일치 검증
+        # 4. 중복 저장 방지 검증
+        # 5. 저장 성공률 측정
+    
+    def _validate_storage_execution(self):
+        """저장 실행 검증"""
+        # 저장 함수 호출 확인
+        # 저장 성공/실패 확인
+    
+    def _validate_table_storage(self):
+        """테이블 저장 여부 검증"""
+        # 저장된 레코드 조회
+        # 저장된 데이터 존재 확인
+    
+    def _validate_record_count(self):
+        """저장된 레코드 수 일치 검증"""
+        # 추천 결과 제품 수 계산
+        # 저장된 레코드 수와 비교
+    
+    def _validate_duplicate_prevention(self):
+        """중복 저장 방지 검증"""
+        # 재저장 테스트
+        # 중복 레코드 확인
+    
+    def _measure_success_rate(self):
+        """저장 성공률 측정"""
+        # 여러 세션에 대한 저장 테스트
+        # 성공/실패 비율 계산
+    
+    def _get_saved_recommendation_products(self, session_id: str):
+        """저장된 추천 제품 조회"""
+    
+    def _count_total_recommended_products(self, recommendations: dict):
+        """추천 결과의 총 제품 수 계산"""
+```
+
+
+시각화 항목:
+
+1. 저장 성공/실패 비율 파이 차트
+2. 세션별 저장된 제품 수 분포 바 차트
+3. 저장 성공률 추이 라인 차트
+4. 실패 원인 분포 바 차트
+5. 저장 시간 분포 박스 플롯
+
+
+참고:
+
+- Step 8-1에서 구현한 저장 로직이 정상 작동하는지 검증
+- 저장된 데이터의 정확성은 Step 8-3에서 검증 예정
+- 저장 성공률이 낮으면 원인 분석 및 개선 필요
+- 실제 운영 환경과 유사한 조건으로 테스트
+

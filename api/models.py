@@ -435,6 +435,14 @@ class OnboardingSession(models.Model):
         help_text="Step 6: 예산 범위"
     )
     
+    # Taste ID (TASTE_CONFIG와 매칭된 결과)
+    taste_id = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(1920)],
+        help_text="매칭된 Taste ID (1-1920, TASTE_CONFIG와 비교하여 설정)"
+    )
+    
     # selected_categories 필드 제거됨 (정규화 테이블 ONBOARD_SESS_CATEGORIES 사용)
     # selected_categories = models.JSONField(...)  # 제거
     
@@ -787,7 +795,7 @@ class TasteConfig(models.Model):
     - 각 taste_id에 대해 카테고리와 추천 제품을 미리 정의
     - 변동사항이 있으면 이 테이블만 업데이트하면 됨
     """
-    taste_id = models.IntegerField(unique=True, primary_key=True, help_text="Taste ID (1-120)")
+    taste_id = models.IntegerField(unique=True, primary_key=True, help_text="Taste ID (1-1920)")
     
     # Taste 설명
     description = models.CharField(max_length=500, blank=True, help_text="Taste 설명")

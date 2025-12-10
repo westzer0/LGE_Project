@@ -1,5 +1,5 @@
 -- ============================================================
--- MEMBER 테이블의 TASTE 칼럼을 1~120 범위의 난수로 채우기 (SQLite 호환)
+-- MEMBER 테이블의 TASTE 칼럼을 1~1920 범위의 난수로 채우기 (SQLite 호환)
 -- ============================================================
 
 -- SQLite는 DBMS_RANDOM이 없으므로 다른 방법 사용
@@ -15,27 +15,27 @@
 -- conn = sqlite3.connect('db.sqlite3')
 -- cursor = conn.cursor()
 -- cursor.execute("UPDATE MEMBER SET TASTE = ? WHERE TASTE IS NULL", 
---                (random.randint(1, 120),))
+--                (random.randint(1, 1920),))
 -- conn.commit()
 
 -- ============================================================
 -- 방법 2: SQLite의 abs(random()) 사용 (제한적)
 -- ============================================================
 
--- TASTE가 NULL인 모든 회원에 대해 1~120 범위의 난수 할당
+-- TASTE가 NULL인 모든 회원에 대해 1~1920 범위의 난수 할당
 -- SQLite의 random()은 -9223372036854775808 ~ 9223372036854775807 범위의 정수를 반환
--- 이를 1~120 범위로 변환: (abs(random()) % 120) + 1
+-- 이를 1~1920 범위로 변환: (abs(random()) % 1920) + 1
 
 UPDATE MEMBER
-SET TASTE = (abs(random()) % 120) + 1
+SET TASTE = (abs(random()) % 1920) + 1
 WHERE TASTE IS NULL;
 
 -- ============================================================
 -- 방법 3: 고정된 순환 값 할당 (테스트용)
 -- ============================================================
--- 각 행에 순차적으로 1~120 값을 할당 (난수는 아님)
+-- 각 행에 순차적으로 1~1920 값을 할당 (난수는 아님)
 -- UPDATE MEMBER
--- SET TASTE = ((rowid - 1) % 120) + 1
+-- SET TASTE = ((rowid - 1) % 1920) + 1
 -- WHERE TASTE IS NULL;
 
 -- ============================================================
@@ -51,20 +51,20 @@ SELECT
     ROUND(AVG(TASTE), 2) as avg_taste
 FROM MEMBER;
 
--- TASTE 값 분포 확인 (1~120 범위 확인)
+-- TASTE 값 분포 확인 (1~1920 범위 확인)
 SELECT 
     CASE 
         WHEN TASTE IS NULL THEN 'NULL'
         WHEN TASTE < 1 THEN '범위 밖 (< 1)'
-        WHEN TASTE > 120 THEN '범위 밖 (> 120)'
-        ELSE '정상 (1~120)'
+        WHEN TASTE > 1920 THEN '범위 밖 (> 1920)'
+        ELSE '정상 (1~1920)'
     END as taste_status,
     COUNT(*) as count
 FROM MEMBER
 GROUP BY taste_status
 ORDER BY taste_status;
 
--- TASTE 값별 개수 확인 (1~120 각 값의 분포)
+-- TASTE 값별 개수 확인 (1~1920 각 값의 분포)
 SELECT 
     TASTE,
     COUNT(*) as count

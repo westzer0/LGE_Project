@@ -1,0 +1,63 @@
+{
+  "storage_execution_tests": [],
+  "table_storage_tests": [],
+  "record_count_tests": [],
+  "duplicate_prevention_tests": [],
+  "success_rate_tests": {
+    "total": 50,
+    "success_count": 0,
+    "error_count": 50,
+    "success_rate": 0.0,
+    "errors": [
+      {
+        "member_id": "user_1",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_10",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_100",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_1000",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_101",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_102",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_103",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_104",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_105",
+        "error": "ORA-00942: table or view does not exist"
+      },
+      {
+        "member_id": "user_106",
+        "error": "ORA-00942: table or view does not exist"
+      }
+    ],
+    "storage_times": []
+  },
+  "errors": [],
+  "warnings": [],
+  "statistics": {
+    "total_tested": 5,
+    "successful": 0,
+    "failed": 5,
+    "errors": 0
+  }
+}
