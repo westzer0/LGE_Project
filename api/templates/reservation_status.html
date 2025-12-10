@@ -868,7 +868,15 @@
                 // 예약 취소 처리
                 sessionStorage.removeItem('reservation_data');
                 alert('예약이 취소되었습니다.');
-                window.location.href = '/result/';
+                // session_id로 결과 페이지로 이동
+                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                const portfolioId = sessionStorage.getItem('portfolio_id');
+                const redirectUrl = portfolioId 
+                    ? `/result/?portfolio_id=${portfolioId}` 
+                    : sessionId 
+                    ? `/result/?session_id=${sessionId}` 
+                    : '/result/';
+                window.location.href = redirectUrl;
             }
         }
 

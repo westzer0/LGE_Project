@@ -293,196 +293,221 @@ def result_page(request):
     """포트폴리오 결과 페이지"""
     from django.conf import settings
     import json
-    from api.models import TasteConfig, OnboardingSession, Portfolio
+    from django.utils import timezone
     from api.db.oracle_client import get_connection
     
     # 기본 컨텍스트
     context = {
         'kakao_js_key': getattr(settings, 'KAKAO_JS_KEY', ''),
         'taste_config_data': None,
-        'style_analysis_message': None
+        'style_analysis_message': None,
+        'session_id': None
     }
     
     try:
         # session_id 또는 portfolio_id로 온보딩 세션 정보 가져오기
         session_id = request.GET.get('session_id')
-        portfolio_id = request.GET.get('portfolio_id')
         
-        onboarding_session = None
+        # context에 session_id와 portfolio_id 추가
+        context['session_id'] = session_id
         
-        if portfolio_id:
-            # portfolio_id로 포트폴리오 조회 후 onboarding_session 가져오기
-            try:
-                portfolio = Portfolio.objects.get(portfolio_id=portfolio_id)
-                if portfolio.onboarding_session:
-                    onboarding_session = portfolio.onboarding_session
-            except Portfolio.DoesNotExist:
-                try:
-                    portfolio = Portfolio.objects.get(internal_key=portfolio_id)
-                    if portfolio.onboarding_session:
-                        onboarding_session = portfolio.onboarding_session
-                except Portfolio.DoesNotExist:
-                    pass
+        print(f"[result_page] 요청 파라미터: session_id={session_id}", flush=True)
         
-        if not onboarding_session and session_id:
-            # session_id로 직접 조회
-            try:
-                onboarding_session = OnboardingSession.objects.get(session_id=session_id)
-            except OnboardingSession.DoesNotExist:
-                pass
+        # Oracle DB에서 온보딩 세션 정보 조회
+        session_data = None
         
-        if onboarding_session:
-            # result 페이지 접속 시 completed_at 설정
-            if onboarding_session.status == 'completed' and not onboarding_session.completed_at:
-                onboarding_session.completed_at = timezone.now()
-                onboarding_session.save()
-                print(f"[result_page] ✅ completed_at 설정: {onboarding_session.completed_at}", flush=True)
-            
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+        
+                # session_id로 ONBOARDING_SESSION 조회
+                if session_id:
+                    print(f"[result_page] Oracle DB에서 온보딩 세션 조회: session_id={session_id}", flush=True)
+                    cur.execute("""
+                        SELECT 
+                            TASTE_ID
+                        FROM ONBOARDING_SESSION
+                        WHERE SESSION_ID = :session_id
+                    """, {'session_id': session_id})
+                    
+                    row = cur.fetchone()
+                    print(f"[result_page] row: {row}", flush=True)
+                    if row:
+                        # TASTE_ID 추출 (row[0]에서 첫 번째 컬럼 값)
+                        taste_id_value = row[0] if row else None
+                        taste_id = int(taste_id_value) if taste_id_value is not None else None
+                        
+                        session_data = {
+                            'session_id': session_id,
+                            'taste_id': taste_id,
+                            'member_id': None,
+                            'status': None,
+                            'completed_at': None,
+                            'recommendation_result': None
+                        }
+                        print(f"[result_page] 온보딩 세션 조회 성공: session_id={session_id}, taste_id={session_data['taste_id']}", flush=True)
+                        
+                    
+        
+        if session_data:
             # 먼저 recommendation_result에서 taste_config 데이터 확인 (온보딩 완료 시 저장된 데이터)
             taste_config_data_from_result = None
-            if onboarding_session.recommendation_result and isinstance(onboarding_session.recommendation_result, dict):
-                taste_config_data_from_result = onboarding_session.recommendation_result.get('taste_config')
-                if taste_config_data_from_result:
-                    print(f"[result_page] recommendation_result에서 taste_config 데이터 발견", flush=True)
-                    # taste_config 데이터를 JSON 문자열로 변환하여 템플릿에 전달
-                    recommended_categories = taste_config_data_from_result.get('recommended_categories', [])
-                    recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False) if isinstance(recommended_categories, list) else str(recommended_categories)
-                    
-                    context['taste_config_data'] = json.dumps({
-                        'description': taste_config_data_from_result.get('description', ''),
-                        'recommended_categories_text': recommended_categories_text,
-                        'recommended_categories': recommended_categories,  # 파싱된 리스트도 함께 전달
-                        'recommended_products': taste_config_data_from_result.get('recommended_products', {}),
-                        'recommended_product_scores': taste_config_data_from_result.get('recommended_product_scores', {})
-                    }, ensure_ascii=False)
-                    
-                    print(f"[result_page] TasteConfig 데이터 로드 완료 (from recommendation_result): taste_id={taste_config_data_from_result.get('taste_id')}", flush=True)
             
-            # recommendation_result에 taste_config가 없으면 기존 방식으로 조회
-            if not taste_config_data_from_result:
-                # member_id로 taste_id 추출
-                taste_id = None
-                member_id = None
+            taste_id = session_data['taste_id']
+            
+            if taste_id:    
+                print(f"[result_page] Oracle DB에서 TASTE_ID 조회 시작: session_id={session_data['session_id']}, taste_id={taste_id}", flush=True)
                 
-                # onboarding_session.taste_id 확인 (온보딩 완료 시 저장된 taste_id)
-                if onboarding_session.taste_id:
-                    taste_id = onboarding_session.taste_id
-                    print(f"[result_page] onboarding_session.taste_id 사용: {taste_id}", flush=True)
-                else:
-                    # onboarding_session에서 member_id 가져오기
-                    # Django 모델에는 member_id 필드가 없을 수 있으므로 Oracle DB에서 조회
-                    try:
-                        with get_connection() as conn:
-                            with conn.cursor() as cur:
-                                cur.execute("""
-                                    SELECT MEMBER_ID, TASTE
-                                    FROM ONBOARDING_SESSION
-                                    WHERE SESSION_ID = :session_id
-                                """, {'session_id': onboarding_session.session_id})
+            
+                print(f"[result_page] TASTE_ID={taste_id}로 TASTE_CONFIG 조회 시작", flush=True)
+                try:
+                    with get_connection() as conn:
+                        with conn.cursor() as cur:
+                            # TASTE_CONFIG에서 모든 데이터 조회
+                            cur.execute("""
+                                SELECT 
+                                    DESCRIPTION,
+                                    RECOMMENDED_CATEGORIES,
+                                    RECOMMENDED_PRODUCTS,
+                                    RECOMMENDED_PRODUCT_SCORES
+                                FROM TASTE_CONFIG
+                                WHERE TASTE_ID = :taste_id
+                            """, {'taste_id': taste_id})
+                            
+                            row = cur.fetchone()
+                            if row:
+                                # DESCRIPTION 읽기
+                                description = row[0] or ""
                                 
-                                row = cur.fetchone()
-                                if row:
-                                    member_id = row[0]
-                                    taste_id = row[1] if row[1] is not None else None
-                                    
-                                    # MEMBER 테이블에서도 taste_id 조회 시도
-                                    if not taste_id and member_id:
-                                        from api.services.taste_calculation_service import taste_calculation_service
-                                        taste_id = taste_calculation_service.get_taste_for_member(member_id)
+                                # RECOMMENDED_CATEGORIES CLOB 읽기
+                                recommended_categories = []
+                                recommended_categories_text = ""
+                                if row[1]:
+                                    try:
+                                        clob_data = row[1]
+                                        if hasattr(clob_data, 'read'):
+                                            recommended_categories_text = clob_data.read()
+                                        else:
+                                            recommended_categories_text = str(clob_data)
                                         
-                    except Exception as e:
-                        print(f"[result_page] member_id/taste_id 조회 실패: {e}", flush=True)
-                
-                # taste_id로 TasteConfig 조회
-            taste_config = None
-            if taste_id:
-                try:
-                    taste_config = TasteConfig.objects.get(taste_id=taste_id)
-                    print(f"[result_page] taste_id={taste_id}로 TasteConfig 조회 성공", flush=True)
-                except TasteConfig.DoesNotExist:
-                    print(f"[result_page] taste_id={taste_id}에 해당하는 TasteConfig를 찾을 수 없음", flush=True)
+                                        if recommended_categories_text and recommended_categories_text.strip():
+                                            recommended_categories = json.loads(recommended_categories_text)
+                                            if not isinstance(recommended_categories, list):
+                                                recommended_categories = []
+                                    except Exception as e:
+                                        print(f"[result_page] RECOMMENDED_CATEGORIES 파싱 실패: {e}", flush=True)
+                                        recommended_categories = []
+                                
+                                # RECOMMENDED_PRODUCTS CLOB 읽기
+                                recommended_products = {}
+                                if row[2]:
+                                    try:
+                                        clob_data = row[2]
+                                        if hasattr(clob_data, 'read'):
+                                            products_text = clob_data.read()
+                                        else:
+                                            products_text = str(clob_data)
+                                        if products_text:
+                                            recommended_products = json.loads(products_text)
+                                            if not isinstance(recommended_products, dict):
+                                                recommended_products = {}
+                                    except Exception as e:
+                                        print(f"[result_page] RECOMMENDED_PRODUCTS 파싱 실패: {e}", flush=True)
+                                
+                                # RECOMMENDED_PRODUCT_SCORES CLOB 읽기
+                                recommended_product_scores = {}
+                                if row[3]:
+                                    try:
+                                        clob_data = row[3]
+                                        if hasattr(clob_data, 'read'):
+                                            scores_text = clob_data.read()
+                                        else:
+                                            scores_text = str(clob_data)
+                                        if scores_text:
+                                            recommended_product_scores = json.loads(scores_text)
+                                            if not isinstance(recommended_product_scores, dict):
+                                                recommended_product_scores = {}
+                                    except Exception as e:
+                                        print(f"[result_page] RECOMMENDED_PRODUCT_SCORES 파싱 실패: {e}", flush=True)
+                                
+                                # recommended_categories_text 생성
+                                if recommended_categories:
+                                    recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False)
+                                
+                                print(f"[result_page] ✅ TASTE_CONFIG 조회 성공: taste_id={taste_id}, categories={len(recommended_categories)}", flush=True)
+                                
+                                context['taste_config_data'] = json.dumps({
+                                    'description': description,
+                                    'recommended_categories': recommended_categories,
+                                    'recommended_categories_text': recommended_categories_text,
+                                    'recommended_products': recommended_products,
+                                    'recommended_product_scores': recommended_product_scores
+                                }, ensure_ascii=False)
+                            else:
+                                print(f"[result_page] ⚠️ TASTE_CONFIG 테이블에 TASTE_ID={taste_id} 레코드가 없습니다.", flush=True)
+                                context['taste_config_data'] = json.dumps({
+                                    'description': '',
+                                    'recommended_categories': [],
+                                    'recommended_categories_text': '',
+                                    'recommended_products': {},
+                                    'recommended_product_scores': {}
+                                }, ensure_ascii=False)
                 except Exception as e:
-                    print(f"[result_page] TasteConfig 조회 오류: {e}", flush=True)
-            
-            if taste_config:
-                # recommended_categories를 텍스트로 그대로 가져오기 (JSON 파싱 없이)
-                recommended_categories_text = ""
-                try:
-                    # Oracle DB에서 직접 CLOB로 조회
-                    with get_connection() as conn:
-                        with conn.cursor() as cur:
-                            cur.execute("""
-                                SELECT RECOMMENDED_CATEGORIES
-                                FROM TASTE_CONFIG
-                                WHERE TASTE_ID = :taste_id
-                            """, {'taste_id': taste_config.taste_id})
-                            
-                            row = cur.fetchone()
-                            if row and row[0]:
-                                # CLOB 읽기
-                                clob_data = row[0]
-                                if hasattr(clob_data, 'read'):
-                                    recommended_categories_text = clob_data.read()
-                                else:
-                                    recommended_categories_text = str(clob_data)
-                except Exception as e:
-                    print(f"[result_page] RECOMMENDED_CATEGORIES 조회 실패: {e}", flush=True)
-                    # Fallback: Django 모델에서 가져오기
-                    recommended_categories = taste_config.recommended_categories
-                    if isinstance(recommended_categories, str):
-                        recommended_categories_text = recommended_categories
-                    elif isinstance(recommended_categories, list):
-                        recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False)
-                
-                # recommended_products 파싱 (필요시)
-                recommended_products = taste_config.recommended_products
-                if isinstance(recommended_products, str):
-                    try:
-                        recommended_products = json.loads(recommended_products)
-                    except:
-                        recommended_products = {}
-                
-                # Oracle DB에서 RECOMMENDED_PRODUCT_SCORES 가져오기
-                recommended_product_scores = {}
-                try:
-                    with get_connection() as conn:
-                        with conn.cursor() as cur:
-                            cur.execute("""
-                                SELECT RECOMMENDED_PRODUCT_SCORES
-                                FROM TASTE_CONFIG
-                                WHERE TASTE_ID = :taste_id
-                            """, {'taste_id': taste_config.taste_id})
-                            
-                            row = cur.fetchone()
-                            if row and row[0]:
-                                scores_json = row[0].read() if hasattr(row[0], 'read') else str(row[0])
-                                if scores_json:
-                                    recommended_product_scores = json.loads(scores_json)
-                except Exception as e:
-                    print(f"[result_page] RECOMMENDED_PRODUCT_SCORES 조회 실패: {e}", flush=True)
-                
-                # description 파싱
-                description = taste_config.description or ""
-                
-                # 데이터를 JSON 문자열로 변환하여 템플릿에 전달
-                # recommended_categories는 텍스트로 그대로 전달
-                context['taste_config_data'] = json.dumps({
-                    'description': description,
-                    'recommended_categories_text': recommended_categories_text,  # 텍스트로 그대로
-                    'recommended_products': recommended_products,
-                    'recommended_product_scores': recommended_product_scores
-                }, ensure_ascii=False)
-                
-                print(f"[result_page] TasteConfig 데이터 로드 완료: taste_id={taste_config.taste_id}", flush=True)
+                    print(f"[result_page] ⚠️ TASTE_CONFIG 조회 실패: {e}", flush=True)
+                    import traceback
+                    traceback.print_exc()
+                    context['taste_config_data'] = json.dumps({
+                        'description': '',
+                        'recommended_categories': [],
+                        'recommended_categories_text': '',
+                        'recommended_products': {},
+                        'recommended_product_scores': {}
+                    }, ensure_ascii=False)
             else:
-                print(f"[result_page] 매칭되는 TasteConfig를 찾을 수 없음: vibe={vibe}, household_size={household_size}, has_pet={has_pet}, priority={priority}, budget_level={budget_level}", flush=True)
+                print(f"[result_page] ⚠️ TASTE_ID가 None입니다. ONBOARDING_SESSION 테이블의 TASTE_ID 컬럼이 설정되지 않았을 수 있습니다.", flush=True)
+                context['taste_config_data'] = json.dumps({
+                    'description': '',
+                    'recommended_categories': [],
+                    'recommended_categories_text': '',
+                    'recommended_products': {},
+                    'recommended_product_scores': {}
+                }, ensure_ascii=False)
         else:
-            print(f"[result_page] 온보딩 세션을 찾을 수 없음: session_id={session_id}, portfolio_id={portfolio_id}", flush=True)
+            print(f"[result_page] ⚠️ 온보딩 세션을 찾을 수 없음: session_id={session_id}", flush=True)
+            print(f"[result_page] ⚠️ taste_config_data가 빈 객체로 설정됩니다.", flush=True)
+            # 온보딩 세션이 없어도 빈 객체라도 전달 (JavaScript에서 null 체크 방지)
+            context['taste_config_data'] = json.dumps({
+                'description': '',
+                'recommended_categories': [],
+                'recommended_categories_text': '',
+                'recommended_products': {},
+                'recommended_product_scores': {}
+            }, ensure_ascii=False)
     
     except Exception as e:
         print(f"[result_page] 오류 발생: {e}", flush=True)
         import traceback
         traceback.print_exc()
+        # 오류 발생 시에도 빈 객체라도 전달
+        context['taste_config_data'] = json.dumps({
+            'description': '',
+            'recommended_categories': [],
+            'recommended_categories_text': '',
+            'recommended_products': {},
+            'recommended_product_scores': {}
+        }, ensure_ascii=False)
+    
+    # 최종 확인: taste_config_data가 설정되었는지 확인
+    if context.get('taste_config_data'):
+        print(f"[result_page] ✅ 최종 taste_config_data 설정 완료: {context['taste_config_data'][:1000]}...", flush=True)
+    else:
+        print(f"[result_page] ⚠️ taste_config_data가 None입니다! 빈 객체로 설정합니다.", flush=True)
+        context['taste_config_data'] = json.dumps({
+            'description': '',
+            'recommended_categories': [],
+            'recommended_categories_text': '',
+            'recommended_products': {},
+            'recommended_product_scores': {}
+        }, ensure_ascii=False)
     
     return render(request, "result.html", context)
 
@@ -2251,26 +2276,7 @@ def onboarding_complete_view(request):
                 traceback.print_exc()
                 # Oracle 저장 실패해도 계속 진행
             
-            # 6. 포트폴리오 자동 생성 (PRD: 온보딩 완료 시 포트폴리오 생성)
-            portfolio_id = None
-            try:
-                user_id = data.get('user_id', f"{session_id}")
-                print(f"[Onboarding Complete] 포트폴리오 생성 시작...")
-                portfolio_result = portfolio_service.create_portfolio_from_onboarding(
-                    session_id=session_id,
-                    user_id=user_id
-                )
-                
-                if portfolio_result.get('success'):
-                    portfolio_id = portfolio_result.get('portfolio_id')
-                    print(f"[Onboarding Complete] 포트폴리오 생성 완료: {portfolio_id}")
-                else:
-                    print(f"[Onboarding Complete] 포트폴리오 생성 실패: {portfolio_result.get('error')}")
-            except Exception as e:
-                print(f"[Onboarding Complete] 포트폴리오 생성 오류: {e}")
-                import traceback
-                traceback.print_exc()
-                # 포트폴리오 생성 실패해도 추천 결과는 반환
+            
             
             # Taste 정보를 응답에 포함 (이미 위에서 계산됨)
             if taste_id:

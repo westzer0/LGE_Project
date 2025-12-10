@@ -1416,8 +1416,11 @@
                     // Redirect to results page with portfolio_id or session_id
                     const redirectUrl = result.portfolio_id
                         ? `/result/?portfolio_id=${result.portfolio_id}`
+                        : result.session_id
+                        ? `/result/?session_id=${result.session_id}`
                         : `/result/?session_id=${sessionId}`;
 
+                    console.log('[온보딩 완료] 결과 페이지로 리다이렉트:', redirectUrl);
                     window.location.href = redirectUrl;
                 } else {
                     throw new Error(result.error || '추천 결과가 없습니다.');

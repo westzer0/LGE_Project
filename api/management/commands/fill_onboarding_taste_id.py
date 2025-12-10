@@ -206,15 +206,29 @@ class Command(BaseCommand):
             self._analyze_matching_failures(sessions)
     
     def _check_required_fields(self, session):
-        """필수 필드 확인"""
+        """필수 필드 확인 및 복원"""
         missing = []
         
         if not session.vibe:
             missing.append('vibe')
         if session.household_size is None:
             missing.append('household_size')
+        
+        # has_pet이 None이면 recommendation_result에서 복원 시도
         if session.has_pet is None:
-            missing.append('has_pet')
+            if session.recommendation_result and isinstance(session.recommendation_result, dict):
+                if 'has_pet' in session.recommendation_result:
+                    session.has_pet = session.recommendation_result['has_pet']
+                    session.save(update_fields=['has_pet'])
+                elif 'pet' in session.recommendation_result:
+                    pet_value = session.recommendation_result['pet']
+                    session.has_pet = (pet_value == 'yes')
+                    session.save(update_fields=['has_pet'])
+                else:
+                    missing.append('has_pet')
+            else:
+                missing.append('has_pet')
+        
         if not session.priority:
             missing.append('priority')
         if not session.budget_level:

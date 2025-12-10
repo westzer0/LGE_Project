@@ -1144,7 +1144,7 @@
                         </a>
                     </div>
                     <div class="recommendation-banner">
-                        <a href="/result/" class="recommendation-banner-content">
+                        <a href="#" onclick="goToResultPage(event); return false;" class="recommendation-banner-content">
                             <span class="recommendation-banner-title">가전 패키지 추천</span>
                             <span class="recommendation-banner-text">내역이 있습니다.&nbsp;&nbsp;&nbsp;</span>
                             <span class="recommendation-banner-link-text">나에게 맞는 패키지 조합을 확인해 보세요</span>
@@ -1236,6 +1236,20 @@
             </svg>
         </button>
     </div>
+    <script>
+        // 결과 페이지로 이동 (session_id 또는 portfolio_id 전달)
+        function goToResultPage(event) {
+            event.preventDefault();
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            const portfolioId = sessionStorage.getItem('portfolio_id');
+            const redirectUrl = portfolioId 
+                ? `/result/?portfolio_id=${portfolioId}` 
+                : sessionId 
+                ? `/result/?session_id=${sessionId}` 
+                : '/result/';
+            window.location.href = redirectUrl;
+        }
+    </script>
 </body>
 
 </html>

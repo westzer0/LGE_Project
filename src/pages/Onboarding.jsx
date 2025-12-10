@@ -115,12 +115,23 @@ const Onboarding = () => {
         if (data.portfolio_id) {
           navigate(`/result?portfolio_id=${data.portfolio_id}`)
         } else if (data.recommendations && data.recommendations.length > 0) {
-          navigate('/result', {
-            state: {
-              recommendations: data.recommendations,
-              portfolio_id: data.portfolio_id
-            }
-          })
+          // session_id가 있으면 URL에 포함, 없으면 state로 전달
+          const sessionId = data.session_id || formData.session_id
+          if (sessionId) {
+            navigate(`/result?session_id=${sessionId}`, {
+              state: {
+                recommendations: data.recommendations,
+                portfolio_id: data.portfolio_id
+              }
+            })
+          } else {
+            navigate('/result', {
+              state: {
+                recommendations: data.recommendations,
+                portfolio_id: data.portfolio_id
+              }
+            })
+          }
         } else {
           alert('추천 결과를 받지 못했습니다. 다시 시도해주세요.')
           setLoading(false)
@@ -556,7 +567,7 @@ const Onboarding = () => {
         // renderStep4와 동일한 로직 사용 (원룸 케이스 고려)
         const isStudio = formData.housing_type === 'studio'
         const mainSpaces = isStudio ? ['all'] : formData.main_space
-        
+
         const hasKitchen = mainSpaces.includes('kitchen') || mainSpaces.includes('all')
         const hasDressing = mainSpaces.includes('dressing') || mainSpaces.includes('all')
         const hasMedia = mainSpaces.includes('living') || mainSpaces.includes('bedroom') ||

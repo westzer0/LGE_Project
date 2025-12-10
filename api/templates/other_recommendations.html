@@ -2284,7 +2284,15 @@
 
         // 뒤로가기 - 추천 화면으로 돌아가기
         function goBackToResult() {
-            window.location.href = '/result/';
+            // session_id 또는 portfolio_id로 결과 페이지로 이동
+            const sessionId = sessionStorage.getItem('onboarding_session_id');
+            const portfolioId = sessionStorage.getItem('portfolio_id');
+            const redirectUrl = portfolioId 
+                ? `/result/?portfolio_id=${portfolioId}` 
+                : sessionId 
+                ? `/result/?session_id=${sessionId}` 
+                : '/result/';
+            window.location.href = redirectUrl;
         }
 
         // 카테고리 전환

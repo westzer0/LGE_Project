@@ -3051,25 +3051,8 @@
                     예산 범위 내의 추천이에요.
                 </p>
                 <div class="appliance-icons-container">
-                    <div class="appliance-icons">
-                        <div class="appliance-icon" data-appliance="refrigerator">
-                            <div class="appliance-icon-circle">
-                                <img src="{% static 'images/가전 카테고리/냉장고.png' %}" alt="냉장고">
-                            </div>
-                            <span class="appliance-icon-label">냉장고</span>
-                        </div>
-                        <div class="appliance-icon" data-appliance="microwave">
-                            <div class="appliance-icon-circle">
-                                <img src="{% static 'images/가전 카테고리/광파오븐.png' %}" alt="광파오븐">
-                            </div>
-                            <span class="appliance-icon-label">광파오븐</span>
-                        </div>
-                        <div class="appliance-icon" data-appliance="dishwasher">
-                            <div class="appliance-icon-circle">
-                                <img src="{% static 'images/가전 카테고리/식기세척기.png' %}" alt="식기세척기">
-                            </div>
-                            <span class="appliance-icon-label">식기세척기</span>
-                        </div>
+                    <div class="appliance-icons" id="applianceIconsContainer">
+                        <!-- 가전 아이콘들이 JavaScript로 동적으로 렌더링됩니다 -->
                     </div>
                 </div>
             </div>
@@ -3881,7 +3864,10 @@
 
             // TasteConfig 데이터 로드 및 적용 (먼저 실행)
             console.log('[initPage] TasteConfig 데이터 로드 시작');
-            loadTasteConfigData();
+            // DOM이 완전히 준비된 후 실행
+            setTimeout(function () {
+                loadTasteConfigData();
+            }, 100);
 
             // sessionStorage에서 vibe 값 가져오기
             const vibe = sessionStorage.getItem('step1_vibe');
@@ -4015,6 +4001,7 @@
         // 카테고리명과 이미지/데이터 매핑
         const categoryMapping = {
             'TV': { image: '{% static "images/가전 카테고리/TV.png" %}', dataAppliance: 'tv' },
+            'tv': { image: '{% static "images/가전 카테고리/TV.png" %}', dataAppliance: 'tv' },
             '에어컨': { image: '{% static "images/가전 카테고리/에어컨.png" %}', dataAppliance: 'airconditioner' },
             '냉장고': { image: '{% static "images/가전 카테고리/냉장고.png" %}', dataAppliance: 'refrigerator' },
             '세탁': { image: '{% static "images/가전 카테고리/세탁기.png" %}', dataAppliance: 'washer' },
@@ -4042,10 +4029,17 @@
         };
 
         // TasteConfig 데이터 (Django 템플릿에서 전달)
-        var TASTE_CONFIG_DATA_JSON = {% if taste_config_data %}{ { taste_config_data | safe } } {% else %} null{% endif %};
+        var TASTE_CONFIG_DATA_JSON = {% if taste_config_data %}'{{ taste_config_data|escapejs }}'{% else %} null{% endif %};
+
+        // Session ID 및 Portfolio ID (Django 템플릿에서 전달)
+        var SESSION_ID = {% if session_id %}'{{ session_id|escapejs }}'{% else %} null{% endif %};
+        var PORTFOLIO_ID = {% if portfolio_id %}'{{ portfolio_id|escapejs }}'{% else %} null{% endif %};
 
         // TasteConfig 데이터 로드 및 적용
         function loadTasteConfigData() {
+            console.log('[loadTasteConfigData] 시작');
+            console.log('[loadTasteConfigData] TASTE_CONFIG_DATA_JSON:', TASTE_CONFIG_DATA_JSON);
+
             if (!TASTE_CONFIG_DATA_JSON) {
                 console.log('[loadTasteConfigData] TasteConfig 데이터가 없습니다. 기본값 사용.');
                 return;
@@ -4057,12 +4051,24 @@
                     : TASTE_CONFIG_DATA_JSON;
 
                 console.log('[loadTasteConfigData] TasteConfig 데이터 로드 완료:', tasteConfigData);
+                console.log('[loadTasteConfigData] recommended_categories:', tasteConfigData.recommended_categories);
+                console.log('[loadTasteConfigData] recommended_categories 타입:', typeof tasteConfigData.recommended_categories);
+                console.log('[loadTasteConfigData] recommended_categories_text:', tasteConfigData.recommended_categories_text);
 
-                // recommended_categories_text를 그대로 appliance-icons-container에 표시
-                if (tasteConfigData.recommended_categories_text) {
+                // recommended_categories 배열을 사용하여 아이콘 렌더링
+                // recommended_categories_text를 먼저 확인 (원본 데이터가 있을 수 있음)
+                if (tasteConfigData.recommended_categories_text && tasteConfigData.recommended_categories_text.trim() !== '') {
+                    // Fallback: recommended_categories_text가 있으면 파싱 시도
+                    console.log('[loadTasteConfigData] recommended_categories_text 파싱 시도:', tasteConfigData.recommended_categories_text);
                     renderApplianceIconsFromText(tasteConfigData.recommended_categories_text);
+                } else if (tasteConfigData.recommended_categories && Array.isArray(tasteConfigData.recommended_categories) && tasteConfigData.recommended_categories.length > 0) {
+                    console.log('[loadTasteConfigData] recommended_categories 배열 사용:', tasteConfigData.recommended_categories);
+                    renderApplianceIcons(tasteConfigData.recommended_categories);
                 } else {
-                    console.log('[loadTasteConfigData] recommended_categories_text가 없습니다. 기본값 유지.');
+                    console.warn('[loadTasteConfigData] recommended_categories가 없습니다. 기본값 유지.');
+                    console.warn('[loadTasteConfigData] tasteConfigData 전체:', tasteConfigData);
+                    console.warn('[loadTasteConfigData] recommended_categories:', tasteConfigData.recommended_categories);
+                    console.warn('[loadTasteConfigData] recommended_categories_text:', tasteConfigData.recommended_categories_text);
                 }
 
                 // banner-overlay에 스타일 분석 메시지 추가 (나중에 엑셀 파일 처리)
@@ -4073,6 +4079,7 @@
 
             } catch (error) {
                 console.error('[loadTasteConfigData] 데이터 파싱 오류:', error);
+                console.error('[loadTasteConfigData] 오류 스택:', error.stack);
                 console.log('[loadTasteConfigData] 오류 발생으로 기본값 사용.');
             }
         }
@@ -4080,9 +4087,15 @@
         // recommended_categories 텍스트를 그대로 표시
         function renderApplianceIconsFromText(categoriesText) {
             console.log('[renderApplianceIconsFromText] 시작, categoriesText:', categoriesText);
+            console.log('[renderApplianceIconsFromText] categoriesText 타입:', typeof categoriesText);
+
             const container = document.getElementById('applianceIconsContainer');
             if (!container) {
-                console.error('[renderApplianceIconsFromText] appliance-icons-container를 찾을 수 없습니다.');
+                console.error('[renderApplianceIconsFromText] applianceIconsContainer를 찾을 수 없습니다.');
+                // DOM이 준비되지 않았으면 잠시 후 재시도
+                setTimeout(function () {
+                    renderApplianceIconsFromText(categoriesText);
+                }, 100);
                 return;
             }
 
@@ -4090,52 +4103,38 @@
             try {
                 // JSON 배열 문자열인 경우 파싱
                 let categories = [];
-                try {
-                    categories = JSON.parse(categoriesText);
-                } catch (e) {
-                    // JSON이 아니면 그대로 텍스트로 표시
-                    container.innerHTML = '<div class="appliance-categories-text">' + categoriesText + '</div>';
-                    console.log('[renderApplianceIconsFromText] 텍스트로 표시:', categoriesText);
+
+                // 문자열이 아니면 그대로 사용
+                if (Array.isArray(categoriesText)) {
+                    categories = categoriesText;
+                    console.log('[renderApplianceIconsFromText] 이미 배열입니다.');
+                } else if (typeof categoriesText === 'string') {
+                    try {
+                        categories = JSON.parse(categoriesText);
+                        console.log('[renderApplianceIconsFromText] JSON 파싱 성공:', categories);
+                    } catch (e) {
+                        // JSON이 아니면 쉼표로 분리 시도
+                        console.log('[renderApplianceIconsFromText] JSON 파싱 실패, 쉼표로 분리 시도');
+                        categories = categoriesText.split(',').map(c => c.trim()).filter(c => c.length > 0);
+                        console.log('[renderApplianceIconsFromText] 쉼표 분리 결과:', categories);
+                    }
+                } else {
+                    console.error('[renderApplianceIconsFromText] 예상치 못한 타입:', typeof categoriesText);
                     return;
                 }
 
                 // 배열인 경우 각 카테고리를 아이콘으로 표시
                 if (Array.isArray(categories) && categories.length > 0) {
-                    container.innerHTML = '';
-                    categories.forEach(category => {
-                        const mapping = categoryMapping[category];
-                        if (mapping) {
-                            const iconDiv = document.createElement('div');
-                            iconDiv.className = 'appliance-icon';
-                            iconDiv.setAttribute('data-appliance', mapping.dataAppliance);
-
-                            iconDiv.innerHTML = `
-                                <div class="appliance-icon-circle">
-                                    <img src="${mapping.image}" alt="${category}">
-                                </div>
-                                <span class="appliance-icon-label">${category}</span>
-                            `;
-
-                            iconDiv.addEventListener('click', function () {
-                                scrollToProduct(mapping.dataAppliance);
-                            });
-
-                            container.appendChild(iconDiv);
-                        } else {
-                            // 매핑이 없는 경우 텍스트로만 표시
-                            const textDiv = document.createElement('div');
-                            textDiv.className = 'appliance-category-text';
-                            textDiv.textContent = category;
-                            container.appendChild(textDiv);
-                        }
-                    });
-                    console.log(`[renderApplianceIconsFromText] ${categories.length}개 카테고리 표시 완료`);
+                    console.log('[renderApplianceIconsFromText] renderApplianceIcons 호출');
+                    renderApplianceIcons(categories);
                 } else {
                     // 배열이 아니거나 비어있으면 텍스트로 표시
+                    console.warn('[renderApplianceIconsFromText] 배열이 비어있거나 유효하지 않음');
                     container.innerHTML = '<div class="appliance-categories-text">' + categoriesText + '</div>';
                 }
             } catch (error) {
                 console.error('[renderApplianceIconsFromText] 오류:', error);
+                console.error('[renderApplianceIconsFromText] 오류 스택:', error.stack);
                 // 오류 발생 시 텍스트로 그대로 표시
                 container.innerHTML = '<div class="appliance-categories-text">' + categoriesText + '</div>';
             }
@@ -4144,9 +4143,21 @@
         // appliance-icons-container 동적 생성
         function renderApplianceIcons(categories) {
             console.log('[renderApplianceIcons] 시작, categories:', categories);
+            console.log('[renderApplianceIcons] categories 타입:', typeof categories, Array.isArray(categories));
+
+            if (!categories || !Array.isArray(categories) || categories.length === 0) {
+                console.error('[renderApplianceIcons] categories가 유효하지 않습니다:', categories);
+                return;
+            }
+
             const container = document.getElementById('applianceIconsContainer');
             if (!container) {
-                console.error('[renderApplianceIcons] appliance-icons-container를 찾을 수 없습니다.');
+                console.error('[renderApplianceIcons] applianceIconsContainer를 찾을 수 없습니다.');
+                console.error('[renderApplianceIcons] DOM 상태:', document.readyState);
+                // DOM이 준비되지 않았으면 잠시 후 재시도
+                setTimeout(function () {
+                    renderApplianceIcons(categories);
+                }, 100);
                 return;
             }
 
@@ -4156,12 +4167,34 @@
 
             // 카테고리별로 아이콘 생성
             let createdCount = 0;
-            categories.forEach(category => {
-                const mapping = categoryMapping[category];
+            categories.forEach((category, index) => {
+                console.log(`[renderApplianceIcons] 처리 중 [${index}]: ${category} (타입: ${typeof category})`);
+
+                // 카테고리명 정규화 (대소문자, 공백 처리)
+                const normalizedCategory = String(category).trim();
+                console.log(`[renderApplianceIcons] 정규화된 카테고리: "${normalizedCategory}"`);
+
+                // 대소문자 구분 없이 매핑 찾기
+                let mapping = categoryMapping[normalizedCategory];
                 if (!mapping) {
-                    console.warn(`[renderApplianceIcons] 카테고리 매핑 없음: ${category}`);
+                    // 대문자로 변환하여 찾기
+                    mapping = categoryMapping[normalizedCategory.toUpperCase()];
+                    console.log(`[renderApplianceIcons] 대문자로 찾기 시도: ${normalizedCategory.toUpperCase()}`);
+                }
+                if (!mapping) {
+                    // 첫 글자만 대문자로 변환하여 찾기
+                    const firstUpper = normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1).toLowerCase();
+                    mapping = categoryMapping[firstUpper];
+                    console.log(`[renderApplianceIcons] 첫글자 대문자로 찾기 시도: ${firstUpper}`);
+                }
+
+                if (!mapping) {
+                    console.warn(`[renderApplianceIcons] 카테고리 매핑 없음: ${category} (정규화: ${normalizedCategory})`);
+                    console.warn(`[renderApplianceIcons] 사용 가능한 카테고리:`, Object.keys(categoryMapping));
                     return;
                 }
+
+                console.log(`[renderApplianceIcons] 매핑 찾음:`, mapping);
 
                 const iconDiv = document.createElement('div');
                 iconDiv.className = 'appliance-icon';
@@ -4169,9 +4202,9 @@
 
                 iconDiv.innerHTML = `
                     <div class="appliance-icon-circle">
-                        <img src="${mapping.image}" alt="${category}">
+                        <img src="${mapping.image}" alt="${normalizedCategory}">
                     </div>
-                    <span class="appliance-icon-label">${category}</span>
+                    <span class="appliance-icon-label">${normalizedCategory}</span>
                 `;
 
                 // 클릭 이벤트 추가
@@ -4181,10 +4214,16 @@
 
                 container.appendChild(iconDiv);
                 createdCount++;
-                console.log(`[renderApplianceIcons] ${category} 아이콘 생성 완료`);
+                console.log(`[renderApplianceIcons] ${normalizedCategory} 아이콘 생성 완료`);
             });
 
             console.log(`[renderApplianceIcons] 총 ${createdCount}개 카테고리 아이콘 생성 완료`);
+
+            if (createdCount === 0) {
+                console.error('[renderApplianceIcons] 아이콘이 하나도 생성되지 않았습니다!');
+                console.error('[renderApplianceIcons] 입력 categories:', categories);
+                console.error('[renderApplianceIcons] categoryMapping 키:', Object.keys(categoryMapping));
+            }
         }
 
         function initApplianceIcons() {

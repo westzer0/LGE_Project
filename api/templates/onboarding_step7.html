@@ -984,26 +984,36 @@
                         // 7단계 선택 값 저장
                         sessionStorage.setItem('step7_lineup', selectedLineup);
 
+                        // session_id로 결과 페이지로 이동
+                        const sessionIdForRedirect = data.session_id || sessionId;
+                        const redirectUrl = sessionIdForRedirect ? `/result/?session_id=${sessionIdForRedirect}` : '/result/';
+
                         // 로딩 화면을 짧게 유지한 후 결과 페이지로 이동 (1.5초 딜레이)
                         setTimeout(() => {
-                            console.log('온보딩 완료, 결과 페이지로 이동합니다.');
-                            window.location.href = '/result/';
+                            console.log('온보딩 완료, 결과 페이지로 이동합니다. session_id:', sessionIdForRedirect);
+                            window.location.href = redirectUrl;
                         }, 1500);
                     } else {
                         console.warn('⚠️ 서버 저장 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
                         console.warn('오류 내용:', data.error);
+                        // session_id로 결과 페이지로 이동
+                        const sessionIdForRedirect = sessionStorage.getItem('onboarding_session_id');
+                        const redirectUrl = sessionIdForRedirect ? `/result/?session_id=${sessionIdForRedirect}` : '/result/';
                         // 로딩 화면을 짧게 유지한 후 이동 (1.5초 딜레이)
                         setTimeout(() => {
-                            window.location.href = '/result/';
+                            window.location.href = redirectUrl;
                         }, 1500);
                     }
                 })
                 .catch(error => {
                     console.error('❌ API Error:', error);
                     console.warn('⚠️ API 호출 실패, 하지만 sessionStorage에 저장되어 있으므로 이동합니다.');
+                    // session_id로 결과 페이지로 이동
+                    const sessionIdForRedirect = sessionStorage.getItem('onboarding_session_id');
+                    const redirectUrl = sessionIdForRedirect ? `/result/?session_id=${sessionIdForRedirect}` : '/result/';
                     // 로딩 화면을 짧게 유지한 후 이동 (1.5초 딜레이)
                     setTimeout(() => {
-                        window.location.href = '/result/';
+                        window.location.href = redirectUrl;
                     }, 1500);
                 });
         }
