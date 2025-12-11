@@ -433,7 +433,127 @@ def result_page(request):
                                 if recommended_categories:
                                     recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False)
                                 
-                                print(f"[result_page] ✅ TASTE_CONFIG 조회 성공: taste_id={taste_id}, categories={len(recommended_categories)}", flush=True)
+                                # 각 카테고리의 첫 번째 제품 ID 추출 및 제품 정보 조회
+                                recommended_products_list = []
+                                if recommended_products and isinstance(recommended_products, dict):
+                                    print(f"[result_page] 추천 제품 정보 조회 시작: {len(recommended_products)}개 카테고리", flush=True)
+                                    
+                                    for category_name, product_ids in recommended_products.items():
+                                        if not isinstance(product_ids, list) or len(product_ids) == 0:
+                                            continue
+                                        
+                                        # 각 카테고리의 첫 번째(Index 0) 제품 ID만 추출
+                                        raw_product_id = product_ids[0]
+                                        
+                                        # 원본 데이터 로깅 (디버깅용)
+                                        print(f"[result_page] 원본 데이터 - 카테고리: {category_name}, product_ids 타입: {type(product_ids).__name__}, 첫 번째 값: {repr(raw_product_id)} (타입: {type(raw_product_id).__name__})", flush=True)
+                                        
+                                        # 데이터 타입 및 공백 문제 해결
+                                        # 1. 문자열인 경우 공백 제거 후 정수 변환
+                                        # 2. 이미 정수인 경우 그대로 사용
+                                        # 3. None이거나 빈 값인 경우 스킵
+                                        try:
+                                            if isinstance(raw_product_id, str):
+                                                # 공백 제거 후 정수 변환
+                                                first_product_id = int(str(raw_product_id).strip())
+                                                print(f"[result_page] 문자열 PRODUCT_ID 변환: '{raw_product_id}' -> {first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
+                                            elif isinstance(raw_product_id, (int, float)):
+                                                # 숫자 타입인 경우 정수로 변환
+                                                first_product_id = int(raw_product_id)
+                                                print(f"[result_page] 숫자 PRODUCT_ID 사용: {first_product_id} (원본 타입: {type(raw_product_id).__name__})", flush=True)
+                                            else:
+                                                print(f"[result_page] ⚠️ 지원하지 않는 PRODUCT_ID 타입: {type(raw_product_id).__name__}, 값: {raw_product_id}", flush=True)
+                                                continue
+                                        except (ValueError, TypeError) as e:
+                                            print(f"[result_page] ⚠️ PRODUCT_ID 변환 실패: {raw_product_id} (타입: {type(raw_product_id).__name__}), 오류: {e}", flush=True)
+                                            continue
+                                        
+                                        print(f"[result_page] 최종 PRODUCT_ID: {first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
+                                        
+                                        try:
+                                            # PRODUCT 테이블에서 PRODUCT_NAME 조회
+                                            # 타입 명시적으로 정수로 전달
+                                            print(f"[result_page] PRODUCT 조회 시작: PRODUCT_ID={first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
+                                            cur.execute("""
+                                                SELECT PRODUCT_NAME
+                                                FROM PRODUCT
+                                                WHERE PRODUCT_ID = :product_id
+                                            """, {'product_id': int(first_product_id)})  # 명시적으로 정수 변환
+                                            
+                                            product_row = cur.fetchone()
+                                            product_name = product_row[0] if product_row and product_row[0] else ""
+                                            
+                                            if not product_name:
+                                                print(f"[result_page] ⚠️ PRODUCT 조회 실패 - PRODUCT_ID={first_product_id}에 해당하는 제품이 없습니다.", flush=True)
+                                            
+                                            # PRODUCT_IMAGE 테이블에서 모든 IMAGE_URL 조회 (Raw SQL)
+                                            print(f"[result_page] PRODUCT_IMAGE 조회 시작: PRODUCT_ID={first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
+                                            cur.execute("""
+                                                SELECT IMAGE_URL
+                                                FROM PRODUCT_IMAGE
+                                                WHERE PRODUCT_ID = :product_id
+                                                AND IMAGE_URL IS NOT NULL
+                                                AND IMAGE_URL != ''
+                                                ORDER BY PRODUCT_IMAGE_ID
+                                            """, {'product_id': int(first_product_id)})
+                                            
+                                            # 즉시 fetchall()로 데이터를 리스트에 저장 (커서 소모 방지)
+                                            image_rows = cur.fetchall()
+                                            print(f"[result_page] Raw 데이터 (rows): {image_rows}", flush=True)
+                                            print(f"[result_page] 조회된 이미지 개수: {len(image_rows)}개", flush=True)
+                                            
+                                            image_url = ""
+                                            
+                                            # Python에서 이미지를 우선순위에 따라 필터링
+                                            # 우선순위: 1) large-interior01.jpg로 끝나는 것, 2) interior01.jpg로 끝나는 것, 3) 첫 번째 이미지
+                                            large_interior01_images = []  # large-interior01.jpg로 끝나는 것 (최우선)
+                                            exact_interior01_images = []  # 정확히 interior01.jpg로 끝나는 것
+                                            other_images = []  # 그 외
+                                            
+                                            for row in image_rows:
+                                                url = str(row[0]).strip() if row[0] else ""
+                                                if url:
+                                                    url_lower = url.lower()
+                                                    # large-interior01.jpg로 끝나는지 확인 (최우선)
+                                                    if url_lower.endswith('large-interior01.jpg'):
+                                                        large_interior01_images.append(url)
+                                                    # 정확히 interior01.jpg로 끝나는지 확인 (large-interior01.jpg는 제외)
+                                                    elif url_lower.endswith('interior01.jpg') and not url_lower.endswith('large-interior01.jpg'):
+                                                        exact_interior01_images.append(url)
+                                                    else:
+                                                        other_images.append(url)
+                                            
+                                            print(f"[result_page] 이미지 분류 결과 - large-interior01: {len(large_interior01_images)}, interior01: {len(exact_interior01_images)}, 기타: {len(other_images)}", flush=True)
+                                            
+                                            # 우선순위에 따라 이미지 선택
+                                            if large_interior01_images:
+                                                image_url = large_interior01_images[0]
+                                                print(f"[result_page] ✅ 최종 선택: large-interior01.jpg 이미지 = {image_url}", flush=True)
+                                            elif exact_interior01_images:
+                                                image_url = exact_interior01_images[0]
+                                                print(f"[result_page] ✅ 최종 선택: interior01.jpg 이미지 = {image_url}", flush=True)
+                                            elif other_images:
+                                                image_url = other_images[0]
+                                                print(f"[result_page] 최종 선택: 첫 번째 이미지 = {image_url}", flush=True)
+                                            
+                                            if not image_url:
+                                                print(f"[result_page] ⚠️ 제품 이미지를 찾을 수 없음: PRODUCT_ID={first_product_id}", flush=True)
+                                            
+                                            recommended_products_list.append({
+                                                'category': category_name,
+                                                'product_id': first_product_id,
+                                                'product_name': product_name,
+                                                'image_url': image_url
+                                            })
+                                            
+                                            print(f"[result_page] 제품 정보 조회 완료: {category_name} - ID={first_product_id}, NAME={product_name[:50] if product_name else 'N/A'}", flush=True)
+                                            
+                                        except Exception as e:
+                                            print(f"[result_page] 제품 정보 조회 실패: category={category_name}, product_id={first_product_id}, error={e}", flush=True)
+                                            import traceback
+                                            traceback.print_exc()
+                                
+                                print(f"[result_page] ✅ TASTE_CONFIG 조회 성공: taste_id={taste_id}, categories={len(recommended_categories)}, products={len(recommended_products_list)}", flush=True)
                                 
                                 context['taste_config_data'] = json.dumps({
                                     'description': description,
@@ -442,6 +562,9 @@ def result_page(request):
                                     'recommended_products': recommended_products,
                                     'recommended_product_scores': recommended_product_scores
                                 }, ensure_ascii=False)
+                                
+                                # 동적 제품 리스트를 위한 별도 데이터 전달 (JSON 직렬화)
+                                context['recommended_products_list'] = json.dumps(recommended_products_list, ensure_ascii=False)
                             else:
                                 print(f"[result_page] ⚠️ TASTE_CONFIG 테이블에 TASTE_ID={taste_id} 레코드가 없습니다.", flush=True)
                                 context['taste_config_data'] = json.dumps({
@@ -451,6 +574,7 @@ def result_page(request):
                                     'recommended_products': {},
                                     'recommended_product_scores': {}
                                 }, ensure_ascii=False)
+                                context['recommended_products_list'] = json.dumps([], ensure_ascii=False)
                 except Exception as e:
                     print(f"[result_page] ⚠️ TASTE_CONFIG 조회 실패: {e}", flush=True)
                     import traceback
@@ -462,6 +586,7 @@ def result_page(request):
                         'recommended_products': {},
                         'recommended_product_scores': {}
                     }, ensure_ascii=False)
+                    context['recommended_products_list'] = []
             else:
                 print(f"[result_page] ⚠️ TASTE_ID가 None입니다. ONBOARDING_SESSION 테이블의 TASTE_ID 컬럼이 설정되지 않았을 수 있습니다.", flush=True)
                 context['taste_config_data'] = json.dumps({
@@ -471,6 +596,7 @@ def result_page(request):
                     'recommended_products': {},
                     'recommended_product_scores': {}
                 }, ensure_ascii=False)
+                context['recommended_products_list'] = []
         else:
             print(f"[result_page] ⚠️ 온보딩 세션을 찾을 수 없음: session_id={session_id}", flush=True)
             print(f"[result_page] ⚠️ taste_config_data가 빈 객체로 설정됩니다.", flush=True)
@@ -482,6 +608,7 @@ def result_page(request):
                 'recommended_products': {},
                 'recommended_product_scores': {}
             }, ensure_ascii=False)
+            context['recommended_products_list'] = []
     
     except Exception as e:
         print(f"[result_page] 오류 발생: {e}", flush=True)
@@ -495,6 +622,7 @@ def result_page(request):
             'recommended_products': {},
             'recommended_product_scores': {}
         }, ensure_ascii=False)
+        context['recommended_products_list'] = []
     
     # 최종 확인: taste_config_data가 설정되었는지 확인
     if context.get('taste_config_data'):
@@ -508,6 +636,10 @@ def result_page(request):
             'recommended_products': {},
             'recommended_product_scores': {}
         }, ensure_ascii=False)
+    
+    # recommended_products_list가 없으면 빈 리스트로 설정
+    if 'recommended_products_list' not in context:
+        context['recommended_products_list'] = json.dumps([], ensure_ascii=False)
     
     return render(request, "result.html", context)
 

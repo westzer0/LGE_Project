@@ -76,3 +76,4 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(traceback.format_exc()))
             raise
 
+
