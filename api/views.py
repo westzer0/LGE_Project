@@ -3,7 +3,11 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.conf import settings
 import json
+import os
+import requests
+from pathlib import Path
 from .models import Product, OnboardingSession, Portfolio, ProductReview, Cart, Wishlist, ProductRecommendReason, ProductDemographics, Reservation, ProductSpec
 from .views_erd_helpers import (
     save_onboarding_to_erd_models as _save_onboarding_to_erd_models,
@@ -20,6 +24,63 @@ from .services.kakao_message_service import kakao_message_service
 from .services.ai_recommendation_service import ai_recommendation_service
 from .services.product_comparison_service import product_comparison_service
 from .db.oracle_client import DatabaseDisabledError
+
+
+def download_product_image(image_url: str, product_id: int) -> str:
+    """
+    제품 이미지를 서버 사이드에서 다운로드하여 로컬에 저장
+    
+    Args:
+        image_url: 원본 이미지 URL
+        product_id: 제품 ID
+    
+    Returns:
+        로컬 이미지 경로 (예: /static/images/products/product_1234.jpg)
+    """
+    if not image_url or not image_url.startswith('http'):
+        print(f"[download_product_image] 유효하지 않은 이미지 URL: {image_url}", flush=True)
+        return '/static/images/가전 카테고리/냉장고.png'  # 기본 이미지
+    
+    # static/images/products/ 폴더 경로 생성
+    # api/static/images/products/ 경로 사용
+    base_dir = Path(__file__).resolve().parent.parent  # 프로젝트 루트
+    products_dir = base_dir / 'api' / 'static' / 'images' / 'products'
+    
+    # 폴더가 없으면 생성
+    products_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[download_product_image] 이미지 저장 폴더: {products_dir}", flush=True)
+    
+    # 파일명: product_{product_id}.jpg
+    filename = f"product_{product_id}.jpg"
+    filepath = products_dir / filename
+    
+    # 캐싱: 이미 파일이 존재하면 다운로드 건너뛰기
+    if filepath.exists():
+        print(f"[download_product_image] 캐시된 이미지 사용: {filepath}", flush=True)
+        return f'/static/images/products/{filename}'
+    
+    # 이미지 다운로드
+    try:
+        print(f"[download_product_image] 이미지 다운로드 시작: {image_url}", flush=True)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(image_url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        # 이미지 데이터 저장
+        with open(filepath, 'wb') as f:
+            f.write(response.content)
+        
+        print(f"[download_product_image] ✅ 이미지 다운로드 완료: {filepath}", flush=True)
+        return f'/static/images/products/{filename}'
+        
+    except Exception as e:
+        print(f"[download_product_image] ⚠️ 이미지 다운로드 실패: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        # 다운로드 실패 시 기본 이미지 반환
+        return '/static/images/가전 카테고리/냉장고.png'
 
 
 def _generate_installation_notes(product_data: dict, onboarding_data: dict) -> list:
@@ -433,10 +494,51 @@ def result_page(request):
                                 if recommended_categories:
                                     recommended_categories_text = json.dumps(recommended_categories, ensure_ascii=False)
                                 
+                                # 온보딩 데이터 가져오기 (스타일 분석 및 추천 이유 생성용)
+                                onboarding_data = None
+                                user_profile = None
+                                style_analysis = None
+                                
+                                try:
+                                    from api.services.taste_calculation_service import taste_calculation_service
+                                    onboarding_data = taste_calculation_service._get_onboarding_data_from_session(session_id)
+                                    
+                                    # user_profile 생성
+                                    user_profile = {
+                                        'vibe': onboarding_data.get('vibe', 'modern'),
+                                        'household_size': onboarding_data.get('household_size', 2),
+                                        'housing_type': onboarding_data.get('housing_type', 'apartment'),
+                                        'pyung': onboarding_data.get('pyung', 25),
+                                        'priority': onboarding_data.get('priority', 'value'),
+                                        'budget_level': onboarding_data.get('budget_level', 'medium'),
+                                        'has_pet': onboarding_data.get('has_pet', False),
+                                        'cooking': onboarding_data.get('cooking', 'sometimes'),
+                                        'laundry': onboarding_data.get('laundry', 'weekly'),
+                                        'media': onboarding_data.get('media', 'balanced'),
+                                        'main_space': onboarding_data.get('main_space', 'living')
+                                    }
+                                    
+                                    # 스타일 분석 메시지 생성
+                                    from api.services.style_analysis_service import style_analysis_service
+                                    style_analysis = style_analysis_service.generate_style_analysis(
+                                        onboarding_data=onboarding_data,
+                                        user_profile=user_profile
+                                    )
+                                    print(f"[result_page] ✅ 스타일 분석 메시지 생성 완료: {style_analysis.get('title', '')}", flush=True)
+                                    
+                                except Exception as e:
+                                    print(f"[result_page] ⚠️ 온보딩 데이터 조회 또는 스타일 분석 실패: {e}", flush=True)
+                                    import traceback
+                                    traceback.print_exc()
+                                
                                 # 각 카테고리의 첫 번째 제품 ID 추출 및 제품 정보 조회
                                 recommended_products_list = []
                                 if recommended_products and isinstance(recommended_products, dict):
                                     print(f"[result_page] 추천 제품 정보 조회 시작: {len(recommended_products)}개 카테고리", flush=True)
+                                    
+                                    # 추천 이유 생성기 import
+                                    from api.services.recommendation_reason_generator import reason_generator
+                                    from api.models import Product, ProductReview
                                     
                                     for category_name, product_ids in recommended_products.items():
                                         if not isinstance(product_ids, list) or len(product_ids) == 0:
@@ -471,82 +573,167 @@ def result_page(request):
                                         print(f"[result_page] 최종 PRODUCT_ID: {first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
                                         
                                         try:
-                                            # PRODUCT 테이블에서 PRODUCT_NAME 조회
+                                            # PRODUCT 테이블에서 PRODUCT_NAME, PRICE, MODEL_CODE 조회
                                             # 타입 명시적으로 정수로 전달
                                             print(f"[result_page] PRODUCT 조회 시작: PRODUCT_ID={first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
                                             cur.execute("""
-                                                SELECT PRODUCT_NAME
-                                                FROM PRODUCT
+                                                SELECT PRODUCT_NAME, PRICE, MODEL_CODE
+                                                FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT
                                                 WHERE PRODUCT_ID = :product_id
                                             """, {'product_id': int(first_product_id)})  # 명시적으로 정수 변환
                                             
                                             product_row = cur.fetchone()
                                             product_name = product_row[0] if product_row and product_row[0] else ""
+                                            db_price = product_row[1] if product_row and product_row[1] is not None else 0
+                                            model_code = product_row[2] if product_row and product_row[2] else ""
+                                            
+                                            # PRICE를 정수로 변환
+                                            try:
+                                                db_price = int(float(db_price)) if db_price else 0
+                                            except (ValueError, TypeError):
+                                                db_price = 0
                                             
                                             if not product_name:
                                                 print(f"[result_page] ⚠️ PRODUCT 조회 실패 - PRODUCT_ID={first_product_id}에 해당하는 제품이 없습니다.", flush=True)
                                             
-                                            # PRODUCT_IMAGE 테이블에서 모든 IMAGE_URL 조회 (Raw SQL)
-                                            print(f"[result_page] PRODUCT_IMAGE 조회 시작: PRODUCT_ID={first_product_id} (타입: {type(first_product_id).__name__})", flush=True)
-                                            cur.execute("""
-                                                SELECT IMAGE_URL
-                                                FROM PRODUCT_IMAGE
-                                                WHERE PRODUCT_ID = :product_id
-                                                AND IMAGE_URL IS NOT NULL
-                                                AND IMAGE_URL != ''
-                                                ORDER BY PRODUCT_IMAGE_ID
-                                            """, {'product_id': int(first_product_id)})
+                                            # 가격 계산 로직
+                                            # 판매가 (sale_price): DB에 있는 PRICE 값 그대로
+                                            sale_price = db_price
                                             
-                                            # 즉시 fetchall()로 데이터를 리스트에 저장 (커서 소모 방지)
-                                            image_rows = cur.fetchall()
-                                            print(f"[result_page] Raw 데이터 (rows): {image_rows}", flush=True)
-                                            print(f"[result_page] 조회된 이미지 개수: {len(image_rows)}개", flush=True)
+                                            # 정가 (original_price): PRICE * 1.3 (30% 인상), 소수점 버리고 정수로 변환
+                                            original_price = int(db_price * 1.3) if db_price > 0 else 0
                                             
-                                            image_url = ""
+                                            # 최대 혜택가 (final_price): PRICE * (1 - 0.096) = PRICE * 0.904 (9.6% 할인), 소수점 버리고 정수로 변환
+                                            final_price = int(db_price * 0.904) if db_price > 0 else 0
                                             
-                                            # Python에서 이미지를 우선순위에 따라 필터링
-                                            # 우선순위: 1) large-interior01.jpg로 끝나는 것, 2) interior01.jpg로 끝나는 것, 3) 첫 번째 이미지
-                                            large_interior01_images = []  # large-interior01.jpg로 끝나는 것 (최우선)
-                                            exact_interior01_images = []  # 정확히 interior01.jpg로 끝나는 것
-                                            other_images = []  # 그 외
+                                            print(f"[result_page] 가격 계산 완료 - 판매가: {sale_price}, 정가: {original_price}, 최대 혜택가: {final_price}", flush=True)
                                             
-                                            for row in image_rows:
-                                                url = str(row[0]).strip() if row[0] else ""
-                                                if url:
-                                                    url_lower = url.lower()
-                                                    # large-interior01.jpg로 끝나는지 확인 (최우선)
-                                                    if url_lower.endswith('large-interior01.jpg'):
-                                                        large_interior01_images.append(url)
-                                                    # 정확히 interior01.jpg로 끝나는지 확인 (large-interior01.jpg는 제외)
-                                                    elif url_lower.endswith('interior01.jpg') and not url_lower.endswith('large-interior01.jpg'):
-                                                        exact_interior01_images.append(url)
+                                            # MODEL_CODE를 사용하여 로컬 정적 파일 경로 생성
+                                            # MODEL_CODE 공백 제거 후 파일명 생성
+                                            model_code_clean = model_code.strip() if model_code else ""
+                                            
+                                            if model_code_clean:
+                                                # 로컬 정적 파일 경로 생성: /static/images/Download Images/{MODEL_CODE}.jpg
+                                                product_image_url = f"/static/images/Download Images/{model_code_clean}.jpg"
+                                                print(f"[result_page] ✅ 이미지 경로 생성: MODEL_CODE={model_code_clean} -> {product_image_url}", flush=True)
+                                            else:
+                                                # MODEL_CODE가 없는 경우 기본 이미지 사용
+                                                product_image_url = "/static/images/가전 카테고리/냉장고.png"
+                                                print(f"[result_page] ⚠️ MODEL_CODE가 없어 기본 이미지 사용: PRODUCT_ID={first_product_id}", flush=True)
+                                            
+                                            # 기존 이미지 다운로드 로직 제거 (주석 처리)
+                                            # PRODUCT_IMAGE 테이블 조회 및 다운로드 로직은 더 이상 사용하지 않음
+                                            
+                                            # RECOMMENDED_PRODUCT_SCORES에서 해당 카테고리의 첫 번째 점수 추출
+                                            match_score = None
+                                            if recommended_product_scores and isinstance(recommended_product_scores, dict):
+                                                if category_name in recommended_product_scores:
+                                                    scores_list = recommended_product_scores[category_name]
+                                                    if isinstance(scores_list, list) and len(scores_list) > 0:
+                                                        match_score = scores_list[0]  # 첫 번째 점수 (Index 0)
+                                                        print(f"[result_page] 취향 일치율 찾음: {category_name} = {match_score}%", flush=True)
                                                     else:
-                                                        other_images.append(url)
+                                                        print(f"[result_page] ⚠️ {category_name}의 점수 리스트가 비어있거나 유효하지 않음", flush=True)
+                                                else:
+                                                    print(f"[result_page] ⚠️ {category_name}에 해당하는 점수가 없음", flush=True)
+                                            else:
+                                                print(f"[result_page] ⚠️ RECOMMENDED_PRODUCT_SCORES가 없거나 유효하지 않음", flush=True)
                                             
-                                            print(f"[result_page] 이미지 분류 결과 - large-interior01: {len(large_interior01_images)}, interior01: {len(exact_interior01_images)}, 기타: {len(other_images)}", flush=True)
+                                            # 추천 이유 생성
+                                            recommend_reason = "고객님의 선호도에 맞는 제품입니다."  # 기본값
+                                            try:
+                                                product_obj = Product.objects.filter(product_id=first_product_id).first()
+                                                if product_obj and user_profile:
+                                                    # taste_info는 None으로 전달 (CSV 데이터는 나중에 추가 가능)
+                                                    recommend_reason = reason_generator.generate_reason(
+                                                        product=product_obj,
+                                                        user_profile=user_profile,
+                                                        taste_info=None,
+                                                        score=(match_score / 100.0) if match_score else 0.5
+                                                    )
+                                                    print(f"[result_page] ✅ 추천 이유 생성 완료: {recommend_reason[:50]}...", flush=True)
+                                            except Exception as reason_error:
+                                                print(f"[result_page] ⚠️ 추천 이유 생성 실패: {reason_error}", flush=True)
                                             
-                                            # 우선순위에 따라 이미지 선택
-                                            if large_interior01_images:
-                                                image_url = large_interior01_images[0]
-                                                print(f"[result_page] ✅ 최종 선택: large-interior01.jpg 이미지 = {image_url}", flush=True)
-                                            elif exact_interior01_images:
-                                                image_url = exact_interior01_images[0]
-                                                print(f"[result_page] ✅ 최종 선택: interior01.jpg 이미지 = {image_url}", flush=True)
-                                            elif other_images:
-                                                image_url = other_images[0]
-                                                print(f"[result_page] 최종 선택: 첫 번째 이미지 = {image_url}", flush=True)
+                                            # 구매 리뷰 분석 (최대 3개)
+                                            reviews_data = []
+                                            try:
+                                                reviews = ProductReview.objects.filter(product_id=first_product_id).order_by('-created_at')[:3]
+                                                for review in reviews:
+                                                    reviews_data.append({
+                                                        'star': review.star or '',
+                                                        'review_text': review.review_text[:200] if review.review_text else '',  # 200자 제한
+                                                        'created_at': review.created_at.isoformat() if review.created_at else None
+                                                    })
+                                                print(f"[result_page] ✅ 리뷰 조회 완료: {len(reviews_data)}개", flush=True)
+                                            except Exception as review_error:
+                                                print(f"[result_page] ⚠️ 리뷰 조회 실패: {review_error}", flush=True)
                                             
-                                            if not image_url:
-                                                print(f"[result_page] ⚠️ 제품 이미지를 찾을 수 없음: PRODUCT_ID={first_product_id}", flush=True)
+                                            # PRODUCT_SPEC 테이블에서 스펙 정보 조회
+                                            print(f"[result_page] PRODUCT_SPEC 조회 시작: PRODUCT_ID={first_product_id}", flush=True)
+                                            product_specs = []
+                                            try:
+                                                cur.execute("""
+                                                    SELECT SPEC_KEY, SPEC_VALUE
+                                                    FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT_SPEC
+                                                    WHERE PRODUCT_ID = :product_id
+                                                    ORDER BY SPEC_ID ASC
+                                                """, {'product_id': int(first_product_id)})
+                                                
+                                                spec_rows = cur.fetchall()
+                                                print(f"[result_page] 조회된 스펙 개수: {len(spec_rows)}개", flush=True)
+                                                
+                                                # 스펙 데이터 필터링 및 가공
+                                                for spec_row in spec_rows:
+                                                    spec_key = spec_row[0] if spec_row[0] else ""
+                                                    spec_value = spec_row[1] if spec_row[1] else None
+                                                    
+                                                    # 필터링 조건: None, 빈 문자열, 공백만 있는 경우, "nan"/"null"/"undefined" 제외
+                                                    if spec_value is None:
+                                                        print(f"[result_page] 스펙 제외 (None): {spec_key}", flush=True)
+                                                        continue
+                                                    
+                                                    spec_value_str = str(spec_value).strip()
+                                                    
+                                                    if not spec_value_str or spec_value_str == "":
+                                                        print(f"[result_page] 스펙 제외 (빈 문자열): {spec_key}", flush=True)
+                                                        continue
+                                                    
+                                                    spec_value_lower = spec_value_str.lower()
+                                                    if spec_value_lower in ['nan', 'null', 'undefined']:
+                                                        print(f"[result_page] 스펙 제외 (nan/null/undefined): {spec_key} = {spec_value_str}", flush=True)
+                                                        continue
+                                                    
+                                                    # 유효한 스펙만 리스트에 추가
+                                                    product_specs.append({
+                                                        'key': spec_key,
+                                                        'value': spec_value_str
+                                                    })
+                                                    print(f"[result_page] 스펙 추가: {spec_key} = {spec_value_str}", flush=True)
+                                                
+                                                print(f"[result_page] ✅ 유효한 스펙 개수: {len(product_specs)}개", flush=True)
+                                                
+                                            except Exception as spec_error:
+                                                print(f"[result_page] ⚠️ PRODUCT_SPEC 조회 실패: {spec_error}", flush=True)
+                                                import traceback
+                                                traceback.print_exc()
+                                                product_specs = []  # 오류 시 빈 리스트
                                             
                                             recommended_products_list.append({
                                                 'category': category_name,
                                                 'product_id': first_product_id,
                                                 'product_name': product_name,
-                                                'image_url': image_url
+                                                'image_url': product_image_url,  # MODEL_CODE 기반 로컬 정적 파일 경로
+                                                'match_score': match_score,  # 취향 일치율 추가
+                                                'sale_price': sale_price,  # 판매가
+                                                'original_price': original_price,  # 정가
+                                                'final_price': final_price,  # 최대 혜택가
+                                                'specs': product_specs,  # 스펙 정보 추가
+                                                'reason': recommend_reason,  # 추천 이유 추가
+                                                'reviews': reviews_data  # 구매 리뷰 분석 추가
                                             })
                                             
-                                            print(f"[result_page] 제품 정보 조회 완료: {category_name} - ID={first_product_id}, NAME={product_name[:50] if product_name else 'N/A'}", flush=True)
+                                            print(f"[result_page] 제품 정보 조회 완료: {category_name} - ID={first_product_id}, NAME={product_name[:50] if product_name else 'N/A'}, MATCH_SCORE={match_score}, PRICE={sale_price}", flush=True)
                                             
                                         except Exception as e:
                                             print(f"[result_page] 제품 정보 조회 실패: category={category_name}, product_id={first_product_id}, error={e}", flush=True)
@@ -565,6 +752,15 @@ def result_page(request):
                                 
                                 # 동적 제품 리스트를 위한 별도 데이터 전달 (JSON 직렬화)
                                 context['recommended_products_list'] = json.dumps(recommended_products_list, ensure_ascii=False)
+                                
+                                # 스타일 분석 메시지 추가
+                                if style_analysis:
+                                    context['style_analysis_message'] = json.dumps(style_analysis, ensure_ascii=False)
+                                else:
+                                    context['style_analysis_message'] = json.dumps({
+                                        'title': '나에게 딱 맞는 스타일',
+                                        'subtitle': '당신의 라이프스타일에 맞춰 구성했어요.'
+                                    }, ensure_ascii=False)
                             else:
                                 print(f"[result_page] ⚠️ TASTE_CONFIG 테이블에 TASTE_ID={taste_id} 레코드가 없습니다.", flush=True)
                                 context['taste_config_data'] = json.dumps({
@@ -645,8 +841,198 @@ def result_page(request):
 
 
 def other_recommendations_page(request):
-    """다른 추천 포트폴리오 페이지"""
-    return render(request, "other_recommendations.html")
+    """다른 추천 후보 페이지 - 각 카테고리별 3개 제품 표시"""
+    from django.conf import settings
+    import json
+    from api.db.oracle_client import get_connection
+    
+    # 기본 컨텍스트
+    context = {
+        'categories': [],
+        'session_id': None
+    }
+    
+    try:
+        # session_id 또는 portfolio_id로 온보딩 세션 정보 가져오기
+        session_id = request.GET.get('session_id')
+        portfolio_id = request.GET.get('portfolio_id')
+        
+        context['session_id'] = session_id
+        
+        print(f"[other_recommendations_page] 요청 파라미터: session_id={session_id}, portfolio_id={portfolio_id}", flush=True)
+        
+        # Oracle DB에서 온보딩 세션 정보 조회
+        taste_id = None
+        
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                # session_id로 ONBOARDING_SESSION 조회
+                if session_id:
+                    print(f"[other_recommendations_page] Oracle DB에서 온보딩 세션 조회: session_id={session_id}", flush=True)
+                    cur.execute("""
+                        SELECT TASTE_ID
+                        FROM CAMPUS_24K_LG3_DX7_P3_4.ONBOARDING_SESSION
+                        WHERE SESSION_ID = :session_id
+                    """, {'session_id': session_id})
+                    
+                    row = cur.fetchone()
+                    if row:
+                        taste_id_value = row[0] if row else None
+                        taste_id = int(taste_id_value) if taste_id_value is not None else None
+                        print(f"[other_recommendations_page] TASTE_ID 조회 성공: {taste_id}", flush=True)
+                
+                # portfolio_id로 PORTFOLIO 조회
+                elif portfolio_id:
+                    print(f"[other_recommendations_page] Oracle DB에서 포트폴리오 조회: portfolio_id={portfolio_id}", flush=True)
+                    cur.execute("""
+                        SELECT TASTE_ID
+                        FROM CAMPUS_24K_LG3_DX7_P3_4.PORTFOLIO
+                        WHERE PORTFOLIO_ID = :portfolio_id
+                    """, {'portfolio_id': portfolio_id})
+                    
+                    row = cur.fetchone()
+                    if row:
+                        taste_id_value = row[0] if row else None
+                        taste_id = int(taste_id_value) if taste_id_value is not None else None
+                        print(f"[other_recommendations_page] TASTE_ID 조회 성공: {taste_id}", flush=True)
+                
+                if not taste_id:
+                    print(f"[other_recommendations_page] ⚠️ TASTE_ID를 찾을 수 없음", flush=True)
+                    return render(request, "other_recommendations.html", context)
+                
+                # TASTE_CONFIG 테이블에서 RECOMMENDED_PRODUCTS 조회
+                print(f"[other_recommendations_page] TASTE_CONFIG 조회 시작: taste_id={taste_id}", flush=True)
+                cur.execute("""
+                    SELECT RECOMMENDED_PRODUCTS
+                    FROM CAMPUS_24K_LG3_DX7_P3_4.TASTE_CONFIG
+                    WHERE TASTE_ID = :taste_id
+                """, {'taste_id': taste_id})
+                
+                row = cur.fetchone()
+                if not row or not row[0]:
+                    print(f"[other_recommendations_page] ⚠️ RECOMMENDED_PRODUCTS를 찾을 수 없음", flush=True)
+                    return render(request, "other_recommendations.html", context)
+                
+                # RECOMMENDED_PRODUCTS CLOB 읽기 및 파싱
+                recommended_products = {}
+                try:
+                    clob_data = row[0]
+                    if hasattr(clob_data, 'read'):
+                        products_text = clob_data.read()
+                    else:
+                        products_text = str(clob_data)
+                    if products_text:
+                        recommended_products = json.loads(products_text)
+                        if not isinstance(recommended_products, dict):
+                            recommended_products = {}
+                        print(f"[other_recommendations_page] RECOMMENDED_PRODUCTS 파싱 성공: {len(recommended_products)}개 카테고리", flush=True)
+                except Exception as e:
+                    print(f"[other_recommendations_page] RECOMMENDED_PRODUCTS 파싱 실패: {e}", flush=True)
+                    return render(request, "other_recommendations.html", context)
+                
+                # 각 카테고리별로 3개 제품 정보 조회
+                categories_data = []
+                
+                for category_name, product_ids in recommended_products.items():
+                    if not isinstance(product_ids, list) or len(product_ids) < 3:
+                        print(f"[other_recommendations_page] ⚠️ 카테고리 {category_name}의 제품 ID가 3개 미만: {len(product_ids) if isinstance(product_ids, list) else 0}", flush=True)
+                        continue
+                    
+                    # 3개 제품 ID 추출 (순서 유지)
+                    product_id_list = []
+                    for idx, raw_product_id in enumerate(product_ids[:3]):  # 최대 3개만
+                        try:
+                            if isinstance(raw_product_id, str):
+                                product_id = int(str(raw_product_id).strip())
+                            elif isinstance(raw_product_id, (int, float)):
+                                product_id = int(raw_product_id)
+                            else:
+                                print(f"[other_recommendations_page] ⚠️ 지원하지 않는 PRODUCT_ID 타입: {type(raw_product_id).__name__}", flush=True)
+                                continue
+                            product_id_list.append(product_id)
+                        except (ValueError, TypeError) as e:
+                            print(f"[other_recommendations_page] ⚠️ PRODUCT_ID 변환 실패: {raw_product_id}, 오류: {e}", flush=True)
+                            continue
+                    
+                    if len(product_id_list) < 3:
+                        print(f"[other_recommendations_page] ⚠️ 카테고리 {category_name}의 유효한 제품 ID가 3개 미만", flush=True)
+                        continue
+                    
+                    # PRODUCT 테이블에서 제품 정보 일괄 조회
+                    # IN 절을 사용하여 한 번에 조회하되, 순서를 유지하기 위해 Python에서 재정렬
+                    placeholders = ','.join([':id' + str(i) for i in range(len(product_id_list))])
+                    params = {f'id{i}': pid for i, pid in enumerate(product_id_list)}
+                    
+                    cur.execute(f"""
+                        SELECT PRODUCT_ID, PRODUCT_NAME, MODEL_CODE, RATING, PRICE, URL
+                        FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT
+                        WHERE PRODUCT_ID IN ({placeholders})
+                    """, params)
+                    
+                    product_rows = cur.fetchall()
+                    
+                    # PRODUCT_ID를 키로 하는 딕셔너리 생성 (순서 재정렬을 위해)
+                    product_dict = {}
+                    for prod_row in product_rows:
+                        prod_id = int(prod_row[0])
+                        product_dict[prod_id] = {
+                            'product_id': prod_id,
+                            'product_name': prod_row[1] if prod_row[1] else "",
+                            'model_code': prod_row[2] if prod_row[2] else "",
+                            'rating': float(prod_row[3]) if prod_row[3] is not None else 0.0,
+                            'price': int(float(prod_row[4])) if prod_row[4] is not None else 0,
+                            'url': prod_row[5] if prod_row[5] else ""
+                        }
+                    
+                    # JSON 리스트의 순서대로 제품 정보 재정렬
+                    products_list = []
+                    for idx, product_id in enumerate(product_id_list):
+                        if product_id in product_dict:
+                            product_info = product_dict[product_id].copy()
+                            
+                            # 가격 계산
+                            db_price = product_info['price']
+                            list_price = int(db_price * 1.3) if db_price > 0 else 0
+                            sale_price = db_price
+                            benefit_price = int(db_price * 0.904) if db_price > 0 else 0
+                            
+                            # 천 단위 콤마 포맷팅
+                            product_info['list_price'] = f"{list_price:,}"
+                            product_info['sale_price'] = f"{sale_price:,}"
+                            product_info['benefit_price'] = f"{benefit_price:,}"
+                            
+                            # 첫 번째 제품(Index 0)에만 is_perfect = True
+                            product_info['is_perfect'] = (idx == 0)
+                            
+                            # 이미지 경로 생성 (MODEL_CODE 사용)
+                            model_code_clean = product_info['model_code'].strip() if product_info['model_code'] else ""
+                            if model_code_clean:
+                                product_info['image_url'] = f"/static/images/Download Images/{model_code_clean}.jpg"
+                            else:
+                                product_info['image_url'] = "/static/images/가전 카테고리/냉장고.png"
+                            
+                            products_list.append(product_info)
+                    
+                    if len(products_list) == 3:
+                        categories_data.append({
+                            'name': category_name,
+                            'products': products_list
+                        })
+                        print(f"[other_recommendations_page] ✅ 카테고리 {category_name}: {len(products_list)}개 제품 조회 완료", flush=True)
+                    else:
+                        print(f"[other_recommendations_page] ⚠️ 카테고리 {category_name}: 제품 조회 실패 (예상: 3개, 실제: {len(products_list)}개)", flush=True)
+                
+                context['categories'] = categories_data
+                # JSON 문자열로 변환하여 JavaScript에서 사용할 수 있도록 함
+                context['categories_data_json'] = json.dumps(categories_data, ensure_ascii=False)
+                print(f"[other_recommendations_page] ✅ 전체 조회 완료: {len(categories_data)}개 카테고리", flush=True)
+                
+    except Exception as e:
+        print(f"[other_recommendations_page] ⚠️ 오류 발생: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+    
+    return render(request, "other_recommendations.html", context)
 
 
 def mypage(request):

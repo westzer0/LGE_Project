@@ -38,7 +38,7 @@ def get_image_url_from_product_image_table(
         # PRODUCT_IMAGE 테이블에서 이미지 URL 가져오기
         result = fetch_one("""
             SELECT IMAGE_URL
-            FROM PRODUCT_IMAGE
+            FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT_IMAGE
             WHERE PRODUCT_ID = :product_id
             AND IMAGE_URL IS NOT NULL
             AND IMAGE_URL != ''

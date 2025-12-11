@@ -28,7 +28,7 @@
         }
 
         /* ============================================
-           Header - main.html과 동일한 스타일
+           Header - onboarding.html과 동일한 스타일
            ============================================ */
         .header {
             position: fixed;
@@ -168,15 +168,17 @@
         }
 
         .home-style-icon {
-            width: 14px;
-            height: 14px;
+            width: 58px;
+            height: 36px;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
 
-        .home-style-icon svg {
+        .home-style-icon img {
             width: 100%;
             height: 100%;
-            fill: currentColor;
+            object-fit: contain;
         }
 
         .gnb-item.home-style:hover {
@@ -211,6 +213,55 @@
 
         .gnb-brand-item strong {
             font-weight: 700;
+        }
+
+        /* ============================================
+           Breadcrumb - onboarding.html과 동일한 스타일
+           ============================================ */
+        .breadcrumb {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-bottom: none;
+            z-index: 999;
+            padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+            padding: 7px 0px 0px;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
         }
 
         /* ============================================
@@ -713,7 +764,7 @@
 
 <body>
     <!-- ============================================
-         Header - main.html과 동일한 구조
+         Header - onboarding.html과 동일한 구조
          ============================================ -->
     <header class="header">
         <div class="header-wrapper">
@@ -772,6 +823,19 @@
             </div>
         </div>
     </header>
+
+    <!-- ============================================
+         Breadcrumb - onboarding.html과 동일한 구조
+         ============================================ -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/lge/#">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">가전패키지추천</span>
+            </div>
+        </div>
+    </nav>
 
     <!-- ============================================
          Breadcrumb - main.html과 동일한 구조

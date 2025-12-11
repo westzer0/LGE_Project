@@ -154,9 +154,9 @@
         }
 
         .gnb-item.home-style {
-            background: #FD312E;
+            background: transparent;
             color: #fff;
-            padding: 5px 10px;
+            padding: 5px 0px;
             border-radius: 4px;
             font-weight: 700;
             font-size: 13px;
@@ -168,19 +168,21 @@
         }
 
         .home-style-icon {
-            width: 14px;
-            height: 14px;
+            width: 58px;
+            height: 36px;
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
         }
 
-        .home-style-icon svg {
+        .home-style-icon img {
             width: 100%;
             height: 100%;
-            fill: currentColor;
+            object-fit: contain;
         }
 
         .gnb-item.home-style:hover {
-            background: #B80D3D;
+            background: transparent;
             color: #fff;
         }
 
@@ -210,6 +212,9 @@
         /* ============================================
            Breadcrumb - onboarding.html과 동일한 구조
            ============================================ */
+        /* ============================================
+           Breadcrumb - onboarding.html과 동일한 스타일
+           ============================================ */
         .breadcrumb {
             position: fixed;
             top: 120px;
@@ -219,6 +224,40 @@
             border-bottom: none;
             z-index: 999;
             padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
         }
 
         .breadcrumb-wrapper {
@@ -273,6 +312,7 @@
             height: 600px;
             overflow: hidden;
             margin-bottom: 0;
+            z-index: 1;
         }
 
         .banner-image {
@@ -295,6 +335,12 @@
             align-items: center;
             padding: 60px 40px;
             text-align: center;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .banner-overlay>* {
+            pointer-events: auto;
         }
 
         .banner-overlay.has-overlay {
@@ -538,6 +584,8 @@
         .product-list-section {
             padding: 0;
             background: #fff;
+            position: relative;
+            z-index: 1;
         }
 
         .product-list-container {
@@ -778,7 +826,7 @@
         .price-original {
             font-size: 16px;
             color: #666666;
-            text-decoration: none;
+            text-decoration: line-through;
             text-align: left;
             padding-left: 208px;
             margin-top: 2px;
@@ -895,7 +943,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
+            z-index: 100020 !important;
             align-items: center;
             justify-content: center;
         }
@@ -951,21 +999,29 @@
         }
 
         .spec-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e5e5;
             font-size: 14px;
-            color: #1a1a1a;
-            line-height: 1.8;
-            margin-bottom: 12px;
-            padding-left: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .spec-item:last-child {
-            margin-bottom: 0;
+            border-bottom: none;
         }
 
-        .spec-item:before {
-            content: "• ";
+        .spec-key {
+            font-weight: 700;
+            color: #666;
+            flex: 0 0 auto;
+            margin-right: 16px;
+        }
+
+        .spec-value {
             color: #1a1a1a;
-            margin-right: 8px;
+            text-align: right;
+            flex: 1;
         }
 
         /* ============================================
@@ -979,7 +1035,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 10001;
+            z-index: 100020 !important;
             align-items: center;
             justify-content: center;
             overflow-y: auto;
@@ -1325,7 +1381,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 10001;
+            z-index: 100020 !important;
             align-items: center;
             justify-content: center;
             overflow-y: auto;
@@ -1380,7 +1436,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 10002;
+            z-index: 100020 !important;
             align-items: center;
             justify-content: center;
         }
@@ -1621,7 +1677,7 @@
         }
 
         .consultation-product-benefit-price {
-            color: #1a1a1a;
+            color: #EA1917;
             font-weight: 700;
             font-size: 16px;
         }
@@ -2032,12 +2088,12 @@
             padding: 40px;
             border-top: none;
             position: relative;
-            z-index: 10;
+            z-index: 100010 !important;
         }
 
         .bottom-actions-row-single {
             position: relative;
-            z-index: 10000;
+            z-index: 100010 !important;
         }
 
         .bottom-actions-container {
@@ -2114,7 +2170,7 @@
             align-items: center;
             justify-content: center;
             position: relative !important;
-            z-index: 99999 !important;
+            z-index: 100010 !important;
             pointer-events: auto !important;
             text-decoration: none !important;
             -webkit-user-select: none;
@@ -2132,13 +2188,17 @@
             cursor: pointer !important;
             color: #fff !important;
             pointer-events: auto !important;
-            z-index: 99999 !important;
+            z-index: 100010 !important;
+            position: relative !important;
         }
 
         #otherRecommendationsBtn {
             cursor: pointer !important;
             pointer-events: auto !important;
-            z-index: 99999 !important;
+            z-index: 100010 !important;
+            position: relative !important;
+            width: 100%;
+            max-width: 280px;
         }
 
         .action-button-large:visited {
@@ -2177,7 +2237,7 @@
             padding: 0 20px;
             border-radius: 100px;
             font-size: 16px;
-            z-index: 10000;
+            z-index: 100030 !important;
             opacity: 0;
             transition: opacity 0.3s;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -2455,6 +2515,13 @@
             .bottom-actions {
                 padding: 20px 16px;
                 padding-bottom: calc(20px + env(safe-area-inset-bottom));
+                z-index: 100010 !important;
+                position: relative;
+            }
+
+            .bottom-actions-row-single {
+                z-index: 100010 !important;
+                position: relative;
             }
 
             .bottom-actions-container {
@@ -2744,6 +2811,7 @@
             .bottom-actions {
                 padding: 16px;
                 padding-bottom: calc(16px + env(safe-area-inset-bottom));
+                z-index: 100010 !important;
             }
 
             .action-button,
@@ -2970,11 +3038,8 @@
                     <span class="gnb-separator"></span>
                     <a href="/lge/#" class="gnb-item home-style">
                         <span class="home-style-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                            </svg>
+                            <img src="https://www.lge.co.kr/lg5-common/images/header/logo-living.svg" alt="홈스타일">
                         </span>
-                        홈스타일
                     </a>
                     <div class="gnb-brand">
                         <a href="#" class="gnb-brand-item"><strong>LG</strong> SIGNATURE</a>
@@ -2986,6 +3051,19 @@
             </div>
         </div>
     </header>
+
+    <!-- ============================================
+         Breadcrumb - onboarding.html과 동일한 구조
+         ============================================ -->
+    <nav class="breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <div class="breadcrumb-nav">
+                <a href="/lge/#">홈</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-current">가전패키지추천</span>
+            </div>
+        </div>
+    </nav>
 
     <!-- ============================================
          Breadcrumb - onboarding.html과 동일한 구조
@@ -3092,8 +3170,8 @@
                 </div>
                 <div class="bottom-actions-row-single">
                     <a href="/other-recommendations/" class="action-button-large" id="otherRecommendationsBtn"
-                        onclick="window.location.href='/other-recommendations/'; return false;"
-                        style="cursor: pointer !important; pointer-events: auto !important; position: relative !important; z-index: 99999 !important; display: inline-flex !important; text-decoration: none !important;">
+                        onclick="goToOtherRecommendations(); return false;"
+                        style="cursor: pointer !important; pointer-events: auto !important; position: relative !important; z-index: 100010 !important; display: inline-flex !important; text-decoration: none !important;">
                         다른 추천 후보 확인
                     </a>
                 </div>
@@ -3283,7 +3361,7 @@
                     <img src="/static/images/가전 카테고리/냉장고.png" alt="장바구니" class="cart-icon">
                 </div>
                 <div class="cart-message-text">
-                    <span>장바구니에 담았습니다.</span>
+                    <span>장바구니에 모두 담았습니다.</span>
                 </div>
                 <button class="cart-go-button" onclick="goToCart()">바로가기 ></button>
             </div>
@@ -3586,108 +3664,79 @@
         function openSpecModal(productId) {
             const modal = document.getElementById('specModal');
             const specList = document.getElementById('specList');
+            const bottomActions = document.querySelector('.bottom-actions');
 
-            // 제품 스펙 데이터 가져오기
-            const sessionId = sessionStorage.getItem('onboarding_session_id');
-            if (!sessionId) {
-                alert('세션 정보를 찾을 수 없습니다.');
-                return;
+            // RECOMMENDED_PRODUCTS_LIST에서 해당 제품 찾기
+            const product = RECOMMENDED_PRODUCTS_LIST.find(p => p.product_id === productId);
+
+            if (product && product.specs && Array.isArray(product.specs) && product.specs.length > 0) {
+                displaySpecModal(product);
+                modal.classList.add('active');
+            } else {
+                console.warn(`[openSpecModal] 제품 ID ${productId}의 스펙 정보를 찾을 수 없습니다.`);
+                specList.innerHTML = '<li class="spec-item"><span class="spec-key">알림</span><span class="spec-value">스펙 정보가 없습니다.</span></li>';
+                modal.classList.add('active');
             }
 
-            // 세션에서 제품 정보 가져오기
-            fetch(`/api/onboarding/session/${sessionId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.session && data.session.recommendation_result) {
-                        const recommendations = data.session.recommendation_result.recommendations || [];
-                        const productIds = ['refrigerator', 'microwave', 'dishwasher'];
-                        const index = productIds.indexOf(productId);
-
-                        if (index >= 0 && index < recommendations.length) {
-                            const product = recommendations[index];
-                            displaySpecModal(product);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('스펙 정보 로드 오류:', error);
-                    // 기본 스펙 정보 표시
-                    displaySpecModal(null, productId);
-                });
-
-            modal.classList.add('active');
+            // 모달이 열릴 때 버튼을 모달 아래로 보내기 (모달이 버튼에 가려지지 않도록)
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100005'; // 모달(100020) 아래로
+                otherRecommendationsBtn.style.pointerEvents = 'none'; // 클릭 비활성화
+            }
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100005'; // 모달 아래로
+            }
         }
 
         // 스펙 모달 닫기
         function closeSpecModal() {
             const modal = document.getElementById('specModal');
+            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.remove('active');
+
+            // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100010'; // 원래대로 복원
+                otherRecommendationsBtn.style.pointerEvents = 'auto'; // 클릭 활성화
+            }
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100010'; // 원래대로 복원
+            }
         }
 
         // 스펙 정보 표시
-        function displaySpecModal(product, productId = null) {
+        function displaySpecModal(product) {
             const specList = document.getElementById('specList');
             specList.innerHTML = '';
 
-            if (product && product.product_id) {
-                // API에서 제품 스펙 가져오기
-                fetch(`/api/products/${product.product_id}/spec/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.specs) {
-                            const specs = data.specs;
+            if (product && product.specs && Array.isArray(product.specs) && product.specs.length > 0) {
+                // 백엔드에서 필터링된 스펙 데이터를 그대로 사용
+                product.specs.forEach(spec => {
+                    const li = document.createElement('li');
+                    li.className = 'spec-item';
 
-                            // 스펙 키 매핑 (다양한 키 이름 지원)
-                            const specMappings = {
-                                '전체 용량 (L)': [
-                                    specs['전체 용량 (L)'], specs['전체 용량'], specs['용량'], specs['총 용량'],
-                                    specs['냉장실 용량'], specs['냉동실 용량'], specs['총용량']
-                                ],
-                                '색상': [
-                                    specs['색상'], specs['컬러'], specs['색상명'], specs['제품 색상']
-                                ],
-                                '도어스타일/재질': [
-                                    specs['도어스타일/재질'], specs['도어스타일'], specs['재질'], specs['도어 재질'],
-                                    specs['도어 스타일'], specs['도어 재료']
-                                ],
-                                '냉각방식': [
-                                    specs['냉각방식'], specs['냉각 방식'], specs['냉각 시스템'], specs['냉각기술']
-                                ],
-                                '에너지 소비효율등급': [
-                                    specs['에너지 소비효율등급'], specs['에너지 효율등급'], specs['에너지 효율'],
-                                    specs['효율등급'], specs['에너지등급'], specs['소비효율등급']
-                                ]
-                            };
+                    const keySpan = document.createElement('span');
+                    keySpan.className = 'spec-key';
+                    keySpan.textContent = spec.key || '';
 
-                            // 각 스펙 항목 생성
-                            Object.keys(specMappings).forEach(key => {
-                                const values = specMappings[key];
-                                const value = values.find(v => v !== undefined && v !== null && v !== '');
+                    const valueSpan = document.createElement('span');
+                    valueSpan.className = 'spec-value';
+                    valueSpan.textContent = spec.value || '';
 
-                                if (value) {
-                                    const li = document.createElement('li');
-                                    li.className = 'spec-item';
-                                    li.textContent = `${key}: ${value}`;
-                                    specList.appendChild(li);
-                                }
-                            });
+                    li.appendChild(keySpan);
+                    li.appendChild(valueSpan);
+                    specList.appendChild(li);
+                });
 
-                            // 스펙이 하나도 없으면 메시지 표시
-                            if (specList.children.length === 0) {
-                                specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
-                            }
-                        } else {
-                            // 기본 스펙 정보
-                            specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('스펙 정보 로드 오류:', error);
-                        specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
-                    });
+                // 스펙이 하나도 없으면 메시지 표시
+                if (specList.children.length === 0) {
+                    specList.innerHTML = '<li class="spec-item"><span class="spec-key">알림</span><span class="spec-value">스펙 정보가 없습니다.</span></li>';
+                }
             } else {
                 // 기본 스펙 정보
-                specList.innerHTML = '<li class="spec-item">스펙 정보를 불러올 수 없습니다.</li>';
+                specList.innerHTML = '<li class="spec-item"><span class="spec-key">알림</span><span class="spec-value">스펙 정보가 없습니다.</span></li>';
             }
         }
 
@@ -3722,6 +3771,16 @@
             }
         });
 
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('specModal');
+                if (modal && modal.classList.contains('active')) {
+                    closeSpecModal();
+                }
+            }
+        });
+
         // ============================================
         // vibe 값에 따라 배너 이미지 변경
         // ============================================
@@ -3743,6 +3802,18 @@
             loadProductImages().catch(err => {
                 console.error('제품 이미지 로드 실패:', err);
             });
+
+            // 다른 추천 후보 확인 버튼 초기화 (페이지 로드 시 클릭 가능하도록)
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100010';
+                otherRecommendationsBtn.style.pointerEvents = 'auto';
+                otherRecommendationsBtn.style.cursor = 'pointer';
+            }
+            const bottomActions = document.querySelector('.bottom-actions');
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100010';
+            }
 
             // TasteConfig 데이터 로드 및 적용 (먼저 실행)
             console.log('[initPage] TasteConfig 데이터 로드 시작');
@@ -3890,8 +3961,8 @@
             '세탁기': { image: '{% static "images/가전 카테고리/세탁기.png" %}', dataAppliance: 'washer' },
             '청소기': { image: '{% static "images/가전 카테고리/청소기.png" %}', dataAppliance: 'vacuum' },
             '공기청정기': { image: '{% static "images/가전 카테고리/공기청정기.png" %}', dataAppliance: 'airpurifier' },
-            '전기레인지': { image: '{% static "images/가전 카테고리/전자레인지.png" %}', dataAppliance: 'microwave' },
-            '전자레인지': { image: '{% static "images/가전 카테고리/전자레인지.png" %}', dataAppliance: 'microwave' },
+            '전기레인지': { image: '{% static "images/가전 카테고리/전기레인지.png" %}', dataAppliance: 'microwave' },
+            '전자레인지': { image: '{% static "images/가전 카테고리/전기레인지.png" %}', dataAppliance: 'microwave' },
             '광파오븐': { image: '{% static "images/가전 카테고리/광파오븐.png" %}', dataAppliance: 'microwave' },
             '식기세척기': { image: '{% static "images/가전 카테고리/식기세척기.png" %}', dataAppliance: 'dishwasher' },
             '건조기': { image: '{% static "images/가전 카테고리/건조기.png" %}', dataAppliance: 'dryer' },
@@ -3916,6 +3987,11 @@
         // 추천 제품 리스트 (Django 템플릿에서 전달)
         var RECOMMENDED_PRODUCTS_LIST_JSON = {% if recommended_products_list %}'{{ recommended_products_list|escapejs }}'{% else %} '[]'{% endif %};
         var RECOMMENDED_PRODUCTS_LIST = [];
+
+        // 스타일 분석 메시지 (Django 템플릿에서 전달)
+        var STYLE_ANALYSIS_MESSAGE_JSON = {% if style_analysis_message %}'{{ style_analysis_message|escapejs }}'{% else %} 'null'{% endif %};
+        var STYLE_ANALYSIS_MESSAGE = null;
+
         try {
             if (RECOMMENDED_PRODUCTS_LIST_JSON) {
                 RECOMMENDED_PRODUCTS_LIST = JSON.parse(RECOMMENDED_PRODUCTS_LIST_JSON);
@@ -3923,6 +3999,15 @@
         } catch (e) {
             console.error('[renderDynamicProductList] RECOMMENDED_PRODUCTS_LIST 파싱 실패:', e);
             RECOMMENDED_PRODUCTS_LIST = [];
+        }
+
+        try {
+            if (STYLE_ANALYSIS_MESSAGE_JSON && STYLE_ANALYSIS_MESSAGE_JSON !== 'null') {
+                STYLE_ANALYSIS_MESSAGE = JSON.parse(STYLE_ANALYSIS_MESSAGE_JSON);
+            }
+        } catch (e) {
+            console.error('[loadStyleAnalysis] STYLE_ANALYSIS_MESSAGE 파싱 실패:', e);
+            STYLE_ANALYSIS_MESSAGE = null;
         }
 
         // Session ID 및 Portfolio ID (Django 템플릿에서 전달)
@@ -3965,10 +4050,27 @@
                     console.warn('[loadTasteConfigData] recommended_categories_text:', tasteConfigData.recommended_categories_text);
                 }
 
-                // banner-overlay에 스타일 분석 메시지 추가 (나중에 엑셀 파일 처리)
-                if (tasteConfigData.description) {
-                    // description은 나중에 엑셀 파일의 스타일 분석 메시지로 대체될 예정
-                    console.log('[loadTasteConfigData] Description:', tasteConfigData.description);
+                // 스타일 분석 메시지 업데이트
+                if (STYLE_ANALYSIS_MESSAGE) {
+                    const bannerTitle = document.getElementById('bannerTitle');
+                    const bannerDescription = document.getElementById('bannerDescription');
+
+                    if (bannerTitle && STYLE_ANALYSIS_MESSAGE.title) {
+                        bannerTitle.textContent = STYLE_ANALYSIS_MESSAGE.title;
+                        console.log('[loadTasteConfigData] 스타일 분석 타이틀 업데이트:', STYLE_ANALYSIS_MESSAGE.title);
+                    }
+
+                    if (bannerDescription && STYLE_ANALYSIS_MESSAGE.subtitle) {
+                        bannerDescription.textContent = STYLE_ANALYSIS_MESSAGE.subtitle;
+                        console.log('[loadTasteConfigData] 스타일 분석 서브타이틀 업데이트:', STYLE_ANALYSIS_MESSAGE.subtitle);
+                    }
+                } else if (tasteConfigData.description) {
+                    // fallback: description 사용
+                    const bannerDescription = document.getElementById('bannerDescription');
+                    if (bannerDescription) {
+                        bannerDescription.textContent = tasteConfigData.description;
+                    }
+                    console.log('[loadTasteConfigData] Description 사용:', tasteConfigData.description);
                 }
 
             } catch (error) {
@@ -4139,6 +4241,16 @@
         // ============================================
         // 동적 제품 리스트 생성
         // ============================================
+
+        // 가격 포맷팅 함수 (천 단위 콤마 + "원")
+        function formatPrice(price) {
+            if (price === null || price === undefined || price === 0) {
+                return '-';
+            }
+            // 천 단위 콤마 추가
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원';
+        }
+
         function renderDynamicProductList() {
             console.log('[renderDynamicProductList] 시작');
             console.log('[renderDynamicProductList] RECOMMENDED_PRODUCTS_LIST:', RECOMMENDED_PRODUCTS_LIST);
@@ -4163,6 +4275,17 @@
                 const imageId = `product-image-${product.product_id || index}`;
                 const categorySlug = product.category ? product.category.toLowerCase().replace(/\s+/g, '-') : `product-${index}`;
 
+                // 취향 일치율 처리
+                const matchScore = product.match_score !== null && product.match_score !== undefined ? product.match_score : null;
+                const matchPercent = matchScore !== null ? matchScore : 0;
+                const matchBadgeClass = matchPercent >= 70 ? 'high' : 'low';  // 70% 이상이면 high, 미만이면 low
+                const matchPercentText = matchScore !== null ? `${matchPercent}%` : '-';
+
+                // 가격 처리
+                const originalPrice = formatPrice(product.original_price);
+                const salePrice = formatPrice(product.sale_price);
+                const finalPrice = formatPrice(product.final_price);
+
                 const productHTML = `
                     <div class="product-item" id="${productId}">
                         <div class="product-image-wrapper">
@@ -4170,42 +4293,70 @@
                                 src="${product.image_url || '/static/images/가전 카테고리/냉장고.png'}"
                                 alt="${product.product_name || '제품 이미지'}" 
                                 class="product-image"
+                                referrerpolicy="no-referrer"
                                 onerror="this.src='/static/images/가전 카테고리/냉장고.png'">
                         </div>
                         <div class="product-info">
-                            <div class="match-badge high">취향 <span class="match-percent">89%</span> 일치</div>
+                            <div class="match-badge ${matchBadgeClass}">취향 <span class="match-percent">${matchPercentText}</span> 일치</div>
                             <h2 class="product-title">${product.product_name || '제품명 없음'}</h2>
                             <div class="recommend-reason-box">
                                 <div class="recommend-reason-title">추천 이유</div>
-                                <div class="recommend-reason-text">고객님의 선호도에 맞는 제품입니다.</div>
+                                <div class="recommend-reason-text">${product.reason || '고객님의 선호도에 맞는 제품입니다.'}</div>
                             </div>
                             <div class="review-analysis-box">
                                 <div class="review-analysis-title">구매 리뷰 분석</div>
-                                <div class="review-analysis-text">고객 만족도가 높은 제품입니다.</div>
+                                <div class="review-analysis-text">
+                                    ${product.reviews && product.reviews.length > 0
+                        ? product.reviews.map(review =>
+                            `<div>${review.review_text || '고객 만족도가 높은 제품입니다.'}</div>`
+                        ).join('')
+                        : '고객 만족도가 높은 제품입니다.'}
+                                </div>
                             </div>
                             <div class="price-section">
                                 <div class="price-section-title">구매 가격</div>
                                 <div class="price-row">
                                     <span class="price-label">정가</span>
-                                    <span class="price-original">-</span>
+                                    <span class="price-original">${originalPrice}</span>
                                 </div>
                                 <div class="price-row">
                                     <span class="price-label">판매가</span>
-                                    <span class="price-sale">-</span>
+                                    <span class="price-sale">${salePrice}</span>
                                 </div>
                                 <div class="price-row">
                                     <span class="price-label">최대 혜택가</span>
-                                    <span class="price-final">-</span>
+                                    <span class="price-final">${finalPrice}</span>
                                 </div>
                                 <div class="price-disclaimer">*카드사, 쿠폰 등 최대 할인 혜택을 적용한 가격으로 실제 구매 가격과 다를 수 있습니다</div>
                             </div>
-                            <button class="spec-button" onclick="openSpecModal('${categorySlug}')">스펙 요약 정보</button>
+                            <button class="spec-button" onclick="openSpecModal(${product.product_id})">상세 스펙 보기</button>
                         </div>
                     </div>
                 `;
 
                 container.insertAdjacentHTML('beforeend', productHTML);
                 console.log(`[renderDynamicProductList] 제품 ${index + 1} 생성 완료: ${product.product_name}`);
+
+                // 제품 생성 후 추천 이유와 리뷰 분석 업데이트
+                const productElement = document.getElementById(productId);
+                if (productElement) {
+                    // 추천 이유 업데이트
+                    const reasonTextEl = productElement.querySelector('.recommend-reason-text');
+                    if (reasonTextEl && product.reason) {
+                        reasonTextEl.textContent = product.reason;
+                        console.log(`[renderDynamicProductList] 추천 이유 업데이트: ${product.reason.substring(0, 50)}...`);
+                    }
+
+                    // 리뷰 분석 업데이트
+                    const reviewTextEl = productElement.querySelector('.review-analysis-text');
+                    if (reviewTextEl && product.reviews && product.reviews.length > 0) {
+                        // 리뷰가 있으면 첫 번째 리뷰 텍스트 표시
+                        reviewTextEl.textContent = product.reviews[0].review_text || '고객 만족도가 높은 제품입니다.';
+                        console.log(`[renderDynamicProductList] 리뷰 분석 업데이트: ${product.reviews.length}개 리뷰`);
+                    } else if (reviewTextEl) {
+                        reviewTextEl.textContent = '고객 만족도가 높은 제품입니다.';
+                    }
+                }
             });
 
             console.log(`[renderDynamicProductList] 총 ${RECOMMENDED_PRODUCTS_LIST.length}개 제품 생성 완료`);
@@ -4225,6 +4376,17 @@
             // 다시 추천받기 확인 모달 표시
             const retryModal = document.getElementById('retryOnboardingModal');
             retryModal.classList.add('active');
+
+            // 모달이 열릴 때 버튼을 모달 아래로 보내기
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100005';
+                otherRecommendationsBtn.style.pointerEvents = 'none';
+            }
+            const bottomActions = document.querySelector('.bottom-actions');
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100005';
+            }
         }
 
         // 다시 추천받기 모달 닫기
@@ -4235,6 +4397,17 @@
             if (shouldConfirm) {
                 // 확인 버튼 클릭 시 온보딩 1단계로 이동
                 window.location.href = '/onboarding/';
+            } else {
+                // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
+                const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+                if (otherRecommendationsBtn) {
+                    otherRecommendationsBtn.style.zIndex = '100010';
+                    otherRecommendationsBtn.style.pointerEvents = 'auto';
+                }
+                const bottomActions = document.querySelector('.bottom-actions');
+                if (bottomActions) {
+                    bottomActions.style.zIndex = '100010';
+                }
             }
         }
 
@@ -4249,17 +4422,39 @@
         // 장바구니 모달 열기
         function openCartModal() {
             const modal = document.getElementById('cartModal');
+            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.add('active');
 
             // 제품 목록 로드
             loadCartRecommendedProducts();
             loadCartMultiProducts();
+
+            // 모달이 열릴 때 버튼을 모달 아래로 보내기 (모달이 버튼에 가려지지 않도록)
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100005'; // 모달(100020) 아래로
+                otherRecommendationsBtn.style.pointerEvents = 'none'; // 클릭 비활성화
+            }
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100005'; // 모달 아래로
+            }
         }
 
         // 장바구니 모달 닫기
         function closeCartModal() {
             const modal = document.getElementById('cartModal');
+            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.remove('active');
+
+            // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100010'; // 원래대로 복원
+                otherRecommendationsBtn.style.pointerEvents = 'auto'; // 클릭 활성화
+            }
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100010'; // 원래대로 복원
+            }
         }
 
         // 장바구니로 이동
@@ -4423,6 +4618,7 @@
 
         function openConsultationModal() {
             const modal = document.getElementById('consultationModal');
+            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.add('active');
 
             // 제품 정보 로드
@@ -4449,6 +4645,16 @@
             }
 
             updateSubmitButton();
+
+            // 모달이 열릴 때 버튼을 모달 아래로 보내기 (모달이 버튼에 가려지지 않도록)
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100005'; // 모달(100020) 아래로
+                otherRecommendationsBtn.style.pointerEvents = 'none'; // 클릭 비활성화
+            }
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100005'; // 모달 아래로
+            }
         }
 
         function closeConsultationModal(event) {
@@ -4475,6 +4681,16 @@
                 confirmModal.classList.add('active');
                 // 스크롤 위치 복원
                 window.scrollTo(0, scrollY);
+
+                // 확인 모달이 열릴 때 버튼을 모달 아래로 보내기
+                const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+                if (otherRecommendationsBtn) {
+                    otherRecommendationsBtn.style.zIndex = '100005';
+                    otherRecommendationsBtn.style.pointerEvents = 'none';
+                }
+                if (bottomActions) {
+                    bottomActions.style.zIndex = '100005';
+                }
             } else {
                 // 입력이 없으면 바로 닫기
                 actuallyCloseConsultationModal(scrollY);
@@ -4490,11 +4706,23 @@
                 // 스크롤 위치 저장
                 const scrollY = window.scrollY;
                 actuallyCloseConsultationModal(scrollY);
+            } else {
+                // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기 (계속 진행하기 선택 시)
+                const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+                if (otherRecommendationsBtn) {
+                    otherRecommendationsBtn.style.zIndex = '100010';
+                    otherRecommendationsBtn.style.pointerEvents = 'auto';
+                }
+                const bottomActions = document.querySelector('.bottom-actions');
+                if (bottomActions) {
+                    bottomActions.style.zIndex = '100010';
+                }
             }
         }
 
         function actuallyCloseConsultationModal(savedScrollY) {
             const modal = document.getElementById('consultationModal');
+            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.remove('active');
 
             // 선택 초기화
@@ -4504,6 +4732,16 @@
 
             // 시간 슬롯 숨기기
             document.getElementById('consultationTimeSlots').style.display = 'none';
+
+            // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100010'; // 원래대로 복원
+                otherRecommendationsBtn.style.pointerEvents = 'auto'; // 클릭 활성화
+            }
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100010'; // 원래대로 복원
+            }
 
             // 선택 해제
             document.querySelectorAll('.purpose-btn').forEach(btn => btn.classList.remove('selected'));
@@ -4549,176 +4787,148 @@
 
             productsContainer.innerHTML = '';
 
-            // 먼저 전역 변수에서 추천 제품 정보 사용 시도
-            let recommendations = globalRecommendations;
-            console.log('전역 추천 제품 정보 사용:', recommendations);
+            // 우선순위 1: RECOMMENDED_PRODUCTS_LIST 사용 (PRODUCT_ID로 가져온 제품 정보)
+            let recommendations = [];
+            if (RECOMMENDED_PRODUCTS_LIST && Array.isArray(RECOMMENDED_PRODUCTS_LIST) && RECOMMENDED_PRODUCTS_LIST.length > 0) {
+                console.log('[loadConsultationProducts] RECOMMENDED_PRODUCTS_LIST 사용:', RECOMMENDED_PRODUCTS_LIST);
+                recommendations = RECOMMENDED_PRODUCTS_LIST.map(product => ({
+                    product_id: product.product_id,
+                    product_name: product.product_name,
+                    image_url: product.image_url,
+                    model_code: product.model_code,
+                    original_price: product.original_price,
+                    sale_price: product.sale_price,
+                    final_price: product.final_price
+                }));
+            } else {
+                // 우선순위 2: 전역 변수에서 추천 제품 정보 사용 시도
+                recommendations = globalRecommendations;
+                console.log('[loadConsultationProducts] 전역 추천 제품 정보 사용:', recommendations);
 
-            // 전역 변수에 데이터가 없으면 API 호출 시도
-            if (!recommendations || recommendations.length === 0) {
-                console.log('전역 변수에 데이터가 없어 API 호출 시도');
-                try {
-                    const sessionId = sessionStorage.getItem('onboarding_session_id');
-                    if (!sessionId) {
-                        console.warn('세션 ID가 없습니다. 페이지에서 제품 정보를 가져오는 중...');
-                        // 세션 ID가 없어도 페이지에서 직접 제품 정보 추출 시도
-                        recommendations = getProductsFromPage();
-                        if (!recommendations || recommendations.length === 0) {
-                            productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
-                            return;
-                        }
-                    } else {
-                        const response = await fetch(`/api/onboarding/session/${sessionId}/`);
-                        if (!response.ok) {
-                            console.error('API 응답 오류:', response.status, response.statusText);
-                            // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                // 전역 변수에 데이터가 없으면 API 호출 시도
+                if (!recommendations || recommendations.length === 0) {
+                    console.log('[loadConsultationProducts] 전역 변수에 데이터가 없어 API 호출 시도');
+                    try {
+                        const sessionId = sessionStorage.getItem('onboarding_session_id');
+                        if (!sessionId) {
+                            console.warn('[loadConsultationProducts] 세션 ID가 없습니다. 페이지에서 제품 정보를 가져오는 중...');
+                            // 세션 ID가 없어도 페이지에서 직접 제품 정보 추출 시도
                             recommendations = getProductsFromPage();
                             if (!recommendations || recommendations.length === 0) {
                                 productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
                                 return;
                             }
                         } else {
-                            const data = await response.json();
-                            if (data.success && data.session && data.session.recommendation_result) {
-                                let recommendationResult = data.session.recommendation_result;
-                                if (typeof recommendationResult === 'string') {
-                                    try {
-                                        recommendationResult = JSON.parse(recommendationResult);
-                                    } catch (e) {
-                                        console.error('추천 결과 파싱 오류:', e);
-                                    }
-                                }
-                                recommendations = recommendationResult.recommendations || [];
-                                globalRecommendations = recommendations; // 전역 변수에 저장
-
-                                // API에서 가져온 recommendations가 비어있으면 페이지에서 가져오기 시도
+                            const response = await fetch(`/api/onboarding/session/${sessionId}/`);
+                            if (!response.ok) {
+                                console.error('[loadConsultationProducts] API 응답 오류:', response.status, response.statusText);
+                                // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                                recommendations = getProductsFromPage();
                                 if (!recommendations || recommendations.length === 0) {
-                                    console.log('API 응답에 제품이 없어 페이지에서 제품 정보를 가져오는 중...');
-                                    recommendations = getProductsFromPage();
+                                    productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
+                                    return;
                                 }
                             } else {
-                                // API 응답에 recommendation_result가 없으면 페이지에서 가져오기 시도
-                                console.log('API 응답에 recommendation_result가 없어 페이지에서 제품 정보를 가져오는 중...');
-                                recommendations = getProductsFromPage();
+                                const data = await response.json();
+                                if (data.success && data.session && data.session.recommendation_result) {
+                                    let recommendationResult = data.session.recommendation_result;
+                                    if (typeof recommendationResult === 'string') {
+                                        try {
+                                            recommendationResult = JSON.parse(recommendationResult);
+                                        } catch (e) {
+                                            console.error('[loadConsultationProducts] 추천 결과 파싱 오류:', e);
+                                        }
+                                    }
+                                    recommendations = recommendationResult.recommendations || [];
+                                    globalRecommendations = recommendations; // 전역 변수에 저장
+
+                                    // API에서 가져온 recommendations가 비어있으면 페이지에서 가져오기 시도
+                                    if (!recommendations || recommendations.length === 0) {
+                                        console.log('[loadConsultationProducts] API 응답에 제품이 없어 페이지에서 제품 정보를 가져오는 중...');
+                                        recommendations = getProductsFromPage();
+                                    }
+                                } else {
+                                    // API 응답에 recommendation_result가 없으면 페이지에서 가져오기 시도
+                                    console.log('[loadConsultationProducts] API 응답에 recommendation_result가 없어 페이지에서 제품 정보를 가져오는 중...');
+                                    recommendations = getProductsFromPage();
+                                }
                             }
                         }
+                    } catch (error) {
+                        console.error('[loadConsultationProducts] API 호출 오류:', error);
+                        // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                        recommendations = getProductsFromPage();
+                        if (!recommendations || recommendations.length === 0) {
+                            productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러오는 중 오류가 발생했습니다.</div>';
+                            return;
+                        }
                     }
-                } catch (error) {
-                    console.error('API 호출 오류:', error);
-                    // API 실패 시에도 페이지에 표시된 제품 정보 사용 시도
+                }
+
+                // 여전히 제품이 없으면 페이지에서 직접 가져오기 시도
+                if (!recommendations || recommendations.length === 0) {
+                    console.log('[loadConsultationProducts] 추천 제품이 없어 페이지에서 제품 정보를 가져오는 중...');
                     recommendations = getProductsFromPage();
-                    if (!recommendations || recommendations.length === 0) {
-                        productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러오는 중 오류가 발생했습니다.</div>';
-                        return;
-                    }
+                    console.log('[loadConsultationProducts] 페이지에서 가져온 제품 정보:', recommendations);
                 }
             }
 
-            console.log('최종 추천 제품 목록:', recommendations);
-
-            // 여전히 제품이 없으면 페이지에서 직접 가져오기 시도
             if (!recommendations || recommendations.length === 0) {
-                console.log('추천 제품이 없어 페이지에서 제품 정보를 가져오는 중...');
-                recommendations = getProductsFromPage();
-                console.log('페이지에서 가져온 제품 정보:', recommendations);
-            }
-
-            if (!recommendations || recommendations.length === 0) {
-                console.warn('추천 제품이 없습니다.');
+                console.warn('[loadConsultationProducts] 추천 제품이 없습니다.');
                 productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">추천 제품이 없습니다.</div>';
                 return;
             }
 
-            // 제품 이미지 로드를 위한 비동기 함수
-            const loadProductImageForConsultation = async (productName, imgElement) => {
-                try {
-                    const response = await fetch(`/api/products/image-by-name/?name=${encodeURIComponent(productName)}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success && data.image_url) {
-                            imgElement.src = data.image_url;
-                        }
-                    }
-                } catch (error) {
-                    console.error('제품 이미지 로드 오류:', error);
-                }
+            console.log('[loadConsultationProducts] 최종 추천 제품 목록:', recommendations);
+
+            // 가격 포맷팅 함수 (천 단위 콤마 + "원" 제거)
+            const formatPriceNumber = (price) => {
+                if (!price || price === 0) return '0';
+                // 숫자만 추출하여 천 단위 콤마 추가
+                const numPrice = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, '')) : parseInt(price);
+                return numPrice.toLocaleString('ko-KR');
             };
 
-            // 제품 타입에 따른 가전 카테고리 이미지 매핑
-            const getApplianceCategoryImage = (productName, index) => {
-                const categoryImages = {
-                    '냉장고': '/static/images/가전 카테고리/냉장고.png',
-                    '광파오븐': '/static/images/가전 카테고리/광파오븐.png',
-                    '식기세척기': '/static/images/가전 카테고리/식기세척기.png'
-                };
-
-                // 제품명에서 카테고리 추출
-                if (productName.includes('냉장고')) {
-                    return categoryImages['냉장고'];
-                } else if (productName.includes('광파오븐') || productName.includes('오븐')) {
-                    return categoryImages['광파오븐'];
-                } else if (productName.includes('식기세척기')) {
-                    return categoryImages['식기세척기'];
-                }
-
-                // 인덱스 기반 매핑 (첫 번째: 냉장고, 두 번째: 광파오븐, 세 번째: 식기세척기)
-                const indexMapping = [
-                    categoryImages['냉장고'],
-                    categoryImages['광파오븐'],
-                    categoryImages['식기세척기']
-                ];
-
-                return indexMapping[index] || categoryImages['냉장고'];
-            };
-
-            // 모델명 매핑 (순서대로: 냉장고, 광파오븐, 식기세척기)
-            const modelNumberMapping = ['W826GBB482', 'MLJ32ERS', 'DUE5BGHE'];
-
+            // 제품 렌더링
             recommendations.forEach((product, index) => {
-                console.log(`제품 ${index + 1} 처리 중:`, product);
+                console.log(`[loadConsultationProducts] 제품 ${index + 1} 처리 중:`, product);
                 const productItem = document.createElement('div');
                 productItem.className = 'consultation-product-item';
 
-                // 가전 카테고리 이미지 사용
-                const imageUrl = getApplianceCategoryImage(product.name || '', index);
-                const productName = product.name || '제품명 없음';
-                // 모델명: 제품 데이터에 있으면 사용, 없으면 매핑된 모델명 사용
-                const modelNumber = product.model_number || product.model || (modelNumberMapping[index] || '');
+                // RECOMMENDED_PRODUCTS_LIST에서 가져온 경우
+                const imageUrl = product.image_url || '/static/images/가전 카테고리/냉장고.png';
+                const productName = product.product_name || product.name || '제품명 없음';
+                const modelCode = product.model_code || product.model_number || product.model || '';
 
-                // 가격 정보: 정가, 판매가, 최대 혜택가
+                // 가격 정보: RECOMMENDED_PRODUCTS_LIST 구조에 맞게 처리
                 const originalPrice = product.original_price || product.price || 0;
                 const salePrice = product.sale_price || product.price || 0;
-                const discountPrice = product.discount_price || salePrice || product.price || 0;
+                const finalPrice = product.final_price || product.discount_price || salePrice || product.price || 0;
 
                 // 할인율 계산: 정가 기준으로 최대 혜택가와 비교
-                const discountRate = originalPrice > 0 && discountPrice < originalPrice
-                    ? Math.round((1 - discountPrice / originalPrice) * 100)
+                const discountRate = originalPrice > 0 && finalPrice < originalPrice
+                    ? Math.round((1 - finalPrice / originalPrice) * 100)
                     : 0;
-
-                // 가격 포맷팅 (원 단위 제거, 숫자만)
-                const formatPriceNumber = (price) => {
-                    if (!price || price === 0) return '0';
-                    return formatPrice(price);
-                };
 
                 productItem.innerHTML = `
                     <button class="consultation-product-remove" onclick="removeProduct(this)">×</button>
                     <img src="${imageUrl}" alt="${productName}" class="consultation-product-image" onerror="this.src='/static/images/가전 카테고리/냉장고.png'">
                     <div class="consultation-product-info">
                         <div class="consultation-product-name">${productName}</div>
-                        <div class="consultation-product-model">${modelNumber}</div>
+                        <div class="consultation-product-model">${modelCode}</div>
                         <div class="consultation-product-price-info">
-                            ${discountRate > 0 ? `<span class="consultation-product-discount-rate">${discountRate}%</span>` : ''}
-                            <span class="consultation-product-benefit-price">${formatPriceNumber(discountPrice)}</span>
-                            <span class="consultation-product-original-price">${formatPriceNumber(originalPrice)}</span>
+                            ${discountRate > 0 ? `<span class="consultation-product-discount-rate">최대혜택가</span>` : ''}
+                            <span class="consultation-product-benefit-price">${formatPriceNumber(finalPrice)}원</span>
+                            <span class="consultation-product-original-price">${formatPriceNumber(originalPrice)}원</span>
                         </div>
                     </div>
                 `;
 
                 productsContainer.appendChild(productItem);
-                console.log(`제품 ${index + 1} 추가 완료:`, productName);
+                console.log(`[loadConsultationProducts] 제품 ${index + 1} 추가 완료: ${productName} (모델: ${modelCode})`);
             });
 
-            console.log(`총 ${recommendations.length}개 제품이 추가되었습니다.`);
+            console.log(`[loadConsultationProducts] 총 ${recommendations.length}개 제품이 추가되었습니다.`);
         }
 
         // 페이지에서 직접 제품 정보 가져오기 (API 실패 시 대체 방법)
@@ -5103,6 +5313,17 @@
             const reservationCompleteModal = document.getElementById('reservationCompleteModal');
             reservationCompleteModal.classList.add('active');
 
+            // 예약 완료 모달이 열릴 때 버튼을 모달 아래로 보내기
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100005';
+                otherRecommendationsBtn.style.pointerEvents = 'none';
+            }
+            const bottomActions = document.querySelector('.bottom-actions');
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100005';
+            }
+
             // 실제로는 여기서 API 호출
             // fetch('/api/consultation/reserve/', {
             //     method: 'POST',
@@ -5136,6 +5357,17 @@
 
             // 구매상담예약 모달도 닫기
             closeConsultationModal();
+
+            // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                otherRecommendationsBtn.style.zIndex = '100010';
+                otherRecommendationsBtn.style.pointerEvents = 'auto';
+            }
+            const bottomActions = document.querySelector('.bottom-actions');
+            if (bottomActions) {
+                bottomActions.style.zIndex = '100010';
+            }
 
             if (shouldConfirm) {
                 // 확인 버튼 클릭 시 예약 조회 페이지로 이동
@@ -5211,14 +5443,14 @@
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('다른 추천 후보 확인 버튼 클릭됨 (이벤트 리스너)');
-                    window.location.href = '/other-recommendations/';
+                    goToOtherRecommendations();
                     return false;
                 }, true);
 
                 // 스타일 강제 적용
                 otherRecommendationsBtn.style.cursor = 'pointer';
                 otherRecommendationsBtn.style.pointerEvents = 'auto';
-                otherRecommendationsBtn.style.zIndex = '99999';
+                otherRecommendationsBtn.style.zIndex = '100010';
                 otherRecommendationsBtn.style.position = 'relative';
             }
         });
@@ -5226,11 +5458,46 @@
         // ============================================
         // 다른 추천 후보 확인
         // ============================================
+        function goToOtherRecommendations() {
+            // session_id 또는 portfolio_id를 쿼리 파라미터로 전달
+            let url = '/other-recommendations/';
+            const params = new URLSearchParams();
+
+            // session_id가 있으면 전달
+            if (SESSION_ID) {
+                params.append('session_id', SESSION_ID);
+            }
+
+            // portfolio_id가 있으면 전달
+            if (PORTFOLIO_ID) {
+                params.append('portfolio_id', PORTFOLIO_ID);
+            }
+
+            // URL에서 session_id 가져오기 (fallback)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlSessionId = urlParams.get('session_id');
+            const urlPortfolioId = urlParams.get('portfolio_id');
+
+            if (urlSessionId && !params.has('session_id')) {
+                params.append('session_id', urlSessionId);
+            }
+
+            if (urlPortfolioId && !params.has('portfolio_id')) {
+                params.append('portfolio_id', urlPortfolioId);
+            }
+
+            // 쿼리 파라미터가 있으면 URL에 추가
+            if (params.toString()) {
+                url += '?' + params.toString();
+            }
+
+            console.log('다른 추천 후보 확인 페이지로 이동:', url);
+            window.location.href = url;
+        }
+
+        // 기존 함수 호환성 유지
         function checkOtherRecommendations() {
-            // 다른 추천 후보 확인 페이지로 이동
-            console.log('다른 추천 후보 확인 버튼 클릭됨');
-            window.location.href = '/other-recommendations/';
-            return false;
+            goToOtherRecommendations();
         }
 
 

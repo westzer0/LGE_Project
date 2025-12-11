@@ -35,7 +35,7 @@
             background-color: #fff;
         }
 
-        /* Header - 2단 구조 (fake_lg_main.html 스타일 유지) */
+        /* Header - onboarding.html과 동일한 스타일 */
         .header {
             position: fixed;
             top: 0;
@@ -223,7 +223,7 @@
             font-weight: 700;
         }
 
-        /* Breadcrumb */
+        /* Breadcrumb - onboarding.html과 동일한 스타일 */
         .breadcrumb {
             position: fixed;
             top: 120px;
@@ -233,6 +233,41 @@
             border-bottom: 1px solid #e5e5e5;
             z-index: 999;
             padding: 12px 0;
+        }
+
+        .breadcrumb-wrapper {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 60px;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+            padding: 7px 0px 0px;
+        }
+
+        .breadcrumb-nav a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb-nav a:hover {
+            color: #A50034;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+            margin: 0 4px;
+        }
+
+        .breadcrumb-current {
+            color: #1a1a1a;
+            font-weight: 500;
         }
 
         .breadcrumb-wrapper {
@@ -1150,7 +1185,9 @@
                             <strong>홈스타일 문의</strong> (가구/조명/패브릭 등) : 1544-7599
                         </div>
                         <div class="footer-contact-item">
-                            <strong>LG전자/LG계열사 임직원 구매문의</strong> : (가전)1544-9665, (소모품/구독)1544-7777 <strong>복지몰 제휴사 구매 문의</strong> : (가전)1544-8777, (구독)1544-7777 <strong>사업자몰 구매 문의</strong> : (가전)1544-8777, (구독)1544-7777
+                            <strong>LG전자/LG계열사 임직원 구매문의</strong> : (가전)1544-9665, (소모품/구독)1544-7777 <strong>복지몰 제휴사 구매
+                                문의</strong> : (가전)1544-8777, (구독)1544-7777 <strong>사업자몰 구매 문의</strong> : (가전)1544-8777,
+                            (구독)1544-7777
                         </div>
                         <div class="footer-contact-item">
                             전화상담 시간은 평일 09:00 ~ 18:00 (주말, 공휴일 휴무)입니다. (통화요금 : 발신자 부담)

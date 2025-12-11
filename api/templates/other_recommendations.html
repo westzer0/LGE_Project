@@ -385,6 +385,8 @@
         /* 다시 추천받기 버튼 */
         .retry-recommendation-btn {
             position: absolute;
+            top: -54px;
+            right: 118px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -441,6 +443,10 @@
             transform: translate(44px, 28px);
         }
 
+        .category-products {
+            display: contents;
+        }
+
         .product-cards-container .product-card:first-child {
             transform: translateX(0px);
         }
@@ -470,14 +476,28 @@
             flex-direction: column;
             position: relative;
             margin-top: 0;
+            z-index: 1;
+        }
+
+        .product-card:hover {
+            z-index: 2;
+        }
+
+        .product-card .benefit-info-tooltip.show {
+            z-index: 100040 !important;
         }
 
         .product-card.has-perfect-style {
             border: 2px solid #FF456D;
+            z-index: 10;
         }
 
-        .product-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .product-card.has-perfect-style:hover {
+            z-index: 100041 !important;
+        }
+
+        .product-card.has-perfect-style .benefit-info-tooltip.show {
+            z-index: 100040 !important;
         }
 
         .product-card-header {
@@ -496,8 +516,13 @@
         }
 
         .product-header-image {
+            width: 60px;
+            height: 54px;
             flex-shrink: 0;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .product-tag {
@@ -515,6 +540,18 @@
             height: 28px;
             display: block;
             object-fit: contain;
+        }
+
+        .product-tag-text {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #FF456D 0%, #FF6B8A 100%);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
         }
 
         .product-name {
@@ -554,9 +591,27 @@
             display: none;
         }
 
+        .product-header-image {
+            width: 60px;
+            height: 54px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .product-header-image img {
             width: 60px;
             height: 54px;
+            object-fit: contain;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .product-image {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
             object-fit: contain;
         }
 
@@ -680,6 +735,7 @@
             align-items: center;
             gap: 4px;
             position: relative;
+            z-index: 100040 !important;
         }
 
         .benefit-info-icon {
@@ -709,7 +765,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s;
-            z-index: 1000;
+            z-index: 100040 !important;
             width: 380px;
         }
 
@@ -724,6 +780,8 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             overflow: hidden;
+            position: relative;
+            z-index: 100040 !important;
             width: 380px;
             height: 190px;
             box-sizing: border-box;
@@ -853,7 +911,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 10001;
+            z-index: 100020 !important;
             align-items: center;
             justify-content: center;
             overflow-y: auto;
@@ -1449,7 +1507,7 @@
         }
 
         .consultation-product-benefit-price {
-            color: #1a1a1a;
+            color: #EA1917;
             font-weight: 700;
             font-size: 16px;
         }
@@ -1859,8 +1917,10 @@
             }
 
             .retry-recommendation-btn {
-                position: static;
-                width: 100%;
+                position: absolute;
+                top: -54px;
+                right: 20px;
+                width: auto;
                 justify-content: center;
                 margin-bottom: 20px;
             }
@@ -1966,22 +2026,129 @@
         </h1>
 
         <!-- 카테고리 탭 -->
-        <div class="category-tabs">
-            <button class="category-tab active" data-category="refrigerator" onclick="switchCategory('refrigerator')">
-                냉장고
+        <div class="category-tabs" id="categoryTabs">
+            {% for category in categories %}
+            <button class="category-tab {% if forloop.first %}active{% endif %}" data-category="{{ category.name }}"
+                onclick="switchCategory('{{ category.name }}')">
+                {{ category.name }}
             </button>
-            <button class="category-tab" data-category="microwave" onclick="switchCategory('microwave')">
-                광파오븐
-            </button>
-            <button class="category-tab" data-category="dishwasher" onclick="switchCategory('dishwasher')">
-                식기세척기
-            </button>
+            {% empty %}
+            <button class="category-tab active" data-category="none">카테고리 없음</button>
+            {% endfor %}
         </div>
 
         <!-- 제품 카드 리스트 -->
-        <div class="product-cards-container" id="productCardsContainer">
-            <!-- 제품 카드들이 동적으로 추가됩니다 -->
-            <!-- 다시 추천받기 버튼 -->
+        <div class="product-cards-container" id="productCardsContainer" style="position: relative;">
+            {% for category in categories %}
+            <div class="category-products" data-category="{{ category.name }}"
+                style="display: {% if forloop.first %}contents{% else %}none{% endif %};">
+                {% for product in category.products %}
+                <div class="product-card {% if product.is_perfect %}has-perfect-style{% endif %}"
+                    data-product-id="{{ product.product_id }}">
+                    <!-- Perfect Style 배지 -->
+                    {% if product.is_perfect %}
+                    <div class="product-tag">
+                        <img src="{% static 'images/style.png' %}" alt="Perfect Style"
+                            onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\'product-tag-text\'>Perfect Style</span>';">
+                    </div>
+                    {% endif %}
+
+                    <!-- 제품 카드 헤더 (기존 구조 유지) -->
+                    <div class="product-card-header">
+                        <div class="product-header-info">
+                            <div class="product-name">{{ product.product_name }}</div>
+                            <div class="product-model-rating-row">
+                                <div class="product-model">{{ product.model_code }}</div>
+                                <div class="product-rating">
+                                    <span class="product-rating-stars">★</span>
+                                    <span>{{ product.rating|floatformat:1 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="product-header-image">
+                            <img src="{{ product.image_url }}" alt="{{ product.product_name }}"
+                                onerror="this.src='{% static 'images/가전 카테고리/냉장고.png' %}'">
+                        </div>
+                    </div>
+
+                    <!-- 추천 이유 섹션 -->
+                    <div class="recommend-reason-section">
+                        <div class="recommend-reason-title">추천 이유</div>
+                        <div class="recommend-reason-text">고객님의 선호도에 맞는 제품입니다.</div>
+                    </div>
+
+                    <!-- 스펙 섹션 (가격 포함) -->
+                    <div class="product-specs-section">
+                        <div class="specs-grid">
+                            <!-- 스펙 항목들은 필요시 추가 -->
+                        </div>
+                        <!-- 가격 섹션 (기존 구조 유지) -->
+                        <div class="price-section-in-specs">
+                            <div class="price-row" style="justify-content: flex-end; margin-bottom: 4px;">
+                                <span class="price-list-price">{{ product.list_price }}원</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">판매가</span>
+                                <span class="price-value price-sale">{{ product.sale_price }}원</span>
+                            </div>
+                            <div class="price-row">
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <span class="price-label">최대혜택가</span>
+                                    <span class="benefit-info" onclick="toggleBenefitInfoTooltip(event)">
+                                        <svg class="benefit-info-icon" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                            </path>
+                                        </svg>
+                                        <div class="benefit-info-tooltip">
+                                            <div class="benefit-info-tooltip-content">
+                                                <div class="benefit-info-tooltip-header">
+                                                    <h3>최대혜택가</h3>
+                                                    <button class="benefit-info-tooltip-close"
+                                                        onclick="closeBenefitInfoTooltip(event)">×</button>
+                                                </div>
+                                                <div class="benefit-info-tooltip-body">
+                                                    <ul>
+                                                        <li>최대혜택가는 구매 확정 이후 제공되는 혜택을 계산하여 실제 결제가가 아닌 체감가를 안내합니다.</li>
+                                                        <li>혜택은 적용하는 쿠폰, 카드사에 따라 다르게 계산되어, 실제 적용 시 최대혜택가와 다를 수 있습니다. 상세
+                                                            내용은 구매 혜택 안내에서 확인이 가능합니다.</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </span>
+                                </div>
+                                <span class="price-value price-benefit">{{ product.benefit_price }}원</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 액션 버튼 -->
+                    <div class="product-actions">
+                        <button class="action-btn cart-btn" onclick="addToCart({{ product.product_id }})"
+                            data-product-id="{{ product.product_id }}">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                        </button>
+                        <button class="action-btn consultation-btn primary"
+                            onclick="bookBestShopForProduct('{{ product.model_code }}')">베스트샵 상담예약</button>
+                        <button class="action-btn purchase-btn"
+                            onclick="goToProductPage('{{ product.url|default:"" }}', '{{ product.model_code }}')">구매하러가기</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% empty %}
+            <div class="no-products-message">
+                <p>추천 제품이 없습니다.</p>
+            </div>
+            {% endfor %}
+
+            <!-- 다시 추천받기 버튼 (고정 위치) -->
             <button class="retry-recommendation-btn" id="retryRecommendationBtn" onclick="retryRecommendation()">
                 <svg class="retry-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1993,21 +2160,20 @@
         </div>
     </main>
 
-    <!-- 장바구니 담기 완료 모달 (단일 제품용) -->
-    <div class="cart-modal" id="singleProductCartModal">
+    <!-- 장바구니 담기 완료 모달 -->
+    <div class="cart-modal" id="cartModal">
         <div class="cart-modal-content">
             <!-- 헤더 -->
             <div class="cart-modal-header">
                 <h2 class="cart-modal-title">장바구니 담기 완료</h2>
-                <button class="cart-modal-close" onclick="closeSingleProductCartModal()">×</button>
+                <button class="cart-modal-close" onclick="closeCartModal()">×</button>
             </div>
             <div class="cart-modal-divider"></div>
 
             <!-- 완료 메시지 -->
             <div class="cart-complete-message">
                 <div class="cart-icon-wrapper">
-                    <img id="singleProductCartImage" src="{% static 'images/가전 카테고리/냉장고.png' %}" alt="장바구니"
-                        class="cart-icon">
+                    <img id="cartProductImage" src="{% static 'images/가전 카테고리/냉장고.png' %}" alt="장바구니" class="cart-icon">
                 </div>
                 <div class="cart-message-text">
                     <span>장바구니에 담았습니다.</span>
@@ -2231,6 +2397,20 @@
         </div>
     </div>
 
+    <!-- 다시 추천받기 확인 모달 -->
+    <div class="confirm-modal" id="retryOnboardingModal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-message">취향 분석을 다시 진행하고</div>
+            <div class="confirm-modal-question">새로운 패키지를 추천 받으시겠어요?</div>
+            <div class="confirm-modal-buttons">
+                <button class="confirm-modal-btn confirm-modal-btn-cancel"
+                    onclick="closeRetryOnboardingModal(false)">취소</button>
+                <button class="confirm-modal-btn confirm-modal-btn-confirm"
+                    onclick="closeRetryOnboardingModal(true)">확인</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 전역 변수
         let currentCategory = 'refrigerator';
@@ -2244,16 +2424,51 @@
         let selectedTime = null;
         let selectedPurpose = null;
 
+        // Django 템플릿에서 전달된 categories 데이터를 JavaScript 변수로 변환
+        let categoriesData = [];
+        try {
+            {% if categories_data_json %}
+            const categoriesDataJSON = '{{ categories_data_json|escapejs }}';
+            categoriesData = JSON.parse(categoriesDataJSON);
+            console.log('[categoriesData] Django 템플릿 데이터 로드 완료:', categoriesData);
+            {% else %}
+            console.warn('[categoriesData] Django 템플릿에서 categories_data_json이 없습니다.');
+            {% endif %}
+        } catch (e) {
+            console.error('[categoriesData] 데이터 파싱 오류:', e);
+            categoriesData = [];
+        }
+
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function () {
-            loadOriginalRecommendations();
-            loadRecommendations();
+            // Django 템플릿으로 렌더링된 제품 카드가 있는지 확인
+            const existingProducts = document.querySelectorAll('.category-products .product-card');
+            if (existingProducts.length > 0) {
+                // Django 템플릿으로 렌더링된 데이터가 있으면 JavaScript 동적 생성을 하지 않음
+                console.log('[DOMContentLoaded] Django 템플릿으로 렌더링된 제품 카드 발견:', existingProducts.length, '개');
+                // 카테고리 탭만 활성화
+                const firstCategory = document.querySelector('.category-tab.active');
+                if (firstCategory) {
+                    const categoryName = firstCategory.getAttribute('data-category');
+                    if (categoryName) {
+                        currentCategory = categoryName;
+                    }
+                }
+            } else {
+                // Django 템플릿으로 렌더링된 데이터가 없으면 기존 로직 실행
+                console.log('[DOMContentLoaded] Django 템플릿 데이터 없음, JavaScript 동적 생성 실행');
+                loadOriginalRecommendations();
+                loadRecommendations();
+            }
         });
 
         // 기존 추천 모델 로드 (태깅용)
         async function loadOriginalRecommendations() {
             try {
-                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                // URL 파라미터에서 먼저 찾고, 없으면 세션 스토리지 사용
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id') || sessionStorage.getItem('onboarding_session_id');
+
                 if (!sessionId) {
                     console.warn('세션 ID가 없습니다.');
                     return;
@@ -2284,14 +2499,16 @@
 
         // 뒤로가기 - 추천 화면으로 돌아가기
         function goBackToResult() {
-            // session_id 또는 portfolio_id로 결과 페이지로 이동
-            const sessionId = sessionStorage.getItem('onboarding_session_id');
-            const portfolioId = sessionStorage.getItem('portfolio_id');
-            const redirectUrl = portfolioId 
-                ? `/result/?portfolio_id=${portfolioId}` 
-                : sessionId 
-                ? `/result/?session_id=${sessionId}` 
-                : '/result/';
+            // URL 파라미터에서 먼저 찾고, 없으면 세션 스토리지 사용
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id') || sessionStorage.getItem('onboarding_session_id');
+            const portfolioId = urlParams.get('portfolio_id') || sessionStorage.getItem('portfolio_id');
+
+            const redirectUrl = portfolioId
+                ? `/result/?portfolio_id=${portfolioId}`
+                : sessionId
+                    ? `/result/?session_id=${sessionId}`
+                    : '/result/';
             window.location.href = redirectUrl;
         }
 
@@ -2302,17 +2519,30 @@
             // 탭 활성화 상태 변경
             document.querySelectorAll('.category-tab').forEach(tab => {
                 tab.classList.remove('active');
+                if (tab.getAttribute('data-category') === category) {
+                    tab.classList.add('active');
+                }
             });
-            document.querySelector(`[data-category="${category}"]`).classList.add('active');
 
-            // 해당 카테고리의 제품 표시
-            displayProductsByCategory(category);
+            // 모든 카테고리 제품 숨기기
+            document.querySelectorAll('.category-products').forEach(products => {
+                products.style.display = 'none';
+            });
+
+            // 선택한 카테고리의 제품 표시
+            const selectedProducts = document.querySelector(`.category-products[data-category="${category}"]`);
+            if (selectedProducts) {
+                selectedProducts.style.display = 'contents';
+            }
         }
 
         // 추천 제품 로드
         async function loadRecommendations() {
             try {
-                const sessionId = sessionStorage.getItem('onboarding_session_id');
+                // URL 파라미터에서 먼저 찾고, 없으면 세션 스토리지 사용
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionId = urlParams.get('session_id') || sessionStorage.getItem('onboarding_session_id');
+
                 if (sessionId) {
                     const response = await fetch(`/api/onboarding/session/${sessionId}/`);
                     if (response.ok) {
@@ -2341,6 +2571,13 @@
 
         // 카테고리별 제품 표시
         function displayProductsByCategory(category) {
+            // Django 템플릿으로 렌더링된 제품 카드가 있으면 이 함수를 실행하지 않음
+            const existingProducts = document.querySelectorAll('.category-products .product-card');
+            if (existingProducts.length > 0) {
+                console.log('[displayProductsByCategory] Django 템플릿 데이터가 있으므로 함수 실행 중단');
+                return;
+            }
+
             const container = document.getElementById('productCardsContainer');
             // 제품 카드만 제거하고 다시 추천받기 버튼은 유지
             const retryBtn = container.querySelector('.retry-recommendation-btn');
@@ -2437,30 +2674,8 @@
                 container.appendChild(card);
             });
 
-            // 다시 추천받기 버튼 위치 조정 (3번째 제품 컨테이너 위 오른쪽)
-            setTimeout(() => {
-                positionRetryButton();
-            }, 100);
         }
 
-        // 다시 추천받기 버튼 위치 조정
-        function positionRetryButton() {
-            const container = document.getElementById('productCardsContainer');
-            const retryBtn = document.querySelector('.retry-recommendation-btn');
-            if (!container || !retryBtn) return;
-
-            const cards = container.querySelectorAll('.product-card');
-            if (cards.length >= 3) {
-                const thirdCard = cards[2];
-                const cardRect = thirdCard.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-
-                // 3번째 카드의 오른쪽 상단에 배치
-                retryBtn.style.position = 'absolute';
-                retryBtn.style.top = (cardRect.top - containerRect.top - retryBtn.offsetHeight - 10) + 'px';
-                retryBtn.style.right = (containerRect.right - cardRect.right) + 'px';
-            }
-        }
 
         // 대체 제품 데이터 생성
         function getAlternativeProducts(category) {
@@ -2659,8 +2874,12 @@
                 card.className = 'product-card';
             }
 
+            // 제품 ID 설정
+            const productId = product.product_id || product.id || '0';
+            card.setAttribute('data-product-id', productId);
+
             card.innerHTML = `
-                ${tagText === 'Perfect Style' ? `<span class="product-tag"><img src="/static/images/style.png" alt="Perfect Style"></span>` : ''}
+                ${tagText === 'Perfect Style' ? `<span class="product-tag"><img src="/static/images/style.png" alt="Perfect Style" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'product-tag-text\\'>Perfect Style</span>';"></span>` : ''}
                 <div class="product-card-header">
                     <div class="product-header-info">
                         <div class="product-name">${product.name}</div>
@@ -2726,7 +2945,7 @@
                     </div>
                 </div>
                 <div class="product-actions">
-                    <button class="action-btn cart-btn" onclick="addSingleProductToCart('${product.model}', '${product.name}', '${product.image}')">
+                    <button class="action-btn cart-btn" onclick="addToCart(${product.product_id || product.id || '0'})" data-product-id="${product.product_id || product.id || '0'}">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
@@ -2734,7 +2953,7 @@
                         </svg>
                     </button>
                     <button class="action-btn consultation-btn primary" onclick="bookBestShopForProduct('${product.model}')">베스트샵 상담예약</button>
-                    <button class="action-btn purchase-btn" onclick="goToProductPage('${product.model}')">구매하러가기</button>
+                    <button class="action-btn purchase-btn" onclick="goToProductPage('${product.url || ''}', '${product.model}')">구매하러가기</button>
                 </div>
             `;
 
@@ -2754,11 +2973,58 @@
             return labels[key] || key;
         }
 
-        // 단일 제품 장바구니 담기
-        function addSingleProductToCart(model, name, image) {
-            const modal = document.getElementById('singleProductCartModal');
-            const cartImage = document.getElementById('singleProductCartImage');
-            cartImage.src = image;
+        // 장바구니 담기
+        function addToCart(productId) {
+            // 제품 정보 찾기
+            let product = null;
+
+            // Django 템플릿으로 렌더링된 제품 카드에서 정보 가져오기
+            const productCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+            if (productCard) {
+                const productImage = productCard.querySelector('.product-header-image img');
+                const productName = productCard.querySelector('.product-name');
+                const productModel = productCard.querySelector('.product-model');
+
+                product = {
+                    product_id: productId,
+                    image_url: productImage ? productImage.src : '{% static "images/가전 카테고리/냉장고.png" %}',
+                    product_name: productName ? productName.textContent.trim() : '',
+                    model_code: productModel ? productModel.textContent.trim() : ''
+                };
+            } else {
+                // JavaScript로 동적 생성된 제품에서 찾기
+                const allProducts = document.querySelectorAll('.product-card');
+                allProducts.forEach(card => {
+                    const cardProductId = card.getAttribute('data-product-id');
+                    if (cardProductId == productId) {
+                        const productImage = card.querySelector('.product-header-image img');
+                        const productName = card.querySelector('.product-name');
+                        const productModel = card.querySelector('.product-model');
+
+                        product = {
+                            product_id: productId,
+                            image_url: productImage ? productImage.src : '{% static "images/가전 카테고리/냉장고.png" %}',
+                            product_name: productName ? productName.textContent.trim() : '',
+                            model_code: productModel ? productModel.textContent.trim() : ''
+                        };
+                    }
+                });
+            }
+
+            // 장바구니 모달 열기
+            openCartModal(product);
+        }
+
+        // 장바구니 모달 열기
+        function openCartModal(product = null) {
+            const modal = document.getElementById('cartModal');
+            const cartImage = document.getElementById('cartProductImage');
+
+            // 제품 이미지 설정
+            if (product && product.image_url) {
+                cartImage.src = product.image_url;
+            }
+
             modal.classList.add('active');
 
             // 제품 목록 로드
@@ -2766,74 +3032,135 @@
             loadCartMultiProducts();
         }
 
-        // 단일 제품 장바구니 모달 닫기
-        function closeSingleProductCartModal() {
-            const modal = document.getElementById('singleProductCartModal');
+        // 장바구니 모달 닫기
+        function closeCartModal() {
+            const modal = document.getElementById('cartModal');
             modal.classList.remove('active');
         }
 
         // 베스트샵 상담예약 (구매상담예약 모달 열기)
         function bookBestShopForProduct(model) {
-            // 현재 카테고리의 제품 정보 가져오기
-            const currentProduct = displayedRecommendations.find(p =>
-                (p.model_number || p.model) === model
-            ) || getAlternativeProducts(currentCategory).find(p => p.model === model);
+            console.log('[bookBestShopForProduct] 모델명:', model);
+            console.log('[bookBestShopForProduct] 현재 카테고리:', currentCategory);
 
+            // Django 템플릿으로 렌더링된 제품 카드에서 직접 정보 가져오기
+            const categoryProductsDiv = document.querySelector(`.category-products[data-category="${currentCategory}"]`);
+            let currentProduct = null;
+
+            if (categoryProductsDiv) {
+                const productCards = categoryProductsDiv.querySelectorAll('.product-card');
+                for (const card of productCards) {
+                    const productModelEl = card.querySelector('.product-model');
+                    if (productModelEl && productModelEl.textContent.trim() === model) {
+                        // 제품 정보 추출
+                        const productId = card.getAttribute('data-product-id');
+                        const productNameEl = card.querySelector('.product-name');
+                        const productImageEl = card.querySelector('.product-header-image img');
+                        const priceSaleEl = card.querySelector('.price-value.price-sale');
+                        const priceBenefitEl = card.querySelector('.price-value.price-benefit');
+                        const priceListEl = card.querySelector('.price-list-price');
+
+                        const productName = productNameEl ? productNameEl.textContent.trim() : '';
+                        const imageUrl = productImageEl ? productImageEl.src : '/static/images/가전 카테고리/냉장고.png';
+
+                        // 가격 추출 (숫자만)
+                        const listPrice = priceListEl ? parseInt(priceListEl.textContent.replace(/[^0-9]/g, '')) || 0 : 0;
+                        const salePrice = priceSaleEl ? parseInt(priceSaleEl.textContent.replace(/[^0-9]/g, '')) || 0 : 0;
+                        const benefitPrice = priceBenefitEl ? parseInt(priceBenefitEl.textContent.replace(/[^0-9]/g, '')) || 0 : 0;
+
+                        currentProduct = {
+                            product_id: productId,
+                            product_name: productName,
+                            model_code: model,
+                            image_url: imageUrl,
+                            list_price: listPrice,
+                            sale_price: salePrice,
+                            benefit_price: benefitPrice
+                        };
+                        console.log('[bookBestShopForProduct] 제품 찾음:', currentProduct);
+                        break;
+                    }
+                }
+            }
+
+            // categoriesData에서 찾기 (fallback)
+            if (!currentProduct && categoriesData && categoriesData.length > 0) {
+                const currentCategoryData = categoriesData.find(cat => cat.name === currentCategory);
+                if (currentCategoryData && currentCategoryData.products) {
+                    currentProduct = currentCategoryData.products.find(p => p.model_code === model);
+                    if (currentProduct) {
+                        console.log('[bookBestShopForProduct] categoriesData에서 제품 찾음:', currentProduct);
+                    }
+                }
+            }
+
+            // 제품을 찾았으면 모달 열기
             if (currentProduct) {
                 // 단일 제품 정보를 consultationProducts에 표시
                 openConsultationModalWithProduct(currentProduct);
             } else {
-                // 제품을 찾을 수 없으면 기본 모달 열기
+                // 제품을 찾을 수 없으면 기본 모달 열기 (현재 카테고리의 모든 제품 표시)
+                console.log('[bookBestShopForProduct] 제품을 찾을 수 없어 기본 모달 열기');
                 openConsultationModal();
             }
         }
 
         // 구매상담예약 모달 열기 (단일 제품)
         function openConsultationModalWithProduct(product) {
+            console.log('[openConsultationModalWithProduct] 제품 정보:', product);
             const modal = document.getElementById('consultationModal');
             const productsContainer = document.getElementById('consultationProducts');
+
+            if (!modal) {
+                console.error('[openConsultationModalWithProduct] 모달을 찾을 수 없습니다.');
+                return;
+            }
+
+            if (!productsContainer) {
+                console.error('[openConsultationModalWithProduct] 제품 컨테이너를 찾을 수 없습니다.');
+                return;
+            }
 
             // 제품 정보 표시
             productsContainer.innerHTML = '';
             const productItem = document.createElement('div');
             productItem.className = 'consultation-product-item';
 
-            const imageUrl = product.image || '/static/images/가전 카테고리/냉장고.png';
-            const productName = product.name || '제품명 없음';
-            const modelNumber = product.model_number || product.model || '';
-            const originalPrice = product.original_price || product.originalPrice || 0;
-            const discountPrice = product.discount_price || product.benefitPrice || product.price || 0;
+            const imageUrl = product.image_url || product.image || '/static/images/가전 카테고리/냉장고.png';
+            const productName = product.product_name || product.name || '제품명 없음';
+            const modelCode = product.model_code || product.model_number || product.model || '';
+
+            // 가격 정보 (RECOMMENDED_PRODUCTS_LIST 구조에 맞게 처리)
+            const listPrice = product.list_price || product.original_price || product.originalPrice || 0;
+            const salePrice = product.sale_price || product.price || 0;
+            const benefitPrice = product.benefit_price || product.discount_price || product.benefitPrice || salePrice || 0;
 
             const formatPrice = (price) => {
-                return Math.round(price).toLocaleString('ko-KR');
+                if (!price || price === 0) return '0';
+                const numPrice = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, '')) : parseInt(price);
+                return numPrice.toLocaleString('ko-KR');
             };
 
-            const discountRate = originalPrice > 0 && discountPrice < originalPrice
-                ? Math.round((1 - discountPrice / originalPrice) * 100)
+            const discountRate = listPrice > 0 && benefitPrice < listPrice
+                ? Math.round((1 - benefitPrice / listPrice) * 100)
                 : 0;
 
             productItem.innerHTML = `
                 <img src="${imageUrl}" alt="${productName}" class="consultation-product-image" onerror="this.src='/static/images/가전 카테고리/냉장고.png'">
                 <div class="consultation-product-info">
                     <div class="consultation-product-name">${productName}</div>
-                    <div class="consultation-product-model">${modelNumber}</div>
+                    <div class="consultation-product-model">${modelCode}</div>
                     <div class="consultation-product-price-info">
-                        ${discountRate > 0 ? `<span class="consultation-product-discount-rate">${discountRate}%</span>` : ''}
-                        <span class="consultation-product-benefit-price">${formatPrice(discountPrice)}</span>
-                        <span class="consultation-product-original-price">${formatPrice(originalPrice)}</span>
+                        ${discountRate > 0 ? `<span class="consultation-product-discount-rate">최대혜택가</span>` : ''}
+                        <span class="consultation-product-benefit-price">${formatPrice(benefitPrice)}원</span>
+                        <span class="consultation-product-original-price">${formatPrice(listPrice)}원</span>
                     </div>
                 </div>
             `;
 
             productsContainer.appendChild(productItem);
 
-            // 모달 열기
-            openConsultationModal();
-        }
-
-        // 구매상담예약 모달 열기
-        function openConsultationModal() {
-            const modal = document.getElementById('consultationModal');
+            // 모달 열기 (제품 정보는 이미 추가했으므로 loadConsultationProducts 호출하지 않음)
             modal.classList.add('active');
 
             // 캘린더 초기화
@@ -2863,6 +3190,166 @@
                 notesTextarea.addEventListener('input', function () {
                     notesCounter.textContent = this.value.length;
                 });
+            }
+
+            updateSubmitButton();
+        }
+
+        // 구매상담예약 모달 열기
+        function openConsultationModal() {
+            const modal = document.getElementById('consultationModal');
+            modal.classList.add('active');
+
+            // 제품 정보 로드
+            loadConsultationProducts();
+
+            // 캘린더 초기화
+            initCalendar();
+
+            // 초기화
+            selectedTime = null;
+            selectedPurpose = null;
+
+            // 기본적으로 오늘 날짜 선택
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            selectedDate = today;
+
+            // 오늘 날짜가 선택된 상태로 표시
+            renderCalendar();
+
+            // 오늘 날짜면 시간 슬롯 표시
+            if (selectedDate) {
+                updateAvailableTimes(selectedDate);
+            }
+
+            // 텍스트 영역 글자 수 카운터 초기화
+            const notesTextarea = document.getElementById('consultationNotes');
+            const notesCounter = document.getElementById('notesCounter');
+            if (notesTextarea && notesCounter) {
+                notesTextarea.addEventListener('input', function () {
+                    notesCounter.textContent = this.value.length;
+                });
+            }
+        }
+
+        // 제품 정보 로드 (현재 카테고리의 모든 제품 표시)
+        function loadConsultationProducts() {
+            const productsContainer = document.getElementById('consultationProducts');
+            if (!productsContainer) {
+                console.error('[loadConsultationProducts] 제품 컨테이너를 찾을 수 없습니다.');
+                return;
+            }
+
+            productsContainer.innerHTML = '';
+
+            // 현재 카테고리의 제품 찾기
+            let currentCategoryProducts = [];
+            if (categoriesData && categoriesData.length > 0) {
+                const currentCategoryData = categoriesData.find(cat => cat.name === currentCategory);
+                if (currentCategoryData && currentCategoryData.products) {
+                    currentCategoryProducts = currentCategoryData.products;
+                    console.log('[loadConsultationProducts] 현재 카테고리 제품:', currentCategoryProducts);
+                }
+            }
+
+            // Django 템플릿으로 렌더링된 제품 카드에서 정보 가져오기 (fallback)
+            if (currentCategoryProducts.length === 0) {
+                console.log('[loadConsultationProducts] categoriesData에서 제품을 찾지 못해 DOM에서 가져오기 시도');
+                const categoryProductsDiv = document.querySelector(`.category-products[data-category="${currentCategory}"]`);
+                if (categoryProductsDiv) {
+                    const productCards = categoryProductsDiv.querySelectorAll('.product-card');
+                    productCards.forEach(card => {
+                        const productId = card.getAttribute('data-product-id');
+                        const productNameEl = card.querySelector('.product-name');
+                        const productModelEl = card.querySelector('.product-model');
+                        const productImageEl = card.querySelector('.product-header-image img, .product-image');
+                        const priceSaleEl = card.querySelector('.price-value.price-sale');
+                        const priceBenefitEl = card.querySelector('.price-value.price-benefit');
+                        const priceListEl = card.querySelector('.price-list-price');
+
+                        if (productNameEl) {
+                            const productName = productNameEl.textContent.trim();
+                            const modelCode = productModelEl ? productModelEl.textContent.trim() : '';
+                            const imageUrl = productImageEl ? productImageEl.src : '/static/images/가전 카테고리/냉장고.png';
+
+                            // 가격 추출 (숫자만)
+                            const listPrice = priceListEl ? parseInt(priceListEl.textContent.replace(/[^0-9]/g, '')) || 0 : 0;
+                            const salePrice = priceSaleEl ? parseInt(priceSaleEl.textContent.replace(/[^0-9]/g, '')) || 0 : 0;
+                            const benefitPrice = priceBenefitEl ? parseInt(priceBenefitEl.textContent.replace(/[^0-9]/g, '')) || 0 : 0;
+
+                            currentCategoryProducts.push({
+                                product_id: productId,
+                                product_name: productName,
+                                model_code: modelCode,
+                                image_url: imageUrl,
+                                list_price: listPrice,
+                                sale_price: salePrice,
+                                benefit_price: benefitPrice
+                            });
+                        }
+                    });
+                }
+            }
+
+            if (currentCategoryProducts.length === 0) {
+                console.warn('[loadConsultationProducts] 제품 정보를 찾을 수 없습니다.');
+                productsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">제품 정보를 불러올 수 없습니다.</div>';
+                return;
+            }
+
+            // 가격 포맷팅 함수
+            const formatPriceNumber = (price) => {
+                if (!price || price === 0) return '0';
+                const numPrice = typeof price === 'string' ? parseInt(price.replace(/[^0-9]/g, '')) : parseInt(price);
+                return numPrice.toLocaleString('ko-KR');
+            };
+
+            // 제품 렌더링
+            currentCategoryProducts.forEach((product, index) => {
+                console.log(`[loadConsultationProducts] 제품 ${index + 1} 처리 중:`, product);
+                const productItem = document.createElement('div');
+                productItem.className = 'consultation-product-item';
+
+                const imageUrl = product.image_url || '/static/images/가전 카테고리/냉장고.png';
+                const productName = product.product_name || '제품명 없음';
+                const modelCode = product.model_code || '';
+
+                // 가격 정보
+                const listPrice = product.list_price || 0;
+                const salePrice = product.sale_price || 0;
+                const benefitPrice = product.benefit_price || 0;
+
+                // 할인율 계산: 정가 기준으로 최대 혜택가와 비교
+                const discountRate = listPrice > 0 && benefitPrice < listPrice
+                    ? Math.round((1 - benefitPrice / listPrice) * 100)
+                    : 0;
+
+                productItem.innerHTML = `
+                    <img src="${imageUrl}" alt="${productName}" class="consultation-product-image" onerror="this.src='/static/images/가전 카테고리/냉장고.png'">
+                    <div class="consultation-product-info">
+                        <div class="consultation-product-name">${productName}</div>
+                        <div class="consultation-product-model">${modelCode}</div>
+                        <div class="consultation-product-price-info">
+                            ${discountRate > 0 ? `<span class="consultation-product-discount-rate">최대혜택가</span>` : ''}
+                            <span class="consultation-product-benefit-price">${formatPriceNumber(benefitPrice)}원</span>
+                            <span class="consultation-product-original-price">${formatPriceNumber(listPrice)}원</span>
+                        </div>
+                    </div>
+                `;
+
+                productsContainer.appendChild(productItem);
+                console.log(`[loadConsultationProducts] 제품 ${index + 1} 추가 완료: ${productName} (모델: ${modelCode})`);
+            });
+
+            console.log(`[loadConsultationProducts] 총 ${currentCategoryProducts.length}개 제품이 추가되었습니다.`);
+        }
+
+        // 제품 제거 함수
+        function removeProduct(btn) {
+            const productItem = btn.closest('.consultation-product-item');
+            if (productItem) {
+                productItem.remove();
             }
         }
 
@@ -2957,11 +3444,17 @@
         }
 
         // 제품 상세 페이지로 이동
-        function goToProductPage(model) {
-            // LG닷컴 제품 페이지 URL로 이동
-            // 실제 제품 모델명에 따라 URL 구성이 달라질 수 있음
-            const productUrl = `https://www.lge.co.kr/kr/search/${encodeURIComponent(model)}`;
-            window.open(productUrl, '_blank');
+        function goToProductPage(url, model) {
+            // URL이 있으면 해당 URL 사용, 없으면 모델명으로 검색
+            if (url && url.trim() !== '') {
+                window.open(url, '_blank');
+            } else if (model) {
+                // URL이 없으면 모델명으로 검색
+                const productUrl = `https://www.lge.co.kr/kr/search/${encodeURIComponent(model)}`;
+                window.open(productUrl, '_blank');
+            } else {
+                console.warn('제품 URL과 모델명이 모두 없습니다.');
+            }
         }
 
         // 장바구니로 이동
@@ -3116,16 +3609,31 @@
             event.stopPropagation();
             const benefitInfo = event.target.closest('.benefit-info');
             const tooltip = benefitInfo.querySelector('.benefit-info-tooltip');
+            const productCard = benefitInfo.closest('.product-card');
 
-            // 다른 모든 툴팁 닫기
+            // 다른 모든 툴팁 닫기 및 z-index 복원
             document.querySelectorAll('.benefit-info-tooltip').forEach(t => {
                 if (t !== tooltip) {
                     t.classList.remove('show');
+                    const otherCard = t.closest('.product-card');
+                    if (otherCard) {
+                        otherCard.style.zIndex = '';
+                    }
                 }
             });
 
             // 현재 툴팁 토글
+            const isShowing = tooltip.classList.contains('show');
             tooltip.classList.toggle('show');
+
+            // 모달이 열릴 때 해당 제품 카드의 z-index를 최상위로 설정
+            if (productCard) {
+                if (tooltip.classList.contains('show')) {
+                    productCard.style.zIndex = '100041';
+                } else {
+                    productCard.style.zIndex = '';
+                }
+            }
         }
 
         // 최대 혜택가 인포 툴팁 닫기
@@ -3136,6 +3644,11 @@
             const tooltip = event.target.closest('.benefit-info-tooltip');
             if (tooltip) {
                 tooltip.classList.remove('show');
+                // 제품 카드의 z-index 복원
+                const productCard = tooltip.closest('.product-card');
+                if (productCard) {
+                    productCard.style.zIndex = '';
+                }
             }
         }
 
@@ -3147,13 +3660,23 @@
             const benefitInfo = event.target.closest('.benefit-info');
             if (benefitInfo) {
                 const tooltip = benefitInfo.querySelector('.benefit-info-tooltip');
+                const productCard = benefitInfo.closest('.product-card');
                 if (tooltip) {
+                    // 다른 모든 툴팁 닫기 및 z-index 복원
                     document.querySelectorAll('.benefit-info-tooltip').forEach(t => {
                         if (t !== tooltip) {
                             t.classList.remove('show');
+                            const otherCard = t.closest('.product-card');
+                            if (otherCard) {
+                                otherCard.style.zIndex = '';
+                            }
                         }
                     });
                     tooltip.classList.add('show');
+                    // 모달이 열릴 때 해당 제품 카드의 z-index를 최상위로 설정
+                    if (productCard) {
+                        productCard.style.zIndex = '100041';
+                    }
                 }
             }
         }
@@ -3162,28 +3685,30 @@
         function closeBenefitInfo() {
             document.querySelectorAll('.benefit-info-tooltip').forEach(tooltip => {
                 tooltip.classList.remove('show');
+                // 제품 카드의 z-index 복원
+                const productCard = tooltip.closest('.product-card');
+                if (productCard) {
+                    productCard.style.zIndex = '';
+                }
             });
         }
 
         // 다시 추천 받기
         function retryRecommendation() {
-            const btn = document.getElementById('retryRecommendationBtn');
-            if (btn) {
-                btn.classList.add('loading');
+            // 다시 추천받기 확인 모달 표시
+            const retryModal = document.getElementById('retryOnboardingModal');
+            retryModal.classList.add('active');
+        }
+
+        // 다시 추천받기 모달 닫기
+        function closeRetryOnboardingModal(shouldConfirm) {
+            const retryModal = document.getElementById('retryOnboardingModal');
+            retryModal.classList.remove('active');
+
+            if (shouldConfirm) {
+                // 확인 버튼 클릭 시 온보딩 1단계로 이동
+                window.location.href = '/onboarding/';
             }
-
-            // 새로운 3가지 모델로 리프레시
-            // 기존 추천과 중복되지 않는 제품으로 교체
-            const newProducts = generateNewRecommendations(currentCategory);
-            displayedRecommendations = newProducts;
-            displayProductsByCategory(currentCategory);
-
-            // 애니메이션 종료 (한 바퀴 회전 후)
-            setTimeout(() => {
-                if (btn) {
-                    btn.classList.remove('loading');
-                }
-            }, 600);
         }
 
         // 새로운 추천 제품 생성 (중복되지 않게)
