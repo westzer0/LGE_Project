@@ -1186,7 +1186,7 @@ class OnboardingSessionCategories(models.Model):
     주의: 이 모델은 실제로 사용되지 않습니다.
     실제 코드에서는 OnboardSessCategories (ONBOARD_SESS_CATEGORIES)를 사용합니다.
     """
-    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_categories', db_column='session_id', primary_key=True, verbose_name='세션')
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_categories', db_column='session_id', verbose_name='세션')
     category_name = models.CharField(max_length=50, verbose_name='카테고리명')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
     
@@ -1207,7 +1207,7 @@ class OnboardingSessionMainSpaces(models.Model):
     주의: 이 모델은 실제로 사용되지 않습니다.
     실제 코드에서는 OnboardSessMainSpaces (ONBOARD_SESS_MAIN_SPACES)를 사용합니다.
     """
-    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_main_spaces', db_column='session_id', primary_key=True, verbose_name='세션')
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='session_main_spaces', db_column='session_id', verbose_name='세션')
     main_space = models.CharField(max_length=50, verbose_name='주요 공간')
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name='생성 일시')
     
@@ -1247,7 +1247,7 @@ class OnboardingSessionPriorities(models.Model):
 # ONBOARD_SESS_* 테이블들 (ERD에 중복으로 나타남, 별칭으로 처리)
 class OnboardSessCategories(models.Model):
     """ONBOARD_SESS_CATEGORIES (ONBOARDING_SESSION_CATEGORIES와 동일)"""
-    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_categories', db_column='session_id', primary_key=True)
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_categories', db_column='session_id')
     category_name = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     
@@ -1258,7 +1258,7 @@ class OnboardSessCategories(models.Model):
 
 class OnboardSessMainSpaces(models.Model):
     """ONBOARD_SESS_MAIN_SPACES (ONBOARDING_SESSION_MAIN_SPACES와 동일)"""
-    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_main_spaces', db_column='session_id', primary_key=True)
+    session = models.ForeignKey(OnboardingSession, on_delete=models.CASCADE, related_name='onboard_sess_main_spaces', db_column='session_id')
     main_space = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     

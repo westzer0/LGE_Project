@@ -270,11 +270,20 @@ class RecommendationReasonGenerator:
         score: float
     ) -> str:
         """기본 추천 문구 생성 (점수 기반)"""
-        priority = user_profile.get('priority', 'value')
+        priority_raw = user_profile.get('priority', 'value')
+        # priority가 리스트인 경우 첫 번째 값 사용
+        if isinstance(priority_raw, list):
+            priority = priority_raw[0] if priority_raw and len(priority_raw) > 0 else 'value'
+        else:
+            priority = priority_raw if priority_raw else 'value'
+        
         priority_labels = {
             'design': '디자인',
             'tech': '기술 사양',
             'eco': '에너지 효율',
+            'energy': '에너지 효율',
+            'cost_effective': '가성비',
+            'ai_smart': 'AI 스마트',
             'value': '가성비',
         }
         
@@ -406,15 +415,33 @@ class RecommendationReasonGenerator:
         
         vibe = user_profile.get('vibe', '').lower()
         priority_raw = user_profile.get('priority', '')
+        # priority가 리스트인 경우 첫 번째 값 사용 (템플릿 매칭을 위해)
         if isinstance(priority_raw, list):
-            priority = ', '.join(priority_raw).lower() if priority_raw else ''
+            priority = priority_raw[0].lower() if priority_raw and len(priority_raw) > 0 else ''
         else:
             priority = str(priority_raw).lower() if priority_raw else ''
+        
+        # vibe 매핑 (pop -> modern, 기타 등)
+        vibe_mapping = {
+            'pop': 'modern',  # pop은 modern로 매핑
+            'trendy': 'modern',
+            'classic': 'cozy',
+        }
+        mapped_vibe = vibe_mapping.get(vibe, vibe)
+        
+        # priority 매핑 (energy -> eco, cost_effective -> value, ai_smart -> tech)
+        priority_mapping = {
+            'energy': 'eco',
+            'cost_effective': 'value',
+            'ai_smart': 'tech',
+        }
+        mapped_priority = priority_mapping.get(priority, priority)
+        
         household_size = user_profile.get('household_size', 2)
         household_category = self._get_household_category(household_size)
         
-        # 정확한 매칭 시도
-        key = (vibe, priority, household_category)
+        # 정확한 매칭 시도 (매핑된 값 사용)
+        key = (mapped_vibe, mapped_priority, household_category)
         if key in self.taste_reason_templates:
             templates = self.taste_reason_templates[key]
             # 제품 카테고리에 맞게 템플릿 선택
@@ -424,7 +451,7 @@ class RecommendationReasonGenerator:
         
         # 부분 매칭 시도 (vibe만 매칭)
         for (v, p, h), templates in self.taste_reason_templates.items():
-            if v == vibe and h == household_category:
+            if v == mapped_vibe and h == household_category:
                 selected = random.choice(templates)
                 return self._customize_template(selected, user_profile, product)
         

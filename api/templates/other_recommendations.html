@@ -639,6 +639,30 @@
             line-height: 1.5;
         }
 
+        .review-analysis-section {
+            padding: 12px 16px;
+            border-top: none;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            min-height: 55px;
+            background: #F4F4F4;
+            border-radius: 5px;
+            margin: 0 16px 10px 16px;
+        }
+
+        .review-analysis-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #FF456D;
+            margin-bottom: 6px;
+        }
+
+        .review-analysis-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
         .product-specs-section {
             padding: 12px 16px;
             border-top: none;
@@ -2074,7 +2098,25 @@
                     <!-- 추천 이유 섹션 -->
                     <div class="recommend-reason-section">
                         <div class="recommend-reason-title">추천 이유</div>
-                        <div class="recommend-reason-text">고객님의 선호도에 맞는 제품입니다.</div>
+                        <div class="recommend-reason-text">
+                            {% if product.recommendation_reason %}
+                            {{ product.recommendation_reason }}
+                            {% else %}
+                            고객님의 선호도에 맞는 제품입니다.
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- 구매리뷰 분석 섹션 -->
+                    <div class="review-analysis-section">
+                        <div class="review-analysis-title">구매리뷰 분석</div>
+                        <div class="review-analysis-text">
+                            {% if product.review_summary %}
+                            {{ product.review_summary }}
+                            {% else %}
+                            다양한 고객들이 만족하며 사용 중인 제품이에요.
+                            {% endif %}
+                        </div>
                     </div>
 
                     <!-- 스펙 섹션 (가격 포함) -->
@@ -2429,13 +2471,17 @@
         try {
             {% if categories_data_json %}
             const categoriesDataJSON = '{{ categories_data_json|escapejs }}';
+            console.log('[categoriesData] JSON 문자열 길이:', categoriesDataJSON.length);
+            console.log('[categoriesData] JSON 문자열 (첫 500자):', categoriesDataJSON.substring(0, 500));
             categoriesData = JSON.parse(categoriesDataJSON);
             console.log('[categoriesData] Django 템플릿 데이터 로드 완료:', categoriesData);
+            console.log('[categoriesData] 카테고리 개수:', categoriesData.length);
             {% else %}
             console.warn('[categoriesData] Django 템플릿에서 categories_data_json이 없습니다.');
             {% endif %}
         } catch (e) {
             console.error('[categoriesData] 데이터 파싱 오류:', e);
+            console.error('[categoriesData] 오류 발생한 JSON 문자열:', categoriesDataJSON);
             categoriesData = [];
         }
 
@@ -2898,7 +2944,11 @@
                 </div>
                 <div class="recommend-reason-section">
                     <div class="recommend-reason-title">추천 이유</div>
-                    <div class="recommend-reason-text">${product.reason}</div>
+                    <div class="recommend-reason-text">${product.recommendation_reason || product.reason || '고객님의 선호도에 맞는 제품입니다.'}</div>
+                </div>
+                <div class="review-analysis-section">
+                    <div class="review-analysis-title">구매리뷰 분석</div>
+                    <div class="review-analysis-text">${product.review_summary || '다양한 고객들이 만족하며 사용 중인 제품이에요.'}</div>
                 </div>
                 <div class="product-specs-section">
                     <div class="specs-grid">

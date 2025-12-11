@@ -23,6 +23,7 @@ from .services.kakao_auth_service import kakao_auth_service
 from .services.kakao_message_service import kakao_message_service
 from .services.ai_recommendation_service import ai_recommendation_service
 from .services.product_comparison_service import product_comparison_service
+from .services.recommendation_reason_generator import reason_generator
 from .db.oracle_client import DatabaseDisabledError
 
 
@@ -984,6 +985,33 @@ def other_recommendations_page(request):
                             'url': prod_row[5] if prod_row[5] else ""
                         }
                     
+                    # 온보딩 데이터 가져오기 (추천 이유 생성용)
+                    user_profile = None
+                    onboarding_data = None
+                    if session_id:
+                        try:
+                            onboarding_data = taste_calculation_service._get_onboarding_data_from_session(session_id)
+                            # user_profile 형식으로 변환
+                            # priority가 리스트인 경우 첫 번째 값 사용
+                            priority_raw = onboarding_data.get('priority', '')
+                            if isinstance(priority_raw, list) and len(priority_raw) > 0:
+                                priority = priority_raw[0]  # 첫 번째 우선순위 사용
+                            else:
+                                priority = priority_raw if priority_raw else ''
+                            
+                            user_profile = {
+                                'vibe': onboarding_data.get('vibe', ''),
+                                'household_size': onboarding_data.get('household_size', 2),
+                                'housing_type': onboarding_data.get('housing_type', ''),
+                                'pyung': onboarding_data.get('pyung', 0),
+                                'budget_level': onboarding_data.get('budget_level', ''),
+                                'priority': priority,  # 단일 값으로 변환
+                                'has_pet': onboarding_data.get('has_pet', False),
+                            }
+                            print(f"[other_recommendations_page] 온보딩 데이터 조회 성공: {user_profile}", flush=True)
+                        except Exception as e:
+                            print(f"[other_recommendations_page] ⚠️ 온보딩 데이터 조회 실패: {e}", flush=True)
+                    
                     # JSON 리스트의 순서대로 제품 정보 재정렬
                     products_list = []
                     for idx, product_id in enumerate(product_id_list):
@@ -1011,26 +1039,131 @@ def other_recommendations_page(request):
                             else:
                                 product_info['image_url'] = "/static/images/가전 카테고리/냉장고.png"
                             
+                            # 추천 이유 생성
+                            try:
+                                if user_profile:
+                                    # Product 모델 없이도 추천 이유 생성 가능하도록 가짜 Product 객체 생성
+                                    class FakeProduct:
+                                        def __init__(self, product_id, name, model_code, category_name):
+                                            self.id = product_id
+                                            self.product_id = product_id
+                                            self.name = name
+                                            self.product_name = name
+                                            self.model_code = model_code
+                                            self.model_number = model_code
+                                            self.category = category_name
+                                    
+                                    fake_product = FakeProduct(
+                                        product_id=product_id,
+                                        name=product_info['product_name'],
+                                        model_code=product_info.get('model_code', ''),
+                                        category_name=category_name
+                                    )
+                                    
+                                    # 추천 이유 생성
+                                    recommendation_reason = reason_generator.generate_reason(
+                                        product=fake_product,
+                                        user_profile=user_profile,
+                                        taste_info=None,
+                                        score=0.0
+                                    )
+                                    product_info['recommendation_reason'] = recommendation_reason
+                                    product_info['reason'] = recommendation_reason  # JavaScript 호환성을 위해 reason 필드도 추가
+                                    print(f"[other_recommendations_page] 제품 {product_id} 추천 이유 생성: {recommendation_reason[:50]}...", flush=True)
+                                else:
+                                    product_info['recommendation_reason'] = "고객님의 선호도에 맞는 제품입니다."
+                            except Exception as e:
+                                print(f"[other_recommendations_page] ⚠️ 추천 이유 생성 실패 (제품 {product_id}): {e}", flush=True)
+                                import traceback
+                                traceback.print_exc()
+                                product_info['recommendation_reason'] = "고객님의 선호도에 맞는 제품입니다."
+                            
+                            # 구매리뷰 분석 생성 (Oracle DB에서 직접 조회)
+                            try:
+                                # Oracle DB에서 직접 리뷰 가져오기
+                                review_texts = []
+                                with get_connection() as conn:
+                                    with conn.cursor() as cur:
+                                        cur.execute("""
+                                            SELECT REVIEW_TEXT
+                                            FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT_REVIEW
+                                            WHERE PRODUCT_ID = :product_id
+                                            AND REVIEW_TEXT IS NOT NULL
+                                            AND REVIEW_TEXT != ''
+                                            AND ROWNUM <= 20
+                                            ORDER BY CREATED_AT DESC
+                                        """, {'product_id': product_id})
+                                        
+                                        rows = cur.fetchall()
+                                        for row in rows:
+                                            review_text = row[0]
+                                            if review_text:
+                                                # CLOB 처리
+                                                if hasattr(review_text, 'read'):
+                                                    review_text = review_text.read()
+                                                review_text = str(review_text).strip()
+                                                if review_text:
+                                                    review_texts.append(review_text)
+                                
+                                if review_texts:
+                                    # ChatGPT로 리뷰 요약
+                                    review_summary = chatgpt_service.summarize_reviews(
+                                        reviews=review_texts,
+                                        product_name=product_info['product_name']
+                                    )
+                                    product_info['review_summary'] = review_summary
+                                    print(f"[other_recommendations_page] 제품 {product_id} 리뷰 분석 생성 완료: {len(review_texts)}개 리뷰", flush=True)
+                                else:
+                                    product_info['review_summary'] = "다양한 고객들이 만족하며 사용 중인 제품이에요."
+                                    print(f"[other_recommendations_page] 제품 {product_id} 리뷰 없음 (Oracle DB)", flush=True)
+                            except Exception as e:
+                                print(f"[other_recommendations_page] ⚠️ 리뷰 분석 생성 실패 (제품 {product_id}): {e}", flush=True)
+                                import traceback
+                                traceback.print_exc()
+                                product_info['review_summary'] = "다양한 고객들이 만족하며 사용 중인 제품이에요."
+                            
                             products_list.append(product_info)
                     
                     if len(products_list) == 3:
-                        categories_data.append({
-                            'name': category_name,
-                            'products': products_list
-                        })
-                        print(f"[other_recommendations_page] ✅ 카테고리 {category_name}: {len(products_list)}개 제품 조회 완료", flush=True)
+                        # 카테고리 이름이 유효한지 확인
+                        if category_name and category_name.strip():
+                            categories_data.append({
+                                'name': category_name.strip(),
+                                'products': products_list
+                            })
+                            print(f"[other_recommendations_page] ✅ 카테고리 {category_name}: {len(products_list)}개 제품 조회 완료", flush=True)
+                        else:
+                            print(f"[other_recommendations_page] ⚠️ 카테고리 이름이 유효하지 않음: '{category_name}'", flush=True)
                     else:
                         print(f"[other_recommendations_page] ⚠️ 카테고리 {category_name}: 제품 조회 실패 (예상: 3개, 실제: {len(products_list)}개)", flush=True)
                 
-                context['categories'] = categories_data
-                # JSON 문자열로 변환하여 JavaScript에서 사용할 수 있도록 함
-                context['categories_data_json'] = json.dumps(categories_data, ensure_ascii=False)
-                print(f"[other_recommendations_page] ✅ 전체 조회 완료: {len(categories_data)}개 카테고리", flush=True)
+                # 카테고리 데이터가 있는지 확인
+                if categories_data:
+                    context['categories'] = categories_data
+                    # JSON 문자열로 변환하여 JavaScript에서 사용할 수 있도록 함
+                    categories_json = json.dumps(categories_data, ensure_ascii=False)
+                    context['categories_data_json'] = categories_json
+                    print(f"[other_recommendations_page] ✅ 전체 조회 완료: {len(categories_data)}개 카테고리", flush=True)
+                    for cat in categories_data:
+                        print(f"  - 카테고리: {cat['name']}, 제품 수: {len(cat['products'])}", flush=True)
+                    print(f"[other_recommendations_page] JSON 길이: {len(categories_json)}자, 첫 200자: {categories_json[:200]}", flush=True)
+                else:
+                    print(f"[other_recommendations_page] ⚠️ 카테고리 데이터가 없습니다.", flush=True)
+                    context['categories'] = []
+                    context['categories_data_json'] = json.dumps([], ensure_ascii=False)
                 
     except Exception as e:
         print(f"[other_recommendations_page] ⚠️ 오류 발생: {e}", flush=True)
         import traceback
         traceback.print_exc()
+        # 예외 발생 시에도 기본값 설정
+        if 'categories' not in context:
+            context['categories'] = []
+        if 'categories_data_json' not in context:
+            context['categories_data_json'] = json.dumps([], ensure_ascii=False)
+    
+    # 최종 확인: categories와 categories_data_json이 제대로 설정되었는지 확인
+    print(f"[other_recommendations_page] 최종 컨텍스트 - categories 개수: {len(context.get('categories', []))}, JSON 길이: {len(context.get('categories_data_json', ''))}", flush=True)
     
     return render(request, "other_recommendations.html", context)
 
@@ -3732,15 +3865,33 @@ def kakao_login_view(request):
     from django.shortcuts import redirect
     from django.conf import settings
     
-    if not settings.KAKAO_REST_API_KEY:
-        return JsonResponse({
-            'success': False,
-            'error': '카카오 API 키가 설정되지 않았습니다.'
-        }, status=500)
+    # API 키가 없어도 카카오 로그인 창이 열리도록 처리
+    # (카카오 측에서 API 키 오류를 표시하지만, 최소한 창은 열림)
+    import logging
+    logger = logging.getLogger(__name__)
     
     redirect_uri = request.build_absolute_uri('/api/auth/kakao/callback/')
-    auth_url = kakao_auth_service.get_authorization_url(redirect_uri)
     
+    # 리다이렉트 URI 로깅 (디버깅용)
+    logger.info(f"[Kakao Login] 리다이렉트 URI: {redirect_uri}")
+    logger.info(f"[Kakao Login] REST API 키 존재: {bool(settings.KAKAO_REST_API_KEY)}")
+    
+    if not settings.KAKAO_REST_API_KEY:
+        # API 키가 없을 경우에도 카카오 인증 페이지로 리다이렉트
+        # 카카오 측에서 오류를 표시하지만 창은 열림
+        from urllib.parse import urlencode
+        base_url = "https://kauth.kakao.com/oauth/authorize"
+        params = {
+            "client_id": "",
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "scope": "profile_nickname,account_email"
+        }
+        auth_url = f"{base_url}?{urlencode(params)}"
+    else:
+        auth_url = kakao_auth_service.get_authorization_url(redirect_uri)
+    
+    logger.info(f"[Kakao Login] 인증 URL 생성 완료")
     return redirect(auth_url)
 
 
