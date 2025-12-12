@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- html2pdf.js 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -3975,9 +3977,60 @@
         // 제품으로 자동 스크롤
         // ============================================
         function scrollToProduct(applianceId) {
-            const productElement = document.getElementById(`product-${applianceId}`);
+            console.log(`[scrollToProduct] applianceId: ${applianceId}`);
+
+            // categoryMapping에서 dataAppliance로 카테고리명 찾기
+            let targetCategory = null;
+            for (const [categoryName, mapping] of Object.entries(categoryMapping)) {
+                if (mapping.dataAppliance === applianceId) {
+                    targetCategory = categoryName;
+                    break;
+                }
+            }
+
+            if (!targetCategory) {
+                console.warn(`[scrollToProduct] 카테고리 매핑을 찾을 수 없음: ${applianceId}`);
+                return;
+            }
+
+            console.log(`[scrollToProduct] 찾은 카테고리: ${targetCategory}`);
+
+            // RECOMMENDED_PRODUCTS_LIST에서 해당 카테고리의 첫 번째 제품 찾기
+            if (!RECOMMENDED_PRODUCTS_LIST || !Array.isArray(RECOMMENDED_PRODUCTS_LIST)) {
+                console.warn('[scrollToProduct] RECOMMENDED_PRODUCTS_LIST가 없거나 배열이 아님');
+                return;
+            }
+
+            // 카테고리명 정규화 (대소문자, 공백 처리)
+            const normalizedTargetCategory = String(targetCategory).trim();
+
+            // 제품 찾기 (대소문자 구분 없이)
+            const matchedProduct = RECOMMENDED_PRODUCTS_LIST.find(product => {
+                if (!product.category) return false;
+                const productCategory = String(product.category).trim();
+                return productCategory === normalizedTargetCategory ||
+                    productCategory.toLowerCase() === normalizedTargetCategory.toLowerCase() ||
+                    productCategory.toUpperCase() === normalizedTargetCategory.toUpperCase();
+            });
+
+            if (!matchedProduct) {
+                console.warn(`[scrollToProduct] 해당 카테고리의 제품을 찾을 수 없음: ${targetCategory}`);
+                console.log('[scrollToProduct] 사용 가능한 제품 카테고리:',
+                    RECOMMENDED_PRODUCTS_LIST.map(p => p.category).filter(Boolean));
+                return;
+            }
+
+            console.log(`[scrollToProduct] 찾은 제품: ${matchedProduct.product_name} (ID: ${matchedProduct.product_id})`);
+
+            // 제품 ID로 실제 DOM 요소 찾기
+            const productId = matchedProduct.product_id || RECOMMENDED_PRODUCTS_LIST.indexOf(matchedProduct);
+            const productElement = document.getElementById(`product-${productId}`);
+
             if (productElement) {
+                console.log(`[scrollToProduct] 제품 요소 찾음, 스크롤 시작`);
                 productElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                console.warn(`[scrollToProduct] 제품 요소를 찾을 수 없음: product-${productId}`);
             }
         }
 
@@ -5279,9 +5332,9 @@
                 return;
             }
 
-            const name = document.getElementById('consultationName').value;
-            const phone = document.getElementById('consultationPhone').value;
-            const notes = document.getElementById('consultationNotes').value;
+            const name = document.getElementById('consultationName').value.trim();
+            const phone = document.getElementById('consultationPhone').value.trim();
+            const notes = document.getElementById('consultationNotes').value.trim();
             const earlyContact = document.getElementById('earlyContactCheckbox').checked;
 
             // 예약 정보 수집
@@ -5295,58 +5348,45 @@
                     };
                 });
 
+            // 날짜 포맷팅 함수
+            const formatDate = (date) => {
+                if (!date) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}.${month}.${day}`;
+            };
+
+            const formatDateTime = (date) => {
+                if (!date) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}.${month}.${day} ${hours}:${minutes}`;
+            };
+
+            // 예약 데이터 포맷팅 (reservation_status.html 형식에 맞춤)
             const reservationData = {
-                purpose: selectedPurpose,
-                date: selectedDate.toISOString().split('T')[0],
-                time: selectedTime || null,
+                receiptDate: formatDateTime(new Date()),
+                status: '상담예정',
+                scheduledDate: selectedDate ? formatDate(selectedDate) : '',
+                scheduledTime: selectedTime || '',
+                purpose: selectedPurpose || '',
                 name: name,
                 phone: phone,
                 notes: notes,
-                earlyContact: earlyContact,
                 products: selectedProducts
             };
 
             console.log('예약 정보:', reservationData);
 
-            // 예약 완료 확인 모달 표시
-            const reservationCompleteModal = document.getElementById('reservationCompleteModal');
-            reservationCompleteModal.classList.add('active');
+            // 세션 스토리지에 저장
+            sessionStorage.setItem('reservation_data', JSON.stringify(reservationData));
 
-            // 예약 완료 모달이 열릴 때 버튼을 모달 아래로 보내기
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                otherRecommendationsBtn.style.zIndex = '100005';
-                otherRecommendationsBtn.style.pointerEvents = 'none';
-            }
-            const bottomActions = document.querySelector('.bottom-actions');
-            if (bottomActions) {
-                bottomActions.style.zIndex = '100005';
-            }
-
-            // 실제로는 여기서 API 호출
-            // fetch('/api/consultation/reserve/', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'X-CSRFToken': getCookie('csrftoken')
-            //     },
-            //     body: JSON.stringify(reservationData)
-            // })
-            // .then(response => response.json())
-            // .then(data => {
-            //     if (data.success) {
-            //         alert('예약이 완료되었습니다.');
-            //         closeConsultationModal();
-            //     } else {
-            //         alert('예약 중 오류가 발생했습니다: ' + data.error);
-            //     }
-            // })
-            // .catch(error => {
-            //     console.error('예약 오류:', error);
-            //     alert('예약 중 오류가 발생했습니다.');
-            // });
-
-            // 모달 닫기 (예약 완료 모달이 표시되므로 여기서는 닫지 않음)
+            // 예약 조회 페이지로 이동
+            window.location.href = '/reservation-status/';
         }
 
         // 예약 완료 모달 닫기
@@ -5520,15 +5560,185 @@
 
 
         // ============================================
-        // 결과 저장하기
+        // 결과 저장하기 (PDF 생성)
         // ============================================
         async function saveResult() {
             try {
-                // TODO: API 호출하여 결과 저장
-                showToast('결과가 저장되었습니다.');
+                showToast('PDF 생성 중...');
+
+                // 플로팅 버튼들 숨기기 (PDF에 포함되지 않도록)
+                const retrySection = document.querySelector('.retry-section');
+                const topActionBar = document.querySelector('.top-action-bar');
+                const scrollToTopButton = document.querySelector('.scroll-to-top-button');
+                const header = document.querySelector('.header');
+                const breadcrumb = document.querySelector('.breadcrumb');
+
+                const originalRetryDisplay = retrySection ? retrySection.style.display : '';
+                const originalActionBarDisplay = topActionBar ? topActionBar.style.display : '';
+                const originalScrollButtonDisplay = scrollToTopButton ? scrollToTopButton.style.display : '';
+                const originalHeaderDisplay = header ? header.style.display : '';
+                const originalBreadcrumbDisplay = breadcrumb ? breadcrumb.style.display : '';
+
+                // PDF 생성 시 불필요한 요소들 숨기기
+                if (retrySection) retrySection.style.display = 'none';
+                if (topActionBar) topActionBar.style.display = 'none';
+                if (scrollToTopButton) scrollToTopButton.style.display = 'none';
+                if (header) header.style.display = 'none';
+                if (breadcrumb) breadcrumb.style.display = 'none';
+
+                // 메인 콘텐츠 영역 가져오기
+                const mainContent = document.querySelector('.main-content');
+                if (!mainContent) {
+                    showToast('PDF로 변환할 콘텐츠를 찾을 수 없습니다.');
+                    return;
+                }
+
+                // 원래 스크롤 위치 저장
+                const originalScrollY = window.scrollY;
+
+                // 페이지 상단으로 스크롤 (전체 콘텐츠를 보기 위해)
+                window.scrollTo(0, 0);
+
+                // 스크롤 후 잠시 대기 (렌더링 완료 대기)
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // 이미지 로드 대기
+                const allImages = mainContent.querySelectorAll('img');
+                await new Promise(resolve => {
+                    let loadedCount = 0;
+                    const totalImages = allImages.length;
+
+                    if (totalImages === 0) {
+                        resolve();
+                        return;
+                    }
+
+                    allImages.forEach(img => {
+                        if (img.complete && img.naturalHeight !== 0) {
+                            loadedCount++;
+                            if (loadedCount === totalImages) resolve();
+                        } else {
+                            const checkLoad = () => {
+                                loadedCount++;
+                                if (loadedCount === totalImages) resolve();
+                            };
+                            img.onload = checkLoad;
+                            img.onerror = checkLoad;
+                        }
+                    });
+
+                    // 타임아웃 설정 (10초)
+                    setTimeout(resolve, 10000);
+                });
+
+                // 실제 화면 크기 측정 (노트북 화면에 보이는 그대로)
+                const screenWidth = window.innerWidth || document.documentElement.clientWidth;
+                const screenHeight = window.innerHeight || document.documentElement.clientHeight;
+                const contentWidth = mainContent.scrollWidth || mainContent.offsetWidth;
+                const contentHeight = mainContent.scrollHeight || mainContent.offsetHeight;
+
+                console.log('화면 크기:', screenWidth, 'x', screenHeight);
+                console.log('콘텐츠 크기:', contentWidth, 'x', contentHeight);
+
+                // A4 가로 모드 크기 (mm)
+                const A4_LANDSCAPE_WIDTH_MM = 297;
+                const A4_LANDSCAPE_HEIGHT_MM = 210;
+
+                // PDF 생성 옵션 설정 - 노트북 화면에 보이는 그대로 정확히 저장
+                const opt = {
+                    margin: [0, 0, 0, 0],
+                    filename: `LG전자_가전패키지추천_${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: {
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 2, // 고해상도
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: screenWidth, // 실제 화면 너비 사용
+                        windowHeight: screenHeight, // 실제 화면 높이 사용
+                        width: contentWidth, // 콘텐츠 너비
+                        height: contentHeight, // 콘텐츠 높이
+                        x: 0,
+                        y: 0,
+                        onclone: function (clonedDoc) {
+                            // PDF 생성 시 제품 이미지 크기 줄이기 (제품 설명이 잘 보이도록)
+                            const clonedMainContent = clonedDoc.querySelector('.main-content');
+                            if (clonedMainContent) {
+                                // 모든 제품 이미지 wrapper 크기 조정
+                                const imageWrappers = clonedMainContent.querySelectorAll('.product-image-wrapper');
+                                imageWrappers.forEach(wrapper => {
+                                    // 이미지 크기를 60%로 줄임 (1000px -> 600px)
+                                    wrapper.style.width = '600px';
+                                    wrapper.style.height = '600px';
+                                    wrapper.style.flexShrink = '0';
+                                });
+
+                                // 제품 아이템 그리드 조정 (이미지가 줄어든 만큼 설명 공간 확보)
+                                const productItems = clonedMainContent.querySelectorAll('.product-item');
+                                productItems.forEach(item => {
+                                    // 그리드 레이아웃 조정: 이미지 600px, 설명 나머지
+                                    item.style.gridTemplateColumns = '600px 1fr';
+                                });
+
+                                // 제품 정보 패딩 조정
+                                const productInfos = clonedMainContent.querySelectorAll('.product-info');
+                                productInfos.forEach(info => {
+                                    info.style.paddingRight = '40px'; // 오른쪽 패딩 줄임
+                                });
+                            }
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: [A4_LANDSCAPE_WIDTH_MM, A4_LANDSCAPE_HEIGHT_MM],
+                        orientation: 'landscape',
+                        compress: true
+                    },
+                    pagebreak: {
+                        mode: ['avoid-all', 'css', 'legacy'],
+                        avoid: ['.banner-section', '.product-item']
+                    }
+                };
+
+                console.log('PDF 생성 시작...');
+                // PDF 생성 및 다운로드 (실제 DOM 요소 사용, 노트북 화면에 보이는 그대로)
+                await html2pdf().set(opt).from(mainContent).save();
+                console.log('PDF 생성 완료');
+
+                // 원래 스크롤 위치로 복원
+                window.scrollTo(0, originalScrollY);
+
+                // 플로팅 버튼들 다시 표시
+                if (retrySection) retrySection.style.display = originalRetryDisplay;
+                if (topActionBar) topActionBar.style.display = originalActionBarDisplay;
+                if (scrollToTopButton) scrollToTopButton.style.display = originalScrollButtonDisplay;
+                if (header) header.style.display = originalHeaderDisplay;
+                if (breadcrumb) breadcrumb.style.display = originalBreadcrumbDisplay;
+
+                showToast('PDF가 저장되었습니다.');
             } catch (error) {
-                console.error('저장 오류:', error);
-                showToast('저장 중 오류가 발생했습니다.');
+                console.error('PDF 저장 오류:', error);
+                console.error('오류 상세:', error.stack);
+                showToast('PDF 저장 중 오류가 발생했습니다.');
+
+                // 오류 발생 시에도 모든 요소 복원
+                const retrySection = document.querySelector('.retry-section');
+                const topActionBar = document.querySelector('.top-action-bar');
+                const scrollToTopButton = document.querySelector('.scroll-to-top-button');
+                const header = document.querySelector('.header');
+                const breadcrumb = document.querySelector('.breadcrumb');
+
+                if (retrySection) retrySection.style.display = '';
+                if (topActionBar) topActionBar.style.display = '';
+                if (scrollToTopButton) scrollToTopButton.style.display = '';
+                if (header) header.style.display = '';
+                if (breadcrumb) breadcrumb.style.display = '';
             }
         }
 

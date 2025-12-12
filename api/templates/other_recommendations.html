@@ -3963,25 +3963,61 @@
                 return;
             }
 
-            const name = document.getElementById('consultationName').value;
-            const phone = document.getElementById('consultationPhone').value;
-            const notes = document.getElementById('consultationNotes').value;
+            const name = document.getElementById('consultationName').value.trim();
+            const phone = document.getElementById('consultationPhone').value.trim();
+            const notes = document.getElementById('consultationNotes').value.trim();
             const earlyContact = document.getElementById('earlyContactCheckbox').checked;
 
+            // 예약 정보 수집
+            const selectedProducts = Array.from(document.querySelectorAll('.consultation-product-item.selected'))
+                .map(item => {
+                    const nameEl = item.querySelector('.consultation-product-name');
+                    const modelEl = item.querySelector('.consultation-product-model');
+                    return {
+                        name: nameEl ? nameEl.textContent : '',
+                        model: modelEl ? modelEl.textContent : ''
+                    };
+                });
+
+            // 날짜 포맷팅 함수
+            const formatDate = (date) => {
+                if (!date) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}.${month}.${day}`;
+            };
+
+            const formatDateTime = (date) => {
+                if (!date) return '';
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}.${month}.${day} ${hours}:${minutes}`;
+            };
+
+            // 예약 데이터 포맷팅 (reservation_status.html 형식에 맞춤)
             const reservationData = {
-                purpose: selectedPurpose,
-                date: selectedDate.toISOString().split('T')[0],
-                time: selectedTime || null,
+                receiptDate: formatDateTime(new Date()),
+                status: '상담예정',
+                scheduledDate: selectedDate ? formatDate(selectedDate) : '',
+                scheduledTime: selectedTime || '',
+                purpose: selectedPurpose || '',
                 name: name,
                 phone: phone,
                 notes: notes,
-                earlyContact: earlyContact
+                products: selectedProducts
             };
 
             console.log('예약 정보:', reservationData);
 
-            const reservationCompleteModal = document.getElementById('reservationCompleteModal');
-            reservationCompleteModal.classList.add('active');
+            // 세션 스토리지에 저장
+            sessionStorage.setItem('reservation_data', JSON.stringify(reservationData));
+
+            // 예약 조회 페이지로 이동
+            window.location.href = '/reservation-status/';
         }
 
         // 예약 완료 모달 닫기
@@ -3995,6 +4031,15 @@
                 const name = document.getElementById('consultationName').value.trim();
                 const phone = document.getElementById('consultationPhone').value.trim();
                 const notes = document.getElementById('consultationNotes').value.trim();
+                const selectedProducts = Array.from(document.querySelectorAll('.consultation-product-item.selected'))
+                    .map(item => {
+                        const nameEl = item.querySelector('.consultation-product-name');
+                        const modelEl = item.querySelector('.consultation-product-model');
+                        return {
+                            name: nameEl ? nameEl.textContent : '',
+                            model: modelEl ? modelEl.textContent : ''
+                        };
+                    });
 
                 const formatDate = (date) => {
                     if (!date) return '';
@@ -4022,11 +4067,12 @@
                     purpose: selectedPurpose || '',
                     name: name,
                     phone: phone,
-                    notes: notes
+                    notes: notes,
+                    products: selectedProducts
                 };
 
                 sessionStorage.setItem('reservation_data', JSON.stringify(reservationData));
-                window.location.href = '/reservation/status/';
+                window.location.href = '/reservation-status/';
             }
         }
     </script>
