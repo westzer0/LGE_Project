@@ -3692,18 +3692,10 @@
         // 스펙 모달 닫기
         function closeSpecModal() {
             const modal = document.getElementById('specModal');
-            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.remove('active');
 
             // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                otherRecommendationsBtn.style.zIndex = '100010'; // 원래대로 복원
-                otherRecommendationsBtn.style.pointerEvents = 'auto'; // 클릭 활성화
-            }
-            if (bottomActions) {
-                bottomActions.style.zIndex = '100010'; // 원래대로 복원
-            }
+            restoreOtherRecommendationsButton();
         }
 
         // 스펙 정보 표시
@@ -3795,6 +3787,39 @@
             });
         }
 
+        // 모달이 열려있는지 확인하는 함수
+        function isAnyModalOpen() {
+            const modals = [
+                'specModal',
+                'consultationModal',
+                'closeConsultationConfirmModal',
+                'reservationCompleteModal',
+                'cartModal',
+                'retryOnboardingModal'
+            ];
+            return modals.some(modalId => {
+                const modal = document.getElementById(modalId);
+                return modal && modal.classList.contains('active');
+            });
+        }
+
+        // 다른 추천 후보 확인 버튼 상태 복원 함수
+        function restoreOtherRecommendationsButton() {
+            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
+            if (otherRecommendationsBtn) {
+                // 모달이 하나도 열려있지 않으면 버튼 활성화
+                if (!isAnyModalOpen()) {
+                    otherRecommendationsBtn.style.zIndex = '100010';
+                    otherRecommendationsBtn.style.pointerEvents = 'auto';
+                    otherRecommendationsBtn.style.cursor = 'pointer';
+                }
+            }
+            const bottomActions = document.querySelector('.bottom-actions');
+            if (bottomActions && !isAnyModalOpen()) {
+                bottomActions.style.zIndex = '100010';
+            }
+        }
+
         function initPage() {
             // 초기 제품 이름들에 줄바꿈 적용
             applyLineBreaksToInitialTitles();
@@ -3804,16 +3829,7 @@
             });
 
             // 다른 추천 후보 확인 버튼 초기화 (페이지 로드 시 클릭 가능하도록)
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                otherRecommendationsBtn.style.zIndex = '100010';
-                otherRecommendationsBtn.style.pointerEvents = 'auto';
-                otherRecommendationsBtn.style.cursor = 'pointer';
-            }
-            const bottomActions = document.querySelector('.bottom-actions');
-            if (bottomActions) {
-                bottomActions.style.zIndex = '100010';
-            }
+            restoreOtherRecommendationsButton();
 
             // TasteConfig 데이터 로드 및 적용 (먼저 실행)
             console.log('[initPage] TasteConfig 데이터 로드 시작');
@@ -4399,15 +4415,7 @@
                 window.location.href = '/onboarding/';
             } else {
                 // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
-                const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-                if (otherRecommendationsBtn) {
-                    otherRecommendationsBtn.style.zIndex = '100010';
-                    otherRecommendationsBtn.style.pointerEvents = 'auto';
-                }
-                const bottomActions = document.querySelector('.bottom-actions');
-                if (bottomActions) {
-                    bottomActions.style.zIndex = '100010';
-                }
+                restoreOtherRecommendationsButton();
             }
         }
 
@@ -4443,18 +4451,10 @@
         // 장바구니 모달 닫기
         function closeCartModal() {
             const modal = document.getElementById('cartModal');
-            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.remove('active');
 
             // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                otherRecommendationsBtn.style.zIndex = '100010'; // 원래대로 복원
-                otherRecommendationsBtn.style.pointerEvents = 'auto'; // 클릭 활성화
-            }
-            if (bottomActions) {
-                bottomActions.style.zIndex = '100010'; // 원래대로 복원
-            }
+            restoreOtherRecommendationsButton();
         }
 
         // 장바구니로 이동
@@ -4708,21 +4708,12 @@
                 actuallyCloseConsultationModal(scrollY);
             } else {
                 // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기 (계속 진행하기 선택 시)
-                const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-                if (otherRecommendationsBtn) {
-                    otherRecommendationsBtn.style.zIndex = '100010';
-                    otherRecommendationsBtn.style.pointerEvents = 'auto';
-                }
-                const bottomActions = document.querySelector('.bottom-actions');
-                if (bottomActions) {
-                    bottomActions.style.zIndex = '100010';
-                }
+                restoreOtherRecommendationsButton();
             }
         }
 
         function actuallyCloseConsultationModal(savedScrollY) {
             const modal = document.getElementById('consultationModal');
-            const bottomActions = document.querySelector('.bottom-actions');
             modal.classList.remove('active');
 
             // 선택 초기화
@@ -4734,14 +4725,7 @@
             document.getElementById('consultationTimeSlots').style.display = 'none';
 
             // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                otherRecommendationsBtn.style.zIndex = '100010'; // 원래대로 복원
-                otherRecommendationsBtn.style.pointerEvents = 'auto'; // 클릭 활성화
-            }
-            if (bottomActions) {
-                bottomActions.style.zIndex = '100010'; // 원래대로 복원
-            }
+            restoreOtherRecommendationsButton();
 
             // 선택 해제
             document.querySelectorAll('.purpose-btn').forEach(btn => btn.classList.remove('selected'));
@@ -5359,15 +5343,7 @@
             closeConsultationModal();
 
             // 모달이 닫힐 때 버튼을 다시 클릭 가능하게 만들기
-            const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
-            if (otherRecommendationsBtn) {
-                otherRecommendationsBtn.style.zIndex = '100010';
-                otherRecommendationsBtn.style.pointerEvents = 'auto';
-            }
-            const bottomActions = document.querySelector('.bottom-actions');
-            if (bottomActions) {
-                bottomActions.style.zIndex = '100010';
-            }
+            restoreOtherRecommendationsButton();
 
             if (shouldConfirm) {
                 // 확인 버튼 클릭 시 예약 조회 페이지로 이동
@@ -5440,6 +5416,12 @@
             if (otherRecommendationsBtn) {
                 // 모든 이벤트 리스너 추가
                 otherRecommendationsBtn.addEventListener('click', function (e) {
+                    // 모달이 열려있으면 클릭 방지
+                    if (isAnyModalOpen()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('다른 추천 후보 확인 버튼 클릭됨 (이벤트 리스너)');
@@ -5447,11 +5429,32 @@
                     return false;
                 }, true);
 
-                // 스타일 강제 적용
-                otherRecommendationsBtn.style.cursor = 'pointer';
-                otherRecommendationsBtn.style.pointerEvents = 'auto';
-                otherRecommendationsBtn.style.zIndex = '100010';
-                otherRecommendationsBtn.style.position = 'relative';
+                // 버튼 상태 복원 (모달이 열려있지 않으면 활성화)
+                restoreOtherRecommendationsButton();
+
+                // 모달 상태 변화를 감지하여 버튼 상태 업데이트
+                const observer = new MutationObserver(function (mutations) {
+                    restoreOtherRecommendationsButton();
+                });
+
+                // 모든 모달을 관찰
+                const modals = [
+                    'specModal',
+                    'consultationModal',
+                    'closeConsultationConfirmModal',
+                    'reservationCompleteModal',
+                    'cartModal',
+                    'retryOnboardingModal'
+                ];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (modal) {
+                        observer.observe(modal, {
+                            attributes: true,
+                            attributeFilter: ['class']
+                        });
+                    }
+                });
             }
         });
 

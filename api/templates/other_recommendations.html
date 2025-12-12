@@ -2074,7 +2074,7 @@
                     <!-- 추천 이유 섹션 -->
                     <div class="recommend-reason-section">
                         <div class="recommend-reason-title">추천 이유</div>
-                        <div class="recommend-reason-text">고객님의 선호도에 맞는 제품입니다.</div>
+                        <div class="recommend-reason-text">{{ product.reason|default:"고객님의 선호도에 맞는 제품입니다." }}</div>
                     </div>
 
                     <!-- 스펙 섹션 (가격 포함) -->
@@ -2898,7 +2898,7 @@
                 </div>
                 <div class="recommend-reason-section">
                     <div class="recommend-reason-title">추천 이유</div>
-                    <div class="recommend-reason-text">${product.reason}</div>
+                    <div class="recommend-reason-text">${product.reason || '고객님의 선호도에 맞는 제품입니다.'}</div>
                 </div>
                 <div class="product-specs-section">
                     <div class="specs-grid">

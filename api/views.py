@@ -639,21 +639,36 @@ def result_page(request):
                                             else:
                                                 print(f"[result_page] ⚠️ RECOMMENDED_PRODUCT_SCORES가 없거나 유효하지 않음", flush=True)
                                             
-                                            # 추천 이유 생성
+                                            # 추천 이유 조회 (Oracle DB PRODUCT_REVIEW.REASON_TEXT)
                                             recommend_reason = "고객님의 선호도에 맞는 제품입니다."  # 기본값
                                             try:
-                                                product_obj = Product.objects.filter(product_id=first_product_id).first()
-                                                if product_obj and user_profile:
-                                                    # taste_info는 None으로 전달 (CSV 데이터는 나중에 추가 가능)
-                                                    recommend_reason = reason_generator.generate_reason(
-                                                        product=product_obj,
-                                                        user_profile=user_profile,
-                                                        taste_info=None,
-                                                        score=(match_score / 100.0) if match_score else 0.5
-                                                    )
-                                                    print(f"[result_page] ✅ 추천 이유 생성 완료: {recommend_reason[:50]}...", flush=True)
+                                                print(f"[result_page] PRODUCT_REVIEW.REASON_TEXT 조회 시작: PRODUCT_ID={first_product_id}", flush=True)
+                                                cur.execute("""
+                                                    SELECT REASON_TEXT
+                                                    FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT_REVIEW
+                                                    WHERE PRODUCT_ID = :product_id
+                                                """, {'product_id': int(first_product_id)})
+                                                
+                                                reason_row = cur.fetchone()
+                                                if reason_row and reason_row[0]:
+                                                    # CLOB 데이터 읽기 처리
+                                                    reason_text = reason_row[0]
+                                                    if hasattr(reason_text, 'read'):
+                                                        recommend_reason = reason_text.read()
+                                                    else:
+                                                        recommend_reason = str(reason_text).strip()
+                                                    
+                                                    # 빈 문자열이나 None 체크
+                                                    if recommend_reason and recommend_reason != "":
+                                                        print(f"[result_page] ✅ 추천 이유 조회 완료: {recommend_reason[:50]}...", flush=True)
+                                                    else:
+                                                        print(f"[result_page] ⚠️ REASON_TEXT가 비어있음, 기본값 사용", flush=True)
+                                                else:
+                                                    print(f"[result_page] ⚠️ PRODUCT_REVIEW에 REASON_TEXT가 없음, 기본값 사용", flush=True)
                                             except Exception as reason_error:
-                                                print(f"[result_page] ⚠️ 추천 이유 생성 실패: {reason_error}", flush=True)
+                                                print(f"[result_page] ⚠️ PRODUCT_REVIEW.REASON_TEXT 조회 실패: {reason_error}", flush=True)
+                                                import traceback
+                                                traceback.print_exc()
                                             
                                             # 구매 리뷰 분석 (최대 3개)
                                             reviews_data = []
@@ -984,6 +999,32 @@ def other_recommendations_page(request):
                             'url': prod_row[5] if prod_row[5] else ""
                         }
                     
+                    # PRODUCT_REVIEW 테이블에서 REASON_TEXT 일괄 조회
+                    print(f"[other_recommendations_page] PRODUCT_REVIEW.REASON_TEXT 조회 시작: {len(product_id_list)}개 제품", flush=True)
+                    reason_dict = {}
+                    try:
+                        cur.execute(f"""
+                            SELECT PRODUCT_ID, REASON_TEXT
+                            FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT_REVIEW
+                            WHERE PRODUCT_ID IN ({placeholders})
+                        """, params)
+                        
+                        reason_rows = cur.fetchall()
+                        for reason_row in reason_rows:
+                            prod_id = int(reason_row[0])
+                            reason_text = reason_row[1]
+                            if reason_text:
+                                # CLOB 데이터 읽기 처리
+                                if hasattr(reason_text, 'read'):
+                                    reason_dict[prod_id] = reason_text.read().strip()
+                                else:
+                                    reason_dict[prod_id] = str(reason_text).strip()
+                        print(f"[other_recommendations_page] ✅ REASON_TEXT 조회 완료: {len(reason_dict)}개", flush=True)
+                    except Exception as reason_error:
+                        print(f"[other_recommendations_page] ⚠️ PRODUCT_REVIEW.REASON_TEXT 조회 실패: {reason_error}", flush=True)
+                        import traceback
+                        traceback.print_exc()
+                    
                     # JSON 리스트의 순서대로 제품 정보 재정렬
                     products_list = []
                     for idx, product_id in enumerate(product_id_list):
@@ -1010,6 +1051,12 @@ def other_recommendations_page(request):
                                 product_info['image_url'] = f"/static/images/Download Images/{model_code_clean}.jpg"
                             else:
                                 product_info['image_url'] = "/static/images/가전 카테고리/냉장고.png"
+                            
+                            # 추천 이유 추가 (PRODUCT_REVIEW.REASON_TEXT)
+                            if product_id in reason_dict and reason_dict[product_id]:
+                                product_info['reason'] = reason_dict[product_id]
+                            else:
+                                product_info['reason'] = "고객님의 선호도에 맞는 제품입니다."  # 기본값
                             
                             products_list.append(product_info)
                     
