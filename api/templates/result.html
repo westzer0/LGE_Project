@@ -2245,10 +2245,14 @@
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            pointer-events: none !important;
+            /* 투명할 때는 클릭을 막지 않음 */
         }
 
         .toast.show {
             opacity: 0.56;
+            pointer-events: auto !important;
+            /* 보일 때만 클릭 가능 */
         }
 
         .toast-message {
@@ -3807,16 +3811,27 @@
         function restoreOtherRecommendationsButton() {
             const otherRecommendationsBtn = document.getElementById('otherRecommendationsBtn');
             if (otherRecommendationsBtn) {
-                // 모달이 하나도 열려있지 않으면 버튼 활성화
-                if (!isAnyModalOpen()) {
+                const modalOpen = isAnyModalOpen();
+                // 모달 상태에 따라 명시적으로 버튼 상태 설정
+                if (modalOpen) {
+                    // 모달이 열려있으면 비활성화
+                    otherRecommendationsBtn.style.zIndex = '100005';
+                    otherRecommendationsBtn.style.pointerEvents = 'none';
+                    otherRecommendationsBtn.style.cursor = 'not-allowed';
+                } else {
+                    // 모달이 닫혀있으면 활성화
                     otherRecommendationsBtn.style.zIndex = '100010';
                     otherRecommendationsBtn.style.pointerEvents = 'auto';
                     otherRecommendationsBtn.style.cursor = 'pointer';
                 }
             }
             const bottomActions = document.querySelector('.bottom-actions');
-            if (bottomActions && !isAnyModalOpen()) {
-                bottomActions.style.zIndex = '100010';
+            if (bottomActions) {
+                if (isAnyModalOpen()) {
+                    bottomActions.style.zIndex = '100005';
+                } else {
+                    bottomActions.style.zIndex = '100010';
+                }
             }
         }
 

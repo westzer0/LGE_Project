@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>버튼 디버깅 가이드</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .code-block {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .step {
+            background: #e8f4f8;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #2196F3;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 5px;
+        }
+        .important {
+            background: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 "다른 추천 후보 확인" 버튼 디버깅 가이드</h1>
+
+    <div class="step">
+        <h2>1단계: 개발자 도구 열기</h2>
+        <p><strong>Windows/Linux:</strong> F12 또는 Ctrl + Shift + I</p>
+        <p><strong>Mac:</strong> Cmd + Option + I</p>
+        <p>또는 페이지에서 우클릭 → "검사" 선택</p>
+    </div>
+
+    <div class="step">
+        <h2>2단계: Elements 탭에서 버튼 찾기</h2>
+        <ol>
+            <li>개발자 도구 상단의 <strong>"Elements"</strong> 탭 클릭</li>
+            <li>좌측 상단의 <strong>선택 도구 아이콘</strong> (마우스 커서 모양) 클릭</li>
+            <li>페이지에서 "다른 추천 후보 확인" 버튼 클릭</li>
+            <li>또는 Elements 탭에서 <strong>Ctrl+F</strong> 눌러서 <code>otherRecommendationsBtn</code> 검색</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>3단계: 버튼 스타일 확인</h2>
+        <p>오른쪽 패널에서 <strong>"Styles"</strong> 탭 확인:</p>
+        <ul>
+            <li><strong>element.style</strong> 섹션 찾기 (맨 위에 있을 수 있음)</li>
+            <li><code>pointer-events</code> 값 확인</li>
+            <li><code>z-index</code> 값 확인</li>
+        </ul>
+        <div class="important">
+            <strong>찾아야 할 정보:</strong>
+            <ul>
+                <li>pointer-events: auto 또는 none?</li>
+                <li>z-index: 100010 또는 100005?</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>4단계: Console 탭에서 코드 실행</h2>
+        <ol>
+            <li>개발자 도구 상단의 <strong>"Console"</strong> 탭 클릭</li>
+            <li>아래 코드를 복사해서 붙여넣기</li>
+            <li>Enter 키 누르기</li>
+        </ol>
+
+        <div class="code-block">
+// ============================================
+// 버튼 상태 완전 진단 코드
+// ============================================
+
+console.log('=== 🔍 버튼 디버깅 시작 ===\n');
+
+// 1. 버튼 요소 확인
+const btn = document.getElementById('otherRecommendationsBtn');
+if (!btn) {
+    console.error('❌ 버튼을 찾을 수 없습니다!');
+} else {
+    console.log('✅ 버튼 찾음:', btn);
+    
+    // 2. 인라인 스타일 확인
+    console.log('\n--- 📝 인라인 스타일 (element.style) ---');
+    console.log('pointerEvents:', btn.style.pointerEvents || '(설정 안 됨)');
+    console.log('zIndex:', btn.style.zIndex || '(설정 안 됨)');
+    console.log('cursor:', btn.style.cursor || '(설정 안 됨)');
+    console.log('display:', btn.style.display || '(설정 안 됨)');
+    
+    // 3. 실제 적용된 스타일 확인
+    console.log('\n--- 🎨 실제 적용된 스타일 (getComputedStyle) ---');
+    const computed = window.getComputedStyle(btn);
+    console.log('pointerEvents:', computed.pointerEvents);
+    console.log('zIndex:', computed.zIndex);
+    console.log('cursor:', computed.cursor);
+    console.log('display:', computed.display);
+    console.log('position:', computed.position);
+    
+    // 4. 모달 상태 확인
+    console.log('\n--- 🪟 모달 상태 확인 ---');
+    const modals = [
+        'specModal',
+        'consultationModal',
+        'closeConsultationConfirmModal',
+        'reservationCompleteModal',
+        'cartModal',
+        'retryOnboardingModal'
+    ];
+    
+    const openModals = [];
+    modals.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            const isActive = modal.classList.contains('active');
+            const isVisible = window.getComputedStyle(modal).display !== 'none';
+            if (isActive || isVisible) {
+                openModals.push({
+                    id: id,
+                    hasActiveClass: isActive,
+                    isVisible: isVisible,
+                    display: window.getComputedStyle(modal).display,
+                    zIndex: window.getComputedStyle(modal).zIndex
+                });
+            }
+        }
+    });
+    
+    if (openModals.length > 0) {
+        console.log('⚠️ 열려있는 모달:', openModals);
+    } else {
+        console.log('✅ 열려있는 모달 없음');
+    }
+    
+    // 5. isAnyModalOpen() 함수 테스트
+    console.log('\n--- 🧪 isAnyModalOpen() 함수 테스트 ---');
+    if (typeof isAnyModalOpen === 'function') {
+        const modalOpen = isAnyModalOpen();
+        console.log('isAnyModalOpen() 결과:', modalOpen);
+    } else {
+        console.warn('⚠️ isAnyModalOpen 함수를 찾을 수 없습니다');
+    }
+    
+    // 6. 부모 요소 확인
+    console.log('\n--- 👨‍👩‍👧 부모 요소 확인 ---');
+    const bottomActions = btn.closest('.bottom-actions');
+    if (bottomActions) {
+        const bottomActionsStyle = window.getComputedStyle(bottomActions);
+        console.log('bottom-actions z-index:', bottomActionsStyle.zIndex);
+        console.log('bottom-actions pointer-events:', bottomActionsStyle.pointerEvents);
+    }
+    
+    // 7. 클릭 이벤트 확인
+    console.log('\n--- 🖱️ 클릭 이벤트 확인 ---');
+    const hasOnclick = btn.hasAttribute('onclick');
+    console.log('onclick 속성 있음:', hasOnclick);
+    if (hasOnclick) {
+        console.log('onclick 값:', btn.getAttribute('onclick'));
+    }
+    
+    // 8. 요소가 다른 요소에 가려져 있는지 확인
+    console.log('\n--- 🔍 요소 가림 확인 ---');
+    const rect = btn.getBoundingClientRect();
+    const elementAtPoint = document.elementFromPoint(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2
+    );
+    console.log('버튼 위치:', { left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+    console.log('버튼 위에 있는 요소:', elementAtPoint === btn ? '없음 (버튼이 최상위)' : elementAtPoint);
+    
+    // 9. 수동으로 복원 함수 실행
+    console.log('\n--- 🔧 복원 함수 테스트 ---');
+    if (typeof restoreOtherRecommendationsButton === 'function') {
+        console.log('복원 함수 실행 전 pointer-events:', btn.style.pointerEvents);
+        restoreOtherRecommendationsButton();
+        console.log('복원 함수 실행 후 pointer-events:', btn.style.pointerEvents);
+    } else {
+        console.warn('⚠️ restoreOtherRecommendationsButton 함수를 찾을 수 없습니다');
+    }
+    
+    // 10. 최종 상태 확인
+    console.log('\n--- ✅ 최종 상태 ---');
+    console.log('최종 pointer-events:', window.getComputedStyle(btn).pointerEvents);
+    console.log('최종 z-index:', window.getComputedStyle(btn).zIndex);
+    console.log('버튼이 클릭 가능한가?', window.getComputedStyle(btn).pointerEvents === 'auto' ? '✅ 예' : '❌ 아니오');
+}
+
+console.log('\n=== 🏁 디버깅 완료 ===');
+
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>5단계: 결과 확인 및 공유</h2>
+        <p>콘솔에 출력된 결과를 확인하고, 다음 정보를 복사해서 공유해주세요:</p>
+        <ul>
+            <li>인라인 스타일의 pointer-events 값</li>
+            <li>실제 적용된 스타일의 pointer-events 값</li>
+            <li>열려있는 모달 목록</li>
+            <li>isAnyModalOpen() 함수의 결과</li>
+            <li>버튼 위에 있는 요소 정보</li>
+            <li>복원 함수 실행 전후의 pointer-events 값</li>
+        </ul>
+    </div>
+
+    <div class="important">
+        <h2>📸 스크린샷 찍는 방법</h2>
+        <p>결과를 더 쉽게 공유하려면:</p>
+        <ol>
+            <li>콘솔의 출력 결과 선택 (드래그)</li>
+            <li>복사 (Ctrl+C 또는 Cmd+C)</li>
+            <li>텍스트로 붙여넣기</li>
+            <li>또는 개발자 도구 전체 스크린샷 찍기 (Windows: Win+Shift+S, Mac: Cmd+Shift+4)</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>추가 팁</h2>
+        <ul>
+            <li><strong>콘솔 지우기:</strong> Console 탭에서 🚫 아이콘 클릭 또는 Ctrl+L</li>
+            <li><strong>코드 다시 실행:</strong> 위쪽 화살표 키(↑)를 눌러 이전 명령 불러오기</li>
+            <li><strong>요소 하이라이트:</strong> Elements 탭에서 버튼을 선택하면 페이지에서 하이라이트됨</li>
+        </ul>
+    </div>
+</body>
+</html>
+
