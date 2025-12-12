@@ -660,6 +660,26 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
+            max-height: 120px; /* 접힌 상태: 약 1/6 분량 (대략 4-5개 항목) */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            position: relative;
+        }
+
+        .specs-grid.expanded {
+            max-height: none; /* 펼친 상태: 전체 표시 */
+        }
+
+        /* 접힌 상태에서 그라데이션 효과 (선택사항) */
+        .specs-grid:not(.expanded)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to bottom, transparent, #F4F4F4);
+            pointer-events: none;
         }
 
         .spec-item {
@@ -677,6 +697,31 @@
             font-size: 13px;
             color: #1a1a1a;
             font-weight: 500;
+        }
+
+        /* 더보기/접기 버튼 */
+        .specs-toggle-btn {
+            width: 100%;
+            padding: 8px 16px;
+            margin-top: 8px;
+            background: transparent;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .specs-toggle-btn:hover {
+            background: #f5f5f5;
+            border-color: #d0d0d0;
+            color: #1a1a1a;
+        }
+
+        .specs-toggle-btn:active {
+            background: #e5e5e5;
         }
 
         .product-price-section {
@@ -2082,6 +2127,10 @@
                         <div class="specs-grid">
                             <!-- 스펙 항목들은 필요시 추가 -->
                         </div>
+                        <!-- 더보기/접기 버튼 -->
+                        <button class="specs-toggle-btn" onclick="toggleSpecs(this)" style="display: none;">
+                            더보기
+                        </button>
                         <!-- 가격 섹션 (기존 구조 유지) -->
                         <div class="price-section-in-specs">
                             <div class="price-row" style="justify-content: flex-end; margin-bottom: 4px;">
@@ -2439,6 +2488,126 @@
             categoriesData = [];
         }
 
+        // 제품 스펙 로드 및 표시
+        async function loadProductSpecs() {
+            const productCards = document.querySelectorAll('.product-card[data-product-id]');
+            console.log('[loadProductSpecs] 제품 카드 개수:', productCards.length);
+            
+            if (productCards.length === 0) {
+                console.warn('[loadProductSpecs] 제품 카드를 찾을 수 없습니다.');
+                return;
+            }
+            
+            for (const card of productCards) {
+                const productId = card.getAttribute('data-product-id');
+                if (!productId) {
+                    console.warn('[loadProductSpecs] product-id 속성이 없습니다.');
+                    continue;
+                }
+                
+                const specsGrid = card.querySelector('.specs-grid');
+                if (!specsGrid) {
+                    console.warn(`[loadProductSpecs] 제품 ${productId}: specs-grid를 찾을 수 없습니다.`);
+                    continue;
+                }
+                
+                console.log(`[loadProductSpecs] 제품 ${productId} 스펙 로드 시작...`);
+                
+                try {
+                    const apiUrl = `/api/products/${productId}/spec/`;
+                    console.log(`[loadProductSpecs] API 호출: ${apiUrl}`);
+                    
+                    const response = await fetch(apiUrl);
+                    console.log(`[loadProductSpecs] 응답 상태:`, response.status, response.statusText);
+                    
+                    if (!response.ok) {
+                        console.warn(`[loadProductSpecs] 제품 ${productId} 스펙 조회 실패:`, response.status);
+                        const errorText = await response.text();
+                        console.warn(`[loadProductSpecs] 오류 내용:`, errorText);
+                        continue;
+                    }
+                    
+                    const data = await response.json();
+                    console.log(`[loadProductSpecs] 제품 ${productId} 응답 데이터:`, data);
+                    
+                    if (data.success && data.specs && Object.keys(data.specs).length > 0) {
+                        // 기존 내용 제거
+                        specsGrid.innerHTML = '';
+                        
+                        let addedCount = 0;
+                        
+                        // 스펙 항목 추가
+                        Object.entries(data.specs).forEach(([key, value]) => {
+                            // 빈 값이나 유효하지 않은 값 제외
+                            if (!value || String(value).trim() === '' || 
+                                String(value).toLowerCase() === 'nan' || 
+                                String(value).toLowerCase() === 'null' ||
+                                String(value).toLowerCase() === 'undefined') {
+                                console.log(`[loadProductSpecs] 제품 ${productId}: 스펙 "${key}" 제외 (유효하지 않은 값)`);
+                                return;
+                            }
+                            
+                            const specItem = document.createElement('div');
+                            specItem.className = 'spec-item';
+                            
+                            const specLabel = document.createElement('span');
+                            specLabel.className = 'spec-label';
+                            specLabel.textContent = getSpecLabel(key);
+                            
+                            const specValue = document.createElement('span');
+                            specValue.className = 'spec-value';
+                            specValue.textContent = String(value);
+                            
+                            specItem.appendChild(specLabel);
+                            specItem.appendChild(specValue);
+                            specsGrid.appendChild(specItem);
+                            
+                            addedCount++;
+                            console.log(`[loadProductSpecs] 제품 ${productId}: 스펙 추가 "${key}" = "${value}"`);
+                        });
+                        
+                        console.log(`[loadProductSpecs] ✅ 제품 ${productId} 스펙 로드 완료: ${addedCount}개 표시됨`);
+                        
+                        // 더보기 버튼 표시 여부 결정 (스펙이 6개 이상일 때만)
+                        if (addedCount > 6) {
+                            const toggleBtn = card.querySelector('.specs-toggle-btn');
+                            if (toggleBtn) {
+                                toggleBtn.style.display = 'block';
+                            }
+                        }
+                    } else {
+                        console.log(`[loadProductSpecs] 제품 ${productId} 스펙 데이터 없음 (success: ${data.success}, specs: ${data.specs ? Object.keys(data.specs).length : 0}개)`);
+                    }
+                } catch (error) {
+                    console.error(`[loadProductSpecs] 제품 ${productId} 스펙 로드 오류:`, error);
+                    console.error(`[loadProductSpecs] 오류 스택:`, error.stack);
+                }
+            }
+            
+            console.log('[loadProductSpecs] 모든 제품 스펙 로드 완료');
+        }
+
+        // 스펙 더보기/접기 토글 함수
+        function toggleSpecs(button) {
+            const specsSection = button.closest('.product-specs-section');
+            if (!specsSection) return;
+            
+            const specsGrid = specsSection.querySelector('.specs-grid');
+            if (!specsGrid) return;
+            
+            const isExpanded = specsGrid.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // 접기: expanded 클래스 제거
+                specsGrid.classList.remove('expanded');
+                button.textContent = '더보기';
+            } else {
+                // 펼치기: expanded 클래스 추가
+                specsGrid.classList.add('expanded');
+                button.textContent = '접기';
+            }
+        }
+
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function () {
             // Django 템플릿으로 렌더링된 제품 카드가 있는지 확인
@@ -2454,6 +2623,8 @@
                         currentCategory = categoryName;
                     }
                 }
+                // 스펙 로드
+                loadProductSpecs();
             } else {
                 // Django 템플릿으로 렌더링된 데이터가 없으면 기존 로직 실행
                 console.log('[DOMContentLoaded] Django 템플릿 데이터 없음, JavaScript 동적 생성 실행');
@@ -2909,6 +3080,9 @@
                             </div>
                         `).join('')}
                     </div>
+                    <button class="specs-toggle-btn" onclick="toggleSpecs(this)" style="display: ${Object.keys(product.specs || {}).length > 6 ? 'block' : 'none'};">
+                        더보기
+                    </button>
                     <div class="price-section-in-specs">
                         <div class="price-row" style="justify-content: flex-end; margin-bottom: 4px;">
                             <span class="price-list-price">${formatPrice(product.originalPrice)}</span>
@@ -2963,14 +3137,35 @@
         // 스펙 라벨 매핑
         function getSpecLabel(key) {
             const labels = {
+                // 냉장고 관련
                 capacity: '전체 용량 (L)',
                 color: '색상',
                 doorStyle: '도어스타일/재질',
                 coolingMethod: '냉각방식',
                 energyGrade: '에너지 소비효율등급',
-                function: '기능'
+                function: '기능',
+                // TV 관련
+                screenSize: '화면 크기',
+                resolution: '해상도',
+                panelType: '패널 타입',
+                hdr: 'HDR',
+                smartPlatform: '스마트 플랫폼',
+                // 에어컨 관련
+                coolingCapacity: '냉방능력',
+                heatingCapacity: '난방능력',
+                energyEfficiency: '에너지 효율',
+                // 세탁기 관련
+                washingCapacity: '세탁 용량',
+                spinSpeed: '탈수 속도',
+                // 공통
+                size: '크기',
+                weight: '무게',
+                power: '소비전력',
+                warranty: '보증기간'
             };
-            return labels[key] || key;
+            // 키를 소문자로 변환하여 매핑 시도
+            const lowerKey = String(key).toLowerCase();
+            return labels[lowerKey] || labels[key] || key;
         }
 
         // 장바구니 담기

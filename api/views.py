@@ -1306,43 +1306,98 @@ def product_spec_view(request, product_id):
     """
     GET /api/products/<product_id>/spec/ - 제품 스펙 조회
     
+    Oracle DB의 PRODUCT_SPEC 테이블에서 직접 조회
+    
     응답:
     {
         "success": true,
         "product_id": 1,
-        "spec": {...}
+        "specs": {...}
     }
     """
-    import json
-    try:
-        product = Product.objects.get(id=product_id)
-        
-        # ProductSpec이 있으면 스펙 정보 반환
-        if hasattr(product, 'spec') and product.spec.spec_json:
-            try:
-                specs = json.loads(product.spec.spec_json)
-            except:
-                specs = {}
-        else:
-            specs = {}
-        
-        return JsonResponse({
-            'success': True,
-            'product_id': product.id,
-            'product_name': product.name,
-            'specs': specs
-        }, json_dumps_params={'ensure_ascii': False})
+    from api.db.oracle_client import get_connection
     
-    except Product.DoesNotExist:
+    try:
+        product_id_int = int(product_id)
+    except (ValueError, TypeError):
         return JsonResponse({
             'success': False,
-            'error': '제품을 찾을 수 없습니다.'
-        }, json_dumps_params={'ensure_ascii': False}, status=404)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
+            'error': '유효하지 않은 제품 ID입니다.'
         }, json_dumps_params={'ensure_ascii': False}, status=400)
+    
+    specs_dict = {}
+    
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                # PRODUCT_SPEC 테이블에서 스펙 정보 조회
+                print(f"[product_spec_view] PRODUCT_SPEC 조회 시작: PRODUCT_ID={product_id_int}", flush=True)
+                cur.execute("""
+                    SELECT SPEC_KEY, SPEC_VALUE
+                    FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT_SPEC
+                    WHERE PRODUCT_ID = :product_id
+                    ORDER BY SPEC_ID ASC
+                """, {'product_id': product_id_int})
+                
+                spec_rows = cur.fetchall()
+                print(f"[product_spec_view] 조회된 스펙 개수: {len(spec_rows)}개", flush=True)
+                
+                # 스펙 데이터 필터링 및 가공
+                for spec_row in spec_rows:
+                    spec_key = spec_row[0] if spec_row[0] else ""
+                    spec_value = spec_row[1] if spec_row[1] else None
+                    
+                    # 필터링 조건: None, 빈 문자열, 공백만 있는 경우, "nan"/"null"/"undefined" 제외
+                    if spec_value is None:
+                        print(f"[product_spec_view] 스펙 제외 (None): {spec_key}", flush=True)
+                        continue
+                    
+                    spec_value_str = str(spec_value).strip()
+                    
+                    if not spec_value_str or spec_value_str == "":
+                        print(f"[product_spec_view] 스펙 제외 (빈 문자열): {spec_key}", flush=True)
+                        continue
+                    
+                    spec_value_lower = spec_value_str.lower()
+                    if spec_value_lower in ['nan', 'null', 'undefined']:
+                        print(f"[product_spec_view] 스펙 제외 (nan/null/undefined): {spec_key} = {spec_value_str}", flush=True)
+                        continue
+                    
+                    # 유효한 스펙만 딕셔너리에 추가
+                    specs_dict[spec_key] = spec_value_str
+                    print(f"[product_spec_view] 스펙 추가: {spec_key} = {spec_value_str}", flush=True)
+                
+                print(f"[product_spec_view] ✅ 유효한 스펙 개수: {len(specs_dict)}개", flush=True)
+                
+                # 제품명도 함께 조회 (선택적)
+                product_name = ""
+                try:
+                    cur.execute("""
+                        SELECT PRODUCT_NAME
+                        FROM CAMPUS_24K_LG3_DX7_P3_4.PRODUCT
+                        WHERE PRODUCT_ID = :product_id
+                    """, {'product_id': product_id_int})
+                    product_row = cur.fetchone()
+                    if product_row and product_row[0]:
+                        product_name = product_row[0]
+                except Exception as name_error:
+                    print(f"[product_spec_view] 제품명 조회 실패: {name_error}", flush=True)
+    
+    except Exception as e:
+        print(f"[product_spec_view] ⚠️ PRODUCT_SPEC 조회 실패: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': f'스펙 조회 중 오류가 발생했습니다: {str(e)}'
+        }, json_dumps_params={'ensure_ascii': False}, status=500)
+    
+    return JsonResponse({
+        'success': True,
+        'product_id': product_id_int,
+        'product_name': product_name,
+        'specs': specs_dict
+    }, json_dumps_params={'ensure_ascii': False})
 
 
 @require_http_methods(["GET"])

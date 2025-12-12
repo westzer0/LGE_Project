@@ -25,10 +25,10 @@ SECRET_KEY = 'django-insecure-8zb-1$0d6^f=&c@v8-l2-9b*9ydnp7k3m0-s_y8gljjkvtiyt8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# 하드코딩된 ALLOWED_HOSTS (환경 변수 기반 설정이 우선됨)
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'surer-tabatha-gullibly.ngrok-free.dev',  # ngrok 주소 추가
 ]
 
 # ============================================================
@@ -90,10 +90,9 @@ if not SECRET_KEY:
 # 프로덕션에서는 환경 변수에 도메인을 설정: ALLOWED_HOSTS=your-app.railway.app,yourdomain.com
 # PRD 개선: ngrok 도메인은 환경 변수로 관리
 default_hosts = 'localhost,127.0.0.1,testserver'
-# 기본 ngrok 도메인 추가 (환경 변수로 오버라이드 가능)
-default_hosts += ',braeden-unaromatic-zola.ngrok-free.dev'
-# ngrok-free.app 도메인 패턴 허용 (무료 계정용)
-default_hosts += ',*.ngrok-free.app,*.ngrok.app,*.ngrok.io'
+# ngrok 도메인 패턴 허용 (무료 계정용)
+# 맨 앞에 점(.)을 찍으면 해당 도메인의 모든 서브도메인 허용
+default_hosts += ',.ngrok-free.dev,.ngrok-free.app,.ngrok.app,.ngrok.io'
 ngrok_host = os.environ.get('NGROK_HOST')
 if ngrok_host:
     default_hosts += f',{ngrok_host}'
@@ -104,12 +103,26 @@ ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.s
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://braeden-unaromatic-zola.ngrok-free.dev',  # NGROK URL
 ]
+
+# ngrok 도메인 패턴을 CSRF_TRUSTED_ORIGINS에 추가
+# ngrok 무료 버전은 실행할 때마다 주소가 바뀌므로 패턴으로 허용
 # 환경 변수로 추가 도메인 설정 가능
 csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 if csrf_origins_str:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()])
+
+# ngrok 패턴 추가 (https://*.ngrok-free.dev, https://*.ngrok-free.app 등)
+# 주의: Django의 CSRF_TRUSTED_ORIGINS는 와일드카드를 직접 지원하지 않으므로
+# 환경 변수 NGROK_URL을 통해 현재 ngrok URL을 동적으로 추가하거나
+# 개발 중에는 아래와 같이 수동으로 추가해야 합니다
+ngrok_url = os.environ.get('NGROK_URL', '')
+if ngrok_url:
+    # https://로 시작하는지 확인하고 추가
+    if ngrok_url.startswith('https://'):
+        CSRF_TRUSTED_ORIGINS.append(ngrok_url)
+    elif not ngrok_url.startswith('http'):
+        CSRF_TRUSTED_ORIGINS.append(f'https://{ngrok_url}')
 
 # CORS 설정
 # 프로덕션에서는 환경 변수로 설정

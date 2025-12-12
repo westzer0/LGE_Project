@@ -871,11 +871,11 @@
                 // session_id로 결과 페이지로 이동
                 const sessionId = sessionStorage.getItem('onboarding_session_id');
                 const portfolioId = sessionStorage.getItem('portfolio_id');
-                const redirectUrl = portfolioId 
-                    ? `/result/?portfolio_id=${portfolioId}` 
-                    : sessionId 
-                    ? `/result/?session_id=${sessionId}` 
-                    : '/result/';
+                const redirectUrl = portfolioId
+                    ? `/result/?portfolio_id=${portfolioId}`
+                    : sessionId
+                        ? `/result/?session_id=${sessionId}`
+                        : '/result/';
                 window.location.href = redirectUrl;
             }
         }
