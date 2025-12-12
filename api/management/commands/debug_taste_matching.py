@@ -193,3 +193,5 @@ class Command(BaseCommand):
                         self.stdout.write(f"  NULL이 아닌 모든 조건 매칭: {partial_count}개")
 
 
+
+
